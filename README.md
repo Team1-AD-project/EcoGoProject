@@ -1,0 +1,1 @@
+给了个简单的User用例，请自己参考，然后接口格式/api/v1/user..... 按照restful api格式，对应Controller不要根据那个api接口文档。格式返回自己参考，需要返回具体的错误，就去ErrorCode里面自己定义。logger给你用来定位bug的，在logs文件里。mongodb我测试过了是可以通过的，但是我们现在还没部署云端，你要用的话自己去改ip地址，在application.yaml里面、
