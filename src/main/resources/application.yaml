@@ -3,7 +3,7 @@ spring:
     name: EcoGo
   data:
     mongodb:
-      uri: mongodb://172.20.10.6:27017/EcoGo
+      uri: mongodb://127.0.0.1:27017/EcoGo
       database: EcoGo
 
 logging:
