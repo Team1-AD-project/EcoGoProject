@@ -1,17 +1,9 @@
 spring:
   data:
     mongodb:
-      # === 方案B：拆分写法 (最稳妥，无需转义) ===
-      host: localhost
-      port: 27017
+      uri: mongodb://localhost:27017/EcoGo #我现在本地部署得用localhost才行，所以就在我这个地方改成了这样
       database: EcoGo
-      username: root
-      # 注意：因为密码里有逗号和斜杠，必须用双引号包起来！
-      password: "p8iGS2rN/Q,z" 
-      authentication-database: admin
-      
-      # === 原来的 URI 写法 (请删除或注释掉) ===
-      # uri: ...
+
 logging:
   level:
     com.example.EcoGo: debug
@@ -22,4 +14,4 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
 server:
-  port: 8090  # 与访问端口一致，正确
+  port: 8090

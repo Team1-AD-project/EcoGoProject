@@ -4,8 +4,6 @@ import com.example.EcoGo.dto.AuthDto;
 import com.example.EcoGo.dto.UserResponseDto;
 import com.example.EcoGo.dto.UserProfileDto;
 
-import java.util.List;
-
 public interface UserInterface {
 
     // Existing method
