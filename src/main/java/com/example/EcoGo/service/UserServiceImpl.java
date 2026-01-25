@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserInterface {
     public UserResponseDto getUserByUsername(String username) {
         // Keeping existing method for compatibility
         return userRepository.findByUserid(username)
-                .map(u -> new UserResponseDto(u.getUsername(),u.getEmail(),u.getUserid(),u.getNickname(), u.getPhone())) // Adapt to existing DTO
+                .map(u -> new UserResponseDto(u.getEmail(),u.getUserid(),u.getNickname(), u.getPhone())) // Adapt to existing DTO
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
