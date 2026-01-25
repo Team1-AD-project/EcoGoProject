@@ -1,32 +1,37 @@
 package com.example.EcoGo.dto;
 
+public class UserResponseDto {
+    private String userid;
+    private String nickname;
+    private String phone;
 
-public class UserResponseDto {//根据自己的需要造比如UserUpdateDto
-    private String username;
-    private String email;
-
-    public UserResponseDto(String username) {
+    public UserResponseDto(String userid, String nickname, String phone) {
+        this.userid = userid;
+        this.nickname = nickname;
+        this.phone = phone;
     }
 
-
-    public String getUsername() {
-        return username;
+    public String getUserid() {
+        return userid;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setUserid(String userid) {
+        this.userid = userid;
     }
 
-    public String getEmail() {
-        return email;
+    public String getNickname() {
+        return nickname;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
     }
-    // 只暴露需要给前端的字段，不含 password
-    // getter/setter
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
 }
-
-
-

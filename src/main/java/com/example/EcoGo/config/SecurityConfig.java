@@ -1,20 +1,46 @@
 package com.example.EcoGo.config;
 
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter)
+            throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // 关闭CSRF（前后端分离场景）
+                // Disable CSRF (since we use JWT and don't need session-based CSRF protection)
+                .csrf(AbstractHttpConfigurer::disable)
+
+                // Disable default login forms (we use our own API endpoints)
+                .formLogin(AbstractHttpConfigurer::disable)
+                .httpBasic(AbstractHttpConfigurer::disable)
+
+                // Authorize Requests
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/user/**").permitAll() // 放行用户查询接口
-                        .anyRequest().authenticated() // 其他接口需登录
-                );
+                        // Public Endpoints
+                        .requestMatchers("/api/v1/mobile/users/login", "/api/v1/mobile/users/register").permitAll()
+                        .requestMatchers("/api/v1/web/users/login").permitAll()
+
+                        // Secured Endpoints
+                        .requestMatchers("/api/v1/mobile/**").authenticated()
+                        .requestMatchers("/api/v1/web/**").authenticated() // Suggest adding .hasRole("ADMIN") later if
+                                                                           // needed
+
+                        // Default
+                        .anyRequest().permitAll() // Keep other paths open or strict as needed
+                )
+
+                // Add JWT Filter
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 }
