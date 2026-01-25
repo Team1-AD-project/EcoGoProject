@@ -1,8 +1,8 @@
 package com.example.EcoGo.interfacemethods;
 
 import com.example.EcoGo.dto.AuthDto;
-import com.example.EcoGo.dto.UserResponseDto;
 import com.example.EcoGo.dto.UserProfileDto;
+import com.example.EcoGo.dto.UserResponseDto;
 
 public interface UserInterface {
 

@@ -1,5 +1,12 @@
 package com.example.EcoGo.service;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.UUID;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
 import com.example.EcoGo.dto.AuthDto;
 import com.example.EcoGo.dto.UserProfileDto;
@@ -11,13 +18,6 @@ import com.example.EcoGo.model.User;
 import com.example.EcoGo.repository.UserRepository;
 import com.example.EcoGo.utils.JwtUtils;
 import com.example.EcoGo.utils.PasswordUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.UUID;
 
 @Service
 public class UserServiceImpl implements UserInterface {
@@ -38,7 +38,7 @@ public class UserServiceImpl implements UserInterface {
     public UserResponseDto getUserByUsername(String username) {
         // Keeping existing method for compatibility
         return userRepository.findByUserid(username)
-                .map(u -> new UserResponseDto(u.getUserid(), u.getNickname(), u.getPhone())) // Adapt to existing DTO
+                .map(u -> new UserResponseDto(u.getEmail(),u.getUserid(),u.getNickname(), u.getPhone())) // Adapt to existing DTO
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 

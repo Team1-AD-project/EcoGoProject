@@ -1,19 +1,17 @@
 package com.example.EcoGo.dto;
 
 public class UserResponseDto {
-    private String username;
     private String email;
     private String userid;
     private String nickname;
     private String phone;
-
+    private String username;
     // No-argument constructor
     public UserResponseDto() {
     }
 
     // Full constructor (optional, but good practice)
-    public UserResponseDto(String username, String email, String userid, String nickname, String phone) {
-        this.username = username;
+    public UserResponseDto(String email, String userid, String nickname, String phone) {
         this.email = email;
         this.userid = userid;
         this.nickname = nickname;
@@ -21,11 +19,12 @@ public class UserResponseDto {
     }
 
     // Getters and Setters
-    public UserResponseDto(String userid, String nickname, String phone) {
+public UserResponseDto(String userid, String nickname, String phone) {
         this.userid = userid;
         this.nickname = nickname;
         this.phone = phone;
     }
+
     public String getUsername() {
         return username;
     }
@@ -34,6 +33,7 @@ public class UserResponseDto {
         this.username = username;
     }
 
+    // 保留队友的 Email 方法
     public String getEmail() {
         return email;
     }
@@ -41,6 +41,7 @@ public class UserResponseDto {
     public void setEmail(String email) {
         this.email = email;
     }
+
 
     public String getUserid() {
         return userid;
