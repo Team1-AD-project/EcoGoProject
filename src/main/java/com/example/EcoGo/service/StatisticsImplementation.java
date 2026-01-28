@@ -3,7 +3,6 @@ package com.example.EcoGo.service;
 import com.example.EcoGo.dto.DashboardStatsDTO;
 import com.example.EcoGo.dto.HeatmapDataDTO;
 import com.example.EcoGo.interfacemethods.StatisticsInterface;
-import com.example.EcoGo.model.CarbonRecord;
 import com.example.EcoGo.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -21,15 +20,15 @@ public class StatisticsImplementation implements StatisticsInterface {
     private ActivityRepository activityRepository;
 
     @Autowired
-    private CarbonRecordRepository carbonRecordRepository;
+    private UserPointsLogRepository pointsLogRepository;
 
     @Override
     public DashboardStatsDTO getDashboardStats() {
         DashboardStatsDTO stats = new DashboardStatsDTO();
 
-        // 用户统计 (Temporarily disabled)
-        stats.setTotalUsers(0L);
-        stats.setActiveUsers(0L);
+        // 用户统计
+        stats.setTotalUsers(0L); // Placeholder
+        stats.setActiveUsers(0L); // Placeholder
 
         // 广告统计
         long totalAds = advertisementRepository.count();
@@ -44,10 +43,12 @@ public class StatisticsImplementation implements StatisticsInterface {
         stats.setTotalActivities(totalActivities);
         stats.setOngoingActivities(ongoingActivities);
 
-        // 碳积分统计 (Temporarily disabled)
-        stats.setTotalCarbonCredits(0L);
+        // 碳积分统计
+        stats.setTotalCarbonCredits(0L); // Placeholder
 
-        // 碳减排量统计
+        // 碳减排量统计 (Use Points as proxy for now, assumes 1 point = 1g carbon or similar)
+        // In reality, we might need a separate CarbonLog if points != carbon
+        // For now, assuming "gain" points reflects activity volume
         Long totalReduction = getTotalCarbonReduction();
         stats.setTotalCarbonReduction(totalReduction);
 
@@ -60,23 +61,27 @@ public class StatisticsImplementation implements StatisticsInterface {
 
     @Override
     public Long getTotalCarbonReduction() {
-        List<CarbonRecord> earnRecords = carbonRecordRepository.findByType("EARN");
-        return earnRecords.stream()
-                .mapToLong(r -> r.getCredits() != null ? r.getCredits() : 0)
+        // Calculate total points earned as a proxy
+        List<com.example.EcoGo.model.UserPointsLog> logs = pointsLogRepository.findAll();
+        return logs.stream()
+                .filter(log -> "gain".equalsIgnoreCase(log.getChangeType()))
+                .mapToLong(com.example.EcoGo.model.UserPointsLog::getPoints)
                 .sum();
     }
 
     @Override
     public Long getActiveUserCount(int days) {
-        // This implementation now returns 0 as it depends on user data
         return 0L;
     }
 
     @Override
     public Long getRedemptionVolume() {
-        List<CarbonRecord> redeemRecords = carbonRecordRepository.findBySourceAndType("EXCHANGE", "SPEND");
-        return redeemRecords.stream()
-                .mapToLong(r -> r.getCredits() != null ? r.getCredits() : 0)
+        List<com.example.EcoGo.model.UserPointsLog> logs = pointsLogRepository.findAll();
+        return logs.stream()
+                .filter(log -> "redeem".equalsIgnoreCase(log.getChangeType())
+                        || "redeem".equalsIgnoreCase(log.getSource()))
+                .mapToLong(log -> Math.abs(log.getPoints())) // Points are usually negative or positive depending on
+                                                             // implementation
                 .sum();
     }
 

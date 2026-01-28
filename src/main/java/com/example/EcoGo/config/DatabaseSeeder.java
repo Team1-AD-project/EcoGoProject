@@ -15,10 +15,13 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordUtils passwordUtils;
+    private final com.example.EcoGo.repository.TransportModeRepository transportModeRepository;
 
-    public DatabaseSeeder(UserRepository userRepository, PasswordUtils passwordUtils) {
+    public DatabaseSeeder(UserRepository userRepository, PasswordUtils passwordUtils,
+            com.example.EcoGo.repository.TransportModeRepository transportModeRepository) {
         this.userRepository = userRepository;
         this.passwordUtils = passwordUtils;
+        this.transportModeRepository = transportModeRepository;
     }
 
     @Override
@@ -65,5 +68,27 @@ public class DatabaseSeeder implements CommandLineRunner {
             System.out.println("Admin user created: userid=admin, password=admin123");
             System.out.println("---------------------------------------------");
         }
+
+        // --- Seed Transport Modes ---
+        if (transportModeRepository.count() == 0) {
+            seedTransportModes();
+            System.out.println("Transport modes seeded.");
+        }
+    }
+
+    private void seedTransportModes() {
+        java.util.List<com.example.EcoGo.model.TransportMode> modes = java.util.Arrays.asList(
+                new com.example.EcoGo.model.TransportMode("1001", "walk", "步行", 0, "https://xxx/icon/walk.png", 1,
+                        true),
+                new com.example.EcoGo.model.TransportMode("1002", "bike", "自行车", 0, "https://xxx/icon/bike.png", 2,
+                        true),
+                new com.example.EcoGo.model.TransportMode("1003", "bus", "公交", 20, "https://xxx/icon/bus.png", 3, true),
+                new com.example.EcoGo.model.TransportMode("1004", "subway", "地铁", 10, "https://xxx/icon/subway.png", 4,
+                        true),
+                new com.example.EcoGo.model.TransportMode("1005", "car", "私家车", 100, "https://xxx/icon/car.png", 5,
+                        false), // Not green
+                new com.example.EcoGo.model.TransportMode("1006", "electric_bike", "电动车", 5,
+                        "https://xxx/icon/ebike.png", 6, true));
+        transportModeRepository.saveAll(modes);
     }
 }

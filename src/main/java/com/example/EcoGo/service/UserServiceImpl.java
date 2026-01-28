@@ -364,12 +364,13 @@ public class UserServiceImpl implements UserInterface {
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
             if (!targetUser.getId().equals(requesterId)) {
-                throw new BusinessException(ErrorCode.NO_PERMISSION, "您无权操作此账号");
+                throw new BusinessException(ErrorCode.NO_PERMISSION,
+                        "You do not have permission to operate on this account");
             }
         } catch (BusinessException be) {
             throw be;
         } catch (Exception e) {
-            throw new BusinessException(ErrorCode.NO_PERMISSION, "Token无效或过期");
+            throw new BusinessException(ErrorCode.NO_PERMISSION, "Token is invalid or expired");
         }
     }
 }
