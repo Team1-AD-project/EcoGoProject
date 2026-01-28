@@ -8,7 +8,6 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
   SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
   SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
@@ -102,8 +101,9 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
-          docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
+          IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+          docker build -t ${{ env.REGISTRY }}/${IMAGE_NAME}:${{ github.sha }} .
+          docker build -t ${{ env.REGISTRY }}/${IMAGE_NAME}:latest .
 
   # Stage 4: Code Quality Analysis (SonarQube)
   sonarqube:
