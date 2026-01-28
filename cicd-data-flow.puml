@@ -1,0 +1,238 @@
+@startuml EcoGo_Data_Flow
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+title EcoGo CI/CD Pipeline - 数据流和产物图
+
+skinparam component {
+  BackgroundColor LightSteelBlue
+  BorderColor Navy
+}
+
+skinparam artifact {
+  BackgroundColor LightYellow
+  BorderColor Orange
+}
+
+skinparam cloud {
+  BackgroundColor LightGreen
+  BorderColor Green
+}
+
+left to right direction
+
+' 输入源
+package "源代码" {
+  [Java源码] as source
+  [pom.xml] as pom
+  [Dockerfile] as dockerfile
+  [配置文件] as config
+}
+
+' Stage 1-2: 代码质量与安全
+package "质量与安全检查" {
+  component "Checkstyle" as cs
+  component "SpotBugs" as sb
+  component "OWASP Check" as owasp
+  
+  artifact "checkstyle-report" as cs_report
+  artifact "spotbugs-report" as sb_report
+  artifact "dependency-report" as dep_report
+  
+  source --> cs
+  source --> sb
+  pom --> owasp
+  
+  cs --> cs_report
+  sb --> sb_report
+  owasp --> dep_report
+}
+
+' Stage 3: 构建
+package "构建阶段" {
+  component "Maven Build" as maven
+  component "Docker Build" as docker
+  
+  artifact "EcoGo.jar" as jar
+  artifact "Docker Image\n(SHA + latest)" as image
+  
+  source --> maven
+  pom --> maven
+  dockerfile --> docker
+  jar --> docker
+  
+  maven --> jar
+  docker --> image
+}
+
+' Stage 4: 容器安全
+package "容器安全" {
+  component "Trivy Scanner" as trivy
+  
+  artifact "SARIF Report" as sarif
+  artifact "Security Findings" as findings
+  
+  image --> trivy
+  trivy --> sarif
+  trivy --> findings
+}
+
+' Stage 5: 覆盖率
+package "测试与覆盖率" {
+  component "JUnit Tests" as junit
+  component "JaCoCo" as jacoco
+  database "MongoDB\n(Test)" as mongo_test
+  
+  artifact "Test Results" as test_results
+  artifact "Coverage Report\n(70%/60%)" as coverage
+  
+  source --> junit
+  junit --> mongo_test
+  junit --> test_results
+  test_results --> jacoco
+  jacoco --> coverage
+}
+
+' Stage 6: 代码质量
+package "代码质量分析" {
+  component "SonarQube" as sonar
+  cloud "SonarQube\nServer" as sonar_cloud
+  
+  artifact "Quality Gate\nStatus" as quality
+  
+  source --> sonar
+  coverage --> sonar
+  sonar --> sonar_cloud
+  sonar --> quality
+}
+
+' Stage 7: 部署
+package "部署" {
+  component "Terraform" as tf
+  component "Ansible" as ansible
+  cloud "AWS ECS\nStaging" as staging
+  cloud "AWS ECS\nProduction" as production
+  
+  jar --> tf
+  image --> tf
+  config --> ansible
+  
+  tf --> staging : 自动部署
+  tf --> production : 需批准
+  ansible --> staging
+  ansible --> production
+}
+
+' Stage 8-10: 测试
+package "运行时测试" {
+  component "Integration\nTests" as int_test
+  component "Smoke Tests" as smoke
+  component "JMeter" as jmeter
+  component "OWASP ZAP" as zap
+  database "MongoDB\n(Runtime)" as mongo_runtime
+  
+  artifact "Integration\nResults" as int_results
+  artifact "Smoke Test\nResults" as smoke_results
+  artifact "Performance\nReport" as perf_report
+  artifact "DAST\nReport" as dast_report
+  
+  staging --> int_test
+  staging --> smoke
+  staging --> jmeter
+  staging --> zap
+  production --> smoke : 仅Smoke
+  
+  int_test --> mongo_runtime
+  int_test --> int_results
+  smoke --> smoke_results
+  jmeter --> perf_report
+  zap --> dast_report
+}
+
+' Stage 11: 监控
+package "监控与可观测性" {
+  component "Prometheus" as prom
+  component "Grafana" as grafana
+  
+  artifact "Metrics Data" as metrics
+  artifact "Dashboards" as dashboards
+  
+  staging --> prom : 采集指标
+  production --> prom : 采集指标
+  prom --> metrics
+  metrics --> grafana
+  grafana --> dashboards
+}
+
+' 最终产物
+cloud "GitHub Artifacts" {
+  folder "下载报告" {
+    [sast-reports]
+    [build-artifacts]
+    [coverage-reports]
+    [jmeter-report]
+    [dast-report]
+  }
+}
+
+cloud "GitHub Security" {
+  [Security Alerts]
+  [Dependency Alerts]
+  [Code Scanning]
+}
+
+' 产物上传
+cs_report --> [sast-reports]
+sb_report --> [sast-reports]
+dep_report --> [sast-reports]
+jar --> [build-artifacts]
+coverage --> [coverage-reports]
+perf_report --> [jmeter-report]
+dast_report --> [dast-report]
+
+sarif --> [Security Alerts]
+findings --> [Code Scanning]
+dep_report --> [Dependency Alerts]
+
+' 通知
+package "通知与报告" {
+  actor "开发人员" as dev
+  component "Pipeline\nStatus" as status
+  
+  [sast-reports] --> status
+  [coverage-reports] --> status
+  [jmeter-report] --> status
+  [dast-report] --> status
+  quality --> status
+  [Security Alerts] --> status
+  
+  status --> dev : Email/Slack通知
+}
+
+note top of source
+  触发点:
+  • Push到main/develop/feature
+  • Pull Request
+end note
+
+note bottom of staging
+  Feature/Develop分支:
+  • 自动部署
+  • 完整测试流程
+  • 无需批准
+end note
+
+note bottom of production
+  Main分支:
+  • 需要手动批准
+  • 仅冒烟测试
+  • 生产级监控
+end note
+
+note right of [下载报告]
+  保留期: 90天
+  格式: HTML, JSON, XML
+  大小: 几MB到几百MB
+end note
+
+@enduml

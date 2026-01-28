@@ -1,0 +1,440 @@
+@startuml EcoGo_CICD_Detailed_Flow
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 11
+skinparam ArrowColor #2C3E50
+skinparam shadowing false
+
+title EcoGo CI/CD Pipeline - 详细流程图
+
+|#LightBlue|触发器|
+start
+:代码提交/PR;
+note right
+  触发分支:
+  • main
+  • develop
+  • feature/**
+end note
+
+|#LightGray|共同流程|
+partition "Stage 1: Lint & Code Quality" {
+  :检出代码
+  fetch-depth: 0;
+  :设置 JDK 17
+  distribution: temurin;
+  :运行 Checkstyle
+  mvn checkstyle:check;
+  note right
+    检查项:
+    • 代码风格
+    • 命名规范
+    • 注释规范
+  end note
+  :生成 Checkstyle 报告;
+}
+
+partition "Stage 2: SAST Analysis" {
+  :检出代码;
+  :设置 JDK 17;
+  :编译应用
+  mvn clean compile;
+  
+  fork
+    :运行 SpotBugs
+    mvn spotbugs:spotbugs;
+    note right
+      检测:
+      • 空指针
+      • 资源泄漏
+      • 并发问题
+    end note
+  fork again
+    :运行 OWASP Dependency Check
+    mvn dependency-check:check;
+    note right
+      扫描:
+      • CVE 漏洞
+      • 依赖版本
+      • 许可证
+    end note
+  end fork
+  
+  :上传 SAST 报告
+  Artifacts: sast-reports;
+}
+
+partition "Stage 3: Build Application" {
+  :检出代码;
+  :设置 JDK 17 + Maven 缓存;
+  :Maven 打包
+  mvn clean package -DskipTests;
+  :生成 JAR 文件
+  target/EcoGo-*.jar;
+  :构建 Docker 镜像;
+  note right
+    生成两个版本:
+    • ${IMAGE}:${SHA}
+    • ${IMAGE}:latest
+  end note
+  :上传构建产物
+  Artifacts: build-artifacts;
+}
+
+partition "Stage 4: Container Security" {
+  :检出代码;
+  :构建 Docker 镜像用于扫描;
+  
+  :运行 Trivy 扫描
+  severity: CRITICAL,HIGH;
+  note right
+    扫描内容:
+    • OS 漏洞
+    • 应用依赖
+    • 配置问题
+  end note
+  
+  :生成 SARIF 报告;
+  
+  if (有 security-events 权限?) then (是)
+    :上传到 GitHub Security
+    CodeQL Action v4;
+  else (否)
+    :跳过上传;
+  endif
+  
+  :生成表格报告;
+}
+
+partition "Stage 5: Code Coverage Gate" {
+  :检出代码;
+  :设置 JDK 17;
+  :启动 MongoDB 服务
+  image: mongo:latest
+  port: 27017;
+  
+  :运行测试
+  mvn clean verify;
+  note right
+    环境变量:
+    SPRING_DATA_MONGODB_URI=
+    mongodb://localhost:27017/ecogo
+  end note
+  
+  :生成 JaCoCo 报告
+  mvn jacoco:report;
+  
+  :检查覆盖率阈值;
+  note right
+    目标:
+    • 行覆盖率: 70%
+    • 分支覆盖率: 60%
+  end note
+  
+  :上传覆盖率报告
+  Artifacts: coverage-reports;
+}
+
+partition "Stage 6: SonarQube Analysis" {
+  :检出代码
+  fetch-depth: 0;
+  :设置 JDK 17;
+  
+  if (配置了 SONAR_TOKEN?) then (是)
+    :运行 SonarQube 扫描
+    mvn sonar:sonar;
+    note right
+      分析:
+      • 代码异味
+      • 重复代码
+      • 复杂度
+      • 安全热点
+      • 技术债务
+    end note
+  else (否)
+    :显示警告
+    跳过 SonarQube;
+  endif
+}
+
+|#LightGray|分支判断|
+:检查当前分支;
+
+if (分支 == main?) then (是 - Main分支)
+  
+  |#LightCoral|Production流程|
+  
+  partition "Stage 7: Deploy to Production" {
+    :检出代码;
+    :下载构建产物;
+    
+    :⏸️ 等待手动批准
+    GitHub Environment: production;
+    note right
+      需要:
+      • 授权审批人
+      • 在GitHub界面批准
+      • 可选等待时间
+    end note
+    
+    if (配置了 AWS 凭证?) then (是)
+      :配置 AWS 凭证
+      region: us-east-1;
+      
+      :部署到 AWS ECS Production;
+      note right
+        使用:
+        • Terraform (基础设施)
+        • Ansible (配置)
+        • Docker 镜像
+      end note
+    else (否)
+      :显示 AWS 未配置警告;
+    endif
+  }
+  
+  partition "Stage 8: Smoke Tests - Production" {
+    :检出代码;
+    
+    if (配置了 PRODUCTION_URL?) then (是)
+      :等待部署完成
+      sleep 30s;
+      
+      :运行冒烟测试脚本
+      smoke-tests.sh;
+      note right
+        测试端点:
+        • /actuator/health
+        • /actuator/info
+        • /actuator/metrics
+      end note
+      
+      :测试关键 API 端点;
+    else (否)
+      :显示跳过警告
+      需要配置 PRODUCTION_URL;
+    endif
+  }
+  
+  partition "Stage 9: Monitoring - Production" {
+    :检出代码;
+    :配置生产级监控;
+    note right
+      部署:
+      • Prometheus
+      • Grafana
+      • 告警规则
+    end note
+  }
+  
+  |#LightCoral|Production流程|
+  :生成流程状态报告;
+  stop
+
+else (否 - Feature/Develop分支)
+  
+  |#LightGreen|Staging流程|
+  
+  partition "Stage 7: Deploy to Staging" {
+    :检出代码;
+    :下载构建产物;
+    
+    if (配置了 AWS 凭证?) then (是)
+      :配置 AWS 凭证
+      region: us-east-1;
+      
+      :部署到 AWS Staging;
+      note right
+        环境: staging
+        自动部署，无需批准
+      end note
+    else (否)
+      :显示 AWS 未配置警告
+      继续测试流程;
+    endif
+  }
+  
+  fork
+    partition "Stage 8a: Integration Tests" {
+      :检出代码;
+      :设置 JDK 17;
+      :启动 MongoDB 服务
+      port: 27017;
+      
+      :等待 MongoDB 就绪
+      sleep 10s;
+      
+      :运行集成测试
+      mvn clean verify;
+      note right
+        测试内容:
+        • 数据库集成
+        • API 交互
+        • 组件协作
+      end note
+    }
+    
+  fork again
+    partition "Stage 8b: Smoke Tests - Staging" {
+      :检出代码;
+      
+      if (配置了 STAGING_URL?) then (是)
+        :使用真实部署环境;
+        :等待部署完成
+        sleep 30s;
+        :target_url = STAGING_URL;
+      else (否)
+        :使用本地测试环境;
+        :下载构建产物;
+        :设置 JDK 17;
+        :启动 MongoDB 服务;
+        :启动本地应用
+        nohup java -jar EcoGo-*.jar;
+        
+        :等待应用就绪
+        循环30次，每次3秒;
+        note right
+          健康检查:
+          curl http://localhost:8090/actuator/health
+        end note
+        :target_url = http://localhost:8090;
+      endif
+      
+      :运行冒烟测试脚本;
+      note right
+        测试:
+        • Health Check
+        • Info Endpoint
+        • Metrics Endpoint
+      end note
+      
+      :测试关键 API 端点;
+    }
+  end fork
+  
+  partition "Stage 9: Performance Tests" {
+    :检出代码;
+    :下载构建产物;
+    :设置 JDK 17;
+    :启动 MongoDB 服务;
+    
+    :等待 MongoDB
+    sleep 10s;
+    
+    :启动应用
+    nohup java -jar EcoGo-*.jar;
+    
+    :等待应用就绪
+    健康检查循环;
+    
+    :运行 JMeter 测试
+    docker run justb4/jmeter;
+    note right
+      测试计划:
+      • load-test.jmx
+      • 并发用户
+      • 响应时间
+      • 吞吐量
+    end note
+    
+    :生成性能报告
+    HTML + JTL;
+    
+    :上传性能报告
+    Artifacts: jmeter-report;
+    
+    :检查性能基准;
+  }
+  
+  partition "Stage 10: DAST" {
+    :检出代码;
+    :下载构建产物;
+    :设置 JDK 17;
+    :启动 MongoDB 服务;
+    
+    :等待 MongoDB
+    sleep 15s;
+    
+    :启动应用;
+    :等待应用就绪
+    健康检查循环;
+    
+    :验证应用健康状态
+    curl -v /actuator/health;
+    
+    fork
+      :运行 ZAP 基线扫描
+      zap-baseline.py;
+      note right
+        快速扫描:
+        • 被动扫描
+        • 常见漏洞
+        • 15分钟内
+      end note
+    fork again
+      :运行 ZAP 完整扫描
+      zap-full-scan.py;
+      note right
+        深度扫描:
+        • 主动扫描
+        • Spider爬虫
+        • 自定义规则
+        配置: .zap/zap-config.yaml
+      end note
+    end fork
+    
+    :验证报告生成;
+    
+    if (报告生成失败?) then (是)
+      :创建回退报告;
+    endif
+    
+    :上传 DAST 报告
+    Artifacts: dast-report;
+    note right
+      格式:
+      • HTML
+      • Markdown
+      • JSON
+      • XML
+    end note
+  }
+  
+  partition "Stage 11: Monitoring Setup" {
+    :检出代码;
+    
+    fork
+      :部署 Prometheus;
+      note right
+        配置:
+        • monitoring/prometheus.yml
+        • 端口: 9090
+      end note
+    fork again
+      :部署 Grafana;
+      note right
+        配置:
+        • 端口: 3000
+        • 默认密码: admin
+      end note
+    end fork
+    
+    :等待服务启动
+    sleep 10s;
+    
+    :配置 Grafana 数据源
+    连接到 Prometheus;
+    note right
+      访问:
+      • Prometheus: http://localhost:9090
+      • Grafana: http://localhost:3000
+    end note
+  }
+  
+  |#LightGreen|Staging流程|
+  :生成流程状态报告;
+  stop
+  
+endif
+
+@enduml

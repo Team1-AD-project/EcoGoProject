@@ -1,0 +1,161 @@
+@startuml EcoGo_Sequence_Diagram
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam sequenceArrowThickness 2
+skinparam roundcorner 10
+
+title EcoGo CI/CD Pipeline - 时序图 (Feature/Develop分支)
+
+actor Developer as dev
+participant "GitHub" as gh
+participant "GitHub Actions" as actions
+participant "Maven" as maven
+participant "Docker" as docker
+participant "Security\nScanners" as security
+participant "SonarQube" as sonar
+participant "AWS ECS" as aws
+participant "MongoDB" as mongo
+participant "Test Tools" as test
+participant "Monitoring" as monitor
+database "Artifacts" as artifacts
+
+== 触发阶段 ==
+dev -> gh: Push代码到feature分支
+gh -> actions: 触发Workflow
+
+== Stage 1-2: 代码质量与安全 ==
+actions -> maven: 运行Checkstyle
+maven --> actions: 代码风格报告
+
+actions -> maven: 运行SpotBugs
+maven --> actions: 静态分析报告
+
+actions -> maven: OWASP依赖检查
+maven --> actions: 依赖漏洞报告
+
+actions -> artifacts: 上传SAST报告
+artifacts --> actions: 上传成功
+
+== Stage 3: 构建 ==
+actions -> maven: 编译打包\nmvn clean package
+maven --> actions: EcoGo.jar
+
+actions -> docker: 构建Docker镜像
+docker --> actions: 镜像构建完成
+
+actions -> artifacts: 上传构建产物
+artifacts --> actions: 上传成功
+
+== Stage 4: 容器安全 ==
+actions -> security: Trivy扫描镜像
+security --> actions: 漏洞报告(SARIF)
+
+actions -> gh: 上传到GitHub Security
+gh --> actions: 上传成功
+
+== Stage 5: 覆盖率检查 ==
+actions -> mongo: 启动MongoDB服务
+mongo --> actions: 服务就绪
+
+actions -> maven: 运行测试\nmvn clean verify
+maven -> mongo: 连接数据库
+maven --> actions: 测试完成
+
+actions -> maven: 生成JaCoCo报告
+maven --> actions: 覆盖率报告
+
+actions -> artifacts: 上传覆盖率报告
+artifacts --> actions: 上传成功
+
+== Stage 6: 代码质量 ==
+actions -> sonar: 运行SonarQube扫描
+sonar --> actions: 质量报告
+
+== Stage 7: 部署Staging ==
+actions -> aws: 检查AWS凭证
+
+alt AWS已配置
+  actions -> aws: 部署到Staging环境
+  aws --> actions: 部署成功
+else AWS未配置
+  actions -> actions: 跳过部署，继续测试
+end
+
+== Stage 8a: 集成测试 ==
+actions -> mongo: 启动MongoDB
+mongo --> actions: 服务就绪
+
+actions -> maven: 运行集成测试
+maven -> mongo: 数据库交互
+maven --> actions: 测试完成
+
+== Stage 8b: 冒烟测试 ==
+alt 有STAGING_URL
+  actions -> aws: 测试真实部署
+  aws --> actions: 测试结果
+else 无STAGING_URL
+  actions -> test: 启动本地应用
+  test -> mongo: 连接MongoDB
+  test --> actions: 应用就绪
+  
+  actions -> test: 运行smoke-tests.sh
+  test -> test: GET /actuator/health
+  test -> test: GET /actuator/info
+  test -> test: GET /actuator/metrics
+  test --> actions: 测试通过
+end
+
+== Stage 9: 性能测试 ==
+actions -> test: 启动应用+MongoDB
+test -> mongo: 连接数据库
+test --> actions: 应用就绪
+
+actions -> test: 运行JMeter测试
+test -> test: 并发负载测试
+test --> actions: 性能报告
+
+actions -> artifacts: 上传JMeter报告
+artifacts --> actions: 上传成功
+
+== Stage 10: DAST ==
+actions -> test: 启动应用+MongoDB
+test --> actions: 应用就绪
+
+actions -> security: ZAP基线扫描
+security -> test: 扫描应用端点
+security --> actions: 基线报告
+
+actions -> security: ZAP完整扫描
+security -> test: 深度安全扫描
+security --> actions: 完整报告
+
+actions -> artifacts: 上传DAST报告
+artifacts --> actions: 上传成功
+
+== Stage 11: 监控部署 ==
+actions -> monitor: 部署Prometheus
+monitor --> actions: Prometheus就绪
+
+actions -> monitor: 部署Grafana
+monitor --> actions: Grafana就绪
+
+actions -> monitor: 配置数据源
+monitor -> monitor: 连接Prometheus
+monitor --> actions: 配置完成
+
+== 完成 ==
+actions -> gh: 生成Pipeline状态报告
+gh -> dev: 通知执行结果
+
+note over dev, artifacts
+  **完整流程耗时: 37-57分钟**
+  
+  产物:
+  • sast-reports
+  • build-artifacts
+  • coverage-reports
+  • jmeter-report
+  • dast-report
+end note
+
+@enduml

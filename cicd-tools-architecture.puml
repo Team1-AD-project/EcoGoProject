@@ -1,0 +1,159 @@
+@startuml EcoGo_Tools_Architecture
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+title EcoGo CI/CD - 工具架构图
+
+skinparam package {
+  BackgroundColor LightBlue
+  BorderColor DarkBlue
+}
+
+skinparam component {
+  BackgroundColor LightYellow
+  BorderColor Orange
+}
+
+skinparam database {
+  BackgroundColor LightGreen
+  BorderColor Green
+}
+
+package "GitHub Actions Platform" {
+  [Workflow Engine] as workflow
+}
+
+package "Stage 1-2: 代码质量与安全" {
+  component "Checkstyle" as checkstyle
+  component "SpotBugs" as spotbugs
+  component "OWASP\nDependency Check" as owasp
+  
+  checkstyle --> [代码风格报告]
+  spotbugs --> [静态分析报告]
+  owasp --> [依赖漏洞报告]
+}
+
+package "Stage 3-4: 构建与容器安全" {
+  component "Maven" as maven
+  component "Docker" as docker
+  component "Trivy" as trivy
+  
+  maven --> [JAR文件]
+  docker --> [Docker镜像]
+  trivy --> [容器安全报告]
+  trivy --> [GitHub Security]
+}
+
+package "Stage 5-6: 测试与质量" {
+  component "JUnit" as junit
+  component "JaCoCo" as jacoco
+  component "SonarQube" as sonar
+  database "MongoDB\nTest" as mongo_test
+  
+  junit --> jacoco
+  jacoco --> [覆盖率报告]
+  sonar --> [代码质量报告]
+  junit ..> mongo_test : 使用
+}
+
+package "Stage 7: 部署工具" {
+  component "Terraform" as terraform
+  component "Ansible" as ansible
+  component "AWS CLI" as aws
+  
+  terraform --> [基础设施]
+  ansible --> [配置管理]
+  aws --> [AWS ECS]
+}
+
+package "Stage 8-10: 测试工具" {
+  component "Integration\nTests" as integration
+  component "Smoke Tests\nScript" as smoke
+  component "JMeter" as jmeter
+  component "OWASP ZAP" as zap
+  database "MongoDB\nRuntime" as mongo_runtime
+  
+  integration ..> mongo_runtime : 使用
+  smoke --> [API测试报告]
+  jmeter --> [性能测试报告]
+  zap --> [DAST报告]
+}
+
+package "Stage 11: 监控工具" {
+  component "Prometheus" as prometheus
+  component "Grafana" as grafana
+  
+  prometheus --> [指标数据]
+  grafana --> [可视化仪表板]
+  grafana ..> prometheus : 查询
+}
+
+cloud "AWS Cloud" {
+  [ECS Cluster] as ecs
+  [Load Balancer] as alb
+  [ECR Registry] as ecr
+  database "MongoDB\nProduction" as mongo_prod
+  
+  docker --> ecr : 推送镜像
+  ecs ..> ecr : 拉取镜像
+  ecs ..> mongo_prod : 连接
+  alb --> ecs
+}
+
+package "输出产物" {
+  folder "Artifacts" {
+    [sast-reports]
+    [build-artifacts]
+    [coverage-reports]
+    [jmeter-report]
+    [dast-report]
+  }
+}
+
+' 工作流连接
+workflow --> checkstyle
+workflow --> spotbugs
+workflow --> owasp
+workflow --> maven
+workflow --> docker
+workflow --> trivy
+workflow --> junit
+workflow --> jacoco
+workflow --> sonar
+workflow --> terraform
+workflow --> ansible
+workflow --> aws
+workflow --> integration
+workflow --> smoke
+workflow --> jmeter
+workflow --> zap
+workflow --> prometheus
+workflow --> grafana
+
+' 产物上传
+checkstyle --> [sast-reports]
+spotbugs --> [sast-reports]
+owasp --> [sast-reports]
+maven --> [build-artifacts]
+jacoco --> [coverage-reports]
+jmeter --> [jmeter-report]
+zap --> [dast-report]
+
+note right of workflow
+  触发条件:
+  • Push to main/develop/feature
+  • Pull Request
+end note
+
+note right of [AWS ECS]
+  环境:
+  • Staging (自动)
+  • Production (需批准)
+end note
+
+note bottom of [Artifacts]
+  所有报告可在GitHub Actions下载
+  保留期: 90天
+end note
+
+@enduml

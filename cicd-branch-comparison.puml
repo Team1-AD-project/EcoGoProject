@@ -1,0 +1,220 @@
+@startuml EcoGo_Branch_Comparison
+!theme plain
+skinparam backgroundColor #FFFFFF
+
+title EcoGo CI/CD - 分支执行对比
+
+|#Technology|所有分支共同流程|
+start
+
+partition "Stage 1: Lint" {
+  :Checkstyle 代码风格检查;
+  note right
+    工具: Maven Checkstyle
+    耗时: ~2分钟
+    失败影响: 不阻断
+  end note
+}
+
+partition "Stage 2: SAST" {
+  :SpotBugs 静态分析;
+  :OWASP 依赖检查;
+  note right
+    工具: SpotBugs, OWASP
+    耗时: ~3-5分钟
+    失败影响: 不阻断
+  end note
+}
+
+partition "Stage 3: Build" {
+  :Maven 打包;
+  :Docker 镜像构建;
+  note right
+    工具: Maven, Docker
+    耗时: ~3-4分钟
+    失败影响: 阻断（必须通过）
+  end note
+}
+
+partition "Stage 4: Container Security" {
+  :Trivy 容器扫描;
+  :上传 GitHub Security;
+  note right
+    工具: Trivy
+    耗时: ~2-3分钟
+    失败影响: 不阻断
+  end note
+}
+
+partition "Stage 5: Coverage" {
+  :运行测试 + MongoDB;
+  :JaCoCo 覆盖率检查;
+  note right
+    工具: JaCoCo
+    阈值: 70%行, 60%分支
+    耗时: ~3-4分钟
+    失败影响: 不阻断
+  end note
+}
+
+partition "Stage 6: SonarQube" {
+  :代码质量分析;
+  note right
+    工具: SonarQube
+    耗时: ~2-3分钟
+    失败影响: 不阻断
+    可选: 需要配置Token
+  end note
+}
+
+:总耗时: ~15-21分钟;
+
+split
+  |#LightGreen|Feature/Develop 分支|
+  
+  partition "Stage 7: Deploy Staging" {
+    :检查 AWS 凭证;
+    if (AWS 已配置?) then (是)
+      :部署到 AWS Staging;
+    else (否)
+      :跳过部署，继续测试;
+    endif
+    note right
+      环境: staging
+      批准: 不需要
+      耗时: ~2-3分钟
+    end note
+  }
+  
+  fork
+    partition "Stage 8a: Integration Tests" {
+      :启动 MongoDB;
+      :运行集成测试;
+      note right
+        工具: Maven + MongoDB
+        耗时: ~3-4分钟
+        失败影响: 不阻断
+      end note
+    }
+  fork again
+    partition "Stage 8b: Smoke Tests" {
+      if (STAGING_URL 配置?) then (是)
+        :测试真实环境;
+      else (否)
+        :启动本地应用测试;
+      endif
+      note right
+        工具: Bash + curl
+        耗时: ~2-3分钟
+        失败影响: 不阻断
+      end note
+    }
+  end fork
+  
+  partition "Stage 9: Performance Tests" {
+    :启动应用 + MongoDB;
+    :JMeter 负载测试;
+    note right
+      工具: JMeter
+      耗时: ~5-8分钟
+      失败影响: 不阻断
+    end note
+  }
+  
+  partition "Stage 10: DAST" {
+    :启动应用;
+    :ZAP 基线扫描;
+    :ZAP 完整扫描;
+    note right
+      工具: OWASP ZAP
+      耗时: ~8-15分钟
+      失败影响: 不阻断
+    end note
+  }
+  
+  partition "Stage 11: Monitoring" {
+    :部署 Prometheus;
+    :部署 Grafana;
+    :配置数据源;
+    note right
+      工具: Prometheus, Grafana
+      耗时: ~2-3分钟
+      失败影响: 不阻断
+    end note
+  }
+  
+  :Feature/Develop 总耗时;
+  note right
+    共同流程: ~15-21分钟
+    Staging流程: ~22-36分钟
+    **总计: ~37-57分钟**
+  end note
+  
+  |#LightGreen|Feature/Develop 结束|
+  :Pipeline Status Report;
+  stop
+
+split again
+  |#LightCoral|Main 分支|
+  
+  partition "Stage 7: Deploy Production" {
+    :⏸️ 等待手动批准;
+    note right
+      ⚠️ 人工介入点
+      需要授权人员批准
+      等待时间: 不定
+    end note
+    
+    :检查 AWS 凭证;
+    if (AWS 已配置?) then (是)
+      :部署到 AWS Production;
+    else (否)
+      :跳过部署;
+    endif
+    note right
+      环境: production
+      批准: **必需**
+      耗时: ~3-5分钟
+    end note
+  }
+  
+  partition "Stage 8: Smoke Tests Production" {
+    if (PRODUCTION_URL 配置?) then (是)
+      :等待部署完成;
+      :运行冒烟测试;
+      :测试关键端点;
+    else (否)
+      :跳过测试;
+      :显示警告;
+    endif
+    note right
+      工具: Bash + curl
+      耗时: ~2-3分钟
+      失败影响: 不阻断
+    end note
+  }
+  
+  partition "Stage 9: Monitoring Production" {
+    :配置生产监控;
+    note right
+      工具: Prometheus, Grafana
+      耗时: ~1-2分钟
+      失败影响: 不阻断
+    end note
+  }
+  
+  :Main 总耗时;
+  note right
+    共同流程: ~15-21分钟
+    Production流程: ~6-10分钟
+    **总计: ~21-31分钟**
+    (不含等待批准时间)
+  end note
+  
+  |#LightCoral|Main 结束|
+  :Pipeline Status Report;
+  stop
+
+end split
+
+@enduml

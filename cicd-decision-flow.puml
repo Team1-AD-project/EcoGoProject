@@ -1,0 +1,165 @@
+@startuml EcoGo_Decision_Flow
+!theme plain
+skinparam backgroundColor #FFFFFF
+skinparam defaultFontSize 11
+
+title EcoGo CI/CD Pipeline - 决策流程图
+
+start
+
+:代码Push/PR;
+
+if (分支类型?) then (main)
+  #LightCoral:Main分支流程;
+  :执行共同流程\n(Stage 1-6);
+  
+  :到达Deploy Production;
+  
+  if (AWS凭证\n已配置?) then (否)
+    #Orange:显示AWS警告;
+    :跳过Terraform部署;
+  else (是)
+    if (手动批准\n已通过?) then (否)
+      #Yellow:⏸️ 暂停等待;
+      :等待授权人员\n在GitHub批准;
+      stop
+    else (是)
+      #LightGreen:部署到Production;
+      
+      if (PRODUCTION_URL\n已配置?) then (否)
+        #Orange:跳过Smoke Tests;
+        :显示配置提示;
+      else (是)
+        :运行Production\nSmoke Tests;
+        
+        if (测试通过?) then (否)
+          #Pink:测试失败;
+          :记录失败日志;
+          note right: continue-on-error
+        else (是)
+          #LightGreen:测试通过;
+        endif
+      endif
+      
+      :配置Production监控;
+      :✅ 生产部署完成;
+      stop
+    endif
+  endif
+
+elseif (develop或feature/**) then (是)
+  #LightGreen:Staging分支流程;
+  :执行共同流程\n(Stage 1-6);
+  
+  :到达Deploy Staging;
+  
+  if (AWS凭证\n已配置?) then (否)
+    #Orange:显示AWS警告;
+    :跳过AWS部署;
+    :继续本地测试;
+  else (是)
+    :部署到AWS Staging;
+  endif
+  
+  fork
+    :集成测试;
+    if (MongoDB\n可用?) then (否)
+      #Pink:启动失败;
+      :记录错误;
+      note right: continue-on-error
+    else (是)
+      :运行集成测试;
+    endif
+    
+  fork again
+    :冒烟测试;
+    if (STAGING_URL\n已配置?) then (是)
+      #LightBlue:测试真实环境;
+      :等待部署完成;
+      :运行smoke-tests.sh;
+    else (否)
+      #LightYellow:本地测试模式;
+      :下载构建产物;
+      :启动MongoDB;
+      :启动本地应用;
+      
+      if (应用启动\n成功?) then (否)
+        #Pink:启动失败;
+        :检查日志;
+        :记录错误;
+        note right: continue-on-error
+      else (是)
+        :运行smoke-tests.sh;
+      endif
+    endif
+  end fork
+  
+  :性能测试;
+  if (应用启动\n成功?) then (否)
+    #Pink:跳过性能测试;
+  else (是)
+    :运行JMeter测试;
+    
+    if (性能基准\n达标?) then (否)
+      #Orange:性能警告;
+      :记录性能指标;
+      note right: 不阻断流程
+    else (是)
+      #LightGreen:性能通过;
+    endif
+  endif
+  
+  :DAST安全扫描;
+  if (应用启动\n成功?) then (否)
+    #Pink:跳过DAST;
+  else (是)
+    fork
+      :ZAP基线扫描;
+    fork again
+      :ZAP完整扫描;
+    end fork
+    
+    if (发现严重\n漏洞?) then (是)
+      #Orange:安全警告;
+      :生成详细报告;
+      note right: 需要人工审查
+    else (否)
+      #LightGreen:安全检查通过;
+    endif
+  endif
+  
+  :部署监控栈;
+  fork
+    if (Prometheus\n部署成功?) then (否)
+      #Orange:监控部署失败;
+    else (是)
+      #LightGreen:Prometheus就绪;
+    endif
+  fork again
+    if (Grafana\n部署成功?) then (否)
+      #Orange:监控部署失败;
+    else (是)
+      #LightGreen:Grafana就绪;
+      :配置数据源;
+    endif
+  end fork
+  
+  :✅ Staging测试完成;
+  
+  note right
+    建议下一步:
+    1. 审查所有报告
+    2. 修复发现的问题
+    3. 创建PR到main
+    4. 触发Production流程
+  end note
+  
+  stop
+
+else (其他)
+  #Pink:不支持的分支;
+  :显示错误信息;
+  stop
+endif
+
+@enduml
