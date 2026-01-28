@@ -153,7 +153,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Deploy Application
     needs: sonarqube
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/cicdfeature'
     steps:
       - uses: actions/checkout@v4
 
@@ -209,7 +209,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Integration Tests
     needs: deploy
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/cicdfeature'
     services:
       mongodb:
         image: mongo:latest
@@ -244,7 +244,7 @@ jobs:
     runs-on: ubuntu-latest
     name: DAST with OWASP ZAP
     needs: integration-tests
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/cicdfeature'
     steps:
       - uses: actions/checkout@v4
 
@@ -286,7 +286,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Setup Monitoring Stack
     needs: dast
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/feature/cicdfeature'
     steps:
       - uses: actions/checkout@v4
 
