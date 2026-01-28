@@ -1,13 +1,13 @@
 spring:
   data:
     mongodb:
-      uri: mongodb://localhost:27017/EcoGo #我现在本地部署得用localhost才行，所以就在我这个地方改成了这样
+      uri: {{ mongodb_uri }}
       database: EcoGo
 
 logging:
   level:
-    com.example.EcoGo: debug
-    org.springframework.data.mongodb: debug
+    com.example.EcoGo: info
+    org.springframework.data.mongodb: info
   file:
     name: logs/eco-go.log
   pattern:
@@ -15,8 +15,12 @@ logging:
 
 server:
   port: 8090
+  servlet:
+    context-path: /api
+  compression:
+    enabled: true
+    min-response-size: 1024
 
-# Actuator configuration for monitoring
 management:
   endpoints:
     web:
@@ -35,11 +39,12 @@ management:
       prometheus:
         enabled: true
     tags:
-      application: ${spring.application.name:EcoGo}
+      application: ecogo
+      environment: {{ app_environment }}
 
-# Application info
 info:
   app:
     name: EcoGo
     description: Eco-friendly carbon tracking application
     version: 1.0.0
+    environment: {{ app_environment }}

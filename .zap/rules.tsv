@@ -1,0 +1,45 @@
+# OWASP ZAP Security Rules Configuration
+# Format: RULE_ID	THRESHOLD	ACTION
+# Thresholds: IGNORE, INFO, WARN, FAIL
+# Actions: IGNORE, ALERT, BLOCK
+
+# SQL Injection
+40018	WARN	ALERT
+
+# Cross-Site Scripting (XSS)
+40012	WARN	ALERT
+40014	WARN	ALERT
+40016	WARN	ALERT
+40017	WARN	ALERT
+
+# Path Traversal
+6	WARN	ALERT
+
+# Remote File Inclusion
+7	WARN	ALERT
+
+# Server Side Include
+40009	WARN	ALERT
+
+# CSRF Tokens
+10202	WARN	ALERT
+
+# Information Disclosure
+10096	INFO	ALERT
+
+# Cookie Security
+10054	WARN	ALERT
+10055	WARN	ALERT
+
+# Security Headers
+10020	INFO	ALERT
+10021	INFO	ALERT
+10023	INFO	ALERT
+10035	INFO	ALERT
+10038	INFO	ALERT
+
+# Authentication
+10105	WARN	ALERT
+
+# Session Management
+10112	WARN	ALERT
