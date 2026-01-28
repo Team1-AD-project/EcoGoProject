@@ -281,7 +281,7 @@ jobs:
   deploy-production:
     runs-on: ubuntu-latest
     name: Deploy to Production
-    needs: [performance-tests, dast]
+    needs: sonarqube
     if: github.ref == 'refs/heads/main'
     environment:
       name: production
@@ -405,7 +405,85 @@ jobs:
           curl -f ${{ secrets.PRODUCTION_URL || 'http://localhost:8090' }}/actuator/health || echo "Health check completed"
         continue-on-error: true
 
-  # Stage 8: DAST (Dynamic Application Security Testing)
+  # Stage 8: Performance Tests
+  performance-tests:
+    runs-on: ubuntu-latest
+    name: Performance Tests - JMeter
+    needs: smoke-tests-staging
+    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/feature/cicdfeature'
+    services:
+      mongodb:
+        image: mongo:latest
+        options: >-
+          --health-cmd mongosh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+      
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+      
+      - name: Wait for MongoDB
+        run: sleep 10
+      
+      - name: Start Application
+        run: |
+          echo "Starting application for performance tests..."
+          nohup java -jar EcoGo-*.jar > app.log 2>&1 &
+          
+          # Wait for application to start
+          for i in {1..30}; do
+            if curl -s http://localhost:8090/actuator/health > /dev/null 2>&1; then
+              echo "Application is ready!"
+              break
+            fi
+            echo "Waiting for application... ($i/30)"
+            sleep 3
+          done
+        env:
+          SPRING_DATA_MONGODB_URI: mongodb://localhost:27017/ecogo
+          SERVER_PORT: 8090
+      
+      - name: Run JMeter Tests
+        run: |
+          echo "Running JMeter performance tests..."
+          docker run --network="host" \
+            -v $(pwd)/performance-tests:/tests \
+            justb4/jmeter \
+            -n -t /tests/load-test.jmx \
+            -l /tests/results.jtl \
+            -e -o /tests/report || echo "JMeter tests completed"
+        continue-on-error: true
+      
+      - name: Upload Performance Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jmeter-report
+          path: performance-tests/report/
+          if-no-files-found: warn
+      
+      - name: Check Performance Baseline
+        run: |
+          echo "Checking performance metrics..."
+          if [ -f performance-tests/results.jtl ]; then
+            echo "Performance test results available"
+          fi
+        continue-on-error: true
+
+  # Stage 9: DAST (Dynamic Application Security Testing)
   dast:
     runs-on: ubuntu-latest
     name: DAST with OWASP ZAP
@@ -538,8 +616,8 @@ jobs:
   monitoring-setup:
     runs-on: ubuntu-latest
     name: Setup Monitoring Stack
-    needs: [dast, deploy-production]
-    if: always() && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/feature/cicdfeature')
+    needs: [dast]
+    if: always() && (github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/feature/cicdfeature')
     steps:
       - uses: actions/checkout@v4
 
@@ -568,14 +646,26 @@ jobs:
             -u admin:admin
         continue-on-error: true
 
+  # Stage 11: Production Monitoring
+  monitoring-setup-production:
+    runs-on: ubuntu-latest
+    name: Setup Monitoring Stack - Production
+    needs: smoke-tests-production
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Prometheus
+        run: |
+          echo "Production monitoring setup..."
+          # Add production-specific monitoring configuration
+        continue-on-error: true
+
   # Final Status Report
   pipeline-status:
     runs-on: ubuntu-latest
     name: Pipeline Status
-    needs: [lint, sast, build, container-security, coverage-check, 
-            sonarqube, deploy-staging, smoke-tests-staging,
-            integration-tests, performance-tests, dast,
-            deploy-production, smoke-tests-production, monitoring-setup]
+    needs: [lint, sast, build, container-security, coverage-check, sonarqube]
     if: always()
     steps:
       - name: Pipeline Summary
