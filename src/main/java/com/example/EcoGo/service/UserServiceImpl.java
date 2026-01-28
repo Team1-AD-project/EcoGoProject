@@ -197,8 +197,9 @@ public class UserServiceImpl implements UserInterface {
     // --- Mobile Profile ---
 
     @Override
-    public UserProfileDto.UpdateProfileResponse updateProfile(String userId,
+    public UserProfileDto.UpdateProfileResponse updateProfile(String token, String userId,
             UserProfileDto.UpdateProfileRequest request) {
+        validateAccess(token, userId);
         User user = userRepository.findByUserid(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -206,7 +207,8 @@ public class UserServiceImpl implements UserInterface {
     }
 
     @Override
-    public UserProfileDto.PreferencesResetResponse resetPreferences(String userId) {
+    public UserProfileDto.PreferencesResetResponse resetPreferences(String token, String userId) {
+        validateAccess(token, userId);
         // Mobile uses UserID (Business ID)
         User user = userRepository.findByUserid(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
@@ -228,6 +230,22 @@ public class UserServiceImpl implements UserInterface {
         userRepository.save(user);
 
         return new UserProfileDto.PreferencesResetResponse(defaultPref, user.getUpdatedAt());
+    }
+
+    @Override
+    public UserProfileDto.UserDetailResponse getUserDetail(String token, String userId) {
+        validateAccess(token, userId);
+        return userRepository.findById(userId)
+                .map(UserProfileDto.UserDetailResponse::new)
+                .or(() -> userRepository.findByUserid(userId).map(UserProfileDto.UserDetailResponse::new))
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    }
+
+    @Override
+    public java.util.List<UserResponseDto> getAllUsers() {
+        return userRepository.findAll().stream()
+                .map(u -> new UserResponseDto(u.getEmail(), u.getUserid(), u.getNickname(), u.getPhone()))
+                .collect(java.util.stream.Collectors.toList());
     }
 
     // --- Web Auth ---
@@ -305,21 +323,6 @@ public class UserServiceImpl implements UserInterface {
     }
 
     @Override
-    public UserProfileDto.UserDetailResponse getUserDetail(String userId) {
-        // For Mobile, userId is Business ID. For Admin, it might be UUID.
-        // But since this method is shared or mostly used by Admin...
-        // Wait, the plan says "Add GET /api/v1/mobile/users/profile/{userid}".
-        // So we should try finding by UserID first, if not found then ID?
-        // Or create explicit method?
-        // Let's assume this method is reused.
-        // Try finding by internal ID first (Admin usage)
-        return userRepository.findById(userId)
-                .map(UserProfileDto.UserDetailResponse::new)
-                .or(() -> userRepository.findByUserid(userId).map(UserProfileDto.UserDetailResponse::new))
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-    }
-
-    @Override
     public UserProfileDto.UpdateProfileResponse updateProfileAdmin(String userId,
             UserProfileDto.UpdateProfileRequest request) {
         // Admin uses UUID
@@ -340,5 +343,35 @@ public class UserServiceImpl implements UserInterface {
         userRepository.save(user);
 
         return new UserProfileDto.UpdateProfileResponse(user.getId(), user.getUpdatedAt());
+    }
+
+    /**
+     * Security Validation:
+     * 1. Check if token is valid.
+     * 2. If Admin -> Pass.
+     * 3. If User -> Check if Token UUID matches Target User's UUID.
+     */
+    private void validateAccess(String token, String targetUserId) {
+        try {
+            var claims = jwtUtils.validateToken(token);
+            boolean isAdmin = (boolean) claims.get("isAdmin");
+            if (isAdmin)
+                return; // Admin can access anyone
+
+            String requesterId = claims.getSubject(); // This is UUID
+
+            // Mobile endpoints pass "userid" (Business ID), but we need to verify against
+            // UUID
+            User targetUser = userRepository.findByUserid(targetUserId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+            if (!targetUser.getId().equals(requesterId)) {
+                throw new BusinessException(ErrorCode.NO_PERMISSION, "您无权操作此账号");
+            }
+        } catch (BusinessException be) {
+            throw be;
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.NO_PERMISSION, "Token无效或过期");
+        }
     }
 }

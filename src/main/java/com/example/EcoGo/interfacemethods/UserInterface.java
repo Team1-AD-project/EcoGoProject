@@ -17,9 +17,10 @@ public interface UserInterface {
     void logoutMobile(String token, String userId);
 
     // Mobile - Profile
-    UserProfileDto.UpdateProfileResponse updateProfile(String userId, UserProfileDto.UpdateProfileRequest request);
+    UserProfileDto.UpdateProfileResponse updateProfile(String token, String userId,
+            UserProfileDto.UpdateProfileRequest request);
 
-    UserProfileDto.PreferencesResetResponse resetPreferences(String userId);
+    UserProfileDto.PreferencesResetResponse resetPreferences(String token, String userId);
 
     // Web - Auth
     AuthDto.LoginResponse loginWeb(AuthDto.WebLoginRequest request);
@@ -33,7 +34,9 @@ public interface UserInterface {
 
     UserProfileDto.UpdateProfileResponse manageUser(String userId, UserProfileDto.AdminManageUserRequest request);
 
-    UserProfileDto.UserDetailResponse getUserDetail(String userId);
+    UserProfileDto.UserDetailResponse getUserDetail(String token, String userId);
+
+    java.util.List<UserResponseDto> getAllUsers(); // New Admin List
 
     UserProfileDto.UpdateProfileResponse updateProfileAdmin(String userId, UserProfileDto.UpdateProfileRequest request);
 }
