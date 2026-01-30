@@ -140,13 +140,14 @@ public class PointsController {
     /**
      * Admin Adjust Points
      * POST /api/v1/web/users/{userid}/points/adjust
-     * Body: { "points": 100, "source": "admin", "reason": "bonus" }
+     * Body: { "points": 100, "source": "admin", "description": "Compensation",
+     * "reason": "System Error" }
      */
     @PostMapping("/api/v1/web/users/{userid}/points/adjust")
     public ResponseMessage<String> adjustPointsAdmin(
             @RequestHeader("Authorization") String authHeader,
             @PathVariable String userid,
-            @RequestBody AdminAdjustRequest request) {
+            @RequestBody PointsDto.AdjustPointsRequest request) {
 
         // 1. Resolve Target User Business ID -> UUID
         User targetUser = userRepository.findByUserid(userid)
@@ -162,15 +163,11 @@ public class PointsController {
         adminAction.setApprovalStatus("approved");
 
         // 3. Call Service
-        pointsService.adjustPoints(targetUser.getId(), request.points, request.source, request.reason, adminAction);
+        // Use description from request, or fallback to reason if null
+        String description = request.description != null ? request.description : request.reason;
+
+        pointsService.adjustPoints(targetUser.getId(), request.points, request.source, description, adminAction);
 
         return ResponseMessage.success("Points adjusted successfully");
-    }
-
-    // Helper DTO for Admin Request
-    public static class AdminAdjustRequest {
-        public long points;
-        public String source; // "admin"
-        public String reason;
     }
 }

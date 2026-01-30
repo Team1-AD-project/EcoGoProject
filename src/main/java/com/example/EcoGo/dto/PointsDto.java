@@ -10,7 +10,6 @@ public class PointsDto {
         public String source; // admin, trip, etc
         public String description;
         // For admin action details
-        public String operator_id;
         public String reason;
     }
 

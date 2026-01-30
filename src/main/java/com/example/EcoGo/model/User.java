@@ -244,12 +244,23 @@ public class User {
         private int weeklyRank;
         private int monthlyRank;
 
+        // Cache field for trip-specific points
+        private long totalPointsFromTrips;
+
         public int getTotalTrips() {
             return totalTrips;
         }
 
         public void setTotalTrips(int totalTrips) {
             this.totalTrips = totalTrips;
+        }
+
+        public long getTotalPointsFromTrips() {
+            return totalPointsFromTrips;
+        }
+
+        public void setTotalPointsFromTrips(long totalPointsFromTrips) {
+            this.totalPointsFromTrips = totalPointsFromTrips;
         }
 
         public double getTotalDistance() {

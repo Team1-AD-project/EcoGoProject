@@ -98,19 +98,29 @@ public class PointsServiceImpl implements PointsService {
 
     @Override
     public PointsDto.TripStatsResponse getTripStats(String userId) {
-        List<UserPointsLog> logs;
         if (userId == null) {
-            // Global stats
-            logs = pointsLogRepository.findBySource("trip");
+            // Global stats - Aggregate logs (because scanning all users is expensive too,
+            // and logs source='trip' is accurate)
+            List<UserPointsLog> logs = pointsLogRepository.findBySource("trip");
+            long totalTrips = logs.size();
+            long totalPoints = logs.stream().mapToLong(UserPointsLog::getPoints).sum();
+            return new PointsDto.TripStatsResponse(totalTrips, totalPoints);
         } else {
-            // User stats
-            logs = pointsLogRepository.findByUserIdAndSource(userId, "trip");
+            // User stats - Read from User.Stats Cache (Fast)
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+            User.Stats stats = user.getStats();
+            long totalTrips = 0;
+            long totalPoints = 0;
+
+            if (stats != null) {
+                totalTrips = stats.getTotalTrips();
+                totalPoints = stats.getTotalPointsFromTrips();
+            }
+
+            return new PointsDto.TripStatsResponse(totalTrips, totalPoints);
         }
-
-        long totalTrips = logs.size();
-        long totalPoints = logs.stream().mapToLong(UserPointsLog::getPoints).sum();
-
-        return new PointsDto.TripStatsResponse(totalTrips, totalPoints);
     }
 
     @Override
@@ -135,8 +145,23 @@ public class PointsServiceImpl implements PointsService {
         long points = (long) (carbonAmount * 10);
 
         String description = "Trip completed: " + tripId;
-        // Reuse adjustPoints logic
+        // Reuse adjustPoints logic (Handles log and balance)
         adjustPoints(userId, points, "trip", description, null);
+
+        // --- Sync to User.stats Cache ---
+        userRepository.findById(userId).ifPresent(user -> {
+            User.Stats stats = user.getStats();
+            if (stats == null) {
+                stats = new User.Stats();
+                user.setStats(stats);
+            }
+            stats.setTotalTrips(stats.getTotalTrips() + 1);
+            stats.setTotalPointsFromTrips(stats.getTotalPointsFromTrips() + points);
+            // Assuming distance is handled by TripService or we don't have it here.
+            // If needed, we would need distance param.
+
+            userRepository.save(user);
+        });
     }
 
     @Override
