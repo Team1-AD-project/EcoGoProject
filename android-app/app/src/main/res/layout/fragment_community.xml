@@ -26,35 +26,38 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            app:cardBackgroundColor="#ECFDF5"
             app:cardCornerRadius="16dp"
-            app:cardElevation="2dp">
+            app:cardElevation="1dp"
+            app:strokeColor="@color/primary"
+            app:strokeWidth="1dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/surface"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
                 android:padding="16dp">
 
-                <ImageView
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:contentDescription="@string/community_current_leader"
-                    android:src="@drawable/ic_trophy"
-                    app:tint="@color/primary" />
+                <TextView
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:gravity="center"
+                    android:text="🏆"
+                    android:textSize="24sp" />
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
+                    android:layout_marginStart="16dp"
                     android:orientation="vertical">
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/community_current_leader"
-                        android:textColor="@color/primary"
+                        android:textAllCaps="true"
+                        android:textColor="#166534"
                         android:textSize="12sp"
                         android:textStyle="bold" />
 
@@ -62,17 +65,17 @@
                         android:id="@+id/text_leader_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-black"
                         android:text="School of Computing"
-                        android:textColor="@color/text_primary"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
+                        android:textColor="#14532D"
+                        android:textSize="16sp" />
 
                     <TextView
                         android:id="@+id/text_leader_points"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="4,520 pts • +12% this week"
-                        android:textColor="@color/text_secondary"
+                        android:textColor="#15803D"
                         android:textSize="11sp" />
                 </LinearLayout>
             </LinearLayout>

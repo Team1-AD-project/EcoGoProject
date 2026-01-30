@@ -115,9 +115,15 @@ class HomeFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val response = repository.getRecommendation(RecommendationRequest(destination)).getOrElse { null }
             if (response != null) {
+                val slideUp = AnimationUtils.loadAnimation(requireContext(), com.ecogo.R.anim.slide_up)
                 binding.layoutRecommendationResult.visibility = View.VISIBLE
+                binding.layoutRecommendationResult.startAnimation(slideUp)
                 binding.textRecommendationTag.text = response.tag
                 binding.textRecommendationResult.text = response.text
+                
+                binding.textAskAnother.setOnClickListener {
+                    binding.layoutRecommendationResult.visibility = View.GONE
+                }
             }
         }
     }

@@ -30,20 +30,35 @@ class ShopItemAdapter(
         itemView: View,
         private val onPurchase: (ShopItem) -> Unit
     ) : RecyclerView.ViewHolder(itemView) {
+        private val icon: TextView = itemView.findViewById(R.id.text_icon)
         private val name: TextView = itemView.findViewById(R.id.text_name)
         private val cost: TextView = itemView.findViewById(R.id.text_cost)
-        private val type: TextView = itemView.findViewById(R.id.text_type)
-        private val button: Button = itemView.findViewById(R.id.button_action)
+        private val status: TextView = itemView.findViewById(R.id.text_status)
+        private val check: View = itemView.findViewById(R.id.image_check)
         
         fun bind(item: ShopItem) {
             name.text = item.name
             cost.text = "${item.cost} pts"
-            type.text = item.type
             
-            button.text = if (item.owned) "Equipped" else "Purchase"
-            button.isEnabled = !item.owned
+            icon.text = when (item.type) {
+                "head" -> if (item.id.contains("grad")) "🎓" else "🧢"
+                "face" -> if (item.id.contains("sun")) "🕶️" else "👓"
+                "body" -> if (item.id.contains("hoodie")) "🧥" else "👕"
+                else -> "🎁"
+            }
             
-            button.setOnClickListener {
+            if (item.owned) {
+                status.visibility = View.VISIBLE
+                status.text = itemView.context.getString(R.string.profile_equipped)
+                cost.visibility = View.GONE
+                check.visibility = View.VISIBLE
+            } else {
+                status.visibility = View.GONE
+                cost.visibility = View.VISIBLE
+                check.visibility = View.GONE
+            }
+            
+            itemView.setOnClickListener {
                 onPurchase(item)
             }
         }

@@ -10,9 +10,11 @@
         android:layout_height="wrap_content"
         android:layout_gravity="end"
         android:background="@drawable/chat_bubble_user"
+        android:elevation="1dp"
+        android:lineSpacingMultiplier="1.5"
         android:maxWidth="280dp"
         android:padding="12dp"
         android:textColor="@color/text_white"
-        android:textSize="15sp" />
+        android:textSize="14sp" />
 
 </FrameLayout>

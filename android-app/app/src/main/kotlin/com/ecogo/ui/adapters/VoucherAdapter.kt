@@ -25,17 +25,37 @@ class VoucherAdapter(private val vouchers: List<Voucher>) :
     override fun getItemCount() = vouchers.size
     
     class VoucherViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val icon: TextView = itemView.findViewById(R.id.text_icon)
         private val name: TextView = itemView.findViewById(R.id.text_name)
-        private val cost: TextView = itemView.findViewById(R.id.text_cost)
         private val description: TextView = itemView.findViewById(R.id.text_description)
-        private val button: Button = itemView.findViewById(R.id.button_redeem)
+        private val button: com.google.android.material.button.MaterialButton = itemView.findViewById(R.id.button_redeem)
         
         fun bind(voucher: Voucher) {
             name.text = voucher.name
-            cost.text = "${voucher.cost} pts"
             description.text = voucher.description
+            button.text = "${voucher.cost} pts"
             button.isEnabled = voucher.available
-            button.text = if (voucher.available) "Redeem" else "Redeemed"
+            
+            icon.text = when {
+                voucher.name.contains("Starbucks", ignoreCase = true) -> "☕"
+                voucher.name.contains("Subway", ignoreCase = true) -> "🥪"
+                voucher.name.contains("Canteen", ignoreCase = true) -> "🍲"
+                voucher.name.contains("Tea", ignoreCase = true) -> "🧋"
+                else -> "🎁"
+            }
+            
+            val iconColor = try {
+                if (voucher.name.contains("Starbucks")) android.graphics.Color.parseColor("#00704A")
+                else if (voucher.name.contains("Subway")) android.graphics.Color.parseColor("#FFC72C")
+                else if (voucher.name.contains("Canteen")) android.graphics.Color.parseColor("#F97316")
+                else if (voucher.name.contains("Tea")) android.graphics.Color.parseColor("#DC2626")
+                else android.graphics.Color.parseColor("#15803D")
+            } catch (e: Exception) {
+                itemView.context.getColor(com.ecogo.R.color.primary)
+            }
+            icon.setBackgroundColor(iconColor)
+            
+            itemView.alpha = if (voucher.available) 1.0f else 0.6f
         }
     }
 }

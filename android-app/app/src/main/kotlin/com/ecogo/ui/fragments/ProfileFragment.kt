@@ -95,15 +95,21 @@ class ProfileFragment : Fragment() {
             binding.recyclerAchievements.visibility = if (tab == "badges") View.VISIBLE else View.GONE
             binding.recyclerHistory.visibility = if (tab == "history") View.VISIBLE else View.GONE
 
-            binding.tabCloset.setTextColor(
-                ContextCompat.getColor(requireContext(), if (tab == "closet") com.ecogo.R.color.primary else com.ecogo.R.color.text_secondary)
-            )
-            binding.tabBadges.setTextColor(
-                ContextCompat.getColor(requireContext(), if (tab == "badges") com.ecogo.R.color.primary else com.ecogo.R.color.text_secondary)
-            )
-            binding.tabHistory.setTextColor(
-                ContextCompat.getColor(requireContext(), if (tab == "history") com.ecogo.R.color.primary else com.ecogo.R.color.text_secondary)
-            )
+            val primary = ContextCompat.getColor(requireContext(), com.ecogo.R.color.primary)
+            val secondary = ContextCompat.getColor(requireContext(), com.ecogo.R.color.text_secondary)
+            val transparent = ContextCompat.getColor(requireContext(), android.R.color.transparent)
+
+            binding.tabCloset.setTextColor(if (tab == "closet") primary else secondary)
+            binding.tabBadges.setTextColor(if (tab == "badges") primary else secondary)
+            binding.tabHistory.setTextColor(if (tab == "history") primary else secondary)
+
+            binding.tabCloset.setTypeface(null, if (tab == "closet") android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+            binding.tabBadges.setTypeface(null, if (tab == "badges") android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+            binding.tabHistory.setTypeface(null, if (tab == "history") android.graphics.Typeface.BOLD else android.graphics.Typeface.NORMAL)
+
+            binding.tabClosetIndicator.setBackgroundColor(if (tab == "closet") primary else transparent)
+            binding.tabBadgesIndicator.setBackgroundColor(if (tab == "badges") primary else transparent)
+            binding.tabHistoryIndicator.setBackgroundColor(if (tab == "history") primary else transparent)
         }
 
         binding.tabCloset.setOnClickListener { setActiveTab("closet") }

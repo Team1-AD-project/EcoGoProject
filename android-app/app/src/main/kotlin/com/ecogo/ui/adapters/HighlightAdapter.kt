@@ -31,8 +31,18 @@ class HighlightAdapter(
 
         fun bind(activity: Activity) {
             title.text = activity.title
-            desc.text = activity.description
-            icon.text = activity.title.firstOrNull()?.uppercase() ?: "A"
+            val dateStr = activity.startTime?.let { it.substring(0, 10) } ?: "TBD"
+            desc.text = "$dateStr • ${activity.description.take(20)}"
+            
+            icon.text = when {
+                activity.title.contains("Clean", ignoreCase = true) -> "🧹"
+                activity.title.contains("Workshop", ignoreCase = true) -> "🥗"
+                activity.title.contains("Run", ignoreCase = true) -> "🏃"
+                activity.title.contains("Recycl", ignoreCase = true) -> "♻️"
+                activity.title.contains("Friday", ignoreCase = true) -> "🚶"
+                activity.title.contains("Container", ignoreCase = true) -> "🍱"
+                else -> "🌱"
+            }
         }
     }
 }

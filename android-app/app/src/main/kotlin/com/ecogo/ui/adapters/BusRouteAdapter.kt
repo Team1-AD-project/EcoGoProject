@@ -25,22 +25,48 @@ class BusRouteAdapter(private val routes: List<BusRoute>) :
     override fun getItemCount() = routes.size
     
     class RouteViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        private val colorStripe: View = itemView.findViewById(R.id.view_color_stripe)
         private val number: TextView = itemView.findViewById(R.id.text_number)
         private val name: TextView = itemView.findViewById(R.id.text_name)
+        private val destination: TextView = itemView.findViewById(R.id.text_destination)
         private val nextArrival: TextView = itemView.findViewById(R.id.text_next_arrival)
         private val crowding: TextView = itemView.findViewById(R.id.text_crowding)
         private val status: TextView = itemView.findViewById(R.id.text_status)
+        private val routeDot: View = itemView.findViewById(R.id.view_route_dot)
         
         fun bind(route: BusRoute) {
             number.text = route.name
-            name.text = if (route.from.isNotEmpty() && route.to.isNotEmpty()) {
-                "${route.from} -> ${route.to}"
-            } else {
-                route.name
-            }
+            name.text = route.from.takeIf { it.isNotEmpty() } ?: "Start"
+            destination.text = route.to.takeIf { it.isNotEmpty() } ?: "End"
             nextArrival.text = route.time ?: "${route.nextArrival} min"
             crowding.text = route.crowd ?: route.crowding
-            status.text = route.status ?: if (route.operational) "Active" else "Inactive"
+            status.text = route.status ?: if (route.operational) "On Time" else "Inactive"
+            
+            // Set route color
+            val routeColor = try {
+                android.graphics.Color.parseColor(route.color ?: "#15803D")
+            } catch (e: Exception) {
+                ContextCompat.getColor(itemView.context, R.color.primary)
+            }
+            colorStripe.setBackgroundColor(routeColor)
+            number.setBackgroundColor(routeColor)
+            routeDot.setBackgroundColor(routeColor)
+            
+            // Set status badge background
+            val statusBg = when ((route.status ?: "").lowercase()) {
+                "arriving" -> "#DCFCE7"
+                "delayed" -> "#FEE2E2"
+                "crowded" -> "#FEF3C7"
+                else -> "#E0F2FE"
+            }
+            val statusTextColor = when ((route.status ?: "").lowercase()) {
+                "arriving" -> "#15803D"
+                "delayed" -> "#B91C1C"
+                "crowded" -> "#B45309"
+                else -> "#0369A1"
+            }
+            status.setBackgroundColor(android.graphics.Color.parseColor(statusBg))
+            status.setTextColor(android.graphics.Color.parseColor(statusTextColor))
             
             // Set crowding color
             val crowdLevel = (route.crowd ?: route.crowding).lowercase()
@@ -50,14 +76,6 @@ class BusRouteAdapter(private val routes: List<BusRoute>) :
                 else -> ContextCompat.getColor(itemView.context, R.color.crowding_high)
             }
             crowding.setTextColor(crowdingColor)
-            
-            // Set status color
-            val statusColor = if ((route.status ?: "").lowercase().contains("delay")) {
-                ContextCompat.getColor(itemView.context, R.color.error)
-            } else {
-                ContextCompat.getColor(itemView.context, R.color.success)
-            }
-            status.setTextColor(statusColor)
         }
     }
 }

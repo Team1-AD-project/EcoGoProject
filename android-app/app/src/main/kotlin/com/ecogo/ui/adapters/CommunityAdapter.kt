@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ecogo.R
 import com.ecogo.data.Community
@@ -28,24 +29,34 @@ class CommunityAdapter(private val communities: List<Community>) :
         private val name: TextView = itemView.findViewById(R.id.text_name)
         private val points: TextView = itemView.findViewById(R.id.text_points)
         private val change: TextView = itemView.findViewById(R.id.text_change)
+        private val progress: View = itemView.findViewById(R.id.view_progress)
         
         fun bind(community: Community, position: Int) {
             rank.text = "#$position"
             name.text = community.name
-            points.text = "${community.points} pts"
-            change.text = if (community.change >= 0) "+${community.change}" else "${community.change}"
+            points.text = community.points.toString()
+            
+            val changeText = if (community.change >= 0) "+${community.change}%" else "${community.change}%"
+            change.text = changeText
             
             val changeColor = if (community.change >= 0) {
-                itemView.context.getColor(R.color.success)
+                android.graphics.Color.parseColor("#16A34A")
             } else {
-                itemView.context.getColor(R.color.error)
+                ContextCompat.getColor(itemView.context, R.color.error)
             }
             change.setTextColor(changeColor)
             
-            // Highlight first place
-            if (position == 1) {
-                itemView.setBackgroundColor(itemView.context.getColor(R.color.primary_light))
+            val rankColor = if (position <= 3) {
+                ContextCompat.getColor(itemView.context, R.color.primary)
+            } else {
+                ContextCompat.getColor(itemView.context, R.color.text_secondary)
             }
+            rank.setTextColor(rankColor)
+            
+            val progressPercentage = (community.points.toFloat() / 5000f).coerceIn(0f, 1f)
+            val params = progress.layoutParams
+            params.width = (itemView.width * progressPercentage * 0.5).toInt()
+            progress.layoutParams = params
         }
     }
 }

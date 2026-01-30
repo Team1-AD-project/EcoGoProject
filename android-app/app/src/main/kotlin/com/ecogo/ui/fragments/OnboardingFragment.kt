@@ -4,13 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import com.ecogo.R
 import com.ecogo.databinding.FragmentOnboardingBinding
 import com.ecogo.ui.adapters.OnboardingAdapter
-import com.google.android.material.tabs.TabLayoutMediator
 
 class OnboardingFragment : Fragment() {
     
@@ -58,6 +58,18 @@ class OnboardingFragment : Fragment() {
         
         binding.textSkip.setOnClickListener {
             findNavController().navigate(R.id.action_onboarding_to_home)
+        }
+    }
+    
+    private fun updateProgressDots(position: Int) {
+        val dots = listOf(binding.dot1, binding.dot2, binding.dot3)
+        val activeColor = ContextCompat.getColor(requireContext(), R.color.primary)
+        val inactiveColor = ContextCompat.getColor(requireContext(), android.R.color.darker_gray)
+        
+        dots.forEachIndexed { index, dot ->
+            dot.setBackgroundResource(
+                if (index == position) R.drawable.progress_dot_active else R.drawable.progress_dot
+            )
         }
     }
     

@@ -46,11 +46,14 @@
     <string name="home_open_map">Open Map</string>
     <string name="home_monthly_highlights">Monthly Highlights</string>
     <string name="home_scenic_walks">Scenic Campus Walks</string>
+    <string name="home_recommendation_label">RECOMMENDATION</string>
+    <string name="home_ask_another">Ask another destination</string>
     
     <!-- Routes -->
-    <string name="routes_title">Bus Routes</string>
+    <string name="routes_title">Live Bus Routes</string>
     <string name="routes_view_on_map">View on Map</string>
     <string name="routes_crowding">Crowding Level</string>
+    <string name="routes_wait_time">Wait Time</string>
     
     <!-- Community -->
     <string name="community_leaderboard">Faculty Leaderboard</string>
@@ -59,6 +62,7 @@
     <string name="community_points">Points</string>
     <string name="community_current_leader">Current Leader</string>
     <string name="community_rankings">Rankings</string>
+    <string name="community_crowd_label">Crowd:</string>
     
     <!-- Chat -->
     <string name="chat_title">Chat with LiNUS</string>
@@ -67,15 +71,17 @@
     
     <!-- Profile -->
     <string name="profile_title">Profile</string>
-    <string name="profile_points">Points</string>
-    <string name="profile_shop">Shop</string>
-    <string name="profile_achievements">Achievements</string>
+    <string name="profile_points">GREEN POINTS</string>
+    <string name="profile_shop">Closet</string>
+    <string name="profile_achievements">Badges</string>
     <string name="profile_history">History</string>
     <string name="profile_settings">Settings</string>
     <string name="profile_purchase">Purchase</string>
     <string name="profile_equip">Equip</string>
     <string name="profile_equipped">Equipped</string>
     <string name="profile_avatar">Profile avatar</string>
+    <string name="profile_mascot_title">Mascot Studio</string>
+    <string name="profile_mascot_subtitle">Customize your LiNUS (Tap him!)</string>
     
     <!-- Settings -->
     <string name="settings_title">Settings</string>
