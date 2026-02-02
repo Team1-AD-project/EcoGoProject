@@ -117,10 +117,10 @@ public class GoodsController {
         try {
             Goods createdGoods = goodsService.createGoods(goods);
             Map<String, Object> response = new HashMap<>();
-            response.put("code", 201);
+            response.put("code", 200);
             response.put("message", "商品创建成功");
             response.put("data", createdGoods);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("code", 400);
