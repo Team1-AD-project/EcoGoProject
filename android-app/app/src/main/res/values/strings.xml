@@ -12,4 +12,9 @@
     <string name="carbon_saved">减碳: %1$.2f kg</string>
     <string name="duration">预计时间: %1$d 分钟</string>
     <string name="select_destination">请选择目的地</string>
+    <string name="timer_format">用时: %1$s</string>
+    <string name="mode_driving">驾车</string>
+    <string name="mode_transit">公交</string>
+    <string name="mode_cycling">骑行</string>
+    <string name="mode_walking">步行</string>
 </resources>

@@ -60,4 +60,14 @@ interface IMapRepository {
         startPoint: GeoPoint,
         endPoint: GeoPoint
     ): Result<RouteRecommendData>
+
+    /**
+     * 根据交通方式获取路线
+     */
+    suspend fun getRouteByTransportMode(
+        userId: String,
+        startPoint: GeoPoint,
+        endPoint: GeoPoint,
+        transportMode: TransportMode
+    ): Result<RouteRecommendData>
 }

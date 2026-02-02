@@ -81,6 +81,10 @@ class MapViewModel(
     private val _successMessage = MutableLiveData<String?>()
     val successMessage: LiveData<String?> = _successMessage
 
+    // 当前选择的交通方式
+    private val _selectedTransportMode = MutableLiveData<TransportMode?>(null)
+    val selectedTransportMode: LiveData<TransportMode?> = _selectedTransportMode
+
     // ========================================
     // 位置更新
     // ========================================
@@ -322,6 +326,51 @@ class MapViewModel(
                 },
                 onFailure = { error ->
                     _errorMessage.value = error.message
+                }
+            )
+            _isLoading.value = false
+        }
+    }
+
+    /**
+     * 根据交通方式获取路线
+     */
+    fun fetchRouteByMode(mode: TransportMode) {
+        // 记录选择的交通方式
+        _selectedTransportMode.value = mode
+
+        val start = _origin.value ?: _currentLocation.value ?: run {
+            _errorMessage.value = "无法获取起点位置"
+            return
+        }
+        val end = _destination.value ?: run {
+            _errorMessage.value = "请先设置目的地"
+            return
+        }
+
+        viewModelScope.launch {
+            _isLoading.value = true
+
+            val result = repository.getRouteByTransportMode(
+                userId = userId,
+                startPoint = GeoPoint.fromLatLng(start),
+                endPoint = GeoPoint.fromLatLng(end),
+                transportMode = mode
+            )
+
+            result.fold(
+                onSuccess = { data ->
+                    _recommendedRoute.value = data
+                    val points = data.route_points ?: emptyList()
+                    _routePoints.value = points.map { it.toLatLng() }
+
+                    val distance = String.format("%.2f", data.total_distance)
+                    val duration = data.estimated_duration
+                    val carbonSaved = String.format("%.2f", data.carbon_saved)
+                    _successMessage.value = "${mode.displayName}路线: ${distance}公里, 预计${duration}分钟, 减碳${carbonSaved}kg"
+                },
+                onFailure = { error ->
+                    _errorMessage.value = error.message ?: "路线获取失败"
                 }
             )
             _isLoading.value = false

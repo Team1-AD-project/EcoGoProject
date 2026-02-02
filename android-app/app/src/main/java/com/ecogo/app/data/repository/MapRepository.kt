@@ -215,4 +215,18 @@ class MapRepository(
             Result.failure(e)
         }
     }
+
+    /**
+     * 根据交通方式获取路线 - 真实 API 实现（预留）
+     */
+    override suspend fun getRouteByTransportMode(
+        userId: String,
+        startPoint: GeoPoint,
+        endPoint: GeoPoint,
+        transportMode: TransportMode
+    ): Result<RouteRecommendData> {
+        // TODO: 对接后端 API
+        // 暂时返回错误
+        return Result.failure(Exception("API not implemented yet"))
+    }
 }

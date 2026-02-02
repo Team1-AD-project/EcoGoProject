@@ -7,6 +7,9 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.widget.Toast
@@ -17,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.ecogo.app.R
 import com.ecogo.app.databinding.ActivityMapBinding
+import com.ecogo.app.data.model.TransportMode
 import com.ecogo.app.service.DirectionsService
 import com.ecogo.app.service.LocationManager
 import com.ecogo.app.service.LocationTrackingService
@@ -60,6 +64,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private var remainingPolyline: Polyline? = null   // 剩余路线（蓝色）
     private var isNavigationMode = false              // 是否在导航模式
 
+    // 路线步骤适配器
+    private val routeStepAdapter = RouteStepAdapter()
+
+    // 路线选择适配器
+    private val routeOptionAdapter = RouteOptionAdapter { selectedRoute ->
+        onRouteSelected(selectedRoute)
+    }
+
     // 起点和终点位置
     private var originLatLng: LatLng? = null
     private var destinationLatLng: LatLng? = null
@@ -68,6 +80,28 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     // 标记当前搜索的是起点还是终点
     private var isSearchingOrigin = false
+
+    // 里程碑追踪（用于显示鼓励信息）
+    private val milestones = listOf(1000f, 2000f, 3000f, 5000f, 10000f) // 单位：米
+    private var reachedMilestones = mutableSetOf<Float>()
+
+    // 行程计时器
+    private val timerHandler = Handler(Looper.getMainLooper())
+    private var timerStartTime = 0L
+    private val timerRunnable = object : Runnable {
+        override fun run() {
+            val elapsed = SystemClock.elapsedRealtime() - timerStartTime
+            val seconds = (elapsed / 1000) % 60
+            val minutes = (elapsed / 1000 / 60) % 60
+            val hours = elapsed / 1000 / 3600
+            val timeStr = if (hours > 0)
+                String.format("%d:%02d:%02d", hours, minutes, seconds)
+            else
+                String.format("%02d:%02d", minutes, seconds)
+            binding.tvTimer.text = getString(R.string.timer_format, timeStr)
+            timerHandler.postDelayed(this, 1000)
+        }
+    }
 
     companion object {
         private const val TAG = "MapActivity"
@@ -186,22 +220,45 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             swapOriginAndDestination()
         }
 
-        // 低碳路线按钮
-        binding.btnLowCarbon.setOnClickListener {
-            if (destinationLatLng != null) {
-                viewModel.fetchLowCarbonRoute()
-            } else {
+        // 交通方式选择监听器
+        binding.chipGroupTransport.setOnCheckedStateChangeListener { _, checkedIds ->
+            if (checkedIds.isEmpty()) return@setOnCheckedStateChangeListener
+
+            // 检查是否选择了目的地
+            if (destinationLatLng == null) {
                 Toast.makeText(this, "请先选择目的地", Toast.LENGTH_SHORT).show()
+                binding.chipGroupTransport.clearCheck()
+                binding.chipWalking.isChecked = true  // 重置为默认
+                return@setOnCheckedStateChangeListener
             }
+
+            // 根据选中的 Chip 确定交通方式
+            val mode = when (checkedIds.first()) {
+                R.id.chipDriving -> TransportMode.DRIVING
+                R.id.chipTransit -> TransportMode.BUS
+                R.id.chipCycling -> TransportMode.CYCLING
+                R.id.chipWalking -> TransportMode.WALKING
+                else -> TransportMode.WALKING
+            }
+
+            // 调用 ViewModel 获取路线
+            viewModel.fetchRouteByMode(mode)
         }
 
-        // 平衡路线按钮
-        binding.btnBalance.setOnClickListener {
-            if (destinationLatLng != null) {
-                viewModel.fetchBalancedRoute()
-            } else {
-                Toast.makeText(this, "请先选择目的地", Toast.LENGTH_SHORT).show()
-            }
+        // 初始化路线步骤 RecyclerView
+        binding.rvRouteSteps.apply {
+            adapter = routeStepAdapter
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this@MapActivity)
+        }
+
+        // 初始化路线选择 RecyclerView（横向滚动）
+        binding.rvRouteOptions.apply {
+            adapter = routeOptionAdapter
+            layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
+                this@MapActivity,
+                androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL,
+                false
+            )
         }
 
         // 行程追踪按钮
@@ -277,7 +334,38 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         remainingPolyline?.remove()
         remainingPolyline = null
 
+        // 重置里程碑追踪
+        reachedMilestones.clear()
+
         isFollowingUser = true
+
+        // 启动计时器
+        startTimer()
+    }
+
+    /**
+     * 启动行程计时器
+     */
+    private fun startTimer() {
+        timerStartTime = SystemClock.elapsedRealtime()
+        binding.tvTimer.visibility = View.VISIBLE
+        binding.tvTimer.text = getString(R.string.timer_format, "00:00")
+        timerHandler.post(timerRunnable)
+    }
+
+    /**
+     * 停止行程计时器
+     */
+    private fun stopTimer() {
+        timerHandler.removeCallbacks(timerRunnable)
+    }
+
+    /**
+     * 隐藏计时器
+     */
+    private fun hideTimer() {
+        timerHandler.removeCallbacks(timerRunnable)
+        binding.tvTimer.visibility = View.GONE
     }
 
     /**
@@ -289,6 +377,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             action = LocationTrackingService.ACTION_STOP
         }
         startService(intent)
+
+        // 停止计时器（保留显示最终用时）
+        stopTimer()
 
         // 停止导航
         if (isNavigationMode) {
@@ -415,9 +506,104 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val remainingKm = remainingMeters / 1000f
 
         if (binding.cardRouteInfo.visibility == View.VISIBLE) {
-            binding.tvCarbonSaved.text = String.format("已行进: %.2f 公里", traveledKm)
+            // 获取实时碳排放信息和鼓励消息
+            val encouragementMessage = generateEncouragementMessage(traveledMeters)
+            binding.tvCarbonSaved.text = encouragementMessage
             binding.tvDuration.text = String.format("剩余: %.2f 公里", remainingKm)
+
+            // 检查是否到达里程碑
+            checkMilestones(traveledMeters)
         }
+    }
+
+    /**
+     * 计算实时碳排放减少量（单位：克）
+     */
+    private fun calculateRealTimeCarbonSaved(distanceMeters: Float): Double {
+        val distanceKm = distanceMeters / 1000.0
+        val mode = viewModel.selectedTransportMode.value
+
+        // 碳排放因子 (kg CO2 / km)
+        val emissionFactor = when (mode) {
+            TransportMode.WALKING, TransportMode.CYCLING -> 0.0
+            TransportMode.BUS, TransportMode.SUBWAY -> 0.05
+            else -> 0.15  // DRIVING 或其他
+        }
+
+        val currentModeCarbon = distanceKm * emissionFactor
+        val drivingCarbon = distanceKm * 0.15  // 与驾车对比
+        val carbonSaved = (drivingCarbon - currentModeCarbon) * 1000  // 转为克
+
+        return carbonSaved.coerceAtLeast(0.0)
+    }
+
+    /**
+     * 生成鼓励消息
+     */
+    private fun generateEncouragementMessage(distanceMeters: Float): String {
+        val mode = viewModel.selectedTransportMode.value
+        val carbonSavedGrams = calculateRealTimeCarbonSaved(distanceMeters)
+
+        return when (mode) {
+            TransportMode.WALKING, TransportMode.CYCLING -> {
+                // 步行/骑行：显示减碳量和鼓励
+                if (carbonSavedGrams >= 1) {
+                    String.format("已减碳 %.0f g | 继续加油 💪", carbonSavedGrams)
+                } else {
+                    "绿色出行 | 继续加油 💪"
+                }
+            }
+            TransportMode.BUS, TransportMode.SUBWAY -> {
+                // 公交/地铁：显示绿色出行进行中
+                if (carbonSavedGrams >= 1) {
+                    String.format("绿色出行进行中 🚌 | 已减碳 %.0f g", carbonSavedGrams)
+                } else {
+                    "绿色出行进行中 🚌"
+                }
+            }
+            else -> {
+                // 驾车或其他：只显示距离
+                String.format("已行进: %.2f 公里", distanceMeters / 1000f)
+            }
+        }
+    }
+
+    /**
+     * 检查并显示里程碑
+     */
+    private fun checkMilestones(distanceMeters: Float) {
+        for (milestone in milestones) {
+            if (distanceMeters >= milestone && !reachedMilestones.contains(milestone)) {
+                reachedMilestones.add(milestone)
+                showMilestoneToast(milestone)
+                break  // 每次只显示一个里程碑
+            }
+        }
+    }
+
+    /**
+     * 显示里程碑Toast
+     */
+    private fun showMilestoneToast(milestoneMeters: Float) {
+        val mode = viewModel.selectedTransportMode.value
+        val carbonSavedGrams = calculateRealTimeCarbonSaved(milestoneMeters)
+
+        val message = when (mode) {
+            TransportMode.WALKING -> {
+                String.format("恭喜！您已步行 %.0f 米，减碳 %.0f g 🎉", milestoneMeters, carbonSavedGrams)
+            }
+            TransportMode.CYCLING -> {
+                String.format("恭喜！您已骑行 %.0f 米，减碳 %.0f g 🚴", milestoneMeters, carbonSavedGrams)
+            }
+            TransportMode.BUS, TransportMode.SUBWAY -> {
+                String.format("恭喜！您已出行 %.0f 米，减碳 %.0f g 🌱", milestoneMeters, carbonSavedGrams)
+            }
+            else -> {
+                String.format("恭喜！您已出行 %.0f 米", milestoneMeters)
+            }
+        }
+
+        Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
     /**
@@ -425,7 +611,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     private fun onReachedDestination() {
         Toast.makeText(this, "您已到达目的地！", Toast.LENGTH_LONG).show()
-        // 可以自动停止导航
+        // 自动停止行程
+        stopLocationTracking()
+        viewModel.stopTracking()
     }
 
     /**
@@ -455,7 +643,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val distanceKm = distanceMeters / 1000f
         // 可以在路线信息卡片显示实时距离
         if (binding.cardRouteInfo.visibility == View.VISIBLE) {
-            binding.tvCarbonSaved.text = String.format("已行进: %.2f 公里", distanceKm)
+            // 使用与导航相同的鼓励消息
+            val encouragementMessage = generateEncouragementMessage(distanceMeters)
+            binding.tvCarbonSaved.text = encouragementMessage
+
+            // 检查是否到达里程碑
+            checkMilestones(distanceMeters)
         }
     }
 
@@ -499,6 +692,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             binding.etOrigin.setText(originName)
                             updateOriginMarker(latLng, originName)
                             viewModel.setOrigin(latLng)  // 使用 setOrigin 而不是 updateCurrentLocation
+
+                            // 如果终点已设置，自动获取默认路线（驾车）
+                            if (destinationLatLng != null) {
+                                binding.cardTransportModes.visibility = View.VISIBLE
+                                binding.chipDriving.isChecked = true
+                                viewModel.fetchRouteByMode(TransportMode.DRIVING)
+                            }
                         } else {
                             // 设置终点
                             destinationLatLng = latLng
@@ -506,6 +706,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                             binding.etDestination.setText(destinationName)
                             updateDestinationMarker(latLng, destinationName)
                             viewModel.setDestination(latLng)
+
+                            // 显示交通方式选择卡片
+                            binding.cardTransportModes.visibility = View.VISIBLE
+
+                            // 自动获取默认路线（驾车）
+                            if (originLatLng != null || viewModel.currentLocation.value != null) {
+                                binding.chipDriving.isChecked = true
+                                viewModel.fetchRouteByMode(TransportMode.DRIVING)
+                            }
                         }
 
                         // 移动相机到选择的位置
@@ -635,12 +844,22 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         viewModel.carbonResult.observe(this) { result ->
             result?.let {
                 val carbonSavedStr = String.format("%.2f", it.carbon_saved)
+
+                // 记录绿色出行统计（如果有减碳）
+                if (it.carbon_saved > 0) {
+                    com.ecogo.app.util.GreenTravelStats.recordGreenTrip(this, it.carbon_saved)
+                }
+
+                // 显示完成消息
                 val message = if (it.is_green_trip) {
-                    "绿色出行! 减碳 $carbonSavedStr kg，获得 ${it.green_points} 积分"
+                    "🎉 绿色出行完成！减碳 $carbonSavedStr kg，获得 ${it.green_points} 积分"
                 } else {
-                    "行程完成，减碳 $carbonSavedStr kg"
+                    "行程完成，碳排放 $carbonSavedStr kg"
                 }
                 Toast.makeText(this, message, Toast.LENGTH_LONG).show()
+
+                // 更新累计统计显示
+                binding.tvCumulativeImpact.text = com.ecogo.app.util.GreenTravelStats.formatWeeklyImpact(this)
             }
         }
 
@@ -685,12 +904,33 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     return@setOnMapClickListener
                 }
 
-                destinationLatLng = latLng
-                destinationName = "地图上的位置"
-                binding.etDestination.setText(destinationName)
-                updateDestinationMarker(latLng, destinationName)
-                viewModel.setDestination(latLng)
-                fitBoundsIfReady()
+                // 显示确认对话框
+                androidx.appcompat.app.AlertDialog.Builder(this@MapActivity)
+                    .setTitle("设置目的地")
+                    .setMessage("是否将此位置设置为目的地？")
+                    .setPositiveButton("确定") { dialog, _ ->
+                        destinationLatLng = latLng
+                        destinationName = "地图上的位置"
+                        binding.etDestination.setText(destinationName)
+                        updateDestinationMarker(latLng, destinationName)
+                        viewModel.setDestination(latLng)
+
+                        // 显示交通方式选择卡片
+                        binding.cardTransportModes.visibility = View.VISIBLE
+
+                        // 自动获取默认路线（驾车）
+                        if (originLatLng != null || viewModel.currentLocation.value != null) {
+                            binding.chipDriving.isChecked = true
+                            viewModel.fetchRouteByMode(TransportMode.DRIVING)
+                        }
+
+                        fitBoundsIfReady()
+                        dialog.dismiss()
+                    }
+                    .setNegativeButton("取消") { dialog, _ ->
+                        dialog.dismiss()
+                    }
+                    .show()
             }
 
             // 长按清除目的地
@@ -724,6 +964,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         routePolyline?.remove()
         routePolyline = null
         binding.cardRouteInfo.visibility = View.GONE
+        binding.cardTransportModes.visibility = View.GONE
         viewModel.clearDestination()
     }
 
@@ -810,7 +1051,17 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
      * 绘制路线（推荐路线预览，蓝色）
      */
     private fun drawRoute(points: List<LatLng>) {
+        // 清除之前的所有路线相关的 Polyline
         routePolyline?.remove()
+        traveledPolyline?.remove()
+        remainingPolyline?.remove()
+        trackPolyline?.remove()
+
+        // 重置引用
+        routePolyline = null
+        traveledPolyline = null
+        remainingPolyline = null
+        trackPolyline = null
 
         if (points.isEmpty()) return
 
@@ -849,14 +1100,102 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         binding.tvRouteType.text = routeTypeText
 
-        // 碳减排
-        val carbonSavedText = String.format("减碳: %.2f kg", route.carbon_saved)
+        // 碳减排 - 绿色出行强化显示
+        val carbonSavedText = if (route.carbon_saved > 0) {
+            String.format("🌍 比驾车减少 %.2f kg 碳排放", route.carbon_saved)
+        } else {
+            String.format("碳排放: %.2f kg", route.total_carbon)
+        }
         binding.tvCarbonSaved.text = carbonSavedText
+
+        // 根据碳排放设置颜色编码（绿色=低碳，黄色=中碳，红色=高碳）
+        val carbonColor = when {
+            route.total_carbon == 0.0 -> android.graphics.Color.parseColor("#4CAF50") // 绿色 - 零碳
+            route.total_carbon < 0.5 -> android.graphics.Color.parseColor("#8BC34A") // 浅绿 - 低碳
+            route.total_carbon < 1.5 -> android.graphics.Color.parseColor("#FFC107") // 黄色 - 中碳
+            else -> android.graphics.Color.parseColor("#FF5722") // 红色 - 高碳
+        }
+        binding.tvCarbonSaved.setTextColor(carbonColor)
+
+        // 环保评级（星级）
+        val ecoRating = calculateEcoRating(route.total_carbon, route.total_distance)
+        val ratingText = "环保指数: $ecoRating"
+        binding.tvRouteType.text = "$routeTypeText  $ratingText"
 
         // 预计时间 (使用新字段 estimated_duration，兼容旧字段 duration)
         val durationMinutes = route.estimated_duration.takeIf { it > 0 } ?: route.duration ?: 0
         val durationText = "预计: $durationMinutes 分钟"
         binding.tvDuration.text = durationText
+
+        // 显示累计环保贡献（仅绿色出行方式显示）
+        if (route.carbon_saved > 0) {
+            binding.tvCumulativeImpact.visibility = View.VISIBLE
+            binding.tvCumulativeImpact.text = com.ecogo.app.util.GreenTravelStats.formatWeeklyImpact(this)
+        } else {
+            binding.tvCumulativeImpact.visibility = View.GONE
+        }
+
+        // 显示路线选择列表（仅公交模式且有多条路线）
+        if (!route.route_alternatives.isNullOrEmpty()) {
+            binding.rvRouteOptions.visibility = View.VISIBLE
+            routeOptionAdapter.setRoutes(route.route_alternatives)
+        } else {
+            binding.rvRouteOptions.visibility = View.GONE
+        }
+
+        // 显示详细步骤列表（仅公交模式显示详细步骤）
+        val hasTransitSteps = route.route_steps?.any { it.travel_mode == "TRANSIT" } == true
+        if (hasTransitSteps && !route.route_steps.isNullOrEmpty()) {
+            binding.rvRouteSteps.visibility = View.VISIBLE
+            routeStepAdapter.setSteps(route.route_steps)
+        } else {
+            binding.rvRouteSteps.visibility = View.GONE
+        }
+    }
+
+    /**
+     * 计算环保评级（星级）
+     * 基于碳排放量和距离计算环保指数
+     */
+    private fun calculateEcoRating(totalCarbon: Double, distance: Double): String {
+        // 计算每公里碳排放
+        val carbonPerKm = if (distance > 0) totalCarbon / distance else totalCarbon
+
+        // 根据每公里碳排放计算星级（0-5星）
+        val stars = when {
+            carbonPerKm == 0.0 -> "⭐⭐⭐⭐⭐" // 零碳 - 5星
+            carbonPerKm < 0.03 -> "⭐⭐⭐⭐" // 地铁级别 - 4星
+            carbonPerKm < 0.06 -> "⭐⭐⭐" // 公交级别 - 3星
+            carbonPerKm < 0.10 -> "⭐⭐" // 混合出行 - 2星
+            else -> "⭐" // 高碳 - 1星
+        }
+
+        return stars
+    }
+
+    /**
+     * 处理用户选择路线
+     */
+    private fun onRouteSelected(route: com.ecogo.app.data.model.RouteAlternative) {
+        Log.d(TAG, "Route selected: ${route.summary}")
+
+        // 更新地图上的路线
+        val points = route.route_points.map { com.google.android.gms.maps.model.LatLng(it.lat, it.lng) }
+        drawRoute(points)
+
+        // 更新路线信息
+        binding.tvCarbonSaved.text = String.format("减碳: %.2f kg", route.total_carbon)
+        binding.tvDuration.text = "预计: ${route.estimated_duration} 分钟"
+
+        // 更新详细步骤
+        if (route.route_steps.any { it.travel_mode == "TRANSIT" }) {
+            binding.rvRouteSteps.visibility = View.VISIBLE
+            routeStepAdapter.setSteps(route.route_steps)
+        } else {
+            binding.rvRouteSteps.visibility = View.GONE
+        }
+
+        Toast.makeText(this, "已切换到: ${route.summary}", Toast.LENGTH_SHORT).show()
     }
 
     /**
@@ -867,8 +1206,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             is TripState.Idle -> {
                 binding.btnTracking.text = getString(R.string.start_tracking)
                 binding.btnTracking.isEnabled = true
-                binding.layoutRouteButtons.visibility = View.VISIBLE
+                binding.chipGroupTransport.visibility = View.VISIBLE
                 binding.cardSearch.visibility = View.VISIBLE
+                hideTimer()
                 // 清除追踪轨迹
                 trackPolyline?.remove()
                 trackPolyline = null
@@ -880,7 +1220,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             is TripState.Tracking -> {
                 binding.btnTracking.text = getString(R.string.stop_tracking)
                 binding.btnTracking.isEnabled = true
-                binding.layoutRouteButtons.visibility = View.GONE
+                binding.chipGroupTransport.visibility = View.GONE
                 binding.cardSearch.visibility = View.GONE
                 // 显示追踪信息卡片
                 binding.cardRouteInfo.visibility = View.VISIBLE
@@ -905,15 +1245,18 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             is TripState.Completed -> {
                 binding.btnTracking.text = getString(R.string.start_tracking)
                 binding.btnTracking.isEnabled = true
-                binding.layoutRouteButtons.visibility = View.VISIBLE
+                binding.chipGroupTransport.visibility = View.VISIBLE
                 binding.cardSearch.visibility = View.VISIBLE
                 binding.cardRouteInfo.visibility = View.GONE
+                hideTimer()
             }
         }
     }
 
     override fun onDestroy() {
         super.onDestroy()
+        // 清除计时器，防止内存泄漏
+        timerHandler.removeCallbacks(timerRunnable)
         // 如果 Activity 销毁时还在追踪，停止服务
         if (LocationManager.isTracking.value == true) {
             stopLocationTracking()

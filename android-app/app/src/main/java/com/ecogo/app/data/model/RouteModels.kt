@@ -30,9 +30,24 @@ data class RouteRecommendData(
     val carbon_saved: Double = 0.0,
     val route_segments: List<RouteSegment>? = null,
     val route_points: List<GeoPoint>? = null,
+    val route_steps: List<RouteStep>? = null,  // 详细步骤（用于公交等多模式路线）
+    val route_alternatives: List<RouteAlternative>? = null,  // 多条路线选项（仅公交模式）
     // 兼容旧字段
     val green_route: List<GeoPoint>? = null,
     val duration: Int? = null
+)
+
+/**
+ * 路线选项（用于显示多条路线供用户选择）
+ */
+data class RouteAlternative(
+    val index: Int,                      // 路线索引
+    val total_distance: Double,          // 总距离（公里）
+    val estimated_duration: Int,         // 预计时长（分钟）
+    val total_carbon: Double,            // 碳排放
+    val route_points: List<GeoPoint>,    // 路线点
+    val route_steps: List<RouteStep>,    // 详细步骤
+    val summary: String                  // 路线摘要（如"地铁1号线 → 公交46路"）
 )
 
 /**
@@ -74,3 +89,27 @@ enum class TransportMode(val value: String, val displayName: String) {
     SUBWAY("subway", "地铁"),
     DRIVING("driving", "驾车")
 }
+
+/**
+ * 路线详细步骤（用于显示公交换乘等详细信息）
+ */
+data class RouteStep(
+    val instruction: String,           // 步骤说明（如"步行至公交站"、"乘坐X路公交"）
+    val distance: Double,               // 距离（米）
+    val duration: Int,                  // 时长（秒）
+    val travel_mode: String,            // 出行方式（WALKING, TRANSIT, DRIVING等）
+    val transit_details: TransitDetails? = null  // 公交详情（仅 TRANSIT 模式有）
+)
+
+/**
+ * 公交详情
+ */
+data class TransitDetails(
+    val line_name: String,              // 线路名称（如"地铁1号线"、"公交46路"）
+    val line_short_name: String? = null, // 线路简称（如"1号线"、"46路"）
+    val departure_stop: String,         // 上车站点
+    val arrival_stop: String,           // 下车站点
+    val num_stops: Int,                 // 经过站数
+    val vehicle_type: String,           // 车辆类型（BUS, SUBWAY, RAIL等）
+    val headsign: String? = null        // 方向标识（如"往XX方向"）
+)

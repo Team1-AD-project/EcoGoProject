@@ -137,6 +137,70 @@
 
     </com.google.android.material.card.MaterialCardView>
 
+    <!-- 交通方式选择卡片 -->
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardTransportModes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="12dp"
+        android:layout_marginTop="8dp"
+        android:visibility="gone"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cardSearch">
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chipGroupTransport"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="12dp"
+            app:singleSelection="true"
+            app:selectionRequired="true"
+            app:chipSpacingHorizontal="8dp">
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipDriving"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mode_driving"
+                app:chipIcon="@drawable/ic_driving"
+                app:chipIconSize="20dp"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipTransit"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mode_transit"
+                app:chipIcon="@drawable/ic_transit"
+                app:chipIconSize="20dp"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipCycling"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mode_cycling"
+                app:chipIcon="@drawable/ic_bicycling"
+                app:chipIconSize="20dp"/>
+
+            <com.google.android.material.chip.Chip
+                android:id="@+id/chipWalking"
+                style="@style/Widget.MaterialComponents.Chip.Choice"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/mode_walking"
+                app:chipIcon="@drawable/ic_walking"
+                app:chipIconSize="20dp"
+                android:checked="true"/>
+
+        </com.google.android.material.chip.ChipGroup>
+
+    </com.google.android.material.card.MaterialCardView>
+
     <!-- 路线信息卡片 -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardRouteInfo"
@@ -149,7 +213,7 @@
         app:cardElevation="4dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/cardSearch">
+        app:layout_constraintTop_toBottomOf="@id/cardTransportModes">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -190,6 +254,50 @@
 
             </LinearLayout>
 
+            <TextView
+                android:id="@+id/tvTimer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:textSize="13sp"
+                android:textColor="#FF5722"
+                android:visibility="gone"
+                tools:text="用时: 00:00" />
+
+            <!-- 累计环保贡献 -->
+            <TextView
+                android:id="@+id/tvCumulativeImpact"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:textSize="12sp"
+                android:textColor="#4CAF50"
+                android:visibility="gone"
+                tools:text="🌱 本周绿色出行 5 次，累计减碳 2.5 kg" />
+
+            <!-- 路线选择列表（仅公交模式显示） -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvRouteOptions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                android:nestedScrollingEnabled="false"
+                android:orientation="horizontal"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_route_option" />
+
+            <!-- 详细步骤列表 -->
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvRouteSteps"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:visibility="gone"
+                android:nestedScrollingEnabled="false"
+                tools:itemCount="3"
+                tools:listitem="@layout/item_route_step" />
+
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>
@@ -222,34 +330,6 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:padding="12dp">
-
-            <!-- 路线推荐按钮组 -->
-            <LinearLayout
-                android:id="@+id/layoutRouteButtons"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnLowCarbon"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_marginEnd="8dp"
-                    android:layout_weight="1"
-                    android:text="@string/low_carbon_route"
-                    android:textSize="13sp" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnBalance"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/balance_route"
-                    android:textSize="13sp" />
-
-            </LinearLayout>
 
             <!-- 行程控制按钮 -->
             <com.google.android.material.button.MaterialButton
