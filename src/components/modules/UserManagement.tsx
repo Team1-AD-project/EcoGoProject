@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Search, Edit, Trash2, UserX } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Edit, UserX } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,92 +13,52 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
-interface User {
-  id: string;
-  username: string;
-  email: string;
-  userType: 'Normal' | 'VIP';
-  status: 'Active' | 'Inactive';
-  registeredDate: string;
-  lastLogin: string;
-}
+import { fetchUserList, type User } from '@/services/userService';
+import { toast } from 'sonner';
 
 export function UserManagement() {
-  const [users, setUsers] = useState<User[]>([
-    {
-      id: 'U001',
-      username: 'John Smith',
-      email: 'john.smith@example.com',
-      userType: 'VIP',
-      status: 'Active',
-      registeredDate: '2024-01-15',
-      lastLogin: '2026-01-24 10:30'
-    },
-    {
-      id: 'U002',
-      username: 'Emily Johnson',
-      email: 'emily.j@example.com',
-      userType: 'Normal',
-      status: 'Active',
-      registeredDate: '2024-02-20',
-      lastLogin: '2026-01-24 09:15'
-    },
-    {
-      id: 'U003',
-      username: 'Michael Brown',
-      email: 'michael.b@example.com',
-      userType: 'VIP',
-      status: 'Active',
-      registeredDate: '2024-03-10',
-      lastLogin: '2026-01-23 18:45'
-    },
-    {
-      id: 'U004',
-      username: 'Sarah Davis',
-      email: 'sarah.davis@example.com',
-      userType: 'Normal',
-      status: 'Active',
-      registeredDate: '2024-04-05',
-      lastLogin: '2026-01-23 14:20'
-    },
-    {
-      id: 'U005',
-      username: 'David Wilson',
-      email: 'david.w@example.com',
-      userType: 'Normal',
-      status: 'Inactive',
-      registeredDate: '2024-05-12',
-      lastLogin: '2026-01-20 11:30'
-    },
-    {
-      id: 'U006',
-      username: 'Jessica Martinez',
-      email: 'jessica.m@example.com',
-      userType: 'VIP',
-      status: 'Active',
-      registeredDate: '2024-06-18',
-      lastLogin: '2026-01-24 08:00'
-    }
-  ]);
-
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+
+  // Pagination
+  const [totalUsers, setTotalUsers] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeactivateDialogOpen, setIsDeactivateDialogOpen] = useState(false);
   const [userToDeactivate, setUserToDeactivate] = useState<User | null>(null);
 
+  useEffect(() => {
+    loadUsers();
+  }, [page]);
+
+  const loadUsers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetchUserList(page, pageSize);
+      if (response.code === 200) {
+        setUsers(response.data.list);
+        setTotalUsers(response.data.total);
+        setTotalPages(Math.ceil(response.data.total / pageSize));
+      } else {
+        toast.error(response.message || 'Failed to fetch users');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('An error occurred while fetching users');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const filteredUsers = users.filter(user =>
-    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.id.toLowerCase().includes(searchTerm.toLowerCase())
+    (user.nickname || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.email || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.userid || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const handleEdit = (user: User) => {
@@ -107,13 +67,10 @@ export function UserManagement() {
   };
 
   const handleSaveEdit = () => {
-    if (editingUser) {
-      setUsers(users.map(user => 
-        user.id === editingUser.id ? editingUser : user
-      ));
-      setIsEditDialogOpen(false);
-      setEditingUser(null);
-    }
+    // Placeholder for API update
+    setIsEditDialogOpen(false);
+    setEditingUser(null);
+    toast.info('Update functionality not implemented yet');
   };
 
   const handleDeactivateClick = (user: User) => {
@@ -122,20 +79,31 @@ export function UserManagement() {
   };
 
   const handleDeactivateConfirm = () => {
-    if (userToDeactivate) {
-      setUsers(users.map(user =>
-        user.id === userToDeactivate.id
-          ? { ...user, status: 'Inactive' as const }
-          : user
-      ));
-      setIsDeactivateDialogOpen(false);
-      setUserToDeactivate(null);
-    }
+    // Placeholder for API Deactivate
+    setIsDeactivateDialogOpen(false);
+    setUserToDeactivate(null);
+    toast.info('Deactivate functionality not implemented yet');
   };
 
-  const normalUserCount = users.filter(u => u.userType === 'Normal').length;
-  const vipUserCount = users.filter(u => u.userType === 'VIP').length;
-  const activeUserCount = users.filter(u => u.status === 'Active').length;
+  const normalUserCount = users.filter(u => !u.vip?.active).length; // Approximate from current page
+  const vipUserCount = users.filter(u => u.vip?.active).length;     // Approximate from current page
+  const activeUserCount = users.filter(u => !u.isDeactivated).length; // Approximate from current page
+
+  // Helper to format date
+  const formatDate = (dateStr: string | null, type: 'date' | 'datetime' = 'date') => {
+    if (!dateStr) return '-';
+    const date = new Date(dateStr);
+
+    // SG format
+    const options: Intl.DateTimeFormatOptions = type === 'date'
+      ? { day: '2-digit', month: '2-digit', year: 'numeric' } // DD/MM/YYYY
+      : {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', hour12: false // DD/MM/YYYY HH:mm
+      };
+
+    return date.toLocaleString('en-SG', options);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -145,14 +113,14 @@ export function UserManagement() {
         <p className="text-gray-600 mt-1">Manage system user accounts and permissions</p>
       </div>
 
-      {/* Statistics */}
+      {/* Statistics (Note: accurate global stats usually come from a separate dashboard API) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-gray-600">Total Users</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{users.length}</p>
+                <p className="text-3xl font-bold text-gray-900 mt-1">{totalUsers}</p>
               </div>
               <div className="size-12 bg-blue-50 rounded-lg flex items-center justify-center">
                 <span className="text-2xl text-blue-600">👥</span>
@@ -160,34 +128,9 @@ export function UserManagement() {
             </div>
           </CardContent>
         </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Normal Users</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{normalUserCount}</p>
-              </div>
-              <div className="size-12 bg-green-50 rounded-lg flex items-center justify-center">
-                <span className="text-2xl text-green-600">👤</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="pt-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">VIP Users</p>
-                <p className="text-3xl font-bold text-gray-900 mt-1">{vipUserCount}</p>
-              </div>
-              <div className="size-12 bg-purple-50 rounded-lg flex items-center justify-center">
-                <span className="text-2xl text-purple-600">👑</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+
+        {/* These stats are currently based on the FETCHED page, which is not ideal, but keeping structure */}
+        {/* In a real scenario, you'd want a separate /stats API */}
       </div>
 
       {/* User List */}
@@ -199,7 +142,7 @@ export function UserManagement() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
                 <Input
-                  placeholder="Search users..."
+                  placeholder="Search by nickname, email or ID..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-9 w-64"
@@ -209,66 +152,131 @@ export function UserManagement() {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
+          <div className="overflow-x-auto bg-white rounded-md shadow-sm">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-gray-200">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">User ID</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Username</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Email</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">User Type</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Registered Date</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Last Login</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
+                  <th className="text-center py-4 px-4 text-sm font-medium text-gray-600 w-[100px]">User ID</th>
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-600">Nickname</th>
+                  <th className="text-left py-4 px-4 text-sm font-medium text-gray-600">Email</th>
+                  <th className="text-center py-4 px-4 text-sm font-medium text-gray-600 whitespace-nowrap">User Type</th>
+                  <th className="text-center py-4 px-4 text-sm font-medium text-gray-600 whitespace-nowrap">Status</th>
+                  <th className="text-center py-4 px-4 text-sm font-medium text-gray-600 whitespace-nowrap">Registered Date</th>
+                  <th className="text-center py-4 px-4 text-sm font-medium text-gray-600 whitespace-nowrap">Last Login</th>
+                  <th className="text-center py-4 px-4 text-sm font-medium text-gray-600 whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredUsers.map((user) => (
-                  <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="py-3 px-4 text-sm text-gray-900">{user.id}</td>
-                    <td className="py-3 px-4 text-sm font-medium text-gray-900">{user.username}</td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{user.email}</td>
-                    <td className="py-3 px-4">
-                      <Badge className={user.userType === 'VIP' ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}>
-                        {user.userType}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge className={user.status === 'Active' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
-                        {user.status}
-                      </Badge>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{user.registeredDate}</td>
-                    <td className="py-3 px-4 text-sm text-gray-600">{user.lastLogin}</td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleEdit(user)}
-                          className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
-                        >
-                          <Edit className="size-4 mr-1" />
-                          Edit
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDeactivateClick(user)}
-                          disabled={user.status === 'Inactive'}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
-                        >
-                          <UserX className="size-4 mr-1" />
-                          Deactivate
-                        </Button>
-                      </div>
-                    </td>
+                {isLoading ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-8 text-gray-500">Loading users...</td>
                   </tr>
-                ))}
+                ) : filteredUsers.length === 0 ? (
+                  <tr>
+                    <td colSpan={8} className="text-center py-8 text-gray-500">No users found.</td>
+                  </tr>
+                ) : (
+                  filteredUsers.map((user) => (
+                    <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="py-4 px-4 text-sm text-gray-900 text-center break-words max-w-[100px]">{user.userid}</td>
+                      <td className="py-4 px-4 text-sm font-medium text-gray-900 text-left break-words max-w-[160px]">{user.nickname}</td>
+                      <td className="py-4 px-4 text-sm text-gray-600 text-left break-words max-w-[220px]">{user.email || '-'}</td>
+                      <td className="py-4 px-4 text-center whitespace-nowrap">
+                        <Badge className={user.vip?.active ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-700'}>
+                          {user.vip?.active ? 'VIP' : 'Normal'}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4 text-center whitespace-nowrap">
+                        <Badge className={!user.isDeactivated ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}>
+                          {!user.isDeactivated ? 'Active' : 'Inactive'}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4 text-sm text-gray-600 text-center whitespace-nowrap">{formatDate(user.createdAt, 'date')}</td>
+                      <td className="py-4 px-4 text-sm text-gray-600 text-center whitespace-nowrap">{formatDate(user.lastLoginAt, 'datetime')}</td>
+                      <td className="py-4 px-4 whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(user)}
+                            className="text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                          >
+                            <Edit className="size-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeactivateClick(user)}
+                            disabled={user.isDeactivated}
+                            className="text-red-600 hover:text-red-700 hover:bg-red-50 disabled:opacity-50"
+                          >
+                            <UserX className="size-4 mr-1" />
+                            Deactivate
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-4">
+              <div className="text-sm text-gray-500">
+                Page {page} of {totalPages}
+              </div>
+              <div className="flex gap-1">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  disabled={page === 1}
+                >
+                  Prev
+                </Button>
+
+                {/* Numbered Pagination */}
+                {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                  // Simple sliding window logic
+                  let pageNum = page;
+                  if (totalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (page <= 3) {
+                    pageNum = i + 1;
+                  } else if (page >= totalPages - 2) {
+                    pageNum = totalPages - 4 + i;
+                  } else {
+                    pageNum = page - 2 + i;
+                  }
+
+                  return (
+                    <Button
+                      key={pageNum}
+                      variant={page === pageNum ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setPage(pageNum)}
+                      className="w-8"
+                    >
+                      {pageNum}
+                    </Button>
+                  );
+                })}
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                  disabled={page === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -278,17 +286,17 @@ export function UserManagement() {
           <DialogHeader>
             <DialogTitle>Edit User Information</DialogTitle>
             <DialogDescription>
-              Update user account information and permission settings
+              Update user account information
             </DialogDescription>
           </DialogHeader>
           {editingUser && (
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="username">Username</Label>
+                <Label htmlFor="nickname">Nickname</Label>
                 <Input
-                  id="username"
-                  value={editingUser.username}
-                  onChange={(e) => setEditingUser({ ...editingUser, username: e.target.value })}
+                  id="nickname"
+                  value={editingUser.nickname}
+                  onChange={(e) => setEditingUser(curr => curr ? { ...curr, nickname: e.target.value } : null)}
                 />
               </div>
               <div className="space-y-2">
@@ -296,40 +304,11 @@ export function UserManagement() {
                 <Input
                   id="email"
                   type="email"
-                  value={editingUser.email}
-                  onChange={(e) => setEditingUser({ ...editingUser, email: e.target.value })}
+                  value={editingUser.email || ''}
+                  onChange={(e) => setEditingUser(curr => curr ? { ...curr, email: e.target.value } : null)}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="userType">User Type</Label>
-                <Select
-                  value={editingUser.userType}
-                  onValueChange={(value: 'Normal' | 'VIP') => setEditingUser({ ...editingUser, userType: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Normal">Normal User</SelectItem>
-                    <SelectItem value="VIP">VIP User</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  value={editingUser.status}
-                  onValueChange={(value: 'Active' | 'Inactive') => setEditingUser({ ...editingUser, status: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              {/* Note: Modifying VIP/Status usually requires separate endpoints logic */}
             </div>
           )}
           <DialogFooter>
@@ -349,7 +328,7 @@ export function UserManagement() {
           <DialogHeader>
             <DialogTitle>Confirm Account Deactivation</DialogTitle>
             <DialogDescription>
-              Are you sure you want to deactivate user <span className="font-semibold text-gray-900">{userToDeactivate?.username}</span>?
+              Are you sure you want to deactivate user <span className="font-semibold text-gray-900">{userToDeactivate?.nickname}</span>?
               This action will prevent the user from logging into the system.
             </DialogDescription>
           </DialogHeader>
@@ -363,6 +342,6 @@ export function UserManagement() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </div>
+    </div >
   );
 }
