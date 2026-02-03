@@ -152,6 +152,13 @@ public class UserController {
         return ResponseMessage.success(userService.updateProfileAdmin(userId, request));
     }
 
+    @PutMapping("/api/v1/web/users/update/{userid}")
+    public ResponseMessage<UserProfileDto.UpdateProfileResponse> updateUserInfoAdmin(
+            @PathVariable String userid,
+            @RequestBody UserProfileDto.AdminUpdateUserInfoRequest request) {
+        return ResponseMessage.success(userService.updateUserInfoAdmin(userid, request));
+    }
+
     // --- Legacy / Compatibility ---
 
     /**

@@ -46,4 +46,7 @@ public interface UserInterface {
     UserProfileDto.UserDetailResponse getUserDetailAdmin(String userId); // For Admin viewing users (by UUID)
 
     com.example.EcoGo.model.User getUserDetailByUserid(String userid); // For Admin viewing users (by business UserID)
+
+    UserProfileDto.UpdateProfileResponse updateUserInfoAdmin(String userid,
+            UserProfileDto.AdminUpdateUserInfoRequest request);
 }

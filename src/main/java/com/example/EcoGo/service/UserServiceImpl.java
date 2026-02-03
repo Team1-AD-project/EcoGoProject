@@ -392,6 +392,38 @@ public class UserServiceImpl implements UserInterface {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
+    @Override
+    public UserProfileDto.UpdateProfileResponse updateUserInfoAdmin(String userid,
+            UserProfileDto.AdminUpdateUserInfoRequest request) {
+        if (userid == null || userid.trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "Target UserID cannot be empty");
+        }
+
+        User user = userRepository.findByUserid(userid)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        if (request.nickname != null) {
+            user.setNickname(request.nickname);
+        }
+        if (request.email != null) {
+            user.setEmail(request.email);
+        }
+        if (request.isVipActive != null) {
+            if (user.getVip() == null) {
+                user.setVip(new User.Vip());
+            }
+            user.getVip().setActive(request.isVipActive);
+        }
+        if (request.isDeactivated != null) {
+            user.setDeactivated(request.isDeactivated);
+        }
+
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        return new UserProfileDto.UpdateProfileResponse(user.getId(), user.getUpdatedAt());
+    }
+
     /**
      * Security Validation:
      * 1. Check if token is valid.
