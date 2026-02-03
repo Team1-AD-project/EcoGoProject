@@ -364,3 +364,13 @@ data class GreenSpot(
     val description: String,
     val collected: Boolean = false
 )
+
+// Home Banner (Simple version - Phase 1)
+data class HomeBanner(
+    val id: String,
+    val title: String,
+    val subtitle: String? = null,
+    val backgroundColor: String = "#15803D", // Primary green
+    val actionText: String? = null,
+    val actionTarget: String? = null // Navigation target: "challenges", "vouchers", etc.
+)

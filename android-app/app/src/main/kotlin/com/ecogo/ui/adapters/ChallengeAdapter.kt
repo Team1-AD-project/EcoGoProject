@@ -52,7 +52,7 @@ class ChallengeAdapter(
             title.text = challenge.title
             description.text = challenge.description
             
-            // 进度
+            // Progress
             val progressPercent = if (challenge.target > 0) {
                 ((challenge.current.toFloat() / challenge.target) * 100).toInt()
             } else 0
@@ -61,33 +61,33 @@ class ChallengeAdapter(
             progress.progress = challenge.current
             progressText.text = "${challenge.current} / ${challenge.target} (${progressPercent}%)"
             
-            // 奖励
-            reward.text = "+${challenge.reward} 积分"
+            // Reward
+            reward.text = "+${challenge.reward} points"
             
-            // 参与人数
-            participants.text = "${challenge.participants} 人参与"
+            // Participants
+            participants.text = "${challenge.participants} participants"
             
-            // 类型标签
+            // Type tag
             typeTag.text = when (challenge.type) {
-                "INDIVIDUAL" -> "个人"
-                "TEAM" -> "组队"
-                "FACULTY" -> "学院"
+                "INDIVIDUAL" -> "Individual"
+                "TEAM" -> "Team"
+                "FACULTY" -> "Faculty"
                 else -> challenge.type
             }
             
-            // 状态徽章
+            // Status badge
             when (challenge.status) {
                 "ACTIVE" -> {
                     statusBadge.visibility = View.GONE
                 }
                 "COMPLETED" -> {
                     statusBadge.visibility = View.VISIBLE
-                    statusBadge.text = "已完成"
+                    statusBadge.text = "Completed"
                     statusBadge.setBackgroundResource(R.drawable.badge_background)
                 }
                 "EXPIRED" -> {
                     statusBadge.visibility = View.VISIBLE
-                    statusBadge.text = "已过期"
+                    statusBadge.text = "Expired"
                 }
             }
         }

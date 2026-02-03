@@ -73,6 +73,29 @@
             app:destination="@id/checkInCalendarFragment" />
     </fragment>
 
+    <!-- Home V2 Fragment (with Banner feature) -->
+    <fragment
+        android:id="@+id/homeFragmentV2"
+        android:name="com.ecogo.ui.fragments.HomeFragmentV2"
+        android:label="Home V2"
+        tools:layout="@layout/fragment_home_v2">
+        <action
+            android:id="@+id/action_homeV2_to_routePlanner"
+            app:destination="@id/routePlannerFragment" />
+        <action
+            android:id="@+id/action_homeV2_to_activityDetail"
+            app:destination="@id/activityDetailFragment" />
+        <action
+            android:id="@+id/action_homeV2_to_voucher"
+            app:destination="@id/voucherFragment" />
+        <action
+            android:id="@+id/action_homeV2_to_challenges"
+            app:destination="@id/challengesFragment" />
+        <action
+            android:id="@+id/action_homeV2_to_checkInCalendar"
+            app:destination="@id/checkInCalendarFragment" />
+    </fragment>
+
     <fragment
         android:id="@+id/routesFragment"
         android:name="com.ecogo.ui.fragments.RoutesFragment"
@@ -126,10 +149,6 @@
         <action
             android:id="@+id/action_chat_to_routePlanner"
             app:destination="@id/routePlannerFragment" />
-        <!-- 临时禁用地图跳转 -->
-        <!-- <action
-            android:id="@+id/action_chat_to_mapGreenGo"
-            app:destination="@id/mapGreenGoFragment" /> -->
     </fragment>
 
     <fragment
@@ -169,6 +188,9 @@
         <action
             android:id="@+id/action_voucher_to_voucherDetail"
             app:destination="@id/voucherDetailFragment" />
+        <action
+            android:id="@+id/action_voucher_to_itemDetail"
+            app:destination="@id/itemDetailFragment" />
     </fragment>
 
     <fragment
@@ -206,32 +228,6 @@
             app:destination="@id/routePlannerFragment" />
     </fragment>
 
-    <!-- 临时禁用地图功能 -->
-    <!-- <fragment
-        android:id="@+id/mapFragment"
-        android:name="com.ecogo.ui.fragments.MapFragment"
-        android:label="Map"
-        tools:layout="@layout/fragment_map">
-        <action
-            android:id="@+id/action_map_to_routePlanner"
-            app:destination="@id/routePlannerFragment" />
-        <action
-            android:id="@+id/action_map_to_mapGreenGo"
-            app:destination="@id/mapGreenGoFragment" />
-    </fragment>
-
-    <fragment
-        android:id="@+id/mapGreenGoFragment"
-        android:name="com.ecogo.ui.fragments.MapGreenGoFragment"
-        android:label="Map Green Go"
-        tools:layout="@layout/fragment_map_green_go">
-        <action
-            android:id="@+id/action_mapGreenGo_to_routePlanner"
-            app:destination="@id/routePlannerFragment" />
-        <action
-            android:id="@+id/action_mapGreenGo_to_locationSearch"
-            app:destination="@id/locationSearchFragment" />
-    </fragment> -->
 
     <fragment
         android:id="@+id/friendsFragment"

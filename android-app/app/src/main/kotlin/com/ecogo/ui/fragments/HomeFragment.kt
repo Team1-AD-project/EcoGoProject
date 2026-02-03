@@ -144,7 +144,9 @@ class HomeFragment : Fragment() {
 
     private fun setupActions() {
         binding.buttonOpenMap.setOnClickListener {
-            findNavController().navigate(com.ecogo.R.id.mapFragment)
+            // 地图功能临时禁用
+            // findNavController().navigate(com.ecogo.R.id.mapFragment)
+            android.widget.Toast.makeText(requireContext(), "地图功能正在开发中", android.widget.Toast.LENGTH_SHORT).show()
         }
         binding.textViewAll.setOnClickListener {
             findNavController().navigate(com.ecogo.R.id.activitiesFragment)
@@ -182,7 +184,9 @@ class HomeFragment : Fragment() {
         
         // 地图预览卡片 -> 地图页（整个卡片可点击）
         binding.cardMap.setOnClickListener {
-            findNavController().navigate(com.ecogo.R.id.mapFragment)
+            // 地图功能临时禁用
+            // findNavController().navigate(com.ecogo.R.id.mapFragment)
+            android.widget.Toast.makeText(requireContext(), "地图功能正在开发中", android.widget.Toast.LENGTH_SHORT).show()
         }
         
         // === 新功能点击事件 ===

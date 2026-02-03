@@ -24,14 +24,14 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="返回"
+                android:contentDescription="Back"
                 android:src="@drawable/ic_close" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="兑换券详情"
+                android:text="Voucher Details"
                 android:textAlignment="center"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
@@ -94,7 +94,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="券码"
+                        android:text="Voucher Code"
                         android:textColor="@color/text_muted"
                         android:textSize="12sp" />
 
@@ -122,7 +122,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="有效期至：2026/03/31"
+                        android:text="Valid until: 2026/03/31"
                         android:textColor="@color/text_muted"
                         android:textSize="12sp" />
                 </LinearLayout>
@@ -147,7 +147,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="16dp"
-                        android:text="500 积分"
+                        android:text="500 Points"
                         android:textColor="@color/primary"
                         android:textSize="24sp"
                         android:textStyle="bold" />
@@ -156,7 +156,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="兑换所需"
+                        android:text="Required to Redeem"
                         android:textColor="@color/text_muted"
                         android:textSize="14sp" />
                 </LinearLayout>
@@ -181,7 +181,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="使用说明"
+                    android:text="Instructions"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -192,7 +192,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
                     android:lineSpacingExtra="4dp"
-                    android:text="使用说明将在这里显示"
+                    android:text="Instructions will be displayed here"
                     android:textColor="@color/text_muted"
                     android:textSize="14sp" />
             </LinearLayout>
@@ -215,7 +215,7 @@
                 android:id="@+id/btn_redeem"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="立即兑换"
+                android:text="Redeem Now"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/primary"
@@ -227,7 +227,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:enabled="false"
-                android:text="立即使用"
+                android:text="Use Now"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:visibility="gone"

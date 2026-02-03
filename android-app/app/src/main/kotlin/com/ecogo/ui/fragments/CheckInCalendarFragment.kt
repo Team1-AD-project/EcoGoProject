@@ -79,14 +79,14 @@ class CheckInCalendarFragment : Fragment() {
     }
     
     private fun updateMonthDisplay() {
-        val monthName = currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
+        val monthName = currentMonth.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH)
         binding.textMonthYear.text = "$monthName ${currentMonth.year}"
     }
     
     private fun buildCalendar() {
         binding.calendarGrid.removeAllViews()
         
-        // 添加星期标题行
+        // Add week header row
         val weekHeaderRow = android.widget.LinearLayout(requireContext()).apply {
             orientation = android.widget.LinearLayout.HORIZONTAL
             layoutParams = android.widget.LinearLayout.LayoutParams(
@@ -95,7 +95,7 @@ class CheckInCalendarFragment : Fragment() {
             )
         }
         
-        val weekDays = arrayOf("一", "二", "三", "四", "五", "六", "日")
+        val weekDays = arrayOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
         weekDays.forEach { day ->
             val dayView = TextView(requireContext()).apply {
                 text = day
@@ -119,7 +119,7 @@ class CheckInCalendarFragment : Fragment() {
         var currentRow: android.widget.LinearLayout? = null
         var dayInWeek = 0
         
-        // 添加空白占位符
+        // Add empty placeholders
         repeat(dayOfWeek - 1) {
             if (dayInWeek == 0) {
                 currentRow = createWeekRow()
@@ -132,7 +132,7 @@ class CheckInCalendarFragment : Fragment() {
             dayInWeek++
         }
         
-        // 添加日期
+        // Add dates
         val daysInMonth = currentMonth.lengthOfMonth()
         for (day in 1..daysInMonth) {
             if (dayInWeek == 0) {
@@ -150,7 +150,7 @@ class CheckInCalendarFragment : Fragment() {
             }
         }
         
-        // 填充剩余空白
+        // Fill remaining empty cells
         if (dayInWeek > 0) {
             repeat(7 - dayInWeek) {
                 val emptyView = View(requireContext()).apply {
@@ -188,19 +188,19 @@ class CheckInCalendarFragment : Fragment() {
             textDay.setTypeface(null, android.graphics.Typeface.BOLD)
         }
         
-        // 已签到日期
+        // Checked-in dates
         if (checkedInDates.contains(date)) {
             iconCheck.visibility = View.VISIBLE
             textDay.setTextColor(ContextCompat.getColor(requireContext(), R.color.text_white))
             dayView.setBackgroundResource(R.drawable.bg_calendar_checked)
         }
         
-        // 选中日期
+        // Selected date
         if (date == selectedDate) {
             viewSelected.visibility = View.VISIBLE
         }
         
-        // 未来日期禁用
+        // Disable future dates
         if (date.isAfter(today)) {
             textDay.alpha = 0.3f
             dayView.isEnabled = false
@@ -223,8 +223,8 @@ class CheckInCalendarFragment : Fragment() {
         val isCheckedIn = checkedInDates.contains(date)
         if (isCheckedIn) {
             binding.layoutDateInfo.visibility = View.VISIBLE
-            binding.textSelectedDate.text = "${date.month.getDisplayName(TextStyle.FULL, Locale.getDefault())} ${date.dayOfMonth}日"
-            binding.textCheckInInfo.text = "已签到 · 获得 10 积分"
+            binding.textSelectedDate.text = "${date.month.getDisplayName(TextStyle.FULL, Locale.ENGLISH)} ${date.dayOfMonth}"
+            binding.textCheckInInfo.text = "Checked In · Earned 10 points"
             binding.buttonCheckIn.visibility = View.GONE
         } else {
             binding.layoutDateInfo.visibility = View.GONE
@@ -242,7 +242,7 @@ class CheckInCalendarFragment : Fragment() {
                         val date = LocalDate.parse(record.checkInDate)
                         checkedInDates.add(date)
                     } catch (e: Exception) {
-                        // 忽略解析错误
+                        // Ignore parse errors
                     }
                 }
                 buildCalendar()
@@ -255,7 +255,7 @@ class CheckInCalendarFragment : Fragment() {
                 totalCheckIns = checkedInDates.size
                 updateStats()
                 
-                // 检查今天是否已签到
+                // Check if already checked in today
                 val today = LocalDate.now()
                 val isCheckedInToday = status.lastCheckInDate == today.toString()
                 
@@ -276,7 +276,7 @@ class CheckInCalendarFragment : Fragment() {
         binding.textConsecutiveDays.text = "$consecutiveDays"
         binding.textTotalCheckIns.text = "$totalCheckIns"
         
-        // 计算本月签到次数
+        // Calculate this month's check-ins
         val thisMonthCheckIns = checkedInDates.count { 
             YearMonth.from(it) == currentMonth 
         }
@@ -291,7 +291,7 @@ class CheckInCalendarFragment : Fragment() {
                 val today = LocalDate.now()
                 checkedInDates.add(today)
                 
-                // 更新统计
+                // Update statistics
                 consecutiveDays = response.consecutiveDays
                 totalCheckIns = checkedInDates.size
                 updateStats()
@@ -299,11 +299,11 @@ class CheckInCalendarFragment : Fragment() {
                 // 刷新日历
                 buildCalendar()
                 
-                // 显示成功动画
+                // Show success animation
                 showCheckInSuccess(response.pointsEarned)
                 
-                // 禁用按钮
-                binding.buttonCheckIn.text = "今日已签到"
+                // Disable button
+                binding.buttonCheckIn.text = "Checked In Today"
                 binding.buttonCheckIn.isEnabled = false
                 binding.buttonCheckIn.alpha = 0.6f
             }
@@ -312,12 +312,12 @@ class CheckInCalendarFragment : Fragment() {
     
     private fun showCheckInSuccess(points: Int) {
         binding.layoutSuccess.visibility = View.VISIBLE
-        binding.textSuccessMessage.text = "签到成功！获得 $points 积分"
+        binding.textSuccessMessage.text = "Check-in successful! Earned $points points"
         
         val popIn = AnimationUtils.loadAnimation(requireContext(), R.anim.pop_in)
         binding.layoutSuccess.startAnimation(popIn)
         
-        // 3秒后自动隐藏
+        // Auto hide after 3 seconds
         binding.layoutSuccess.postDelayed({
             binding.layoutSuccess.visibility = View.GONE
         }, 3000)

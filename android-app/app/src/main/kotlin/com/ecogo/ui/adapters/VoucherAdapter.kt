@@ -39,32 +39,60 @@ class VoucherAdapter(
         private val icon: TextView = itemView.findViewById(R.id.text_icon)
         private val name: TextView = itemView.findViewById(R.id.text_name)
         private val description: TextView = itemView.findViewById(R.id.text_description)
+        private val cost: TextView = itemView.findViewById(R.id.text_cost)
         private val button: com.google.android.material.button.MaterialButton = itemView.findViewById(R.id.button_redeem)
+        private val statusChip: com.google.android.material.chip.Chip = itemView.findViewById(R.id.chip_status)
         
         fun bind(voucher: Voucher) {
             name.text = voucher.name
             description.text = voucher.description
-            button.text = "${voucher.cost} pts"
+            cost.text = voucher.cost.toString()
+            button.text = if (voucher.available) "Redeem" else "Sold Out"
             button.isEnabled = voucher.available
             
+            // Set icon
             icon.text = when {
                 voucher.name.contains("Starbucks", ignoreCase = true) -> "☕"
                 voucher.name.contains("Subway", ignoreCase = true) -> "🥪"
                 voucher.name.contains("Canteen", ignoreCase = true) -> "🍲"
                 voucher.name.contains("Tea", ignoreCase = true) -> "🧋"
+                voucher.name.contains("咖啡", ignoreCase = true) -> "☕"
+                voucher.name.contains("食堂", ignoreCase = true) -> "🍲"
                 else -> "🎁"
             }
             
+            // Set icon background color
             val iconColor = try {
-                if (voucher.name.contains("Starbucks")) android.graphics.Color.parseColor("#00704A")
-                else if (voucher.name.contains("Subway")) android.graphics.Color.parseColor("#FFC72C")
-                else if (voucher.name.contains("Canteen")) android.graphics.Color.parseColor("#F97316")
-                else if (voucher.name.contains("Tea")) android.graphics.Color.parseColor("#DC2626")
-                else android.graphics.Color.parseColor("#15803D")
+                when {
+                    voucher.name.contains("Starbucks", ignoreCase = true) -> 
+                        android.graphics.Color.parseColor("#00704A")
+                    voucher.name.contains("Subway", ignoreCase = true) -> 
+                        android.graphics.Color.parseColor("#FFC72C")
+                    voucher.name.contains("Canteen", ignoreCase = true) || 
+                    voucher.name.contains("食堂", ignoreCase = true) -> 
+                        android.graphics.Color.parseColor("#F97316")
+                    voucher.name.contains("Tea", ignoreCase = true) -> 
+                        android.graphics.Color.parseColor("#DC2626")
+                    else -> android.graphics.Color.parseColor("#15803D")
+                }
             } catch (e: Exception) {
                 itemView.context.getColor(com.ecogo.R.color.primary)
             }
-            icon.setBackgroundColor(iconColor)
+            
+            // 使用cardBackgroundColor而不是直接设置background
+            try {
+                (itemView.findViewById<View>(R.id.card_icon) as? com.google.android.material.card.MaterialCardView)?.setCardBackgroundColor(iconColor)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            
+            // Show popular badge for lower point coupons
+            if (voucher.cost < 600 && voucher.available) {
+                statusChip.visibility = View.VISIBLE
+                statusChip.text = "Popular"
+            } else {
+                statusChip.visibility = View.GONE
+            }
             
             itemView.alpha = if (voucher.available) 1.0f else 0.6f
         }

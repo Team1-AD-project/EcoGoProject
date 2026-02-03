@@ -6,14 +6,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.ecogo.data.MockData
-import com.ecogo.data.Voucher
+import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.ecogo.databinding.FragmentVoucherBinding
-import com.ecogo.ui.adapters.VoucherAdapter
 import com.ecogo.repository.EcoGoRepository
-import com.google.android.material.tabs.TabLayout
+import com.google.android.material.tabs.TabLayoutMediator
 import kotlinx.coroutines.launch
 
 class VoucherFragment : Fragment() {
@@ -34,47 +30,55 @@ class VoucherFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        setupTabs()
-        setupRecyclerView()
-        loadVouchers()
+        setupUserPoints()
+        setupViewPager()
     }
     
-    private fun setupTabs() {
-        // Tab layout不存在于当前布局中，暂时移除
-        // TODO: 如果需要标签页功能，请在布局中添加TabLayout
-    }
-    
-    private fun setupRecyclerView() {
-        binding.recyclerVouchers.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = VoucherAdapter(emptyList()) { voucher ->
-                // 点击券跳转到详情页
-                val action = VoucherFragmentDirections
-                    .actionVoucherToVoucherDetail(voucherId = voucher.id)
-                findNavController().navigate(action)
-            }
-        }
-    }
-
-    private fun loadVouchers(tab: String = "marketplace") {
+    private fun setupUserPoints() {
+        // 从Repository加载用户积分
         viewLifecycleOwner.lifecycleScope.launch {
-            val allVouchers = repository.getVouchers().getOrElse { MockData.VOUCHERS }
-            
-            // 根据Tab过滤（简化版，实际应该从API获取不同数据）
-            val vouchers = when (tab) {
-                "my_vouchers" -> {
-                    // 模拟"我的券包"，只显示部分
-                    allVouchers.filter { voucher -> voucher.available }
-                }
-                else -> allVouchers
+            try {
+                // TODO: Fetch user points from API
+                val userPoints = 1250 // Sample data
+                binding.textUserPoints.text = String.format("%,d", userPoints)
+            } catch (e: Exception) {
+                binding.textUserPoints.text = "0"
             }
-            
-            (binding.recyclerVouchers.adapter as? VoucherAdapter)?.updateVouchers(vouchers)
         }
+    }
+    
+    private fun setupViewPager() {
+        // 设置ViewPager适配器
+        val adapter = VoucherPagerAdapter(this)
+        binding.viewPager.adapter = adapter
+        
+        // 连接TabLayout和ViewPager2
+        TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
+            tab.text = when (position) {
+                0 -> "🛍️ Shop"
+                1 -> "🎫 Coupons"
+                else -> ""
+            }
+        }.attach()
     }
     
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+    
+    /**
+     * ViewPager2 适配器
+     */
+    private inner class VoucherPagerAdapter(fragment: Fragment) : FragmentStateAdapter(fragment) {
+        override fun getItemCount(): Int = 2
+        
+        override fun createFragment(position: Int): Fragment {
+            return when (position) {
+                0 -> VoucherGoodsFragment()
+                1 -> VoucherCouponsFragment()
+                else -> VoucherGoodsFragment()
+            }
+        }
     }
 }

@@ -19,6 +19,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         
         setupNavigation()
+        setupVersionToggle()
     }
     
     private fun setupNavigation() {
@@ -43,5 +44,41 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+    
+    /**
+     * Developer option: Long-press bottom navigation to toggle between Home V1 and V2
+     */
+    private fun setupVersionToggle() {
+        binding.bottomNavigation.setOnLongClickListener {
+            toggleHomeVersion()
+            true
+        }
+    }
+    
+    private fun toggleHomeVersion() {
+        val prefs = getSharedPreferences("ecogo_prefs", MODE_PRIVATE)
+        val useV2 = prefs.getBoolean("use_home_v2", false)
+        prefs.edit().putBoolean("use_home_v2", !useV2).apply()
+        
+        val message = if (!useV2) {
+            "Switched to Home V2 (with Banner) ✨\nRestart to see changes"
+        } else {
+            "Switched to Home V1 (original) 📱\nRestart to see changes"
+        }
+        
+        android.widget.Toast.makeText(this, message, android.widget.Toast.LENGTH_LONG).show()
+        
+        // Optional: Restart activity to apply changes immediately
+        // recreate()
+    }
+    
+    /**
+     * Get the current home fragment destination based on user preference
+     */
+    fun getHomeDestination(): Int {
+        val prefs = getSharedPreferences("ecogo_prefs", MODE_PRIVATE)
+        val useV2 = prefs.getBoolean("use_home_v2", false)
+        return if (useV2) R.id.homeFragmentV2 else R.id.homeFragment
     }
 }

@@ -19,8 +19,8 @@ import com.ecogo.ui.dialogs.AchievementUnlockDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
- * 挑战详情页面
- * 显示挑战规则、进度、排行榜等
+ * Challenge Detail Page
+ * Display challenge rules, progress, leaderboard, etc.
  */
 class ChallengeDetailFragment : Fragment() {
 
@@ -79,10 +79,10 @@ class ChallengeDetailFragment : Fragment() {
         }
         
         binding.btnShare.setOnClickListener {
-            // TODO: 分享功能（将在阶段三实现）
+            // TODO: Share functionality (to be implemented in phase 3)
             android.widget.Toast.makeText(
                 requireContext(),
-                "分享功能将在后续版本实现",
+                "Share functionality coming soon",
                 android.widget.Toast.LENGTH_SHORT
             ).show()
         }
@@ -93,29 +93,29 @@ class ChallengeDetailFragment : Fragment() {
         
         if (challenge == null) {
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("错误")
-                .setMessage("找不到该挑战")
-                .setPositiveButton("确定") { _, _ ->
+                .setTitle("Error")
+                .setMessage("Challenge not found")
+                .setPositiveButton("OK") { _, _ ->
                     findNavController().navigateUp()
                 }
                 .show()
             return
         }
         
-        // 显示挑战信息
+        // Display challenge information
         binding.textTitle.text = challenge.title
         binding.textIcon.text = challenge.icon
         binding.textDescription.text = challenge.description
         
-        // 类型
+        // Type
         binding.textType.text = when (challenge.type) {
-            "INDIVIDUAL" -> "个人挑战"
-            "TEAM" -> "组队挑战"
-            "FACULTY" -> "学院挑战"
+            "INDIVIDUAL" -> "Individual Challenge"
+            "TEAM" -> "Team Challenge"
+            "FACULTY" -> "Faculty Challenge"
             else -> challenge.type
         }
         
-        // 进度
+        // Progress
         val progressPercent = if (challenge.target > 0) {
             ((challenge.current.toFloat() / challenge.target) * 100).toInt()
         } else 0
@@ -125,22 +125,22 @@ class ChallengeDetailFragment : Fragment() {
         binding.textProgress.text = "${challenge.current} / ${challenge.target}"
         binding.textProgressPercent.text = "$progressPercent%"
         
-        // 奖励
-        binding.textReward.text = "+${challenge.reward} 积分"
+        // Reward
+        binding.textReward.text = "+${challenge.reward} points"
         if (challenge.badge != null) {
             binding.textBadgeReward.visibility = View.VISIBLE
-            binding.textBadgeReward.text = "解锁成就徽章"
+            binding.textBadgeReward.text = "Unlock Achievement Badge"
         } else {
             binding.textBadgeReward.visibility = View.GONE
         }
         
-        // 时间
+        // Time
         binding.textEndTime.text = challenge.endTime.substring(0, 10).replace("-", "/")
         
-        // 参与人数
-        binding.textParticipants.text = "${challenge.participants} 人"
+        // Participants
+        binding.textParticipants.text = "${challenge.participants} people"
         
-        // 排行榜（简化版，使用topUsers）
+        // Leaderboard (simplified version, using topUsers)
         if (challenge.topUsers.isNotEmpty()) {
             val rankings = challenge.topUsers.mapIndexed { index, user ->
                 com.ecogo.data.Ranking(
@@ -162,7 +162,7 @@ class ChallengeDetailFragment : Fragment() {
             binding.emptyLeaderboard.visibility = View.VISIBLE
         }
         
-        // 更新按钮状态
+        // Update button state
         updateButtonState(challenge.status)
     }
     
@@ -170,20 +170,20 @@ class ChallengeDetailFragment : Fragment() {
         when (status) {
             "ACTIVE" -> {
                 if (isAccepted) {
-                    binding.btnAccept.text = "继续努力"
+                    binding.btnAccept.text = "Keep Going"
                     binding.btnAccept.setIconResource(R.drawable.ic_check)
                 } else {
-                    binding.btnAccept.text = "接受挑战"
+                    binding.btnAccept.text = "Accept Challenge"
                     binding.btnAccept.icon = null
                 }
                 binding.btnAccept.isEnabled = true
             }
             "COMPLETED" -> {
-                binding.btnAccept.text = "挑战已完成"
+                binding.btnAccept.text = "Challenge Completed"
                 binding.btnAccept.isEnabled = false
             }
             "EXPIRED" -> {
-                binding.btnAccept.text = "挑战已过期"
+                binding.btnAccept.text = "Challenge Expired"
                 binding.btnAccept.isEnabled = false
             }
         }
@@ -192,22 +192,22 @@ class ChallengeDetailFragment : Fragment() {
     private fun acceptChallenge() {
         if (!isAccepted) {
             isAccepted = true
-            binding.btnAccept.text = "继续努力"
+            binding.btnAccept.text = "Keep Going"
             binding.btnAccept.setIconResource(R.drawable.ic_check)
             
-            // 小狮子跳跃动画
+            // Mascot celebration animation
             binding.mascotCheer.celebrateAnimation()
             
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("成功")
-                .setMessage("你已接受挑战！加油完成吧！")
-                .setPositiveButton("好的", null)
+                .setTitle("Success")
+                .setMessage("Challenge accepted! Let's complete it!")
+                .setPositiveButton("OK", null)
                 .show()
         } else {
-            // 如果已经完成了挑战
+            // If challenge is already completed
             val challenge = MockData.CHALLENGES.find { it.id == challengeId }
             if (challenge != null && challenge.current >= challenge.target) {
-                // 显示成就解锁对话框
+                // Show achievement unlock dialog
                 if (challenge.badge != null) {
                     val achievement = MockData.ACHIEVEMENTS.find { it.id == challenge.badge }
                     achievement?.let {

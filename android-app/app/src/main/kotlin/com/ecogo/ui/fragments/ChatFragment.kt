@@ -27,27 +27,54 @@ class ChatFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        // #region agent log
+        try { java.io.File("c:\\Users\\csls\\Desktop\\ad-ui\\.cursor\\debug.log").appendText("{\"location\":\"ChatFragment.kt:30\",\"message\":\"onCreateView started\",\"data\":{},\"timestamp\":${System.currentTimeMillis()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"C\"}\n") } catch(e: Exception) {}
+        // #endregion
         _binding = FragmentChatBinding.inflate(inflater, container, false)
+        // #region agent log
+        try { java.io.File("c:\\Users\\csls\\Desktop\\ad-ui\\.cursor\\debug.log").appendText("{\"location\":\"ChatFragment.kt:34\",\"message\":\"ViewBinding inflated successfully\",\"data\":{},\"timestamp\":${System.currentTimeMillis()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"C\"}\n") } catch(e: Exception) {}
+        // #endregion
         return binding.root
     }
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        // #region agent log
+        try { java.io.File("c:\\Users\\csls\\Desktop\\ad-ui\\.cursor\\debug.log").appendText("{\"location\":\"ChatFragment.kt:40\",\"message\":\"onViewCreated started\",\"data\":{},\"timestamp\":${System.currentTimeMillis()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"ALL\"}\n") } catch(e: Exception) {}
+        // #endregion
         
         setupRecyclerView()
+        // #region agent log
+        try { java.io.File("c:\\Users\\csls\\Desktop\\ad-ui\\.cursor\\debug.log").appendText("{\"location\":\"ChatFragment.kt:46\",\"message\":\"setupRecyclerView completed\",\"data\":{},\"timestamp\":${System.currentTimeMillis()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"D\"}\n") } catch(e: Exception) {}
+        // #endregion
         setupButtons()
+        // #region agent log
+        try { java.io.File("c:\\Users\\csls\\Desktop\\ad-ui\\.cursor\\debug.log").appendText("{\"location\":\"ChatFragment.kt:51\",\"message\":\"setupButtons completed\",\"data\":{},\"timestamp\":${System.currentTimeMillis()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"ALL\"}\n") } catch(e: Exception) {}
+        // #endregion
         setupAnimations()
+        // #region agent log
+        try { java.io.File("c:\\Users\\csls\\Desktop\\ad-ui\\.cursor\\debug.log").appendText("{\"location\":\"ChatFragment.kt:56\",\"message\":\"setupAnimations completed\",\"data\":{},\"timestamp\":${System.currentTimeMillis()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"B\"}\n") } catch(e: Exception) {}
+        // #endregion
     }
     
     private fun setupRecyclerView() {
+        // #region agent log
+        try { java.io.File("c:\\Users\\csls\\Desktop\\ad-ui\\.cursor\\debug.log").appendText("{\"location\":\"ChatFragment.kt:60\",\"message\":\"setupRecyclerView: before adapter creation\",\"data\":{},\"timestamp\":${System.currentTimeMillis()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"D\"}\n") } catch(e: Exception) {}
+        // #endregion
         adapter = ChatMessageAdapter(mutableListOf(
             ChatMessageAdapter.ChatMessage("Hi! I'm LiNUS, your campus assistant. How can I help you today?", false)
         ))
+        // #region agent log
+        try { java.io.File("c:\\Users\\csls\\Desktop\\ad-ui\\.cursor\\debug.log").appendText("{\"location\":\"ChatFragment.kt:66\",\"message\":\"setupRecyclerView: adapter created\",\"data\":{},\"timestamp\":${System.currentTimeMillis()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"D\"}\n") } catch(e: Exception) {}
+        // #endregion
         
         binding.recyclerChat.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = this@ChatFragment.adapter
         }
+        // #region agent log
+        try { java.io.File("c:\\Users\\csls\\Desktop\\ad-ui\\.cursor\\debug.log").appendText("{\"location\":\"ChatFragment.kt:73\",\"message\":\"setupRecyclerView: RecyclerView configured\",\"data\":{},\"timestamp\":${System.currentTimeMillis()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"D\"}\n") } catch(e: Exception) {}
+        // #endregion
     }
     
     private fun setupButtons() {
@@ -94,20 +121,30 @@ class ChatFragment : Fragment() {
             }
             lowerMessage.contains("map") || lowerMessage.contains("地图") || lowerMessage.contains("位置") ||
             lowerMessage.contains("green go") || lowerMessage.contains("spot") -> {
-                android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
-                    findNavController()
-                        .navigate(com.ecogo.R.id.action_chat_to_mapGreenGo)
-                }, 1500)
-                "我来带你查看校园绿色点位地图！"
+                // 地图功能临时禁用
+                // android.os.Handler(android.os.Looper.getMainLooper()).postDelayed({
+                //     findNavController()
+                //         .navigate(com.ecogo.R.id.action_chat_to_mapGreenGo)
+                // }, 1500)
+                "地图功能正在开发中，敬请期待！"
             }
             else -> "I'm currently a demo version. In a real app, I would respond to: '$message'"
         }
     }
 
     private fun setupAnimations() {
+        // #region agent log
+        try { java.io.File("c:\\Users\\csls\\Desktop\\ad-ui\\.cursor\\debug.log").appendText("{\"location\":\"ChatFragment.kt:130\",\"message\":\"setupAnimations: before loading animation\",\"data\":{},\"timestamp\":${System.currentTimeMillis()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"B\"}\n") } catch(e: Exception) {}
+        // #endregion
         val slideUp = AnimationUtils.loadAnimation(requireContext(), com.ecogo.R.anim.slide_up)
+        // #region agent log
+        try { java.io.File("c:\\Users\\csls\\Desktop\\ad-ui\\.cursor\\debug.log").appendText("{\"location\":\"ChatFragment.kt:135\",\"message\":\"setupAnimations: animation loaded\",\"data\":{},\"timestamp\":${System.currentTimeMillis()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"B\"}\n") } catch(e: Exception) {}
+        // #endregion
         binding.recyclerChat.startAnimation(slideUp)
         binding.inputContainer.startAnimation(slideUp)
+        // #region agent log
+        try { java.io.File("c:\\Users\\csls\\Desktop\\ad-ui\\.cursor\\debug.log").appendText("{\"location\":\"ChatFragment.kt:141\",\"message\":\"setupAnimations: animations started\",\"data\":{},\"timestamp\":${System.currentTimeMillis()},\"sessionId\":\"debug-session\",\"hypothesisId\":\"B\"}\n") } catch(e: Exception) {}
+        // #endregion
     }
     
     override fun onDestroyView() {

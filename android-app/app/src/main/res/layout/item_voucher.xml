@@ -5,65 +5,132 @@
     android:layout_height="wrap_content"
     android:layout_marginBottom="12dp"
     app:cardCornerRadius="16dp"
-    app:cardElevation="1dp">
+    app:cardElevation="2dp"
+    app:strokeColor="#E0E0E0"
+    app:strokeWidth="0.5dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
         android:padding="16dp">
 
-        <TextView
-            android:id="@+id/text_icon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:gravity="center"
-            android:text="☕"
-            android:textSize="24sp" />
+        <!-- 左侧品牌图标区域 -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_icon"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            app:cardCornerRadius="12dp"
+            app:cardElevation="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-        <View
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:layout_marginStart="-48dp"
-            android:alpha="0.15"
-            android:background="@drawable/badge_background" />
+            <TextView
+                android:id="@+id/text_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="☕"
+                android:textSize="32sp" />
+        </com.google.android.material.card.MaterialCardView>
 
+        <!-- 优惠券信息区域 -->
         <LinearLayout
+            android:id="@+id/layout_info"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:layout_marginStart="12dp"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="@id/card_icon"
+            app:layout_constraintEnd_toStartOf="@id/layout_price"
+            app:layout_constraintStart_toEndOf="@id/card_icon"
+            app:layout_constraintTop_toTopOf="@id/card_icon">
 
             <TextView
                 android:id="@+id/text_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-medium"
+                android:maxLines="1"
                 android:text="$10 Starbucks"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp" />
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/text_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="4dp"
+                android:ellipsize="end"
+                android:maxLines="2"
                 android:text="Valid at UTown &amp; Frontier"
                 android:textColor="@color/text_secondary"
-                android:textSize="11sp" />
+                android:textSize="13sp" />
         </LinearLayout>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/button_redeem"
+        <!-- 价格和按钮区域 -->
+        <LinearLayout
+            android:id="@+id/layout_price"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="1000 pts"
-            android:textAllCaps="false"
-            android:textSize="12sp"
-            app:backgroundTint="@color/primary"
-            app:cornerRadius="20dp" />
-    </LinearLayout>
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical"
+            app:layout_constraintBottom_toBottomOf="@id/card_icon"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/card_icon">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⭐"
+                    android:textSize="16sp" />
+
+                <TextView
+                    android:id="@+id/text_cost"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="sans-serif-medium"
+                    android:text="500"
+                    android:textColor="@color/primary"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_redeem"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginTop="4dp"
+                android:fontFamily="sans-serif-medium"
+                android:minWidth="80dp"
+                android:paddingHorizontal="12dp"
+                android:text="Redeem"
+                android:textAllCaps="false"
+                android:textSize="13sp"
+                app:backgroundTint="@color/primary"
+                app:cornerRadius="18dp" />
+        </LinearLayout>
+
+        <!-- 优惠券状态标签（可选） -->
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:checkable="false"
+            android:text="Popular"
+            android:textSize="10sp"
+            android:visibility="gone"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+            app:chipMinHeight="20dp"
+            app:layout_constraintStart_toStartOf="@id/card_icon"
+            app:layout_constraintTop_toBottomOf="@id/card_icon" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

@@ -1172,4 +1172,32 @@ object MockData {
             likes = 9
         )
     )
+    
+    // Home Banners (Phase 1 - Simple)
+    val HOME_BANNERS = listOf(
+        HomeBanner(
+            id = "banner_1",
+            title = "New Challenge Available!",
+            subtitle = "Complete 10K steps today",
+            backgroundColor = "#15803D",
+            actionText = "View",
+            actionTarget = "challenges"
+        ),
+        HomeBanner(
+            id = "banner_2",
+            title = "Limited Time Offer",
+            subtitle = "50% off selected vouchers",
+            backgroundColor = "#F97316",
+            actionText = "Shop Now",
+            actionTarget = "vouchers"
+        ),
+        HomeBanner(
+            id = "banner_3",
+            title = "Welcome to EcoGo!",
+            subtitle = "Start your eco-friendly journey today",
+            backgroundColor = "#3B82F6",
+            actionText = null,
+            actionTarget = null
+        )
+    )
 }

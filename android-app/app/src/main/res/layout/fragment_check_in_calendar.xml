@@ -18,7 +18,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="@color/primary_light"
             app:navigationIcon="@drawable/ic_back"
-            app:title="每日签到"
+            app:title="Daily Check-In"
             app:titleTextColor="@color/text_primary" />
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -73,7 +73,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:alpha="0.9"
-                            android:text="连续签到"
+                            android:text="Consecutive"
                             android:textColor="@color/text_white"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -109,7 +109,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:alpha="0.9"
-                            android:text="累计签到"
+                            android:text="Total"
                             android:textColor="@color/text_white"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -145,7 +145,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
                             android:alpha="0.9"
-                            android:text="本月签到"
+                            android:text="This Month"
                             android:textColor="@color/text_white"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -180,7 +180,7 @@
                             android:layout_width="36dp"
                             android:layout_height="36dp"
                             android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="上个月"
+                            android:contentDescription="Previous Month"
                             android:padding="8dp"
                             android:src="@drawable/ic_back"
                             app:tint="@color/text_secondary" />
@@ -202,7 +202,7 @@
                             android:layout_width="36dp"
                             android:layout_height="36dp"
                             android:background="?attr/selectableItemBackgroundBorderless"
-                            android:contentDescription="下个月"
+                            android:contentDescription="Next Month"
                             android:padding="8dp"
                             android:rotation="180"
                             android:src="@drawable/ic_back"
@@ -259,10 +259,10 @@
                         android:id="@+id/text_check_in_info"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="已签到 · 获得 10 积分"
+                        android:text="Checked In · Earned 10 points"
                         android:textColor="@color/primary"
                         android:textSize="13sp"
-                        tools:text="已签到 · 获得 10 积分" />
+                        tools:text="Checked In · Earned 10 points" />
                 </LinearLayout>
             </LinearLayout>
 
@@ -272,7 +272,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="24dp"
-                android:text="立即签到"
+                android:text="Check In Now"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/primary"
@@ -299,7 +299,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="签到规则"
+                        android:text="Check-In Rules"
                         android:textColor="@color/text_primary"
                         android:textSize="14sp"
                         android:textStyle="bold" />
@@ -309,7 +309,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:lineSpacingExtra="4dp"
-                        android:text="• 每日签到可获得 10 积分\n• 连续签到 7 天额外奖励 50 积分\n• 连续签到 30 天额外奖励 200 积分\n• 每月全勤可获得专属徽章"
+                        android:text="• Daily check-in earns 10 points\n• 7 consecutive days bonus: 50 points\n• 30 consecutive days bonus: 200 points\n• Monthly perfect attendance earns exclusive badge"
                         android:textColor="@color/text_secondary"
                         android:textSize="13sp" />
                 </LinearLayout>
@@ -349,18 +349,18 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_weight="1"
-                android:text="签到成功！获得 10 积分"
+                android:text="Check-in successful! Earned 10 points"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
                 android:textStyle="bold"
-                tools:text="签到成功！获得 10 积分" />
+                tools:text="Check-in successful! Earned 10 points" />
 
             <ImageButton
                 android:id="@+id/button_close_success"
                 android:layout_width="32dp"
                 android:layout_height="32dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="关闭"
+                android:contentDescription="Close"
                 android:padding="4dp"
                 android:src="@drawable/ic_close"
                 app:tint="@color/text_secondary" />

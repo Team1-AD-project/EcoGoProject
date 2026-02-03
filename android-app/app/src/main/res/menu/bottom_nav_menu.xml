@@ -1,14 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/homeFragment"
+        android:id="@+id/homeFragmentV2"
         android:icon="@drawable/ic_navigation"
         android:title="@string/nav_home" />
-    <!-- 临时禁用地图按钮 -->
-    <!-- <item
-        android:id="@+id/mapGreenGoFragment"
-        android:icon="@drawable/ic_map_pin"
-        android:title="@string/nav_green_go" /> -->
     <item
         android:id="@+id/routesFragment"
         android:icon="@drawable/ic_route"

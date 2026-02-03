@@ -16,8 +16,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import java.util.UUID
 
 /**
- * 兑换券详情页面
- * 显示券码、二维码、使用说明等
+ * Voucher Detail Page
+ * Display voucher code, QR code, instructions, etc.
  */
 class VoucherDetailFragment : Fragment() {
 
@@ -66,38 +66,38 @@ class VoucherDetailFragment : Fragment() {
         
         if (voucher == null) {
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("错误")
-                .setMessage("找不到该兑换券")
-                .setPositiveButton("确定") { _, _ ->
+                .setTitle("Error")
+                .setMessage("Voucher not found")
+                .setPositiveButton("OK") { _, _ ->
                     findNavController().navigateUp()
                 }
                 .show()
             return
         }
         
-        // 显示券信息
+        // Display voucher information
         binding.textName.text = voucher.name
         binding.textDescription.text = voucher.description
-        binding.textCost.text = "${voucher.cost} 积分"
+        binding.textCost.text = "${voucher.cost} Points"
         
-        // 生成券码（模拟）
+        // Generate voucher code (mock)
         val code = generateVoucherCode()
         binding.textVoucherCode.text = code
         
-        // 设置到期时间（模拟）
+        // Set expiry date (mock)
         val expiryDate = "2026/03/31"
-        binding.textExpiry.text = "有效期至：$expiryDate"
+        binding.textExpiry.text = "Valid until: $expiryDate"
         
-        // 使用说明
+        // Instructions
         binding.textInstructions.text = """
-            使用说明：
-            1. 出示此券码给商家
-            2. 商家确认后即可享受优惠
-            3. 每张券仅限使用一次
-            4. 过期后自动失效
+            Instructions:
+            1. Show this code to the merchant
+            2. Enjoy your discount after verification
+            3. Each voucher can only be used once
+            4. Expires automatically after expiry date
         """.trimIndent()
         
-        // 根据是否已兑换显示不同UI
+        // Update UI based on redemption status
         updateUIForRedeemStatus(isRedeemed)
     }
     
@@ -114,32 +114,32 @@ class VoucherDetailFragment : Fragment() {
     }
     
     private fun generateVoucherCode(): String {
-        // 生成随机券码
+        // Generate random voucher code
         val uuid = UUID.randomUUID().toString().take(12).uppercase()
         return uuid.chunked(4).joinToString("-")
     }
     
     private fun redeemVoucher() {
-        // 显示兑换确认对话框
+        // Show redemption confirmation dialog
         val voucher = MockData.VOUCHERS.find { it.id == voucherId }
         voucher?.let {
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("兑换确认")
-                .setMessage("确定要使用 ${it.cost} 积分兑换此券吗？")
-                .setPositiveButton("确定") { _, _ ->
+                .setTitle("Confirm Redemption")
+                .setMessage("Are you sure you want to redeem this voucher for ${it.cost} points?")
+                .setPositiveButton("Confirm") { _, _ ->
                     performRedeem(it.cost)
                 }
-                .setNegativeButton("取消", null)
+                .setNegativeButton("Cancel", null)
                 .show()
         }
     }
     
     private fun performRedeem(cost: Int) {
-        // TODO: 调用API兑换
+        // TODO: Call API to redeem
         isRedeemed = true
         updateUIForRedeemStatus(true)
         
-        // 显示成功对话框
+        // Show success dialog
         val dialog = android.app.Dialog(requireContext())
         dialog.requestWindowFeature(android.view.Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.dialog_success)
@@ -149,8 +149,8 @@ class VoucherDetailFragment : Fragment() {
         val message: TextView? = dialog.findViewById(R.id.text_message)
         val button: com.google.android.material.button.MaterialButton? = dialog.findViewById(R.id.button_ok)
         
-        title?.text = "兑换成功"
-        message?.text = "券已添加到我的券包\n剩余积分：-$cost"
+        title?.text = "Redemption Successful"
+        message?.text = "Voucher added to your collection\nRemaining points: -$cost"
         button?.setOnClickListener {
             dialog.dismiss()
         }
@@ -159,22 +159,22 @@ class VoucherDetailFragment : Fragment() {
     }
     
     private fun useVoucher() {
-        // 使用券
+        // Use voucher
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("确认使用")
-            .setMessage("确定要使用此券吗？使用后将无法恢复。")
-            .setPositiveButton("确定使用") { _, _ ->
-                // TODO: 调用API标记为已使用
+            .setTitle("Confirm Use")
+            .setMessage("Are you sure you want to use this voucher? This action cannot be undone.")
+            .setPositiveButton("Use Now") { _, _ ->
+                // TODO: Call API to mark as used
                 
                 android.widget.Toast.makeText(
                     requireContext(),
-                    "券已使用",
+                    "Voucher used successfully",
                     android.widget.Toast.LENGTH_SHORT
                 ).show()
                 
                 findNavController().navigateUp()
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton("Cancel", null)
             .show()
     }
     

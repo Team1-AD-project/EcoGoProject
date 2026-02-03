@@ -15,8 +15,8 @@ import com.ecogo.ui.adapters.ChallengeAdapter
 import com.google.android.material.tabs.TabLayout
 
 /**
- * 挑战列表页面
- * 显示所有可用的挑战任务
+ * Challenges List Page
+ * Display all available challenge tasks
  */
 class ChallengesFragment : Fragment() {
 
@@ -82,7 +82,7 @@ class ChallengesFragment : Fragment() {
         
         challengeAdapter.updateChallenges(filtered)
         
-        // 显示空状态
+        // Show empty state
         if (filtered.isEmpty()) {
             binding.emptyState.visibility = View.VISIBLE
             binding.recyclerChallenges.visibility = View.GONE
