@@ -17,63 +17,66 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,
-            JwtAuthenticationFilter jwtAuthenticationFilter,
-            CustomAccessDeniedHandler accessDeniedHandler,
-            CustomAuthenticationEntryPoint authenticationEntryPoint) throws Exception {
-        http
-                // Enable CORS using the custom configuration bean
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                        JwtAuthenticationFilter jwtAuthenticationFilter,
+                        CustomAccessDeniedHandler accessDeniedHandler,
+                        CustomAuthenticationEntryPoint authenticationEntryPoint) throws Exception {
+                http
+                                // Enable CORS using the custom configuration bean
+                                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                // Disable CSRF (since we use JWT and don't need session-based CSRF protection)
-                .csrf(AbstractHttpConfigurer::disable)
+                                // Disable CSRF (since we use JWT and don't need session-based CSRF protection)
+                                .csrf(AbstractHttpConfigurer::disable)
 
-                // Disable default login forms (we use our own API endpoints)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .httpBasic(AbstractHttpConfigurer::disable)
+                                // Disable default login forms (we use our own API endpoints)
+                                .formLogin(AbstractHttpConfigurer::disable)
+                                .httpBasic(AbstractHttpConfigurer::disable)
 
-                // Authorize Requests
-                .authorizeHttpRequests(auth -> auth
-                        // Public Endpoints
-                        .requestMatchers("/api/v1/mobile/users/login", "/api/v1/mobile/users/register").permitAll()
-                        .requestMatchers("/api/v1/web/users/login").permitAll()
-                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger
+                                // Authorize Requests
+                                .authorizeHttpRequests(auth -> auth
+                                                // Public Endpoints
+                                                .requestMatchers("/api/v1/mobile/users/login",
+                                                                "/api/v1/mobile/users/register")
+                                                .permitAll()
+                                                .requestMatchers("/api/v1/web/users/login").permitAll()
+                                                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger
 
-                        // Secured Endpoints
-                        .requestMatchers("/api/v1/mobile/**").authenticated()
-                        .requestMatchers("/api/v1/web/**").hasRole("ADMIN")
+                                                // Secured Endpoints
+                                                .requestMatchers("/api/v1/mobile/**").authenticated()
+                                                .requestMatchers("/api/v1/web/**").hasRole("ADMIN")
 
-                        // Default
-                        .anyRequest().permitAll() // Keep other paths open for development
-                )
+                                                // Default
+                                                .anyRequest().permitAll() // Keep other paths open for development
+                                )
 
-                // Exception Handling for 401 and 403
-                .exceptionHandling(exception -> exception
-                        .accessDeniedHandler(accessDeniedHandler)
-                        .authenticationEntryPoint(authenticationEntryPoint))
+                                // Exception Handling for 401 and 403
+                                .exceptionHandling(exception -> exception
+                                                .accessDeniedHandler(accessDeniedHandler)
+                                                .authenticationEntryPoint(authenticationEntryPoint))
 
-                // Add JWT Filter before the standard username/password filter
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                                // Add JWT Filter before the standard username/password filter
+                                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+                return http.build();
+        }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        // Allow your frontend origin (e.g., http://localhost:8081)
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8081", "http://127.0.0.1:8081"));
-        // Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
-        configuration.setAllowedMethods(Arrays.asList("*"));
-        // Allow all headers
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-        // Allow credentials (like cookies)
-        configuration.setAllowCredentials(true);
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+                CorsConfiguration configuration = new CorsConfiguration();
+                // Use allowedOriginPatterns instead of allowedOrigins to support credentials
+                // with wildcard
+                configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+                // Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
+                configuration.setAllowedMethods(Arrays.asList("*"));
+                // Allow all headers
+                configuration.setAllowedHeaders(Arrays.asList("*"));
+                // Allow credentials (like cookies)
+                configuration.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        // Apply this CORS configuration to all paths
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
+                UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+                // Apply this CORS configuration to all paths
+                source.registerCorsConfiguration("/**", configuration);
+                return source;
+        }
 }
