@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,26 +25,42 @@ public class LeaderboardImplementation implements LeaderboardInterface {
     @Autowired
     private MongoTemplate mongoTemplate;
 
+    @Deprecated // This method is no longer the primary way to get rankings
     @Override
     public Page<Ranking> getRankingsByPeriod(String period, String name, Pageable pageable) {
-        if (name != null && !name.isEmpty()) {
-            return rankingRepository.findByPeriodAndNicknameContainingIgnoreCaseOrderByRankAsc(period, name, pageable);
-        } else {
-            return rankingRepository.findByPeriodOrderByRankAsc(period, pageable);
+        // Defaulting to the new logic with dynamic ranking
+        boolean hasSearchName = name != null && !name.isEmpty();
+        Page<Ranking> rankingsPage = hasSearchName
+                ? rankingRepository.findByPeriodAndNicknameContainingIgnoreCaseOrderByCarbonSavedDesc(period, name, pageable)
+                : rankingRepository.findByPeriodOrderByCarbonSavedDesc(period, pageable);
+
+        // Dynamically assign ranks
+        long startRank = pageable.getOffset() + 1;
+        for (int i = 0; i < rankingsPage.getContent().size(); i++) {
+            rankingsPage.getContent().get(i).setRank((int) (startRank + i));
         }
+        return rankingsPage;
     }
 
     @Override
     public LeaderboardStatsDto getRankingsAndStatsByPeriod(String period, String name, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        // Ensure sorting by carbonSaved is always applied for dynamic ranking
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "carbonSaved"));
         boolean hasSearchName = name != null && !name.isEmpty();
 
-        // 1. Get the paginated results
+        // 1. Get the paginated results, sorted by carbonSaved
         Page<Ranking> rankingsPage = hasSearchName
-                ? rankingRepository.findByPeriodAndNicknameContainingIgnoreCaseOrderByRankAsc(period, name, pageable)
-                : rankingRepository.findByPeriodOrderByRankAsc(period, pageable);
+                ? rankingRepository.findByPeriodAndNicknameContainingIgnoreCaseOrderByCarbonSavedDesc(period, name, pageable)
+                : rankingRepository.findByPeriodOrderByCarbonSavedDesc(period, pageable);
 
-        // 2. Get all rankings for the period (without pagination) to calculate stats
+        // 2. Dynamically assign ranks to the paginated results
+        long startRank = pageable.getOffset() + 1;
+        for (int i = 0; i < rankingsPage.getContent().size(); i++) {
+            rankingsPage.getContent().get(i).setRank((int) (startRank + i));
+        }
+
+        // 3. Get all rankings for the period (without pagination) to calculate overall stats
+        // Note: This part does not need sorting, just fetching the data for calculations.
         List<Ranking> allRankingsForPeriod = rankingRepository.findByPeriod(period);
 
         long totalCarbonSaved = 0;
