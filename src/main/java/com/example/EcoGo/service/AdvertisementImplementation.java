@@ -40,9 +40,15 @@ public class AdvertisementImplementation implements AdvertisementInterface {
                 .orElseThrow(() -> new BusinessException(ErrorCode.ADVERTISEMENT_NOT_FOUND));
 
         existingAd.setName(advertisement.getName());
+        existingAd.setDescription(advertisement.getDescription());
         existingAd.setStatus(advertisement.getStatus());
         existingAd.setStartDate(advertisement.getStartDate());
         existingAd.setEndDate(advertisement.getEndDate());
+        existingAd.setImageUrl(advertisement.getImageUrl());
+        existingAd.setLinkUrl(advertisement.getLinkUrl());
+        existingAd.setPosition(advertisement.getPosition());
+        existingAd.setImpressions(advertisement.getImpressions());
+        existingAd.setClicks(advertisement.getClicks());
 
         return advertisementRepository.save(existingAd);
     }
