@@ -157,7 +157,11 @@ public class PointsController {
         UserPointsLog.AdminAction adminAction = new UserPointsLog.AdminAction();
         // Extract operator ID from token if needed, or just use "admin"
         String token = authHeader.replace("Bearer ", "");
-        String operatorId = jwtUtils.getUserIdFromToken(token);
+        String operatorUuid = jwtUtils.getUserIdFromToken(token);
+        // Resolve Operator UUID -> Business ID
+        String operatorId = userRepository.findById(operatorUuid)
+                .map(User::getUserid)
+                .orElse(operatorUuid); // Fallback to UUID if not found (shouldn't happen)
         adminAction.setOperatorId(operatorId);
         adminAction.setReason(request.reason);
         adminAction.setApprovalStatus("approved");

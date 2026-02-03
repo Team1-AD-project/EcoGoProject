@@ -1,9 +1,11 @@
 package com.example.EcoGo.model;
 
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
-import org.springframework.data.mongodb.core.mapping.Field;
+
+// import org.springframework.data.mongodb.core.mapping.Field; // Removed
 
 import java.time.LocalDateTime;
 
@@ -14,27 +16,20 @@ public class UserPointsLog {
     private String id;
 
     @Indexed
-    @Field("user_id")
-    private String userId; // UUID of the user
+    private String userId; // Stores Business UserID (e.g. "user001")
 
-    @Field("change_type")
     private String changeType; // gain, deduct, redeem
 
-    private long points; // Positive for gain, Negative for deduct? Or absolute value?
-                         // Requirements said: "positive=gain, negative=deduct/redeem"
+    private long points;
 
     private String source; // trip, task, redeem, admin
 
-    @Field("related_id")
     private String relatedId; // Trip ID / Order ID (UUID)
 
-    @Field("admin_action")
     private AdminAction adminAction; // Only if source=admin
 
-    @Field("balance_after")
     private long balanceAfter; // Critical for audit
 
-    @Field("created_at")
     private LocalDateTime createdAt;
 
     // Constructors
@@ -128,10 +123,8 @@ public class UserPointsLog {
 
     // Nested Classes
     public static class AdminAction {
-        @Field("operator_id")
         private String operatorId;
         private String reason;
-        @Field("approval_status")
         private String approvalStatus; // pending, approved, rejected
 
         public AdminAction() {
