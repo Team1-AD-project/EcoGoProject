@@ -22,7 +22,9 @@ export function AdminLayout() {
   };
 
   const handleLogout = () => {
-    navigate('/');
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminInfo');
+    navigate('/admin');
   };
 
   const renderContent = () => {

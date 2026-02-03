@@ -5,22 +5,41 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Lock, Mail, Shield, TrendingUp, Users, Leaf } from 'lucide-react';
+import { toast } from 'sonner';
+
+import { loginAdmin } from '@/services/auth';
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState('');
+  const [userid, setUserId] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate login process
-    setTimeout(() => {
+    try {
+      const response = await loginAdmin({ userid, password });
+      console.log('Login Response:', response);
+
+      if (response.code === 200 && response.data?.token) {
+        localStorage.setItem('adminToken', response.data.token);
+        localStorage.setItem('adminInfo', JSON.stringify(response.data.user_info));
+
+        toast.success(`Welcome back, ${response.data.user_info.nickname || 'Admin'}!`);
+        navigate('/admin/dashboard');
+      } else {
+        const msg = response.message || 'Login failed';
+        toast.error(msg);
+      }
+    } catch (err: any) {
+      console.error(err);
+      const msg = err.message || 'An error occurred during login';
+      toast.error(msg);
+    } finally {
       setIsLoading(false);
-      navigate('/admin/dashboard');
-    }, 1000);
+    }
   };
 
   const handleGoToHome = () => {
@@ -45,15 +64,15 @@ export function LoginPage() {
           <Card className="p-8 shadow-lg">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <Label htmlFor="email">Email Address</Label>
+                <Label htmlFor="userid">User ID</Label>
                 <div className="relative mt-1">
                   <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-5 text-gray-400" />
                   <Input
-                    id="email"
-                    type="email"
-                    placeholder="admin@example.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    id="userid"
+                    type="text"
+                    placeholder="Enter admin user ID"
+                    value={userid}
+                    onChange={(e) => setUserId(e.target.value)}
                     className="pl-10"
                     required
                   />
@@ -75,6 +94,8 @@ export function LoginPage() {
                   />
                 </div>
               </div>
+
+
 
               <div className="flex items-center justify-between">
                 <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
@@ -98,8 +119,8 @@ export function LoginPage() {
             {/* Demo Credentials */}
             <div className="mt-6 p-4 bg-blue-50 rounded-lg">
               <p className="text-xs text-blue-900 font-semibold mb-2">Demo Credentials:</p>
-              <p className="text-xs text-blue-700">Email: admin@example.com</p>
-              <p className="text-xs text-blue-700">Password: Any password</p>
+              <p className="text-xs text-blue-700">User ID: admin</p>
+              <p className="text-xs text-blue-700">Password: admin123</p>
             </div>
           </Card>
 
