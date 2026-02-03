@@ -17,7 +17,12 @@ public class UserProfileDto {
     public static class AdminManageUserRequest {
         public boolean isAdmin;
         public boolean vip_status;
+        public boolean isDeactivated; // New field
         public String remark;
+    }
+
+    public static class UserStatusRequest {
+        public boolean isDeactivated;
     }
 
     public static class UserDetailResponse {

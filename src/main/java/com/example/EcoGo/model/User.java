@@ -10,13 +10,14 @@ public class User {
     @Id
     private String id;
     private String userid;
-    private String username;
+    // private String username; // Removed
     private String email;
     private String phone;
     private String password;
     private String nickname;
     private String avatar;
     private boolean isAdmin;
+    private boolean isDeactivated;
 
     private Vip vip;
     private Stats stats;
@@ -49,14 +50,6 @@ public class User {
 
     public void setUserid(String userid) {
         this.userid = userid;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public String getEmail() {
@@ -105,6 +98,14 @@ public class User {
 
     public void setAdmin(boolean admin) {
         isAdmin = admin;
+    }
+
+    public boolean isDeactivated() {
+        return isDeactivated;
+    }
+
+    public void setDeactivated(boolean deactivated) {
+        isDeactivated = deactivated;
     }
 
     public Vip getVip() {

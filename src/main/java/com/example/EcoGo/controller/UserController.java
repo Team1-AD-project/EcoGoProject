@@ -63,37 +63,33 @@ public class UserController {
         return ResponseMessage.success(null);
     }
 
-    @GetMapping("/api/v1/mobile/users/profile/{userId}")
+    @GetMapping("/api/v1/mobile/users/profile")
     public ResponseMessage<UserProfileDto.UserDetailResponse> getUserProfileMobile(
-            @RequestHeader("Authorization") String authHeader,
-            @PathVariable String userId) {
+            @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
-        return ResponseMessage.success(userService.getUserDetail(token, userId));
+        return ResponseMessage.success(userService.getUserDetail(token));
     }
 
-    @PutMapping("/api/v1/mobile/users/profile/{userId}")
+    @PutMapping("/api/v1/mobile/users/profile")
     public ResponseMessage<UserProfileDto.UpdateProfileResponse> updateProfileMobile(
             @RequestHeader("Authorization") String authHeader,
-            @PathVariable String userId,
             @RequestBody UserProfileDto.UpdateProfileRequest request) {
         String token = authHeader.replace("Bearer ", "");
-        return ResponseMessage.success(userService.updateProfile(token, userId, request));
+        return ResponseMessage.success(userService.updateProfile(token, request));
     }
 
-    @PutMapping("/api/v1/mobile/users/preferences/reset/{userId}")
+    @PutMapping("/api/v1/mobile/users/preferences/reset")
     public ResponseMessage<UserProfileDto.PreferencesResetResponse> resetPreferences(
-            @RequestHeader("Authorization") String authHeader,
-            @PathVariable String userId) {
+            @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
-        return ResponseMessage.success(userService.resetPreferences(token, userId));
+        return ResponseMessage.success(userService.resetPreferences(token));
     }
 
-    @DeleteMapping("/api/v1/mobile/users/{userId}")
+    @DeleteMapping("/api/v1/mobile/users")
     public ResponseMessage<Map<String, Boolean>> deleteUser(
-            @RequestHeader("Authorization") String authHeader,
-            @PathVariable String userId) {
+            @RequestHeader("Authorization") String authHeader) {
         String token = authHeader.replace("Bearer ", "");
-        userService.deleteUser(token, userId);
+        userService.deleteUser(token);
         return ResponseMessage.success(Map.of("success", true));
     }
 
@@ -129,13 +125,17 @@ public class UserController {
         return ResponseMessage.success(userService.manageUser(userId, request));
     }
 
+    @PutMapping("/api/v1/web/users/status/{userId}")
+    public ResponseMessage<UserProfileDto.UpdateProfileResponse> updateUserStatus(@PathVariable String userId,
+            @RequestBody UserProfileDto.UserStatusRequest request) {
+        return ResponseMessage.success(userService.updateUserStatus(userId, request));
+    }
+
     @GetMapping("/api/v1/web/users/profile/{userId}")
     public ResponseMessage<UserProfileDto.UserDetailResponse> getUserDetail(
-            @RequestHeader("Authorization") String authHeader,
             @PathVariable String userId) {
-        String token = authHeader.replace("Bearer ", "");
-        // Admin also needs to pass validation (auto-pass)
-        return ResponseMessage.success(userService.getUserDetail(token, userId));
+        // Token validation is handled by JwtAuthenticationFilter
+        return ResponseMessage.success(userService.getUserDetailAdmin(userId));
     }
 
     @PutMapping("/api/v1/web/users/profile/{userId}")
@@ -151,12 +151,12 @@ public class UserController {
      * 根据用户名查询用户信息
      */
 
-    @GetMapping("/api/v1/user/{username}")
-    public ResponseMessage<UserResponseDto> getUserByUsername(@PathVariable("username") String username) {
-        if (username == null || username.trim().isEmpty()) {
-            throw new BusinessException(ErrorCode.PARAM_ERROR, "用户名不能为空");
+    @GetMapping("/api/v1/user/{userid}")
+    public ResponseMessage<UserResponseDto> getUserByUserid(@PathVariable("userid") String userid) {
+        if (userid == null || userid.trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "User ID cannot be empty");
         }
-        UserResponseDto userDTO = userService.getUserByUsername(username);
+        UserResponseDto userDTO = userService.getUserByUserid(userid);
         return ResponseMessage.success(userDTO);
     }
 }

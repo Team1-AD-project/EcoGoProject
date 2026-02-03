@@ -35,9 +35,9 @@ public class UserServiceImpl implements UserInterface {
     }
 
     @Override
-    public UserResponseDto getUserByUsername(String username) {
+    public UserResponseDto getUserByUserid(String userid) {
         // Keeping existing method for compatibility
-        return userRepository.findByUserid(username)
+        return userRepository.findByUserid(userid)
                 .map(u -> new UserResponseDto(u.getEmail(), u.getUserid(), u.getNickname(), u.getPhone())) // Adapt to
                                                                                                            // existing
                                                                                                            // DTO
@@ -196,22 +196,36 @@ public class UserServiceImpl implements UserInterface {
 
     // --- Mobile Profile ---
 
-    @Override
-    public UserProfileDto.UpdateProfileResponse updateProfile(String token, String userId,
-            UserProfileDto.UpdateProfileRequest request) {
-        validateAccess(token, userId);
-        User user = userRepository.findByUserid(userId)
+    // --- Helper ---
+    private User getUserFromToken(String token) {
+        String userId;
+        try {
+            userId = jwtUtils.validateToken(token).getSubject();
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.NO_PERMISSION, "Invalid Token");
+        }
+
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
+        if (user.isDeactivated()) {
+            throw new BusinessException(ErrorCode.ACCOUNT_DISABLED);
+        }
+        return user;
+    }
+
+    // --- Mobile Profile ---
+
+    @Override
+    public UserProfileDto.UpdateProfileResponse updateProfile(String token,
+            UserProfileDto.UpdateProfileRequest request) {
+        User user = getUserFromToken(token);
         return performUpdate(user, request);
     }
 
     @Override
-    public UserProfileDto.PreferencesResetResponse resetPreferences(String token, String userId) {
-        validateAccess(token, userId);
-        // Mobile uses UserID (Business ID)
-        User user = userRepository.findByUserid(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    public UserProfileDto.PreferencesResetResponse resetPreferences(String token) {
+        User user = getUserFromToken(token);
 
         // Reset to default logic here
         User.Preferences defaultPref = new User.Preferences();
@@ -233,20 +247,39 @@ public class UserServiceImpl implements UserInterface {
     }
 
     @Override
-    public void deleteUser(String token, String userId) {
-        validateAccess(token, userId);
-        User user = userRepository.findByUserid(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    public void deleteUser(String token) {
+        User user = getUserFromToken(token);
         userRepository.delete(user);
     }
 
     @Override
-    public UserProfileDto.UserDetailResponse getUserDetail(String token, String userId) {
-        validateAccess(token, userId);
-        return userRepository.findById(userId)
-                .map(UserProfileDto.UserDetailResponse::new)
-                .or(() -> userRepository.findByUserid(userId).map(UserProfileDto.UserDetailResponse::new))
+    public UserProfileDto.UserDetailResponse getUserDetail(String token) {
+        User user = getUserFromToken(token);
+        return new UserProfileDto.UserDetailResponse(user);
+    }
+
+    // --- Web Admin ---
+
+    @Override
+    public UserProfileDto.UserDetailResponse getUserDetailAdmin(String userId) {
+        User user = userRepository.findById(userId)
+                .or(() -> userRepository.findByUserid(userId)) // Support search by business ID for admin
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        return new UserProfileDto.UserDetailResponse(user);
+    }
+
+    @Override
+    public UserProfileDto.UpdateProfileResponse updateUserStatus(String userId,
+            UserProfileDto.UserStatusRequest request) {
+        User user = userRepository.findById(userId)
+                .or(() -> userRepository.findByUserid(userId))
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        user.setDeactivated(request.isDeactivated);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        return new UserProfileDto.UpdateProfileResponse(user.getId(), user.getUpdatedAt());
     }
 
     @Override
@@ -265,11 +298,17 @@ public class UserServiceImpl implements UserInterface {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (!passwordUtils.matches(request.password, user.getPassword())) {
-            throw new BusinessException(ErrorCode.PASSWORD_ERROR);
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "Invalid password");
         }
 
+        // Check Deactivation
+        if (user.isDeactivated()) {
+            throw new BusinessException(ErrorCode.ACCOUNT_DISABLED, "Your account has been deactivated.");
+        }
+
+        // Check Admin
         if (!user.isAdmin()) {
-            throw new BusinessException(ErrorCode.NO_PERMISSION, "非管理员账号");
+            throw new BusinessException(ErrorCode.NO_PERMISSION, "Not an admin account");
         }
 
         user.setLastLoginAt(LocalDateTime.now());
@@ -309,6 +348,8 @@ public class UserServiceImpl implements UserInterface {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         user.setAdmin(request.isAdmin);
+        user.setDeactivated(request.isDeactivated); // Update Deactivation
+
         if (user.getVip() == null)
             user.setVip(new User.Vip());
         user.getVip().setActive(request.vip_status);
