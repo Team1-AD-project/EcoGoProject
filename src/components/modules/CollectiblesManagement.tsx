@@ -364,9 +364,13 @@ export function CollectiblesManagement() {
     return labels[method];
   };
 
+  // 获取 badge 的唯一 subCategory 列表
+  const badgeCategories = [...new Set(badges.map(b => b.category))];
+
   const filteredBadges = badges.filter(badge => {
     const methodMatch = filterMethod === 'all' || badge.acquisitionMethod === filterMethod;
-    return methodMatch;
+    const categoryMatch = filterBadgeCategory === 'all' || badge.category === filterBadgeCategory;
+    return methodMatch && categoryMatch;
   });
 
   const filteredAccessories = accessories.filter(accessory => {
@@ -444,7 +448,22 @@ export function CollectiblesManagement() {
             {/* Filters */}
             <Card className="p-4 mb-4 flex-shrink-0">
               <div className="flex flex-wrap gap-4 items-end">
-                <div className="flex-1 min-w-[200px]">
+                <div className="flex-1 min-w-[180px]">
+                  <Label>Category</Label>
+                  <Select value={filterBadgeCategory} onValueChange={setFilterBadgeCategory}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Categories</SelectItem>
+                      {badgeCategories.map(cat => (
+                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="flex-1 min-w-[180px]">
                   <Label>Acquisition Method</Label>
                   <Select value={filterMethod} onValueChange={setFilterMethod}>
                     <SelectTrigger>
@@ -462,7 +481,10 @@ export function CollectiblesManagement() {
                   </Select>
                 </div>
 
-                <Button className="bg-blue-600 hover:bg-blue-700 text-white gap-2">
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+                  onClick={() => setIsCreateBadgeOpen(true)}
+                >
                   <Award className="size-4" />
                   Add Badge
                 </Button>
@@ -736,6 +758,188 @@ export function CollectiblesManagement() {
             </Button>
             <Button variant="destructive" onClick={handleDeleteConfirm}>
               Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Create Badge Dialog */}
+      <Dialog open={isCreateBadgeOpen} onOpenChange={setIsCreateBadgeOpen}>
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Create New Badge</DialogTitle>
+            <DialogDescription>
+              Add a new badge or accessory to the system
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-badge-id">Badge ID *</Label>
+                <Input
+                  id="new-badge-id"
+                  placeholder="e.g., eco_champion"
+                  value={newBadge.badgeId}
+                  onChange={(e) => setNewBadge({ ...newBadge, badgeId: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-badge-category">Type</Label>
+                <Select
+                  value={newBadge.category}
+                  onValueChange={(value) => setNewBadge({ ...newBadge, category: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="badge">Badge</SelectItem>
+                    <SelectItem value="cloth">Cloth/Accessory</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-badge-name-en">Name (English) *</Label>
+                <Input
+                  id="new-badge-name-en"
+                  placeholder="Badge name in English"
+                  value={newBadge.nameEn}
+                  onChange={(e) => setNewBadge({ ...newBadge, nameEn: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-badge-name-zh">Name (Chinese)</Label>
+                <Input
+                  id="new-badge-name-zh"
+                  placeholder="徽章中文名称"
+                  value={newBadge.nameZh}
+                  onChange={(e) => setNewBadge({ ...newBadge, nameZh: e.target.value })}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-badge-desc-en">Description (English)</Label>
+                <Textarea
+                  id="new-badge-desc-en"
+                  placeholder="Description in English"
+                  value={newBadge.descriptionEn}
+                  onChange={(e) => setNewBadge({ ...newBadge, descriptionEn: e.target.value })}
+                  rows={2}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-badge-desc-zh">Description (Chinese)</Label>
+                <Textarea
+                  id="new-badge-desc-zh"
+                  placeholder="中文描述"
+                  value={newBadge.descriptionZh}
+                  onChange={(e) => setNewBadge({ ...newBadge, descriptionZh: e.target.value })}
+                  rows={2}
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-badge-subcategory">Sub Category</Label>
+                <Select
+                  value={newBadge.subCategory}
+                  onValueChange={(value) => setNewBadge({ ...newBadge, subCategory: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="normal badge">Normal Badge</SelectItem>
+                    <SelectItem value="VIP badge">VIP Badge</SelectItem>
+                    <SelectItem value="rank badge">Rank Badge</SelectItem>
+                    <SelectItem value="clothes_Hat">Hat</SelectItem>
+                    <SelectItem value="clothes_clothing">Clothing</SelectItem>
+                    <SelectItem value="clothes_shoes">Shoes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-badge-method">Acquisition Method</Label>
+                <Select
+                  value={newBadge.acquisitionMethod}
+                  onValueChange={(value) => setNewBadge({ ...newBadge, acquisitionMethod: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="purchase">Points Purchase</SelectItem>
+                    <SelectItem value="achievement">Achievement Unlock</SelectItem>
+                    <SelectItem value="task">Task Reward</SelectItem>
+                    <SelectItem value="vip">VIP Exclusive</SelectItem>
+                    <SelectItem value="event">Event Limited</SelectItem>
+                    <SelectItem value="free">Free</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              {newBadge.acquisitionMethod === 'purchase' && (
+                <div className="space-y-2">
+                  <Label htmlFor="new-badge-price">Price (points)</Label>
+                  <Input
+                    id="new-badge-price"
+                    type="number"
+                    value={newBadge.purchaseCost}
+                    onChange={(e) => setNewBadge({ ...newBadge, purchaseCost: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+              )}
+              {newBadge.acquisitionMethod === 'achievement' && (
+                <div className="space-y-2">
+                  <Label htmlFor="new-badge-threshold">Carbon Threshold (g)</Label>
+                  <Input
+                    id="new-badge-threshold"
+                    type="number"
+                    value={newBadge.carbonThreshold}
+                    onChange={(e) => setNewBadge({ ...newBadge, carbonThreshold: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="new-badge-icon-url">Icon URL</Label>
+                <Input
+                  id="new-badge-icon-url"
+                  placeholder="/icons/badges/..."
+                  value={newBadge.iconUrl}
+                  onChange={(e) => setNewBadge({ ...newBadge, iconUrl: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-badge-icon-color">Icon Color</Label>
+                <Input
+                  id="new-badge-icon-color"
+                  type="color"
+                  value={newBadge.iconColorScheme}
+                  onChange={(e) => setNewBadge({ ...newBadge, iconColorScheme: e.target.value })}
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCreateBadgeOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleCreateBadge}
+              disabled={!newBadge.badgeId || !newBadge.nameEn}
+            >
+              Create Badge
             </Button>
           </DialogFooter>
         </DialogContent>
