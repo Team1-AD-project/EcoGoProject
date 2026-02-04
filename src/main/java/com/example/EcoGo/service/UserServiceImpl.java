@@ -205,7 +205,7 @@ public class UserServiceImpl implements UserInterface {
             throw new BusinessException(ErrorCode.NO_PERMISSION, "Invalid Token");
         }
 
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUserid(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         if (user.isDeactivated()) {

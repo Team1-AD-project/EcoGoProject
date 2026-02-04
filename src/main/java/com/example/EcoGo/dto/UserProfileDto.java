@@ -37,13 +37,9 @@ public class UserProfileDto {
 
     public static class UserDetailResponse {
         public User user_info;
-        public User.Vip vip_info;
-        public User.Stats stats;
 
         public UserDetailResponse(User user) {
             this.user_info = user;
-            this.vip_info = user.getVip();
-            this.stats = user.getStats();
         }
     }
 
