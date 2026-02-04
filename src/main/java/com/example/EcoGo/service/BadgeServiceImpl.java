@@ -1,15 +1,16 @@
 package com.example.EcoGo.service;
 
+import com.example.EcoGo.dto.PointsDto;
 import com.example.EcoGo.interfacemethods.BadgeService;
+import com.example.EcoGo.interfacemethods.PointsService;
 import com.example.EcoGo.model.Badge;
 import com.example.EcoGo.model.User;
 import com.example.EcoGo.model.UserBadge;
-import com.example.EcoGo.model.UserPointsLog;
 import com.example.EcoGo.repository.BadgeRepository;
 import com.example.EcoGo.repository.UserBadgeRepository;
 import com.example.EcoGo.repository.UserRepository;
-import com.example.EcoGo.repository.UserPointsLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,7 +27,7 @@ public class BadgeServiceImpl implements BadgeService {
     @Autowired private BadgeRepository badgeRepository;
     @Autowired private UserBadgeRepository userBadgeRepository;
     @Autowired private UserRepository userRepository;
-    @Autowired private UserPointsLogRepository userPointsLogRepository;
+    @Autowired @Lazy private PointsService pointsService;
 
     /**
      * 1. 购买徽章
@@ -49,26 +50,14 @@ public class BadgeServiceImpl implements BadgeService {
         Integer cost = badge.getPurchaseCost();
         if (cost == null || cost <= 0) throw new RuntimeException("该徽章不可购买");
 
-        User user = userRepository.findByUserid(userId)
-        .orElseThrow(() -> new RuntimeException("用户不存在"));
-
-        if (user.getTotalPoints() < cost) {
-            throw new RuntimeException("积分不足");
-        }
-
-        long newBalance = user.getTotalPoints() - cost;
-        user.setTotalPoints(newBalance);
-        userRepository.save(user);
-
-        // 记录积分消费日志
-        UserPointsLog log = new UserPointsLog();
-        log.setUserId(user.getId()); // 使用 UUID
-        log.setChangeType("deduct");
-        log.setPoints(-cost); // 负数表示扣除
-        log.setSource("badge_purchase");
-        log.setRelatedId(badgeId); // 关联购买的 badge ID
-        log.setBalanceAfter(newBalance);
-        userPointsLogRepository.save(log);
+       // 使用 PointsService 统一处理积分扣除和日志记录
+        String badgeName = badge.getName() != null ? badge.getName().getOrDefault("en", "Unknown Badge") : "Unknown Badge";
+        PointsDto.SettleResult settleResult = new PointsDto.SettleResult();
+        settleResult.points = -cost;
+        settleResult.source = "badge_purchase";
+        settleResult.description = pointsService.formatBadgeDescription(badgeName);
+        settleResult.relatedId = badgeId;
+        pointsService.settle(userId, settleResult);
 
         UserBadge newBadge = new UserBadge();
         newBadge.setUserId(userId);
