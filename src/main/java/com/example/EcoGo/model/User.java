@@ -194,11 +194,12 @@ public class User {
     // Nested Classes (unchanged)
 
     public static class Vip {
-        private boolean isActive;
+        private boolean isActive = false;
+        private LocalDateTime startDate;
         private LocalDateTime expiryDate;
         private String plan;
-        private boolean autoRenew;
-        private int pointsMultiplier;
+        private boolean autoRenew = false;
+        private int pointsMultiplier = 1; // Default to 1x for normal users
 
         public boolean isActive() {
             return isActive;
@@ -206,6 +207,14 @@ public class User {
 
         public void setActive(boolean active) {
             isActive = active;
+        }
+
+        public LocalDateTime getStartDate() {
+            return startDate;
+        }
+
+        public void setStartDate(LocalDateTime startDate) {
+            this.startDate = startDate;
         }
 
         public LocalDateTime getExpiryDate() {

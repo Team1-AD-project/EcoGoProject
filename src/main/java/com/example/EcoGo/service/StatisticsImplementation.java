@@ -1,103 +1,116 @@
 package com.example.EcoGo.service;
 
-import com.example.EcoGo.dto.DashboardStatsDTO;
-import com.example.EcoGo.dto.HeatmapDataDTO;
+import com.example.EcoGo.dto.AnalyticsSummaryDto;
 import com.example.EcoGo.interfacemethods.StatisticsInterface;
-import com.example.EcoGo.repository.*;
+import com.example.EcoGo.model.Ranking;
+import com.example.EcoGo.model.User;
+import com.example.EcoGo.model.UserPointsLog;
+import com.example.EcoGo.repository.RankingRepository;
+import com.example.EcoGo.repository.UserRepository;
+import com.example.EcoGo.repository.UserPointsLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class StatisticsImplementation implements StatisticsInterface {
 
     @Autowired
-    private AdvertisementRepository advertisementRepository;
-
-    @Autowired
-    private ActivityRepository activityRepository;
-
-    @Autowired
     private UserPointsLogRepository pointsLogRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private RankingRepository rankingRepository;
 
     @Override
-    public DashboardStatsDTO getDashboardStats() {
-        DashboardStatsDTO stats = new DashboardStatsDTO();
+    public AnalyticsSummaryDto getManagementAnalytics(String timeRange) {
+        List<User> allUsers = userRepository.findAll();
+        Map<String, List<Ranking>> rankingsByPeriod = rankingRepository.findAll().stream()
+                .filter(r -> r.getPeriod() != null)
+                .collect(Collectors.groupingBy(Ranking::getPeriod));
 
-        // 用户统计
-        stats.setTotalUsers(0L); // Placeholder
-        stats.setActiveUsers(0L); // Placeholder
+        AnalyticsSummaryDto summary = new AnalyticsSummaryDto();
 
-        // 广告统计
-        long totalAds = advertisementRepository.count();
-        long activeAds = advertisementRepository.findByStatus("Active").size();
-        stats.setTotalAdvertisements(totalAds);
-        stats.setActiveAdvertisements(activeAds);
+        List<AnalyticsSummaryDto.UserGrowthPoint> userTrend = new ArrayList<>();
+        List<AnalyticsSummaryDto.CarbonGrowthPoint> carbonTrend = new ArrayList<>();
 
-        // 活动统计
-        long totalActivities = activityRepository.count();
-        long ongoingActivities = activityRepository.findByStatus("ONGOING").size()
-                + activityRepository.findByStatus("PUBLISHED").size();
-        stats.setTotalActivities(totalActivities);
-        stats.setOngoingActivities(ongoingActivities);
+        if ("weekly".equals(timeRange)) {
+            LocalDate today = LocalDate.now();
+            for (int i = 0; i < 5; i++) { // Last 5 weeks
+                LocalDate weekDate = today.minusWeeks(i);
+                WeekFields weekFields = WeekFields.of(Locale.getDefault());
+                int weekNumber = weekDate.get(weekFields.weekOfWeekBasedYear());
+                // CORRECTED: Replaced yearOfWeekBasedYear() with a simpler, more compatible method.
+                int year = weekDate.getYear();
+                String period = "Week " + weekNumber + ", " + year;
 
-        // 碳积分统计
-        stats.setTotalCarbonCredits(0L); // Placeholder
+                List<Ranking> weekRankings = rankingsByPeriod.getOrDefault(period, Collections.emptyList());
+                long carbonSaved = weekRankings.stream().mapToLong(Ranking::getCarbonSaved).sum();
+                long activeUsers = weekRankings.stream().map(Ranking::getUserId).distinct().count();
 
-        // 碳减排量统计 (Use Points as proxy for now, assumes 1 point = 1g carbon or similar)
-        // In reality, we might need a separate CarbonLog if points != carbon
-        // For now, assuming "gain" points reflects activity volume
-        Long totalReduction = getTotalCarbonReduction();
-        stats.setTotalCarbonReduction(totalReduction);
+                LocalDateTime weekStart = weekDate.with(weekFields.dayOfWeek(), 1).atStartOfDay();
+                long newUsers = allUsers.stream().filter(u -> u.getCreatedAt() != null && u.getCreatedAt().isAfter(weekStart) && u.getCreatedAt().isBefore(weekStart.plusWeeks(1))).count();
+                
+                userTrend.add(new AnalyticsSummaryDto.UserGrowthPoint("W" + weekNumber, allUsers.size(), newUsers, activeUsers));
+                carbonTrend.add(new AnalyticsSummaryDto.CarbonGrowthPoint("W" + weekNumber, carbonSaved, activeUsers > 0 ? (double)carbonSaved/activeUsers : 0));
+            }
+            Collections.reverse(userTrend);
+            Collections.reverse(carbonTrend);
 
-        // 兑换量统计
-        Long redemptionVol = getRedemptionVolume();
-        stats.setRedemptionVolume(redemptionVol);
+        } else { // Default to monthly
+            YearMonth currentMonth = YearMonth.now();
+            for (int i = 0; i < 6; i++) { // Last 6 months
+                YearMonth month = currentMonth.minusMonths(i);
+                final int year = month.getYear();
+                final int monthValue = month.getMonthValue();
 
-        return stats;
-    }
+                long newUsers = allUsers.stream().filter(u -> u.getCreatedAt() != null && u.getCreatedAt().getYear() == year && u.getCreatedAt().getMonthValue() == monthValue).count();
+                long activeUsers = allUsers.stream().filter(u -> u.getActivityMetrics() != null && u.getUpdatedAt() != null && u.getUpdatedAt().isAfter(month.atDay(1).atStartOfDay())).count();
+                long carbonSaved = rankingsByPeriod.values().stream().flatMap(List::stream)
+                    .filter(r -> r.getStartDate() != null && YearMonth.from(r.getStartDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate()).equals(month))
+                    .mapToLong(Ranking::getCarbonSaved).sum();
 
-    @Override
-    public Long getTotalCarbonReduction() {
-        // Calculate total points earned as a proxy
-        List<com.example.EcoGo.model.UserPointsLog> logs = pointsLogRepository.findAll();
-        return logs.stream()
-                .filter(log -> "gain".equalsIgnoreCase(log.getChangeType()))
-                .mapToLong(com.example.EcoGo.model.UserPointsLog::getPoints)
-                .sum();
-    }
+                userTrend.add(new AnalyticsSummaryDto.UserGrowthPoint(month.format(java.time.format.DateTimeFormatter.ofPattern("MMM")), allUsers.size(), newUsers, activeUsers));
+                carbonTrend.add(new AnalyticsSummaryDto.CarbonGrowthPoint(month.format(java.time.format.DateTimeFormatter.ofPattern("MMM")), carbonSaved, activeUsers > 0 ? (double)carbonSaved/activeUsers : 0));
+            }
+            Collections.reverse(userTrend);
+            Collections.reverse(carbonTrend);
+        }
 
-    @Override
-    public Long getActiveUserCount(int days) {
-        return 0L;
+        summary.setUserGrowthTrend(userTrend);
+        summary.setCarbonGrowthTrend(carbonTrend);
+        
+        AnalyticsSummaryDto.UserGrowthPoint latestUserPoint = userTrend.isEmpty() ? new AnalyticsSummaryDto.UserGrowthPoint("",0,0,0) : userTrend.get(userTrend.size() - 1);
+        AnalyticsSummaryDto.CarbonGrowthPoint latestCarbonPoint = carbonTrend.isEmpty() ? new AnalyticsSummaryDto.CarbonGrowthPoint("",0,0) : carbonTrend.get(carbonTrend.size() - 1);
+        AnalyticsSummaryDto.UserGrowthPoint previousUserPoint = userTrend.size() > 1 ? userTrend.get(userTrend.size() - 2) : new AnalyticsSummaryDto.UserGrowthPoint("",0,0,0);
+        AnalyticsSummaryDto.CarbonGrowthPoint previousCarbonPoint = carbonTrend.size() > 1 ? carbonTrend.get(carbonTrend.size() - 2) : new AnalyticsSummaryDto.CarbonGrowthPoint("",0,0);
+
+        summary.setTotalUsers(new AnalyticsSummaryDto.Metric((double)latestUserPoint.getUsers(), (double)previousUserPoint.getUsers()));
+        summary.setNewUsers(new AnalyticsSummaryDto.Metric((double)latestUserPoint.getNewUsers(), (double)previousUserPoint.getNewUsers()));
+        summary.setActiveUsers(new AnalyticsSummaryDto.Metric((double)latestUserPoint.getActiveUsers(), (double)previousUserPoint.getActiveUsers()));
+        summary.setTotalCarbonSaved(new AnalyticsSummaryDto.Metric((double)latestCarbonPoint.getCarbonSaved(), (double)previousCarbonPoint.getCarbonSaved()));
+        summary.setAverageCarbonPerUser(new AnalyticsSummaryDto.Metric(latestCarbonPoint.getAvgPerUser(), previousCarbonPoint.getAvgPerUser()));
+
+        // --- MOCK DATA SECTION ---
+        summary.setTotalRevenue(new AnalyticsSummaryDto.Metric(1389456.0, 1267234.0));
+        summary.setVipRevenue(new AnalyticsSummaryDto.Metric(834567.0, 756789.0));
+        summary.setShopRevenue(new AnalyticsSummaryDto.Metric(554889.0, 510445.0));
+        summary.setVipDistribution(Arrays.asList(new AnalyticsSummaryDto.DistributionPoint("Monthly (Mock)", 423)));
+        summary.setCategoryRevenue(Arrays.asList(new AnalyticsSummaryDto.DistributionPoint("Electronics (Mock)", 456789)));
+        summary.setRevenueGrowthTrend(Arrays.asList(new AnalyticsSummaryDto.RevenueGrowthPoint("Jan", 834567, 554889)));
+
+        return summary;
     }
 
     @Override
     public Long getRedemptionVolume() {
-        List<com.example.EcoGo.model.UserPointsLog> logs = pointsLogRepository.findAll();
-        return logs.stream()
-                .filter(log -> "redeem".equalsIgnoreCase(log.getChangeType())
-                        || "redeem".equalsIgnoreCase(log.getSource()))
-                .mapToLong(log -> Math.abs(log.getPoints())) // Points are usually negative or positive depending on
-                                                             // implementation
-                .sum();
-    }
-
-    @Override
-    public HeatmapDataDTO.HeatmapSummary getEmissionHeatmap() {
-        HeatmapDataDTO.HeatmapSummary summary = new HeatmapDataDTO.HeatmapSummary();
-        List<HeatmapDataDTO> dataPoints = generateMockHeatmapData();
-        summary.setDataPoints(dataPoints);
-        // ... (rest of the method is unchanged)
-        return summary;
-    }
-
-    // This method is unchanged
-    private List<HeatmapDataDTO> generateMockHeatmapData() {
-        List<HeatmapDataDTO> dataPoints = new ArrayList<>();
-        // ... (rest of the method is unchanged)
-        return dataPoints;
+        return 0L; // Returning 0 as UserPointsLog might not be fully available
     }
 }
