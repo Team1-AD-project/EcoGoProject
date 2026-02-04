@@ -13,9 +13,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class BadgeServiceImpl implements BadgeService {
@@ -36,6 +39,12 @@ public class BadgeServiceImpl implements BadgeService {
         
         Badge badge = badgeRepository.findByBadgeId(badgeId)
                 .orElseThrow(() -> new RuntimeException("商品不存在"));
+
+        // 检查获取方式是否为 purchase
+        String method = badge.getAcquisitionMethod();
+        if (method != null && !method.isEmpty() && !"purchase".equalsIgnoreCase(method)) {
+            throw new RuntimeException("该徽章不可通过购买获得");
+        }
 
         Integer cost = badge.getPurchaseCost();
         if (cost == null || cost <= 0) throw new RuntimeException("该徽章不可购买");
@@ -121,9 +130,25 @@ public class BadgeServiceImpl implements BadgeService {
     }
 
     // ... 其他 getter 方法 (getShopList, getMyBadges) 保持不变 ...
-    public List<Badge> getShopList() { return badgeRepository.findByIsActive(true); }
+    public List<Badge> getShopList() {
+        return badgeRepository.findByIsActiveAndAcquisitionMethod(true, "purchase");
+    }
     public List<UserBadge> getMyBadges(String userId) { return userBadgeRepository.findByUserId(userId); }
     public Badge createBadge(Badge badge) { return badgeRepository.save(badge); }
+
+    /**
+     * 按子分类获取徽章列表
+     */
+    public List<Badge> getBadgesBySubCategory(String subCategory) {
+        return badgeRepository.findBySubCategory(subCategory);
+    }
+
+    /**
+     * 按获取方式获取徽章列表
+     */
+    public List<Badge> getBadgesByAcquisitionMethod(String acquisitionMethod) {
+        return badgeRepository.findByAcquisitionMethod(acquisitionMethod);
+    }
 
     /**
      * 3. 获取 Badge 购买统计
@@ -160,8 +185,60 @@ public class BadgeServiceImpl implements BadgeService {
         if (updatedBadge.getIsActive() != null) {
             existingBadge.setIsActive(updatedBadge.getIsActive());
         }
+        if (updatedBadge.getSubCategory() != null) {
+            existingBadge.setSubCategory(updatedBadge.getSubCategory());
+        }
+        if (updatedBadge.getAcquisitionMethod() != null) {
+            existingBadge.setAcquisitionMethod(updatedBadge.getAcquisitionMethod());
+        }
+        if (updatedBadge.getCarbonThreshold() != null) {
+            existingBadge.setCarbonThreshold(updatedBadge.getCarbonThreshold());
+        }
 
         return badgeRepository.save(existingBadge);
+    }
+
+    /**
+     * 检查并自动解锁碳减排成就徽章
+     * 查找所有 acquisitionMethod="achievement" 且 carbonThreshold <= 用户 totalCarbon 的徽章，
+     * 如果用户尚未拥有则自动解锁。
+     */
+    @Transactional
+    public List<UserBadge> checkAndUnlockCarbonBadges(String userId) {
+        User user = userRepository.findByUserid(userId)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+
+        long userCarbon = user.getTotalCarbon();
+
+        // 查找所有已启用的、achievement 类型的、用户碳减排已达标的徽章
+        List<Badge> qualifiedBadges = badgeRepository
+                .findByIsActiveTrueAndAcquisitionMethodAndCarbonThresholdLessThanEqual("achievement", userCarbon);
+
+        if (qualifiedBadges.isEmpty()) {
+            return List.of();
+        }
+
+        // 获取用户已拥有的徽章 ID 集合
+        List<UserBadge> ownedBadges = userBadgeRepository.findByUserId(userId);
+        Set<String> ownedBadgeIds = ownedBadges.stream()
+                .map(UserBadge::getBadgeId)
+                .collect(Collectors.toSet());
+
+        // 过滤出用户尚未拥有的徽章，逐个解锁
+        List<UserBadge> newlyUnlocked = new ArrayList<>();
+        for (Badge badge : qualifiedBadges) {
+            if (!ownedBadgeIds.contains(badge.getBadgeId())) {
+                UserBadge newBadge = new UserBadge();
+                newBadge.setUserId(userId);
+                newBadge.setBadgeId(badge.getBadgeId());
+                newBadge.setUnlockedAt(new Date());
+                newBadge.setDisplay(false);
+                newBadge.setCreatedAt(new Date());
+                newlyUnlocked.add(userBadgeRepository.save(newBadge));
+            }
+        }
+
+        return newlyUnlocked;
     }
 
     /**

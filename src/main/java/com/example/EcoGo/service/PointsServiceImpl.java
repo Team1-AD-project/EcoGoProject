@@ -8,7 +8,9 @@ import com.example.EcoGo.model.User;
 import com.example.EcoGo.model.UserPointsLog;
 import com.example.EcoGo.repository.UserPointsLogRepository;
 import com.example.EcoGo.repository.UserRepository;
+import com.example.EcoGo.interfacemethods.BadgeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,10 @@ public class PointsServiceImpl implements PointsService {
 
     @Autowired
     private UserPointsLogRepository pointsLogRepository;
+
+    @Autowired
+    @Lazy
+    private BadgeService badgeService;
 
     @Override
     public UserPointsLog adjustPoints(String userId, long points, String source, String description, String relatedId,
@@ -56,7 +62,20 @@ public class PointsServiceImpl implements PointsService {
         if (points > 0 && isEarningSource) {
             user.setTotalPoints(user.getTotalPoints() + points);
         }
+
+        // 累计碳减排量（trip 来源时，points / 10 = 碳减排克数）
+        boolean isTripSource = "trip".equalsIgnoreCase(source);
+        if (points > 0 && isTripSource) {
+            long carbonSaved = points / 10;
+            user.setTotalCarbon(user.getTotalCarbon() + carbonSaved);
+        }
+
         userRepository.save(user);
+
+        // 检查是否有碳减排成就徽章可以自动解锁
+        if (isTripSource && points > 0) {
+            badgeService.checkAndUnlockCarbonBadges(userId);
+        }
 
         // 4. Create Log
         String changeType = points > 0 ? "gain" : (points < 0 ? "deduct" : "info");

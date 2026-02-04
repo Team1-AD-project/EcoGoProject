@@ -75,6 +75,18 @@ public class BadgeController {
         }
     }
 
+    // 按子分类查询徽章
+    @GetMapping("/mobile/badges/sub-category/{sub_category}")
+    public ResponseMessage<?> getBadgesBySubCategory(@PathVariable("sub_category") String subCategory) {
+        return ResponseMessage.success(badgeService.getBadgesBySubCategory(subCategory));
+    }
+
+    // 按获取方式查询徽章
+    @GetMapping("/mobile/badges/acquisition-method/{method}")
+    public ResponseMessage<?> getBadgesByAcquisitionMethod(@PathVariable("method") String method) {
+        return ResponseMessage.success(badgeService.getBadgesByAcquisitionMethod(method));
+    }
+
     // 管理员统计 - 获取每个 badge 的购买次数
     @GetMapping("/web/badges/stats/purchases")
     public ResponseMessage<?> getBadgePurchaseStats() {

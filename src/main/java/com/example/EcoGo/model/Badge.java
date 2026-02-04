@@ -27,7 +27,16 @@ public class Badge {
     @Field("purchase_cost")
     private Integer purchaseCost; 
 
-    private String category; 
+    private String category;
+
+    @Field("sub_category")
+    private String subCategory;
+
+    @Field("acquisition_method")
+    private String acquisitionMethod; // e.g. "purchase", "achievement", "reward"
+
+    @Field("carbon_threshold")
+    private Long carbonThreshold; // 当用户 totalCarbon >= 此值时自动解锁（仅 achievement 类型使用）
 
     private BadgeIcon icon;
 

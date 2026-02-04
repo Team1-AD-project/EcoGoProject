@@ -43,8 +43,24 @@ public interface BadgeService {
     void deleteBadge(String badgeId);
 
     /**
+     * 按子分类获取徽章列表
+     */
+    List<Badge> getBadgesBySubCategory(String subCategory);
+
+    /**
+     * 按获取方式获取徽章列表
+     */
+    List<Badge> getBadgesByAcquisitionMethod(String acquisitionMethod);
+
+    /**
      * 获取 Badge 购买统计（管理员用）
      * 返回每个 badge 的购买次数
      */
     List<Map<String, Object>> getBadgePurchaseStats();
+
+    /**
+     * 检查并自动解锁碳减排成就徽章
+     * 当用户的 totalCarbon 达到某个 badge 的 carbonThreshold 时自动解锁
+     */
+    List<UserBadge> checkAndUnlockCarbonBadges(String userId);
 }
