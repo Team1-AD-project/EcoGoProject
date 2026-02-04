@@ -42,8 +42,12 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 .requestMatchers("/api/v1/web/users/login").permitAll()
                                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger
-
+                                                
                                                 .requestMatchers(HttpMethod.GET, "/api/v1/orders").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.POST, "/api/v1/goods").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.PUT, "/api/v1/goods/{id}").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/v1/goods/{id}").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.PUT, "/api/v1/goods/batch-stock").hasRole("ADMIN")
 
                                                 // Secured Endpoints
                                                 .requestMatchers("/api/v1/mobile/**").authenticated()
