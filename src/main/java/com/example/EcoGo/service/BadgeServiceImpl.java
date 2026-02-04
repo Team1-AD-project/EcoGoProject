@@ -245,4 +245,15 @@ public class BadgeServiceImpl implements BadgeService {
         // List<UserBadge> userBadges = userBadgeRepository.findByBadgeId(badgeId);
         // userBadgeRepository.deleteAll(userBadges);
     }
+
+    /**
+     * 6. 获取所有徽章（管理员用）
+     * @param category 可选，按大类过滤 (badge/cloth)
+     */
+    public List<Badge> getAllBadges(String category) {
+        if (category != null && !category.isEmpty()) {
+            return badgeRepository.findByCategory(category);
+        }
+        return badgeRepository.findAll();
+    }
 }

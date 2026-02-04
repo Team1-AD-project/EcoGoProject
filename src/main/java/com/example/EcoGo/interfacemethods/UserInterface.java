@@ -52,4 +52,8 @@ public interface UserInterface {
 
     // New: VIP Activation (Internal/System use)
     void activateVip(String userId, int durationDays);
+
+    // New: Update Mobile Profile by Business UserID
+    UserProfileDto.UpdateProfileResponse updateMobileProfileByUserId(String userid,
+            UserProfileDto.UpdateProfileRequest request);
 }

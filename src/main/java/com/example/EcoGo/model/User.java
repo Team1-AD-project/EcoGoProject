@@ -22,6 +22,8 @@ public class User {
     @JsonProperty("isDeactivated")
     private boolean isDeactivated;
 
+    private String faculty; // New field
+
     private Vip vip;
     private Stats stats;
     private Preferences preferences;
@@ -109,6 +111,14 @@ public class User {
 
     public void setDeactivated(boolean deactivated) {
         isDeactivated = deactivated;
+    }
+
+    public String getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(String faculty) {
+        this.faculty = faculty;
     }
 
     public Vip getVip() {
@@ -310,7 +320,7 @@ public class User {
     }
 
     public static class Preferences {
-        private String preferredTransport;
+        private java.util.List<String> preferredTransport; // Changed to List
         private boolean enablePush;
         private boolean enableEmail;
         private boolean enableBusReminder;
@@ -320,11 +330,25 @@ public class User {
         private boolean showOnLeaderboard;
         private boolean shareAchievements;
 
-        public String getPreferredTransport() {
+        // New Location Fields
+        private String dormitoryOrResidence;
+        private String mainTeachingBuilding;
+        private String favoriteStudySpot;
+
+        // New Interests & Goals
+        private java.util.List<String> interests;
+        private int weeklyGoals;
+
+        // New Notifications
+        private boolean newChallenges;
+        private boolean activityReminders;
+        private boolean friendActivity;
+
+        public java.util.List<String> getPreferredTransport() {
             return preferredTransport;
         }
 
-        public void setPreferredTransport(String preferredTransport) {
+        public void setPreferredTransport(java.util.List<String> preferredTransport) {
             this.preferredTransport = preferredTransport;
         }
 
@@ -390,6 +414,70 @@ public class User {
 
         public void setShareAchievements(boolean shareAchievements) {
             this.shareAchievements = shareAchievements;
+        }
+
+        public String getDormitoryOrResidence() {
+            return dormitoryOrResidence;
+        }
+
+        public void setDormitoryOrResidence(String dormitoryOrResidence) {
+            this.dormitoryOrResidence = dormitoryOrResidence;
+        }
+
+        public String getMainTeachingBuilding() {
+            return mainTeachingBuilding;
+        }
+
+        public void setMainTeachingBuilding(String mainTeachingBuilding) {
+            this.mainTeachingBuilding = mainTeachingBuilding;
+        }
+
+        public String getFavoriteStudySpot() {
+            return favoriteStudySpot;
+        }
+
+        public void setFavoriteStudySpot(String favoriteStudySpot) {
+            this.favoriteStudySpot = favoriteStudySpot;
+        }
+
+        public java.util.List<String> getInterests() {
+            return interests;
+        }
+
+        public void setInterests(java.util.List<String> interests) {
+            this.interests = interests;
+        }
+
+        public int getWeeklyGoals() {
+            return weeklyGoals;
+        }
+
+        public void setWeeklyGoals(int weeklyGoals) {
+            this.weeklyGoals = weeklyGoals;
+        }
+
+        public boolean isNewChallenges() {
+            return newChallenges;
+        }
+
+        public void setNewChallenges(boolean newChallenges) {
+            this.newChallenges = newChallenges;
+        }
+
+        public boolean isActivityReminders() {
+            return activityReminders;
+        }
+
+        public void setActivityReminders(boolean activityReminders) {
+            this.activityReminders = activityReminders;
+        }
+
+        public boolean isFriendActivity() {
+            return friendActivity;
+        }
+
+        public void setFriendActivity(boolean friendActivity) {
+            this.friendActivity = friendActivity;
         }
     }
 

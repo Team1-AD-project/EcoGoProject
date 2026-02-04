@@ -63,4 +63,10 @@ public interface BadgeService {
      * 当用户的 totalCarbon 达到某个 badge 的 carbonThreshold 时自动解锁
      */
     List<UserBadge> checkAndUnlockCarbonBadges(String userId);
+
+    /**
+     * 获取所有徽章（管理员用）
+     * @param category 可选，按大类过滤 (badge/cloth)
+     */
+    List<Badge> getAllBadges(String category);
 }

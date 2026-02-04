@@ -159,6 +159,13 @@ public class UserController {
         return ResponseMessage.success(userService.updateUserInfoAdmin(userid, request));
     }
 
+    @PutMapping("/api/v1/internal/users/{userid}/profile")
+    public ResponseMessage<UserProfileDto.UpdateProfileResponse> updateMobileProfileByUserId(
+            @PathVariable String userid,
+            @RequestBody UserProfileDto.UpdateProfileRequest request) {
+        return ResponseMessage.success(userService.updateMobileProfileByUserId(userid, request));
+    }
+
     // --- Legacy / Compatibility ---
 
     /**

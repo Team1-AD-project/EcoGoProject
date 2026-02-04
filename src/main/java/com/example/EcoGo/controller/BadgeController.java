@@ -1,8 +1,8 @@
 package com.example.EcoGo.controller;
 
 import com.example.EcoGo.dto.ResponseMessage;
+import com.example.EcoGo.interfacemethods.BadgeService;
 import com.example.EcoGo.model.Badge;
-import com.example.EcoGo.service.BadgeServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +14,7 @@ import java.util.Map;
 public class BadgeController {
 
     @Autowired
-    private BadgeServiceImpl badgeService;
+    private BadgeService badgeService;
 
     // 购买
     @PostMapping("/mobile/badges/{badge_id}/purchase")
@@ -46,6 +46,12 @@ public class BadgeController {
     @GetMapping("/mobile/badges/user/{user_id}")
     public ResponseMessage<?> getMyBadges(@PathVariable("user_id") String userId) {
         return ResponseMessage.success(badgeService.getMyBadges(userId));
+    }
+
+    // 管理员获取所有徽章（支持按category过滤）
+    @GetMapping("/web/badges")
+    public ResponseMessage<?> getAllBadges(@RequestParam(required = false) String category) {
+        return ResponseMessage.success(badgeService.getAllBadges(category));
     }
 
     // 管理员创建 (用于初始化测试数据)
