@@ -13,7 +13,8 @@ import java.util.Map;
 @RequestMapping("/api/v1")
 public class BadgeController {
 
-    @Autowired private BadgeServiceImpl badgeService;
+    @Autowired
+    private BadgeServiceImpl badgeService;
 
     // 购买
     @PostMapping("/mobile/badges/{badge_id}/purchase")

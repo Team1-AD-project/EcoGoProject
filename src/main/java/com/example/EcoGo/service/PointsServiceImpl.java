@@ -26,10 +26,10 @@ public class PointsServiceImpl implements PointsService {
     private UserPointsLogRepository pointsLogRepository;
 
     @Override
-    public UserPointsLog adjustPoints(String userId, long points, String source, String description,
+    public UserPointsLog adjustPoints(String userId, long points, String source, String description, String relatedId,
             UserPointsLog.AdminAction adminAction) {
         // 1. Fetch User (using UUID)
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUserid(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         // 2. Validate sufficient funds for deduction
@@ -41,7 +41,19 @@ public class PointsServiceImpl implements PointsService {
 
         // 3. Update User
         user.setCurrentPoints(newBalance);
-        if (points > 0) {
+        // Logic Refinement:
+        // - "trip": Add to Total (Lifetime) + Current.
+        // - "badges"/"redeem" (Refunds): Only Current.
+        // - "badges" (Purchase): Subtract Current (handled by points < 0 check).
+
+        // Prevent infinite rank exploit via Buy/Refund cycles.
+        // Only valid "earning" sources increase Total Points.
+        boolean isEarningSource = "trip".equalsIgnoreCase(source)
+                || "mission".equalsIgnoreCase(source)
+                || "task".equalsIgnoreCase(source)
+                || "admin".equalsIgnoreCase(source); // Admin comps usually count
+
+        if (points > 0 && isEarningSource) {
             user.setTotalPoints(user.getTotalPoints() + points);
         }
         userRepository.save(user);
@@ -54,21 +66,22 @@ public class PointsServiceImpl implements PointsService {
         }
 
         UserPointsLog log = new UserPointsLog();
-        log.setUserId(userId);
+        log.setId(java.util.UUID.randomUUID().toString()); // Use UUID for Log ID
+        log.setUserId(user.getUserid()); // Store Business UserID (e.g. "user001") instead of UUID
         log.setChangeType(changeType);
         log.setPoints(points);
         log.setSource(source);
+        log.setDescription(description);
+        log.setRelatedId(relatedId);
         log.setAdminAction(adminAction);
         log.setBalanceAfter(newBalance);
-        // relatedId ? left null for now, can be added to method signature if needed
-        // later
 
         return pointsLogRepository.save(log);
     }
 
     @Override
     public PointsDto.CurrentPointsResponse getCurrentPoints(String userId) {
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByUserid(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         return new PointsDto.CurrentPointsResponse(user.getUserid(), user.getCurrentPoints(), user.getTotalPoints());
     }
@@ -107,7 +120,7 @@ public class PointsServiceImpl implements PointsService {
             return new PointsDto.TripStatsResponse(totalTrips, totalPoints);
         } else {
             // User stats - Read from User.Stats Cache (Fast)
-            User user = userRepository.findById(userId)
+            User user = userRepository.findByUserid(userId)
                     .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
             User.Stats stats = user.getStats();
@@ -139,36 +152,22 @@ public class PointsServiceImpl implements PointsService {
     }
 
     @Override
-    public void settleTrip(String userId, String tripId, double carbonAmount) {
-        // For settled trips, carbon is already calculated by ML.
-        // We just convert Carbon -> Points (1g = 10pts)
-        long points = (long) (carbonAmount * 10);
+    public void settle(String userId, PointsDto.SettleResult result) {
+        // Logic simplified: Caller calculates points and description
+        long points = result.points;
+        String source = result.source != null ? result.source : "general";
+        String description = result.description != null ? result.description : "Points adjustment";
+        String relatedId = result.relatedId;
 
-        String description = "Trip completed: " + tripId;
         // Reuse adjustPoints logic (Handles log and balance)
-        adjustPoints(userId, points, "trip", description, null);
-
-        // --- Sync to User.stats Cache ---
-        userRepository.findById(userId).ifPresent(user -> {
-            User.Stats stats = user.getStats();
-            if (stats == null) {
-                stats = new User.Stats();
-                user.setStats(stats);
-            }
-            stats.setTotalTrips(stats.getTotalTrips() + 1);
-            stats.setTotalPointsFromTrips(stats.getTotalPointsFromTrips() + points);
-            // Assuming distance is handled by TripService or we don't have it here.
-            // If needed, we would need distance param.
-
-            userRepository.save(user);
-        });
+        adjustPoints(userId, points, source, description, relatedId, null);
     }
 
     @Override
     public void redeemPoints(String userId, String orderId, long points) {
         String description = "Redemption for order: " + orderId;
         // Points should be negative for deduction
-        adjustPoints(userId, -Math.abs(points), "redeem", description, null);
+        adjustPoints(userId, -Math.abs(points), "redeem", description, orderId, null);
     }
 
     @Override
@@ -223,5 +222,21 @@ public class PointsServiceImpl implements PointsService {
     public List<PointsDto.PointsLogResponse> getPointsHistory(String userId) {
         List<UserPointsLog> logs = pointsLogRepository.findByUserIdOrderByCreatedAtDesc(userId);
         return logs.stream().map(this::convertToDto).collect(Collectors.toList());
+    }
+
+    @Override
+    public String formatTripDescription(String startPlace, String endPlace, double totalDistance) {
+        String startName = (startPlace != null && !startPlace.isEmpty()) ? startPlace : "Unknown Start";
+        String endName = (endPlace != null && !endPlace.isEmpty()) ? endPlace : "Unknown Destination";
+
+        // Format: "Start -> End (2.5km)"
+        // Using String.format for cleaner output
+        return String.format("%s -> %s (%.1fkm)", startName, endName, totalDistance);
+    }
+
+    @Override
+    public String formatBadgeDescription(String badgeName) {
+        // Format: "Purchased Badge: Eco Pioneer"
+        return "Purchased Badge: " + (badgeName != null ? badgeName : "Unknown Badge");
     }
 }

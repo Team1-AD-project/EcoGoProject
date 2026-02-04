@@ -13,6 +13,7 @@ public enum ErrorCode {
     PARAM_ERROR(4001, "Parameter error: %s"), // Dynamic placeholder
     NOT_LOGIN(4002, "Please login first"),
     NO_PERMISSION(4003, "Permission denied"),
+    ACCOUNT_DISABLED(4005, "Account is deactivated"),
 
     // User Module Errors (41xx)
     USER_NOT_FOUND(4101, "User not found"),

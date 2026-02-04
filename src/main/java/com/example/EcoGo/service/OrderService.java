@@ -24,4 +24,8 @@ public interface OrderService {
     
     // 根据状态获取订单
     List<Order> getOrdersByStatus(String status);
+
+    // 创建兑换订单（积分兑换）
+    Order createRedemptionOrder(Order order);
+
 }

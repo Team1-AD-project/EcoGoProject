@@ -18,9 +18,10 @@ public interface PointsService {
      * @param points      Amount (+ or -)
      * @param source      Source of change
      * @param description Brief description
+     * @param relatedId   Related ID (Trip/Order/Badge)
      * @param adminAction Optional admin details
      */
-    UserPointsLog adjustPoints(String userId, long points, String source, String description,
+    UserPointsLog adjustPoints(String userId, long points, String source, String description, String relatedId,
             UserPointsLog.AdminAction adminAction);
 
     /**
@@ -59,9 +60,21 @@ public interface PointsService {
     List<PointsDto.PointsLogResponse> getAllPointsHistory();
 
     // --- Internal Logic (Not exposed directly as API) ---
-    void settleTrip(String userId, String tripId, double carbonAmount);
+    void settle(String userId, PointsDto.SettleResult result);
 
     void redeemPoints(String userId, String orderId, long points);
 
     void refundPoints(String userId, String orderId);
+
+    // --- Helper Methods for Complex Trips ---
+
+    /**
+     * Generate description string: "StartName -> EndName (Distancekm)"
+     */
+    String formatTripDescription(String startPlace, String endPlace, double totalDistance);
+
+    /**
+     * Generate description string: "Purchased Badge: BadgeName"
+     */
+    String formatBadgeDescription(String badgeName);
 }

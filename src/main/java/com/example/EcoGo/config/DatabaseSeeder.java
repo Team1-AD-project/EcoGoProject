@@ -30,7 +30,9 @@ public class DatabaseSeeder implements CommandLineRunner {
             User admin = new User();
             admin.setId(UUID.randomUUID().toString());
             admin.setUserid("admin");
-            admin.setUsername("Super Admin");
+            admin.setUserid("admin");
+            // admin.setUsername("Super Admin"); // Removed
+            admin.setEmail("admin@eco.go");
             admin.setEmail("admin@eco.go");
             admin.setPassword(passwordUtils.encode("admin123")); // Default password
             admin.setNickname("System Admin");

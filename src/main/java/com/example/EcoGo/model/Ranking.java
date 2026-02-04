@@ -1,5 +1,6 @@
 package com.example.EcoGo.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
@@ -38,10 +39,11 @@ public class Ranking {
     @Field("nickname")
     private String nickname;
 
-    @Field("steps")
-    private int steps;
+    @Field("carbonSaved")
+    private int carbonSaved;
 
     @Field("isVip")
+    @JsonProperty("isVip")
     private boolean isVip;
 
     // Getters and Setters
@@ -126,12 +128,12 @@ public class Ranking {
         this.nickname = nickname;
     }
 
-    public int getSteps() {
-        return steps;
+    public int getCarbonSaved() {
+        return carbonSaved;
     }
 
-    public void setSteps(int steps) {
-        this.steps = steps;
+    public void setCarbonSaved(int carbonSaved) {
+        this.carbonSaved = carbonSaved;
     }
 
     public boolean isVip() {

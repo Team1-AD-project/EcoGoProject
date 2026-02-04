@@ -21,7 +21,7 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    // 1. 获取所有订单（支持筛选）
+    // 获取所有订单（支持筛选）
     @GetMapping
     public ResponseEntity<Map<String, Object>> getAllOrders(
             @RequestParam(required = false) String userId,
@@ -84,7 +84,7 @@ public class OrderController {
         }
     }
 
-    // 2. 获取订单详情
+    //  获取订单详情
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getOrderById(@PathVariable String id) {
         try {
@@ -109,45 +109,21 @@ public class OrderController {
         }
     }
 
-    // 3. 创建订单
-    @PostMapping
-    public ResponseEntity<Map<String, Object>> createOrder(@RequestBody Order order) {
-        try {
-            Order createdOrder = orderService.createOrder(order);
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 201);
-            response.put("message", "订单创建成功");
-            response.put("data", createdOrder);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 400);
-            errorResponse.put("message", "创建订单失败");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
-        }
-    }
 
-    // 4. 创建兑换订单
+    // 创建兑换订单
     @PostMapping("/redemption")
     public ResponseEntity<Map<String, Object>> createRedemptionOrder(@RequestBody Order order) {
         try {
             // 设置为兑换订单
             order.setIsRedemptionOrder(true);
             
-            // 这里可以添加兑换逻辑，比如：
-            // 1. 验证用户积分是否足够
-            // 2. 验证商品是否可兑换
-            // 3. 验证库存是否充足
-            // 4. 扣除用户积分
-            
-            Order createdOrder = orderService.createOrder(order);
+            Order createdOrder = orderService.createRedemptionOrder(order);
             
             Map<String, Object> response = new HashMap<>();
-            response.put("code", 201);
+            response.put("code", 200);
             response.put("message", "兑换订单创建成功");
             response.put("data", createdOrder);
-            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("code", 400);
@@ -188,7 +164,7 @@ public class OrderController {
         }
     }
 
-    // 6. 删除订单
+    //  删除订单
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, Object>> deleteOrder(@PathVariable String id) {
         try {
@@ -206,7 +182,7 @@ public class OrderController {
         }
     }
 
-    // 7. Mobile端专用 - 用户订单历史
+    //  Mobile端专用 - 用户订单历史
     @GetMapping("/mobile/user/{userId}")
     public ResponseEntity<Map<String, Object>> getUserOrderHistoryForMobile(
             @PathVariable String userId,
@@ -277,7 +253,7 @@ public class OrderController {
         }
     }
 
-    // 8. 更新订单状态（单独接口）
+    //  更新订单状态（单独接口）
     @PutMapping("/{id}/status")
     public ResponseEntity<Map<String, Object>> updateOrderStatus(
             @PathVariable String id,

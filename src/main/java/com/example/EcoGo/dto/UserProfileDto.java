@@ -17,7 +17,22 @@ public class UserProfileDto {
     public static class AdminManageUserRequest {
         public boolean isAdmin;
         public boolean vip_status;
+        public boolean isDeactivated; // New field
         public String remark;
+    }
+
+    public static class UserStatusRequest {
+        @com.fasterxml.jackson.annotation.JsonProperty("isDeactivated")
+        public boolean isDeactivated;
+    }
+
+    public static class AdminUpdateUserInfoRequest {
+        // userid passed via PathVariable
+        public String nickname;
+        public String email;
+        public Boolean isVipActive; // Replaces isAdmin
+        @com.fasterxml.jackson.annotation.JsonProperty("isDeactivated")
+        public Boolean isDeactivated;
     }
 
     public static class UserDetailResponse {

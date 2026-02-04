@@ -2,12 +2,12 @@ package com.example.EcoGo.controller;
 
 import com.example.EcoGo.dto.PointsDto;
 import com.example.EcoGo.dto.ResponseMessage;
-import com.example.EcoGo.exception.BusinessException;
-import com.example.EcoGo.exception.errorcode.ErrorCode;
+// import com.example.EcoGo.exception.BusinessException; // Removed
+// import com.example.EcoGo.exception.errorcode.ErrorCode; // Removed
 import com.example.EcoGo.interfacemethods.PointsService;
-import com.example.EcoGo.model.User;
+// import com.example.EcoGo.model.User; // Removed
 import com.example.EcoGo.model.UserPointsLog;
-import com.example.EcoGo.repository.UserRepository;
+// import com.example.EcoGo.repository.UserRepository; // Removed
 import com.example.EcoGo.utils.JwtUtils; // Fixed import package name
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -20,8 +20,7 @@ public class PointsController {
     @Autowired
     private PointsService pointsService;
 
-    @Autowired
-    private UserRepository userRepository; // Need to resolve business ID for admin
+    // UserRepository removed as it's no longer needed in Controller
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -108,9 +107,8 @@ public class PointsController {
      */
     @GetMapping("/api/v1/web/users/{userid}/points/stats/trip")
     public ResponseMessage<PointsDto.TripStatsResponse> getUserTripStats(@PathVariable String userid) {
-        User targetUser = userRepository.findByUserid(userid)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        return ResponseMessage.success(pointsService.getTripStats(targetUser.getId()));
+        // Pass Business ID directly to Service
+        return ResponseMessage.success(pointsService.getTripStats(userid));
     }
 
     /**
@@ -119,10 +117,8 @@ public class PointsController {
      */
     @GetMapping("/api/v1/web/points/user/{userid}/current")
     public ResponseMessage<PointsDto.CurrentPointsResponse> getAdminUserBalance(@PathVariable String userid) {
-        // Resolve Target User Business ID -> UUID
-        User targetUser = userRepository.findByUserid(userid)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        return ResponseMessage.success(pointsService.getCurrentPoints(targetUser.getId()));
+        // Pass Business ID directly to Service
+        return ResponseMessage.success(pointsService.getCurrentPoints(userid));
     }
 
     /**
@@ -131,10 +127,8 @@ public class PointsController {
      */
     @GetMapping("/api/v1/web/points/user/{userid}/history")
     public ResponseMessage<List<PointsDto.PointsLogResponse>> getAdminUserHistory(@PathVariable String userid) {
-        // Resolve Target User Business ID -> UUID
-        User targetUser = userRepository.findByUserid(userid)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        return ResponseMessage.success(pointsService.getPointsHistory(targetUser.getId()));
+        // Pass Business ID directly to Service
+        return ResponseMessage.success(pointsService.getPointsHistory(userid));
     }
 
     /**
@@ -149,24 +143,20 @@ public class PointsController {
             @PathVariable String userid,
             @RequestBody PointsDto.AdjustPointsRequest request) {
 
-        // 1. Resolve Target User Business ID -> UUID
-        User targetUser = userRepository.findByUserid(userid)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-        // 2. Prepare Admin Action Info
+        // 1. Prepare Admin Action Info
         UserPointsLog.AdminAction adminAction = new UserPointsLog.AdminAction();
-        // Extract operator ID from token if needed, or just use "admin"
+        // Extract operator ID from token (Now it IS Business ID)
         String token = authHeader.replace("Bearer ", "");
         String operatorId = jwtUtils.getUserIdFromToken(token);
+
         adminAction.setOperatorId(operatorId);
         adminAction.setReason(request.reason);
         adminAction.setApprovalStatus("approved");
 
-        // 3. Call Service
-        // Use description from request, or fallback to reason if null
+        // 2. Call Service (Pass Business ID directly)
         String description = request.description != null ? request.description : request.reason;
 
-        pointsService.adjustPoints(targetUser.getId(), request.points, request.source, description, adminAction);
+        pointsService.adjustPoints(userid, request.points, request.source, description, null, adminAction);
 
         return ResponseMessage.success("Points adjusted successfully");
     }

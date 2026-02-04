@@ -23,16 +23,16 @@ public class Badge {
 
     private Map<String, String> name; 
     private Map<String, String> description;
-
+    
     @Field("purchase_cost")
-    private int purchaseCost; 
+    private Integer purchaseCost; 
 
     private String category; 
 
     private BadgeIcon icon;
 
     @Field("is_active")
-    private boolean isActive;
+    private Boolean isActive;
 
     @Field("created_at")
     private Date createdAt;

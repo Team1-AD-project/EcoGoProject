@@ -28,4 +28,10 @@ public interface GoodsService {
     
     // 批量更新商品库存
     void batchUpdateStock(BatchStockUpdateRequest request);
+
+    // 兑换用：扣库存
+    void reserveStock(String goodsId, int quantity);
+
+    // 兑换失败回滚库存
+    void releaseStock(String goodsId, int quantity);
 }

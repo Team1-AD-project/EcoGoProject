@@ -6,10 +6,7 @@ import jakarta.validation.constraints.NotBlank;
 public class AuthDto {
 
     public static class MobileRegisterRequest {
-        // @NotBlank(message = "用户ID不能为空")
-        // public String userid;
-        // @NotBlank(message = "手机号不能为空")
-        // public String phone;
+        // UserID is generated from email
         @NotBlank(message = "邮箱不能为空")
         public String email;
         @NotBlank(message = "昵称不能为空")

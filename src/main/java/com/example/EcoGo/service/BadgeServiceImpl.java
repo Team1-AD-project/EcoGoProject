@@ -36,9 +36,9 @@ public class BadgeServiceImpl implements BadgeService {
         
         Badge badge = badgeRepository.findByBadgeId(badgeId)
                 .orElseThrow(() -> new RuntimeException("商品不存在"));
-        
-        int cost = badge.getPurchaseCost();
-        if (cost <= 0) throw new RuntimeException("该徽章不可购买");
+
+        Integer cost = badge.getPurchaseCost();
+        if (cost == null || cost <= 0) throw new RuntimeException("该徽章不可购买");
 
         User user = userRepository.findByUserid(userId)
         .orElseThrow(() -> new RuntimeException("用户不存在"));
@@ -136,18 +136,19 @@ public class BadgeServiceImpl implements BadgeService {
     /**
      * 4. 修改徽章（管理员用）
      */
+    @Transactional
     public Badge updateBadge(String badgeId, Badge updatedBadge) {
         Badge existingBadge = badgeRepository.findByBadgeId(badgeId)
                 .orElseThrow(() -> new RuntimeException("徽章不存在"));
 
-        // 更新字段
+        // 更新字段（只更新非空字段）
         if (updatedBadge.getName() != null) {
             existingBadge.setName(updatedBadge.getName());
         }
         if (updatedBadge.getDescription() != null) {
             existingBadge.setDescription(updatedBadge.getDescription());
         }
-        if (updatedBadge.getPurchaseCost() >= 0) {
+        if (updatedBadge.getPurchaseCost() != null) {
             existingBadge.setPurchaseCost(updatedBadge.getPurchaseCost());
         }
         if (updatedBadge.getCategory() != null) {
@@ -156,8 +157,9 @@ public class BadgeServiceImpl implements BadgeService {
         if (updatedBadge.getIcon() != null) {
             existingBadge.setIcon(updatedBadge.getIcon());
         }
-        // isActive 可能需要显式更新
-        existingBadge.setActive(updatedBadge.isActive());
+        if (updatedBadge.getIsActive() != null) {
+            existingBadge.setIsActive(updatedBadge.getIsActive());
+        }
 
         return badgeRepository.save(existingBadge);
     }
@@ -173,6 +175,7 @@ public class BadgeServiceImpl implements BadgeService {
         // 删除徽章本身
         badgeRepository.delete(badge);
 
+        // 可选：同时删除所有用户持有的该徽章
         // List<UserBadge> userBadges = userBadgeRepository.findByBadgeId(badgeId);
         // userBadgeRepository.deleteAll(userBadges);
     }

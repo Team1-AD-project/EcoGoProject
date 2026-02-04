@@ -4,7 +4,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
 
-@Document(collection = "transport_modes")
+@Document(collection = "transport_modes_dict")
 public class TransportMode {
 
     @Id
