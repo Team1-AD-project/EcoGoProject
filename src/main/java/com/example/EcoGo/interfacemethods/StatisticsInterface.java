@@ -1,37 +1,18 @@
 package com.example.EcoGo.interfacemethods;
 
-import com.example.EcoGo.dto.DashboardStatsDTO;
-import com.example.EcoGo.dto.HeatmapDataDTO;
+import com.example.EcoGo.dto.AnalyticsSummaryDto;
 
-/**
- * 统计分析服务接口
- * 提供运营仪表盘所需的各类统计数据
- */
 public interface StatisticsInterface {
 
     /**
-     * 获取仪表盘综合统计数据
+     * Retrieves all aggregated data needed for the management analytics page.
+     * @param timeRange The time range identifier (e.g., "daily", "weekly", "monthly").
+     * @return A DTO containing all the calculated metrics and trends.
      */
-    DashboardStatsDTO getDashboardStats();
+    AnalyticsSummaryDto getManagementAnalytics(String timeRange);
 
     /**
-     * 获取总碳减排量
-     */
-    Long getTotalCarbonReduction();
-
-    /**
-     * 获取活跃用户数
-     * @param days 最近多少天内活跃
-     */
-    Long getActiveUserCount(int days);
-
-    /**
-     * 获取奖励兑换量
+     * Gets the total volume of points redeemed.
      */
     Long getRedemptionVolume();
-
-    /**
-     * 获取碳排热力图数据
-     */
-    HeatmapDataDTO.HeatmapSummary getEmissionHeatmap();
 }
