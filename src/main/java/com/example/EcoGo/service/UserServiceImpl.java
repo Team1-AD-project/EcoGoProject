@@ -74,7 +74,7 @@ public class UserServiceImpl implements UserInterface {
 
         // Set Default Preferences (User doesn't provide them at registration)
         User.Preferences preferences = new User.Preferences();
-        preferences.setPreferredTransport("bus");
+        preferences.setPreferredTransport(new java.util.ArrayList<>(java.util.List.of("bus"))); // Default List
         preferences.setEnablePush(true);
         preferences.setEnableEmail(true); // Default to true since they registered with email
         preferences.setEnableBusReminder(true);
@@ -83,6 +83,17 @@ public class UserServiceImpl implements UserInterface {
         preferences.setShareLocation(true);
         preferences.setShowOnLeaderboard(true);
         preferences.setShareAchievements(true);
+
+        // New Fields Defaults
+        preferences.setDormitoryOrResidence(null);
+        preferences.setMainTeachingBuilding(null);
+        preferences.setFavoriteStudySpot(null);
+        preferences.setInterests(new java.util.ArrayList<>());
+        preferences.setWeeklyGoals(0);
+        preferences.setNewChallenges(false);
+        preferences.setActivityReminders(false);
+        preferences.setFriendActivity(false);
+
         user.setPreferences(preferences);
 
         user.setCreatedAt(LocalDateTime.now());
@@ -232,13 +243,23 @@ public class UserServiceImpl implements UserInterface {
         User.Preferences defaultPref = new User.Preferences();
         defaultPref.setLanguage("zh");
         defaultPref.setTheme("light");
-        defaultPref.setPreferredTransport("bus");
+        defaultPref.setPreferredTransport(new java.util.ArrayList<>(java.util.List.of("bus")));
         defaultPref.setEnablePush(true);
         defaultPref.setEnableEmail(true);
         defaultPref.setEnableBusReminder(true);
         defaultPref.setShareLocation(true);
         defaultPref.setShowOnLeaderboard(true);
         defaultPref.setShareAchievements(true);
+
+        // Reset new fields
+        defaultPref.setDormitoryOrResidence(null);
+        defaultPref.setMainTeachingBuilding(null);
+        defaultPref.setFavoriteStudySpot(null);
+        defaultPref.setInterests(new java.util.ArrayList<>());
+        defaultPref.setWeeklyGoals(0);
+        defaultPref.setNewChallenges(false);
+        defaultPref.setActivityReminders(false);
+        defaultPref.setFriendActivity(false);
 
         user.setPreferences(defaultPref);
         user.setUpdatedAt(LocalDateTime.now());
@@ -373,13 +394,69 @@ public class UserServiceImpl implements UserInterface {
         return performUpdate(user, request);
     }
 
+    @Override
+    public UserProfileDto.UpdateProfileResponse updateMobileProfileByUserId(String userid,
+            UserProfileDto.UpdateProfileRequest request) {
+        User user = userRepository.findByUserid(userid)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        return performUpdate(user, request);
+    }
+
     private UserProfileDto.UpdateProfileResponse performUpdate(User user, UserProfileDto.UpdateProfileRequest request) {
         if (request.nickname != null)
             user.setNickname(request.nickname);
         if (request.avatar != null)
             user.setAvatar(request.avatar);
-        if (request.preferences != null)
-            user.setPreferences(request.preferences);
+        if (request.phone != null)
+            user.setPhone(request.phone);
+        if (request.faculty != null)
+            user.setFaculty(request.faculty);
+
+        if (request.preferences != null) {
+            User.Preferences userPref = user.getPreferences();
+            if (userPref == null) {
+                userPref = new User.Preferences();
+                user.setPreferences(userPref);
+            }
+            UserProfileDto.PreferencesDto reqPref = request.preferences;
+
+            if (reqPref.preferredTransport != null)
+                userPref.setPreferredTransport(reqPref.preferredTransport);
+            if (reqPref.enablePush != null)
+                userPref.setEnablePush(reqPref.enablePush);
+            if (reqPref.enableEmail != null)
+                userPref.setEnableEmail(reqPref.enableEmail);
+            if (reqPref.enableBusReminder != null)
+                userPref.setEnableBusReminder(reqPref.enableBusReminder);
+            if (reqPref.language != null)
+                userPref.setLanguage(reqPref.language);
+            if (reqPref.theme != null)
+                userPref.setTheme(reqPref.theme);
+            if (reqPref.shareLocation != null)
+                userPref.setShareLocation(reqPref.shareLocation);
+            if (reqPref.showOnLeaderboard != null)
+                userPref.setShowOnLeaderboard(reqPref.showOnLeaderboard);
+            if (reqPref.shareAchievements != null)
+                userPref.setShareAchievements(reqPref.shareAchievements);
+
+            // New Fields Update
+            if (reqPref.dormitoryOrResidence != null)
+                userPref.setDormitoryOrResidence(reqPref.dormitoryOrResidence);
+            if (reqPref.mainTeachingBuilding != null)
+                userPref.setMainTeachingBuilding(reqPref.mainTeachingBuilding);
+            if (reqPref.favoriteStudySpot != null)
+                userPref.setFavoriteStudySpot(reqPref.favoriteStudySpot);
+            if (reqPref.interests != null)
+                userPref.setInterests(reqPref.interests);
+            if (reqPref.weeklyGoals != null)
+                userPref.setWeeklyGoals(reqPref.weeklyGoals);
+            if (reqPref.newChallenges != null)
+                userPref.setNewChallenges(reqPref.newChallenges);
+            if (reqPref.activityReminders != null)
+                userPref.setActivityReminders(reqPref.activityReminders);
+            if (reqPref.friendActivity != null)
+                userPref.setFriendActivity(reqPref.friendActivity);
+        }
 
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
