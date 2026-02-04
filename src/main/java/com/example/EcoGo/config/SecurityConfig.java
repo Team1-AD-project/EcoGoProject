@@ -2,6 +2,7 @@ package com.example.EcoGo.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -41,6 +42,8 @@ public class SecurityConfig {
                                                 .permitAll()
                                                 .requestMatchers("/api/v1/web/users/login").permitAll()
                                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger
+
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/orders").hasRole("ADMIN")
 
                                                 // Secured Endpoints
                                                 .requestMatchers("/api/v1/mobile/**").authenticated()
