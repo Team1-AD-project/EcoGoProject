@@ -34,12 +34,22 @@ public class GoodsController {
 
         List<Goods> goodsList = goodsService.getAllGoods();
 
+        goodsList = goodsList.stream()
+                .filter(g -> g.getType() == null || !g.getType().trim().equalsIgnoreCase("voucher"))
+                .collect(Collectors.toList());
+
         // 筛选逻辑
         if (category != null && !category.isEmpty()) {
+        String c = category.trim().toLowerCase();
+
+        // ✅ all items / all：表示不过滤
+        if (!c.equals("all") && !c.equals("all items")) {
             goodsList = goodsList.stream()
-                    .filter(goods -> category.equals(goods.getCategory()))
+                    .filter(g -> g.getCategory() != null && c.equals(g.getCategory().trim().toLowerCase()))
                     .collect(Collectors.toList());
         }
+}
+
 
         if (keyword != null && !keyword.isEmpty()) {
             String kw = keyword.toLowerCase();
@@ -94,12 +104,26 @@ public class GoodsController {
         }
     }
 
-    // 3. 创建商品
     @PostMapping
     public ResponseMessage<Goods> createGoods(@RequestBody Goods goods) {
         if (goods == null) {
             throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "goods");
         }
+
+        // ✅ 库存不能为负数
+        if (goods.getStock() != null && goods.getStock() < 0) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "stock cannot be negative");
+        }
+
+        // ✅ category 必须在允许范围内（如果你不想强制必填，把 isBlank 的分支删掉即可）
+        if (goods.getCategory() == null || goods.getCategory().isBlank()) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "category cannot be empty");
+        }
+        String c = goods.getCategory().trim().toLowerCase();
+        if (!List.of("food", "beverage", "merchandise", "service").contains(c)) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "invalid category: " + goods.getCategory());
+        }
+        goods.setCategory(c); // 统一存小写，避免大小写导致前端过滤不到
 
         try {
             Goods createdGoods = goodsService.createGoods(goods);
@@ -111,7 +135,6 @@ public class GoodsController {
         }
     }
 
-    // 4. 更新商品
     @PutMapping("/{id}")
     public ResponseMessage<Goods> updateGoods(@PathVariable String id, @RequestBody Goods goods) {
         if (id == null || id.isBlank()) {
@@ -121,18 +144,33 @@ public class GoodsController {
             throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "goods");
         }
 
+        // ✅ 库存不能为负数
+        if (goods.getStock() != null && goods.getStock() < 0) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "stock cannot be negative");
+        }
+
+        // ✅ category（如果前端更新时不一定传 category，可把这一段改成 “传了才校验”）
+        if (goods.getCategory() != null && !goods.getCategory().isBlank()) {
+            String c = goods.getCategory().trim().toLowerCase();
+            if (!List.of("food", "beverage", "merchandise", "service").contains(c)) {
+                throw new BusinessException(ErrorCode.PARAM_ERROR, "invalid category: " + goods.getCategory());
+            }
+            goods.setCategory(c);
+        }
+
         try {
             Goods updatedGoods = goodsService.updateGoods(id, goods);
             return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), updatedGoods);
         } catch (BusinessException be) {
             throw be;
         } catch (RuntimeException re) {
-            // 你原逻辑：RuntimeException => 404
             throw new BusinessException(ErrorCode.PRODUCT_NOT_EXIST, id);
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.DB_ERROR);
         }
     }
+
+
 
     // 5. 删除商品
     @DeleteMapping("/{id}")
@@ -160,20 +198,6 @@ public class GoodsController {
         try {
             goodsService.deleteAllGoods();
             return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), null);
-        } catch (BusinessException be) {
-            throw be;
-        } catch (Exception e) {
-            throw new BusinessException(ErrorCode.DB_ERROR);
-        }
-    }
-
-    // 7. 插入测试数据
-    @PostMapping("/test")
-    public ResponseMessage<List<Goods>> insertTestData() {
-        try {
-            goodsService.insertTestData();
-            List<Goods> all = goodsService.getAllGoods();
-            return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), all);
         } catch (BusinessException be) {
             throw be;
         } catch (Exception e) {
@@ -211,7 +235,6 @@ public class GoodsController {
         List<Goods> redemptionGoods = allGoods.stream()
                 .filter(goods -> Boolean.TRUE.equals(goods.getIsForRedemption()))
                 .filter(goods -> goods.getStock() > 0)
-                .filter(goods -> vipLevel == null || goods.getVipLevelRequired() <= vipLevel)
                 .collect(Collectors.toList());
 
         List<Map<String, Object>> simplifiedGoods = redemptionGoods.stream()
@@ -223,11 +246,50 @@ public class GoodsController {
                     item.put("imageUrl", goods.getImageUrl());
                     item.put("redemptionPoints", goods.getRedemptionPoints());
                     item.put("stock", goods.getStock());
-                    item.put("vipLevelRequired", goods.getVipLevelRequired());
                     return item;
                 })
                 .collect(Collectors.toList());
 
         return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), simplifiedGoods);
     }
+
+    // 返回所有商品分类（给前端 Tabs 用）
+   @GetMapping("/categories")
+    public ResponseMessage<Map<String, Object>> getGoodsCategories() {
+
+        List<String> categories = List.of("food", "beverage", "merchandise", "service");
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("categories", categories);
+
+        // ✅ 这个不是分类，是“不过滤”的特殊 key
+        data.put("allItemsKey", "all items");
+
+        // 可选：默认 tab
+        data.put("default", "all items");
+
+        return new ResponseMessage<>(
+                ErrorCode.SUCCESS.getCode(),
+                ErrorCode.SUCCESS.getMessage(),
+                data
+    );
+}
+
+    @GetMapping("/coupons")
+    public ResponseMessage<List<Goods>> getVoucherMarketplace() {
+        try {
+            List<Goods> goodsList = goodsService.getAllGoods();
+
+            goodsList = goodsList.stream()
+                    .filter(g -> g.getType() != null && g.getType().equalsIgnoreCase("voucher"))
+                    .filter(g -> Boolean.TRUE.equals(g.getIsActive()))
+                    .filter(g -> Boolean.TRUE.equals(g.getIsForRedemption()))
+                    .toList();
+
+            return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), goodsList);
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.DB_ERROR, e.getMessage());
+        }
+    }
+
 }

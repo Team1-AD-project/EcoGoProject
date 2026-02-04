@@ -5,6 +5,8 @@ import com.example.EcoGo.model.Inventory;
 import com.example.EcoGo.repository.GoodsRepository;
 import com.example.EcoGo.repository.InventoryRepository;
 import com.example.EcoGo.dto.BatchStockUpdateRequest;
+import com.example.EcoGo.exception.BusinessException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -14,6 +16,8 @@ import org.springframework.data.mongodb.core.FindAndModifyOptions;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
+import com.example.EcoGo.exception.errorcode.ErrorCode;
+
 
 
 import java.util.Arrays;
@@ -91,6 +95,12 @@ public class GoodsServiceImpl implements GoodsService {
         goods.setCreatedAt(new Date());
         goods.setUpdatedAt(new Date());
 
+         // ✅ 兜底：null 当 0，负数直接改为 0（或改成抛异常，二选一）
+        Integer stock = goods.getStock();
+        if (stock == null) stock = 0;
+        if (stock < 0) stock = 0;  // 如果你想严格：这里改成 throw new BusinessException(...)
+        goods.setStock(stock);
+
         Goods saved = goodsRepository.save(goods);
 
     // ✅ 同步库存到 inventory（id = goodsId）
@@ -112,6 +122,13 @@ public class GoodsServiceImpl implements GoodsService {
     // 更新商品
     @Override
     public Goods updateGoods(String id, Goods goods) {
+
+         // ✅ 兜底：null 当 0，负数直接改为 0（或改成抛异常，二选一）
+        Integer stock = goods.getStock();
+        if (stock != null && stock < 0) {
+            throw new BusinessException(ErrorCode.DB_ERROR, "stock cannot be negative");
+        }
+
         Optional<Goods> existingGoods = goodsRepository.findById(id);
         if (existingGoods.isPresent()) {
             Goods updatedGoods = existingGoods.get();
@@ -125,7 +142,6 @@ public class GoodsServiceImpl implements GoodsService {
             updatedGoods.setIsActive(goods.getIsActive());
             updatedGoods.setIsForRedemption(goods.getIsForRedemption());
             updatedGoods.setRedemptionPoints(goods.getRedemptionPoints());
-            updatedGoods.setVipLevelRequired(goods.getVipLevelRequired());
             updatedGoods.setRedemptionLimit(goods.getRedemptionLimit());
             updatedGoods.setUpdatedAt(new Date());
             updatedGoods.setUpdatedAt(new Date());
@@ -189,21 +205,18 @@ public class GoodsServiceImpl implements GoodsService {
         testGoods.get(0).setImageUrl("/images/water-cup.jpg");
         testGoods.get(0).setIsForRedemption(true);
         testGoods.get(0).setRedemptionPoints(500);
-        testGoods.get(0).setVipLevelRequired(0);
 
         testGoods.get(1).setCategory("服装");
         testGoods.get(1).setBrand("EcoFashion");
         testGoods.get(1).setImageUrl("/images/t-shirt.jpg");
         testGoods.get(1).setIsForRedemption(true);
         testGoods.get(1).setRedemptionPoints(800);
-        testGoods.get(1).setVipLevelRequired(1);
 
         testGoods.get(2).setCategory("电子产品");
         testGoods.get(2).setBrand("EcoTech");
         testGoods.get(2).setImageUrl("/images/power-bank.jpg");
         testGoods.get(2).setIsForRedemption(true);
         testGoods.get(2).setRedemptionPoints(2000);
-        testGoods.get(2).setVipLevelRequired(2);
 
         testGoods.get(3).setCategory("厨房用品");
         testGoods.get(3).setBrand("EcoKitchen");
@@ -216,7 +229,6 @@ public class GoodsServiceImpl implements GoodsService {
         testGoods.get(4).setImageUrl("/images/bin.jpg");
         testGoods.get(4).setIsForRedemption(true);
         testGoods.get(4).setRedemptionPoints(1200);
-        testGoods.get(4).setVipLevelRequired(1);
 
         // ✅ 先保存 goods 以获取 id
         List<Goods> savedGoods = goodsRepository.saveAll(testGoods);
