@@ -1,33 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  Crown, 
-  Users, 
-  CheckCircle, 
-  XCircle, 
+import {
+  Crown,
+  Users,
+  CheckCircle,
+  XCircle,
   Calendar,
   TrendingUp,
   Settings,
-  Zap
+  Zap,
+  Loader2
 } from 'lucide-react';
-
-interface VIPUser {
-  id: string;
-  name: string;
-  avatar: string;
-  email: string;
-  subscriptionType: 'monthly' | 'quarterly' | 'yearly';
-  startDate: string;
-  endDate: string;
-  status: 'active' | 'expiring' | 'expired';
-  autoRenew: boolean;
-  totalSpent: number;
-}
+import { fetchUserList, type User } from '@/services/userService';
+import { toast } from 'sonner';
 
 interface VIPFeature {
   id: string;
@@ -38,81 +28,8 @@ interface VIPFeature {
 }
 
 export function VIPManagement() {
-  const [vipUsers, setVipUsers] = useState<VIPUser[]>([
-    {
-      id: 'U001',
-      name: 'John Smith',
-      avatar: 'JS',
-      email: 'john.smith@example.com',
-      subscriptionType: 'monthly',
-      startDate: '2026-01-01',
-      endDate: '2026-02-01',
-      status: 'active',
-      autoRenew: true,
-      totalSpent: 2400
-    },
-    {
-      id: 'U003',
-      name: 'Michael Brown',
-      avatar: 'MB',
-      email: 'michael.b@example.com',
-      subscriptionType: 'yearly',
-      startDate: '2025-12-15',
-      endDate: '2026-12-15',
-      status: 'active',
-      autoRenew: true,
-      totalSpent: 9600
-    },
-    {
-      id: 'U005',
-      name: 'David Wilson',
-      avatar: 'DW',
-      email: 'david.w@example.com',
-      subscriptionType: 'quarterly',
-      startDate: '2026-01-10',
-      endDate: '2026-04-10',
-      status: 'active',
-      autoRenew: false,
-      totalSpent: 3600
-    },
-    {
-      id: 'U007',
-      name: 'Robert Chen',
-      avatar: 'RC',
-      email: 'robert.c@example.com',
-      subscriptionType: 'monthly',
-      startDate: '2025-12-20',
-      endDate: '2026-01-28',
-      status: 'expiring',
-      autoRenew: false,
-      totalSpent: 1200
-    },
-    {
-      id: 'U008',
-      name: 'William Taylor',
-      avatar: 'WT',
-      email: 'william.t@example.com',
-      subscriptionType: 'yearly',
-      startDate: '2025-06-01',
-      endDate: '2026-06-01',
-      status: 'active',
-      autoRenew: true,
-      totalSpent: 9600
-    },
-    {
-      id: 'U010',
-      name: 'James Anderson',
-      avatar: 'JA',
-      email: 'james.a@example.com',
-      subscriptionType: 'monthly',
-      startDate: '2025-12-24',
-      endDate: '2026-01-24',
-      status: 'active',
-      autoRenew: true,
-      totalSpent: 2400
-    }
-  ]);
-
+  const [users, setUsers] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [vipFeatures, setVipFeatures] = useState<VIPFeature[]>([
     {
       id: 'F001',
@@ -151,52 +68,82 @@ export function VIPManagement() {
     }
   ]);
 
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  const loadUsers = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch a larger list to find VIPs. In a real app, backend should support filtering by VIP status.
+      // For now, fetching first 100 users.
+      const response = await fetchUserList(1, 100);
+      if (response && response.code === 200) {
+        setUsers(response.data?.list || []);
+      } else {
+        toast.error('Failed to fetch users');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Error loading users');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleToggleAutoRenew = (userId: string) => {
-    setVipUsers(vipUsers.map(user => 
-      user.id === userId ? { ...user, autoRenew: !user.autoRenew } : user
+    // Optimistic update - in real app, call API to toggle
+    setUsers(users.map(user =>
+      user.id === userId && user.vip ? { ...user, vip: { ...user.vip, autoRenew: !user.vip.autoRenew } } : user
     ));
+    toast.success('Auto-renew updated locally');
   };
 
   const handleToggleFeature = (featureId: string) => {
-    setVipFeatures(vipFeatures.map(feature => 
+    setVipFeatures(vipFeatures.map(feature =>
       feature.id === featureId ? { ...feature, enabled: !feature.enabled } : feature
     ));
   };
 
-  const getSubscriptionBadge = (type: VIPUser['subscriptionType']) => {
-    const colors = {
-      monthly: 'bg-blue-100 text-blue-700',
-      quarterly: 'bg-purple-100 text-purple-700',
-      yearly: 'bg-amber-100 text-amber-700'
-    };
-    const labels = {
-      monthly: 'Monthly',
-      quarterly: 'Quarterly',
-      yearly: 'Yearly'
-    };
-    return <Badge className={colors[type]}>{labels[type]}</Badge>;
+  // Filter only users who are VIPs or have a plan
+  const vipUsers = users.filter(u => u.vip?.active || u.vip?.plan);
+
+  const activeCount = vipUsers.filter(u => u.vip?.active).length;
+  // Calculate expiring soon (e.g., within 7 days)
+  const expiringCount = vipUsers.filter(u => {
+    if (!u.vip?.expiryDate) return false;
+    const days = Math.ceil((new Date(u.vip.expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+    return days > 0 && days <= 7;
+  }).length;
+
+  // Total Revenue Estimate: Sum of (Total Earned - Current Balance) for VIP users
+  // Note: This is an approximation as per user instruction.
+  const totalRevenue = vipUsers.reduce((sum, user) => sum + Math.max(0, user.totalPoints - user.currentPoints), 0);
+
+  const getPlanBadgeColor = (plan: string | null) => {
+    if (!plan) return 'bg-gray-100 text-gray-700';
+    const p = plan.toLowerCase();
+    if (p.includes('month')) return 'bg-blue-100 text-blue-700';
+    if (p.includes('quarter')) return 'bg-purple-100 text-purple-700';
+    if (p.includes('year')) return 'bg-amber-100 text-amber-700';
+    return 'bg-gray-100 text-gray-700';
   };
 
-  const getStatusBadge = (status: VIPUser['status']) => {
-    const colors = {
-      active: 'bg-green-100 text-green-700',
-      expiring: 'bg-orange-100 text-orange-700',
-      expired: 'bg-red-100 text-red-700'
-    };
-    const labels = {
-      active: 'Active',
-      expiring: 'Expiring Soon',
-      expired: 'Expired'
-    };
-    return <Badge className={colors[status]}>{labels[status]}</Badge>;
+  const getStatusBadge = (user: User) => {
+    if (user.vip?.active) {
+      // Check if expiring
+      if (user.vip.expiryDate) {
+        const days = Math.ceil((new Date(user.vip.expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+        if (days <= 0) return <Badge className="bg-red-100 text-red-700">Expired</Badge>;
+        if (days <= 7) return <Badge className="bg-orange-100 text-orange-700">Expiring Soon</Badge>;
+      }
+      return <Badge className="bg-green-100 text-green-700">Active</Badge>;
+    }
+    return <Badge className="bg-red-100 text-red-700">Expired</Badge>;
   };
-
-  const activeCount = vipUsers.filter(u => u.status === 'active').length;
-  const expiringCount = vipUsers.filter(u => u.status === 'expiring').length;
-  const totalRevenue = vipUsers.reduce((sum, user) => sum + user.totalSpent, 0);
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-gray-50 min-h-full">
       {/* Header */}
       <div>
         <h2 className="text-2xl font-bold text-gray-900">VIP Subscription Management</h2>
@@ -244,8 +191,9 @@ export function VIPManagement() {
         <Card className="p-4">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm text-gray-600">Total Revenue</p>
-              <p className="text-3xl font-bold text-blue-600 mt-1">${totalRevenue}</p>
+              <p className="text-sm text-gray-600">Est. Revenue</p>
+              <p className="text-3xl font-bold text-blue-600 mt-1">{totalRevenue}</p>
+              <p className="text-xs text-gray-500 mt-1">pts spent</p>
             </div>
             <div className="size-12 bg-blue-50 rounded-lg flex items-center justify-center">
               <TrendingUp className="size-6 text-blue-600" />
@@ -276,65 +224,86 @@ export function VIPManagement() {
             </div>
             <ScrollArea className="h-[600px]">
               <div className="p-4 space-y-4">
-                {vipUsers.map((user) => (
-                  <Card key={user.id} className="p-4 hover:shadow-md transition-shadow">
-                    <div className="flex items-start gap-4">
-                      <Avatar className="size-14 flex-shrink-0">
-                        <AvatarFallback className="bg-purple-600 text-white text-lg">
-                          {user.avatar}
-                        </AvatarFallback>
-                      </Avatar>
-                      
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h4 className="font-semibold text-gray-900">{user.name}</h4>
-                          {getSubscriptionBadge(user.subscriptionType)}
-                          {getStatusBadge(user.status)}
-                        </div>
-                        
-                        <p className="text-sm text-gray-600 mb-3">{user.email}</p>
-                        
-                        <div className="grid grid-cols-2 gap-4 mb-3">
-                          <div>
-                            <p className="text-xs text-gray-500">Start Date</p>
-                            <p className="text-sm font-medium text-gray-900">{user.startDate}</p>
+                {isLoading ? (
+                  <div className="text-center py-12 flex flex-col items-center justify-center text-gray-500">
+                    <Loader2 className="size-8 animate-spin mb-2" />
+                    Loading VIP users...
+                  </div>
+                ) : vipUsers.length === 0 ? (
+                  <div className="text-center py-12 text-gray-500">
+                    No VIP users found.
+                  </div>
+                ) : (
+                  vipUsers.map((user) => (
+                    <Card key={user.id} className="p-4 hover:shadow-md transition-shadow">
+                      <div className="flex items-start gap-4">
+                        <Avatar className="size-14 flex-shrink-0">
+                          <AvatarFallback className="bg-purple-600 text-white text-lg">
+                            {user.nickname?.substring(0, 2).toUpperCase() || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h4 className="font-semibold text-gray-900">{user.nickname}</h4>
+                            <Badge className={getPlanBadgeColor(user.vip?.plan)}>
+                              {user.vip?.plan || 'Unknown Plan'}
+                            </Badge>
+                            {getStatusBadge(user)}
                           </div>
-                          <div>
-                            <p className="text-xs text-gray-500">End Date</p>
-                            <p className="text-sm font-medium text-gray-900">{user.endDate}</p>
+
+                          <p className="text-sm text-gray-600 mb-3">{user.email}</p>
+
+                          <div className="grid grid-cols-2 gap-4 mb-3">
+                            <div>
+                              <p className="text-xs text-gray-500">Start Date</p>
+                              <p className="text-sm font-medium text-gray-900">
+                                {user.vip?.startDate ? new Date(user.vip.startDate).toLocaleDateString() : 'N/A'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500">End Date</p>
+                              <p className="text-sm font-medium text-gray-900">
+                                {user.vip?.expiryDate ? new Date(user.vip.expiryDate).toLocaleDateString() : 'N/A'}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500">Total Spent</p>
+                              <p className="text-sm font-medium text-blue-600">
+                                {Math.max(0, user.totalPoints - user.currentPoints)} pts
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-xs text-gray-500">Days Remaining</p>
+                              <p className="text-sm font-medium text-gray-900">
+                                {user.vip?.expiryDate
+                                  ? Math.max(0, Math.ceil((new Date(user.vip.expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24)))
+                                  : 0} days
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="text-xs text-gray-500">Total Spent</p>
-                            <p className="text-sm font-medium text-blue-600">${user.totalSpent}</p>
-                          </div>
-                          <div>
-                            <p className="text-xs text-gray-500">Days Remaining</p>
-                            <p className="text-sm font-medium text-gray-900">
-                              {Math.ceil((new Date(user.endDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24))} days
-                            </p>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center justify-between pt-3 border-t">
-                          <div className="flex items-center gap-2">
-                            <Switch
-                              checked={user.autoRenew}
-                              onCheckedChange={() => handleToggleAutoRenew(user.id)}
-                            />
-                            <span className="text-sm text-gray-700">Auto Renew</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            {user.autoRenew ? (
-                              <CheckCircle className="size-4 text-green-600" />
-                            ) : (
-                              <XCircle className="size-4 text-gray-400" />
-                            )}
+
+                          <div className="flex items-center justify-between pt-3 border-t">
+                            <div className="flex items-center gap-2">
+                              <Switch
+                                checked={user.vip?.autoRenew || false}
+                                onCheckedChange={() => handleToggleAutoRenew(user.id)}
+                              />
+                              <span className="text-sm text-gray-700">Auto Renew</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {user.vip?.autoRenew ? (
+                                <CheckCircle className="size-4 text-green-600" />
+                              ) : (
+                                <XCircle className="size-4 text-gray-400" />
+                              )}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  ))
+                )}
               </div>
             </ScrollArea>
           </Card>
