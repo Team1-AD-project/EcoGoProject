@@ -453,4 +453,36 @@ public class UserServiceImpl implements UserInterface {
             throw new BusinessException(ErrorCode.NO_PERMISSION, "Token is invalid or expired");
         }
     }
+
+    @Override
+    public void activateVip(String userId, int durationDays) {
+        User user = userRepository.findByUserid(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        User.Vip vip = user.getVip();
+        if (vip == null) {
+            vip = new User.Vip();
+            user.setVip(vip);
+        }
+
+        LocalDateTime now = LocalDateTime.now();
+
+        // Extend if already active, otherwise start new
+        if (vip.isActive() && vip.getExpiryDate() != null && vip.getExpiryDate().isAfter(now)) {
+            // User requested startDate to update even on extension (acting as "Last Renewal
+            // Date")
+            vip.setStartDate(now);
+            vip.setExpiryDate(vip.getExpiryDate().plusDays(durationDays));
+        } else {
+            vip.setActive(true);
+            vip.setStartDate(now);
+            vip.setExpiryDate(now.plusDays(durationDays));
+            vip.setPlan("MONTHLY"); // Default from redemption
+            vip.setPointsMultiplier(2);
+            vip.setAutoRenew(false); // No auto-renew for redemption
+        }
+
+        userRepository.save(user);
+        logger.info("VIP Activated/Extended for user: {}, duration: {} days", userId, durationDays);
+    }
 }
