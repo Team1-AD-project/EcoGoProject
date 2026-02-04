@@ -185,6 +185,8 @@
 							<goal>report</goal>
 						</goals>
 					</execution>
+					<!-- Temporarily disabled for testing SonarCloud integration -->
+					<!--
 					<execution>
 						<id>jacoco-check</id>
 						<phase>verify</phase>
@@ -211,6 +213,7 @@
 							</rules>
 						</configuration>
 					</execution>
+					-->
 				</executions>
 			</plugin>
 

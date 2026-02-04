@@ -238,21 +238,23 @@ jobs:
           # Detect if using SonarCloud and add organization parameter
           if [[ "${{ env.SONAR_HOST_URL }}" == *"sonarcloud.io"* ]]; then
             echo "Using SonarCloud - adding organization parameter"
-            mvn clean verify sonar:sonar \
-              -Dsonar.projectKey=ecogo \
+            mvn clean verify sonar:sonar -X -e \
+              -Dsonar.projectKey=team1-ad-project \
               -Dsonar.organization=team1-ad-project \
               -Dsonar.sources=src/main \
               -Dsonar.tests=src/test \
               -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
-              -Dsonar.login=${{ env.SONAR_TOKEN }}
+              -Dsonar.login=${{ env.SONAR_TOKEN }} \
+              -Dsonar.verbose=true
           else
             echo "Using self-hosted SonarQube"
-            mvn clean verify sonar:sonar \
-              -Dsonar.projectKey=ecogo \
+            mvn clean verify sonar:sonar -X -e \
+              -Dsonar.projectKey=team1-ad-project \
               -Dsonar.sources=src/main \
               -Dsonar.tests=src/test \
               -Dsonar.host.url=${{ env.SONAR_HOST_URL }} \
-              -Dsonar.login=${{ env.SONAR_TOKEN }}
+              -Dsonar.login=${{ env.SONAR_TOKEN }} \
+              -Dsonar.verbose=true
           fi
         continue-on-error: true
 
