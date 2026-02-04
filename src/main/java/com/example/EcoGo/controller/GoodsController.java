@@ -1,12 +1,14 @@
 package com.example.EcoGo.controller;
 
-import com.example.EcoGo.model.Goods;
-import com.example.EcoGo.service.GoodsService;
 import com.example.EcoGo.dto.BatchStockUpdateRequest;
+import com.example.EcoGo.exception.BusinessException;
+import com.example.EcoGo.exception.errorcode.ErrorCode;
+import com.example.EcoGo.model.Goods;
+import com.example.EcoGo.dto.ResponseMessage;
+import com.example.EcoGo.service.GoodsService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,243 +22,199 @@ public class GoodsController {
     @Autowired
     private GoodsService goodsService;
 
-    // 1. 获取所有商品
+    // 1. 获取所有商品（支持筛选 + 分页）
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getAllGoods(
+    public ResponseMessage<Map<String, Object>> getAllGoods(
             @RequestParam(required = false, defaultValue = "1") int page,
             @RequestParam(required = false, defaultValue = "20") int size,
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Boolean isForRedemption) {
-        
-        try {
-            List<Goods> goodsList = goodsService.getAllGoods();
-            
-            // 筛选逻辑
-            if (category != null && !category.isEmpty()) {
-                goodsList = goodsList.stream()
+            @RequestParam(required = false) Boolean isForRedemption
+    ) {
+
+        List<Goods> goodsList = goodsService.getAllGoods();
+
+        // 筛选逻辑
+        if (category != null && !category.isEmpty()) {
+            goodsList = goodsList.stream()
                     .filter(goods -> category.equals(goods.getCategory()))
                     .collect(Collectors.toList());
-            }
-            
-            if (keyword != null && !keyword.isEmpty()) {
-                goodsList = goodsList.stream()
-                    .filter(goods -> 
-                        goods.getName().toLowerCase().contains(keyword.toLowerCase()) ||
-                        (goods.getDescription() != null && goods.getDescription().toLowerCase().contains(keyword.toLowerCase()))
+        }
+
+        if (keyword != null && !keyword.isEmpty()) {
+            String kw = keyword.toLowerCase();
+            goodsList = goodsList.stream()
+                    .filter(goods ->
+                            goods.getName() != null && goods.getName().toLowerCase().contains(kw)
+                                    || (goods.getDescription() != null && goods.getDescription().toLowerCase().contains(kw))
                     )
                     .collect(Collectors.toList());
-            }
-            
-            if (isForRedemption != null) {
-                goodsList = goodsList.stream()
+        }
+
+        if (isForRedemption != null) {
+            goodsList = goodsList.stream()
                     .filter(goods -> isForRedemption.equals(goods.getIsForRedemption()))
                     .collect(Collectors.toList());
-            }
-            
-            // 分页逻辑
-            int total = goodsList.size();
-            int fromIndex = (page - 1) * size;
-            int toIndex = Math.min(fromIndex + size, total);
-            
-            if (fromIndex < total) {
-                goodsList = goodsList.subList(fromIndex, toIndex);
-            } else {
-                goodsList = List.of();
-            }
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("message", "获取商品列表成功");
-            response.put("data", goodsList);
-            response.put("pagination", Map.of(
+        }
+
+        // 分页逻辑
+        int total = goodsList.size();
+        int fromIndex = Math.max(0, (page - 1) * size);
+        int toIndex = Math.min(fromIndex + size, total);
+
+        List<Goods> pageItems = (fromIndex < total) ? goodsList.subList(fromIndex, toIndex) : List.of();
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("items", pageItems);
+        data.put("pagination", Map.of(
                 "page", page,
                 "size", size,
                 "total", total,
                 "totalPages", (int) Math.ceil((double) total / size)
-            ));
-            
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 500);
-            errorResponse.put("message", "获取商品列表失败");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
+        ));
+
+        return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), data);
     }
 
     // 2. 获取单个商品详情
     @GetMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> getGoodsById(@PathVariable String id) {
+    public ResponseMessage<Goods> getGoodsById(@PathVariable String id) {
+        if (id == null || id.isBlank()) {
+            throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "id");
+        }
+
         try {
             Goods goods = goodsService.getGoodsById(id);
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("message", "获取商品成功");
-            response.put("data", goods);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 404);
-            errorResponse.put("message", "商品未找到");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 500);
-            errorResponse.put("message", "获取商品失败");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), goods);
+        } catch (BusinessException be) {
+            throw be; // 已经是标准错误码，直接抛给全局处理器
+        } catch (RuntimeException re) {
+            // 你原逻辑：RuntimeException => 404
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_EXIST, id);
         }
     }
 
     // 3. 创建商品
     @PostMapping
-    public ResponseEntity<Map<String, Object>> createGoods(@RequestBody Goods goods) {
+    public ResponseMessage<Goods> createGoods(@RequestBody Goods goods) {
+        if (goods == null) {
+            throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "goods");
+        }
+
         try {
             Goods createdGoods = goodsService.createGoods(goods);
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("message", "商品创建成功");
-            response.put("data", createdGoods);
-            return ResponseEntity.ok(response);
+            return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), createdGoods);
+        } catch (BusinessException be) {
+            throw be;
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 400);
-            errorResponse.put("message", "创建商品失败");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            throw new BusinessException(ErrorCode.DB_ERROR);
         }
     }
 
     // 4. 更新商品
     @PutMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> updateGoods(@PathVariable String id, @RequestBody Goods goods) {
+    public ResponseMessage<Goods> updateGoods(@PathVariable String id, @RequestBody Goods goods) {
+        if (id == null || id.isBlank()) {
+            throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "id");
+        }
+        if (goods == null) {
+            throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "goods");
+        }
+
         try {
             Goods updatedGoods = goodsService.updateGoods(id, goods);
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("message", "商品更新成功");
-            response.put("data", updatedGoods);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 404);
-            errorResponse.put("message", "商品未找到");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+            return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), updatedGoods);
+        } catch (BusinessException be) {
+            throw be;
+        } catch (RuntimeException re) {
+            // 你原逻辑：RuntimeException => 404
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_EXIST, id);
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 400);
-            errorResponse.put("message", "更新商品失败");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            throw new BusinessException(ErrorCode.DB_ERROR);
         }
     }
 
     // 5. 删除商品
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, Object>> deleteGoods(@PathVariable String id) {
+    public ResponseMessage<Void> deleteGoods(@PathVariable String id) {
+        if (id == null || id.isBlank()) {
+            throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "id");
+        }
+
         try {
             goodsService.deleteGoods(id);
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("message", "商品删除成功");
-            return ResponseEntity.ok(response);
+            return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), null);
+        } catch (BusinessException be) {
+            throw be;
+        } catch (RuntimeException re) {
+            // 你可以按你们业务选择：不存在也算失败 or 直接成功
+            throw new BusinessException(ErrorCode.PRODUCT_NOT_EXIST, id);
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 500);
-            errorResponse.put("message", "删除商品失败");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            throw new BusinessException(ErrorCode.DB_ERROR);
         }
     }
 
     // 6. 删除所有商品
     @DeleteMapping
-    public ResponseEntity<Map<String, Object>> deleteAllGoods() {
+    public ResponseMessage<Void> deleteAllGoods() {
         try {
             goodsService.deleteAllGoods();
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("message", "所有商品已删除");
-            response.put("data", null);
-            return ResponseEntity.ok(response);
+            return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), null);
+        } catch (BusinessException be) {
+            throw be;
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 500);
-            errorResponse.put("message", "删除所有商品失败");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            throw new BusinessException(ErrorCode.DB_ERROR);
         }
     }
 
     // 7. 插入测试数据
     @PostMapping("/test")
-    public ResponseEntity<Map<String, Object>> insertTestData() {
+    public ResponseMessage<List<Goods>> insertTestData() {
         try {
             goodsService.insertTestData();
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("message", "测试数据插入成功");
-            response.put("data", goodsService.getAllGoods());
-            return ResponseEntity.ok(response);
+            List<Goods> all = goodsService.getAllGoods();
+            return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), all);
+        } catch (BusinessException be) {
+            throw be;
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 500);
-            errorResponse.put("message", "插入测试数据失败");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            throw new BusinessException(ErrorCode.DB_ERROR);
         }
     }
 
     // 8. 批量更新商品库存
     @PutMapping("/batch-stock")
-    public ResponseEntity<Map<String, Object>> batchUpdateStock(@RequestBody BatchStockUpdateRequest request) {
+    public ResponseMessage<Void> batchUpdateStock(@RequestBody BatchStockUpdateRequest request) {
+        if (request == null) {
+            throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "request");
+        }
+
         try {
             goodsService.batchUpdateStock(request);
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("message", "批量更新库存成功");
-            response.put("data", null);
-            return ResponseEntity.ok(response);
-        } catch (RuntimeException e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 400);
-            errorResponse.put("message", "批量更新库存失败");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+            return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), null);
+        } catch (BusinessException be) {
+            throw be;
+        } catch (RuntimeException re) {
+            // 你原逻辑：RuntimeException => 400
+            throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, re.getMessage());
         } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 500);
-            errorResponse.put("message", "服务器内部错误");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            throw new BusinessException(ErrorCode.DB_ERROR);
         }
     }
 
     // 9. Mobile端专用 - 获取可兑换商品
     @GetMapping("/mobile/redemption")
-    public ResponseEntity<Map<String, Object>> getRedemptionGoodsForMobile(
+    public ResponseMessage<List<Map<String, Object>>> getRedemptionGoodsForMobile(
             @RequestParam(required = false) Integer vipLevel) {
-        try {
-            List<Goods> allGoods = goodsService.getAllGoods();
-            
-            // 筛选可兑换商品
-            List<Goods> redemptionGoods = allGoods.stream()
+
+        List<Goods> allGoods = goodsService.getAllGoods();
+
+        List<Goods> redemptionGoods = allGoods.stream()
                 .filter(goods -> Boolean.TRUE.equals(goods.getIsForRedemption()))
                 .filter(goods -> goods.getStock() > 0)
-                .filter(goods -> {
-                    if (vipLevel != null) {
-                        return goods.getVipLevelRequired() <= vipLevel;
-                    }
-                    return true;
-                })
+                .filter(goods -> vipLevel == null || goods.getVipLevelRequired() <= vipLevel)
                 .collect(Collectors.toList());
-            
-            // 简化返回数据
-            List<Map<String, Object>> simplifiedGoods = redemptionGoods.stream()
+
+        List<Map<String, Object>> simplifiedGoods = redemptionGoods.stream()
                 .map(goods -> {
                     Map<String, Object> item = new HashMap<>();
                     item.put("id", goods.getId());
@@ -269,18 +227,7 @@ public class GoodsController {
                     return item;
                 })
                 .collect(Collectors.toList());
-            
-            Map<String, Object> response = new HashMap<>();
-            response.put("code", 200);
-            response.put("message", "获取可兑换商品成功");
-            response.put("data", simplifiedGoods);
-            return ResponseEntity.ok(response);
-        } catch (Exception e) {
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("code", 500);
-            errorResponse.put("message", "获取商品失败");
-            errorResponse.put("error", e.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-        }
+
+        return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), simplifiedGoods);
     }
 }
