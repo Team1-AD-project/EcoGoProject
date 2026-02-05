@@ -9,6 +9,8 @@ import android.view.View
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class SplashActivity : AppCompatActivity() {
 
@@ -107,6 +109,40 @@ class SplashActivity : AppCompatActivity() {
             }
         }.start()
 
+        // Sync VIP status in background if logged in
+        if (isLoggedIn) {
+            val userId = com.ecogo.auth.TokenManager.getUserId()
+            if (!userId.isNullOrEmpty()) {
+                lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                    try {
+                        val apiService = com.ecogo.api.RetrofitClient.apiService
+                        val response = apiService.getUserProfile(userId)
+                        if (response.success && response.data != null) {
+                            val userInfo = response.data
+                            val serverIsVip = userInfo.vip?.active == true
+                            
+                            // Update local storage
+                            val localPrefs = getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
+                            localPrefs.edit().putBoolean("is_vip", serverIsVip).apply()
+                            
+                            Log.d(TAG, "Synced VIP status from server: $serverIsVip")
+                            
+                            // If user is VIP, we can skip ad immediately if it's still showing
+                            if (serverIsVip) {
+                                runOnUiThread {
+                                    Log.d(TAG, "User effectively VIP after sync. Skipping ad now.")
+                                    countdownTimer?.cancel()
+                                    proceedToMain(true)
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Failed to sync user profile: ${e.message}")
+                    }
+                }
+            }
+        }
+
         // Start 3s Timer
         Log.d(TAG, "Starting 3s countdown")
         countdownTimer = object : CountDownTimer(3000, 1000) {
@@ -126,6 +162,9 @@ class SplashActivity : AppCompatActivity() {
     private fun proceedToMain(shouldGoToHome: Boolean) {
         Log.d(TAG, "proceedToMain: shouldGoToHome=$shouldGoToHome")
         val intent = Intent(this, MainActivity::class.java)
+        // Clear the task stack so user cannot go back to SplashActivity
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+        
         if (shouldGoToHome) {
             intent.putExtra("NAV_TO_HOME", true)
         }

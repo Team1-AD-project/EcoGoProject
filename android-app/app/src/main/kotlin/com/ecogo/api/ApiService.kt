@@ -478,13 +478,22 @@ interface ApiService {
      */
     @POST("api/v1/mobile/users/login")
     suspend fun login(@Body request: MobileLoginRequest): ApiResponse<MobileLoginResponse>
+
+    /**
+     * 获取用户信息 (包含VIP状态)
+     * GET /api/v1/mobile/users/{id}
+     */
+    @GET("api/v1/mobile/users/{id}")
+    suspend fun getUserProfile(@Path("id") userId: String): ApiResponse<UserInfo>
+
+
+    @POST("api/v1/mobile/users/register")
+    suspend fun register(@Body request: MobileLoginRequest): ApiResponse<MobileLoginResponse>
 }
 
 // ==================== DTO 数据类 ====================
 
-/**
- * 移动端登录请求
- */
+
 /**
  * 移动端登录请求
  */
@@ -507,8 +516,38 @@ data class UserInfo(
     val id: String,
     val userid: String,
     val nickname: String,
-    val isAdmin: Boolean
+    val isAdmin: Boolean,
+    val vip: VipInfo? = null
 )
+
+data class VipInfo(
+    val active: Boolean,
+    val plan: String?,
+    val expiryDate: String?
+)
+/**
+ * 移动端注册请求
+ */
+data class MobileRegisterRequest(
+    val userid: String,
+    val password: String,
+    val nickname: String,
+    val repassword: String,
+    val email: String
+)
+
+/**
+ * 移动端注册响应
+ */
+
+data class MobileRegisterData(
+    val id: String,
+    val userid: String,
+    val nickname: String,
+    @SerializedName("created_at") val createdAt: String // 下划线转驼峰命名
+)
+typealias MobileRegisterResponse = ApiResponse<MobileRegisterData>
+
 
 /**
  * 商品响应（带分页）

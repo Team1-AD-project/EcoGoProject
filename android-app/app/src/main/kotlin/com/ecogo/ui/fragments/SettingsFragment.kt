@@ -37,6 +37,18 @@ class SettingsFragment : Fragment() {
             findNavController()
                 .navigate(com.ecogo.R.id.action_settings_to_profile)
         }
+        
+        // Logout button
+        binding.btnLogout.setOnClickListener {
+            android.app.AlertDialog.Builder(requireContext())
+                .setTitle("Logout")
+                .setMessage("Are you sure you want to logout?")
+                .setPositiveButton("Logout") { _, _ ->
+                    com.ecogo.auth.TokenManager.logout()
+                }
+                .setNegativeButton("Cancel", null)
+                .show()
+        }
     }
     
     override fun onDestroyView() {

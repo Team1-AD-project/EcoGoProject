@@ -97,9 +97,19 @@ class LoginFragment : Fragment() {
                             userId = userInfo.userid,
                             username = userInfo.nickname
                         )
-                        
-                        // ... SharedPreferences update ...
-                        
+
+                        // Save VIP status to EcoGoPrefs for SplashActivity
+                        val prefs = requireContext().getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
+                        val isVip = userInfo.vip?.active == true
+                        Log.d("DEBUG_LOGIN", "VIP Status: $isVip")
+
+                        prefs.edit().apply {
+                            putBoolean("is_logged_in", true) // Keep for compatibility
+                            putBoolean("is_vip", isVip)      // Crucial for SplashActivity
+                            putString("nusnet_id", userInfo.userid)
+                            apply()
+                        }
+
                         Toast.makeText(requireContext(), "Login Success! Navigating...", Toast.LENGTH_SHORT).show()
                         findNavController().navigate(com.ecogo.R.id.action_login_to_home)
                     } else {
