@@ -65,9 +65,35 @@ class ProfileFragment : Fragment() {
         setupTabs()
         setupAnimations()
         setupActions()
+        setupActions()
         loadHistory()
+        loadUserProfile()
         
         Log.d("ProfileFragment", "Profile screen initialized with ${inventory.size} owned items")
+    }
+    
+    private fun loadUserProfile() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = repository.getMobileUserProfile()
+            val profile = result.getOrNull()
+            if (profile != null) {
+                val userInfo = profile.userInfo
+                
+                // Update points
+                currentPoints = userInfo.currentPoints
+                binding.textPoints.text = currentPoints.toString()
+                
+                // Update basic info
+                binding.textName.text = userInfo.nickname
+                
+                // Update faculty if available
+                userInfo.faculty?.let { faculty ->
+                     binding.textFaculty.text = "$faculty • Year 2"
+                }
+                
+                Log.d("ProfileFragment", "Loaded user profile: ${userInfo.nickname}, points: $currentPoints")
+            }
+        }
     }
     
     private fun setupUI() {

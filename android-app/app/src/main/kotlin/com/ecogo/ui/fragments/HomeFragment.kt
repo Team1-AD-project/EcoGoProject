@@ -163,6 +163,8 @@ class HomeFragment : Fragment() {
             // 第二优先级：并发加载次要数据
             launch { loadActivities() }
             launch { loadWalkingRoutes() }
+            launch { loadUserProfile() }
+            launch { loadMonthlyPoints() }
             
             // 第三优先级：延迟加载非关键数据（200ms后）
             kotlinx.coroutines.delay(200)
@@ -174,6 +176,48 @@ class HomeFragment : Fragment() {
         }
     }
     
+    private suspend fun loadUserProfile() {
+        val result = repository.getMobileUserProfile()
+        val profile = result.getOrNull()
+        if (profile != null) {
+            val userInfo = profile.userInfo
+            // Update UI with real data on Main thread
+            
+            // Dynamic Greeting
+            binding.textWelcome.text = "Hello, ${userInfo.nickname}"
+
+            // binding.textMonthlyPoints.text = userInfo.currentPoints.toString() // Moved to loadMonthlyPoints logic
+            binding.textSocScore.text = userInfo.totalPoints.toString() // Using total points as SocScore
+            
+             // Update Rank
+            profile.stats?.let { stats ->
+                binding.textSocRank.text = "Rank #${stats.monthlyRank}"
+            }
+        }
+    }
+    
+    private suspend fun loadMonthlyPoints() {
+        val historyResult = repository.getMobilePointsHistory().getOrElse { emptyList() }
+        val now = java.time.LocalDate.now()
+        val currentMonth = now.month
+        val currentYear = now.year
+        
+        val monthlyPoints = historyResult.filter { item ->
+            // Filter by source "trip"
+            if (item.source != "trip") return@filter false
+            
+            try {
+                // Format: "2026-01-30T06:16:29.699"
+                val date = java.time.LocalDateTime.parse(item.createdAt)
+                date.month == currentMonth && date.year == currentYear
+            } catch (e: Exception) {
+                false
+            }
+        }.sumOf { it.points }
+        
+        binding.textMonthlyPoints.text = monthlyPoints.toString()
+    }
+
     private suspend fun loadBusInfo() {
         val routesResult = repository.getBusRoutes().getOrElse { MockData.ROUTES }
         val firstRoute = routesResult.firstOrNull()

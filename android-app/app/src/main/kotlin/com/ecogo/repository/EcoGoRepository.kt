@@ -475,19 +475,68 @@ class EcoGoRepository {
     // ==================== 新功能 API 方法 ====================
     
     /**
+     * 获取用户资料 (Internal API)
+     */
+    suspend fun getUserProfile(userId: String): Result<UserInfo> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = api.getUserProfile(userId)
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+
+    /**
+     * 获取移动端用户详细资料 (Authenticated)
+     */
+    suspend fun getMobileUserProfile(): Result<MobileProfileResponse> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = api.getMobileUserProfile()
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+
+    suspend fun getMobilePointsHistory(): Result<List<com.ecogo.api.PointHistoryItem>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = api.getMobilePointsHistory()
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    
+    /**
      * 每日签到
+     * POST /api/v1/checkin?userId={userId}
+     * Note: Previous checkIn was mock, now using real endpoint if available or keeping logic consistent.
+     * The ApiService defines performCheckIn. Updating repository to use it.
      */
     suspend fun checkIn(userId: String): Result<CheckInResponse> =
         withContext(Dispatchers.IO) {
             try {
-                // 模拟API调用，实际应调用真实API
-                val response = CheckInResponse(
-                    success = true,
-                    pointsEarned = 10,
-                    consecutiveDays = MockData.CHECK_IN_STATUS.consecutiveDays + 1,
-                    message = "签到成功！"
-                )
-                Result.success(response)
+                val response = api.performCheckIn(userId)
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
             } catch (e: Exception) {
                 Result.failure(e)
             }
@@ -499,7 +548,12 @@ class EcoGoRepository {
     suspend fun getCheckInStatus(userId: String): Result<CheckInStatus> =
         withContext(Dispatchers.IO) {
             try {
-                Result.success(MockData.CHECK_IN_STATUS)
+                val response = api.getCheckInStatus(userId)
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
             } catch (e: Exception) {
                 Result.failure(e)
             }
@@ -511,7 +565,12 @@ class EcoGoRepository {
     suspend fun getCheckInHistory(userId: String): Result<List<CheckIn>> =
         withContext(Dispatchers.IO) {
             try {
-                Result.success(MockData.CHECK_IN_HISTORY)
+                val response = api.getCheckInHistory(userId)
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
             } catch (e: Exception) {
                 Result.failure(e)
             }
@@ -523,7 +582,12 @@ class EcoGoRepository {
     suspend fun getDailyGoal(userId: String): Result<DailyGoal> =
         withContext(Dispatchers.IO) {
             try {
-                Result.success(MockData.DAILY_GOAL)
+                val response = api.getDailyGoal(userId)
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
             } catch (e: Exception) {
                 Result.failure(e)
             }
@@ -535,7 +599,12 @@ class EcoGoRepository {
     suspend fun getWeather(location: String = "NUS"): Result<Weather> =
         withContext(Dispatchers.IO) {
             try {
-                Result.success(MockData.WEATHER)
+                val response = api.getWeather(location)
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
             } catch (e: Exception) {
                 Result.failure(e)
             }
@@ -547,7 +616,12 @@ class EcoGoRepository {
     suspend fun getNotifications(userId: String): Result<List<Notification>> =
         withContext(Dispatchers.IO) {
             try {
-                Result.success(MockData.NOTIFICATIONS.filter { !it.isRead })
+                val response = api.getNotifications(userId)
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
             } catch (e: Exception) {
                 Result.failure(e)
             }
@@ -559,7 +633,12 @@ class EcoGoRepository {
     suspend fun markNotificationAsRead(notificationId: String): Result<Boolean> =
         withContext(Dispatchers.IO) {
             try {
-                Result.success(true)
+                val response = api.markNotificationAsRead(notificationId)
+                if (response.success) {
+                    Result.success(true)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
             } catch (e: Exception) {
                 Result.failure(e)
             }
@@ -571,7 +650,12 @@ class EcoGoRepository {
     suspend fun getCarbonFootprint(userId: String, period: String = "monthly"): Result<CarbonFootprint> =
         withContext(Dispatchers.IO) {
             try {
-                Result.success(MockData.CARBON_FOOTPRINT)
+                val response = api.getCarbonFootprint(userId, period)
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
             } catch (e: Exception) {
                 Result.failure(e)
             }
@@ -583,7 +667,12 @@ class EcoGoRepository {
     suspend fun getFriends(userId: String): Result<List<Friend>> =
         withContext(Dispatchers.IO) {
             try {
-                Result.success(MockData.FRIENDS)
+                val response = api.getFriends(userId)
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
             } catch (e: Exception) {
                 Result.failure(e)
             }
@@ -595,7 +684,12 @@ class EcoGoRepository {
     suspend fun getFriendActivities(userId: String): Result<List<FriendActivity>> =
         withContext(Dispatchers.IO) {
             try {
-                Result.success(MockData.FRIEND_ACTIVITIES)
+                val response = api.getFriendActivities(userId)
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
             } catch (e: Exception) {
                 Result.failure(e)
             }

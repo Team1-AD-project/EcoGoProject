@@ -6,6 +6,8 @@ import com.ecogo.data.CarbonFootprint
 import com.ecogo.data.ChatRequest
 import com.ecogo.data.ChatResponse
 import com.ecogo.data.CheckIn
+import com.ecogo.data.CheckInResponse
+import com.ecogo.data.CheckInStatus
 import com.ecogo.data.DailyGoal
 import com.ecogo.data.Faculty
 import com.ecogo.data.Friend
@@ -291,14 +293,14 @@ interface ApiService {
      * POST /api/v1/checkin?userId={userId}
      */
     @POST("api/v1/checkin")
-    suspend fun performCheckIn(@Query("userId") userId: String): ApiResponse<Map<String, Any>>
+    suspend fun performCheckIn(@Query("userId") userId: String): ApiResponse<CheckInResponse>
     
     /**
      * 获取签到状态
      * GET /api/v1/checkin/status/{userId}
      */
     @GET("api/v1/checkin/status/{userId}")
-    suspend fun getCheckInStatus(@Path("userId") userId: String): ApiResponse<Map<String, Any>>
+    suspend fun getCheckInStatus(@Path("userId") userId: String): ApiResponse<CheckInStatus>
     
     /**
      * 获取签到历史
@@ -487,12 +489,32 @@ interface ApiService {
     suspend fun getUserProfile(@Path("id") userId: String): ApiResponse<UserInfo>
 
 
+    /**
+     * 获取移动端用户详细资料
+     * GET /api/v1/mobile/users/profile
+     */
+    /**
+     * 获取移动端用户详细资料
+     * GET /api/v1/mobile/users/profile
+     */
+    @GET("api/v1/mobile/users/profile")
+    suspend fun getMobileUserProfile(): ApiResponse<MobileProfileResponse>
+
+    /**
+     * 获取用户积分历史
+     * GET /api/v1/mobile/points/history
+     */
+    @GET("api/v1/mobile/points/history")
+    suspend fun getMobilePointsHistory(): ApiResponse<List<PointHistoryItem>>
+
     @POST("api/v1/mobile/users/register")
     suspend fun register(@Body request: MobileRegisterRequest): ApiResponse<MobileRegisterData>
 
     /**
      * 更新用户资料 (Internal API - No Token)
      * PUT /api/v1/internal/users/{userid}/profile
+     * Note: ideally this should be the authenticated /api/v1/mobile/users/profile endpoint for PUT too,
+     * but for now we keep the wizard flow as is or migrate if needed.
      */
     @PUT("api/v1/internal/users/{userid}/profile")
     suspend fun updateProfile(
@@ -520,18 +542,66 @@ data class MobileLoginResponse(
     @SerializedName("user_info") val userInfo: UserInfo
 )
 
+data class MobileProfileResponse(
+    @SerializedName("user_info") val userInfo: UserInfo,
+    @SerializedName("vip_info") val vipInfo: VipInfo?,
+    val stats: UserStats?
+)
+
 data class UserInfo(
     val id: String,
     val userid: String,
+    val email: String?,
+    val phone: String?,
     val nickname: String,
-    val isAdmin: Boolean,
-    val vip: VipInfo? = null
+    val avatar: String?,
+    val vip: VipInfo? = null,
+    val stats: UserStats? = null,
+    val preferences: UserPreferences? = null,
+    val activityMetrics: ActivityMetrics? = null,
+    val totalCarbon: Double = 0.0,
+    val totalPoints: Int = 0,
+    val currentPoints: Int = 0,
+    val lastLoginAt: String?,
+    val createdAt: String?,
+    val isAdmin: Boolean = false,
+    val faculty: String? = null // Added based on context, though optional in sample
+)
+
+data class UserStats(
+    val totalTrips: Int,
+    val totalDistance: Double,
+    val greenDays: Int,
+    val weeklyRank: Int,
+    val monthlyRank: Int,
+    val totalPointsFromTrips: Int
+)
+
+data class UserPreferences(
+    val preferredTransport: List<String>?,
+    val enablePush: Boolean,
+    val enableEmail: Boolean,
+    val enableBusReminder: Boolean,
+    val language: String,
+    val theme: String,
+    val shareLocation: Boolean,
+    val showOnLeaderboard: Boolean,
+    val shareAchievements: Boolean
+)
+
+data class ActivityMetrics(
+    val activeDays7d: Int,
+    val activeDays30d: Int,
+    val lastTripDays: Int,
+    val loginFrequency7d: Int
 )
 
 data class VipInfo(
     val active: Boolean,
     val plan: String?,
-    val expiryDate: String?
+    val expiryDate: String?,
+    val autoRenew: Boolean = false,
+    val pointsMultiplier: Double = 1.0
 )
 
 /**
@@ -736,6 +806,23 @@ data class PaymentIntentRequest(
 data class PaymentIntentResponse(
     val clientSecret: String,
     val publishableKey: String
+)
+
+data class PointHistoryItem(
+    val id: String,
+    @SerializedName("change_type") val changeType: String,
+    val points: Int,
+    val source: String,
+    val description: String?,
+    @SerializedName("balance_after") val balanceAfter: Int,
+    @SerializedName("created_at") val createdAt: String,
+    @SerializedName("admin_action") val adminAction: AdminAction?
+)
+
+data class AdminAction(
+    @SerializedName("operator_id") val operatorId: String,
+    val reason: String,
+    @SerializedName("approval_status") val approvalStatus: String
 )
 
 /**
