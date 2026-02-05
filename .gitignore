@@ -108,3 +108,23 @@ Thumbs.db
 dist/
 build/
 
+# Documentation and notes (exclude from repo)
+# Exclude all MD files except root README.md
+*.md
+!README.md
+!.github/SECURITY.md
+
+# Exclude other documentation files
+*_分支对比报告*.md
+*_分析报告*.md
+*_详细清单表格*.md
+*_连接修复完成报告*.md
+*修复总结*.md
+*修复摘要*.md
+下一步*.md
+测试验证指南.md
+*.backup
+*.ps1
+*.puml
+config-template.txt
+
