@@ -12,6 +12,7 @@ import { AnalyticsManagement } from '@/components/modules/AnalyticsManagement';
 import { AdManagement } from '@/components/modules/AdManagement';
 import { LeaderboardManagement } from '@/components/modules/LeaderboardManagement';
 import { ChatManagement } from '@/components/modules/ChatManagement';
+import { ActivityManagement } from '@/components/modules/ActivityManagement';
 
 export function AdminLayout() {
   const { module } = useParams<{ module: string }>();
@@ -51,6 +52,8 @@ export function AdminLayout() {
         return <LeaderboardManagement />;
       case 'chat-management':
         return <ChatManagement />;
+      case 'activity-management':
+        return <ActivityManagement />;
       default:
         return <Dashboard onModuleSelect={handleModuleSelect} />;
     }

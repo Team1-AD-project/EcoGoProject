@@ -1,4 +1,4 @@
-import { 
+import {
   LayoutDashboard,
   Users,
   Map,
@@ -10,7 +10,8 @@ import {
   Megaphone,
   Trophy,
   MessageSquare,
-  LogOut
+  LogOut,
+  Activity
 } from 'lucide-react';
 import { cn } from '@/components/ui/utils';
 
@@ -82,6 +83,11 @@ export function Sidebar({ selectedModule, onModuleSelect, onLogout }: SidebarPro
       id: 'chat-management',
       label: 'Chat Management',
       icon: <MessageSquare className="size-5" />
+    },
+    {
+      id: 'activity-management',
+      label: 'Activity Logs',
+      icon: <Activity className="size-5" />
     }
   ];
 
