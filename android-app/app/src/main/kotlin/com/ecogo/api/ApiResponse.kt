@@ -7,9 +7,11 @@ package com.ecogo.api
 data class ApiResponse<T>(
     val code: Int,
     val message: String,
-    val data: T?,
-    val success: Boolean = code == 200 || code == 0
-)
+    val data: T?
+) {
+    val success: Boolean
+        get() = code == 200 || code == 0
+}
 
 /**
  * 空响应（没有数据体）

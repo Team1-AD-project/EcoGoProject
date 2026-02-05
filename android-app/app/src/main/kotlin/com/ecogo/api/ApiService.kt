@@ -496,8 +496,7 @@ data class MobileLoginRequest(
 /**
  * 移动端登录响应
  */
- * 移动端登录响应
- */
+
 data class MobileLoginResponse(
     val token: String,
     @SerializedName("user_info") val userInfo: UserInfo
