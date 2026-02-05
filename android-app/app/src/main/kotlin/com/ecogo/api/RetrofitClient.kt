@@ -38,7 +38,8 @@ object RetrofitClient {
                 requestBuilder.header("Authorization", "Bearer $token")
             }
             
-            
+            val request = requestBuilder.build()
+
             // Execute request
             val response = chain.proceed(request)
             
