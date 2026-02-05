@@ -35,6 +35,10 @@ public enum ErrorCode {
     ACTIVITY_FULL(4402, "Activity is full"),
     ALREADY_JOINED(4403, "You have already joined this activity"),
 
+    // Trip module error (46xx)
+    TRIP_NOT_FOUND(4601, "Trip not found"),
+    TRIP_STATUS_ERROR(4602, "Trip status error, current status: %s"),
+
     // Advertisement module error (45xx)
     ADVERTISEMENT_NOT_FOUND(4501, "Advertisement not found"),
 

@@ -66,12 +66,24 @@ public interface PointsService {
 
     void refundPoints(String userId, String orderId);
 
+    // --- Trip Settlement ---
+
+    /**
+     * Settle a completed trip: calculate points, update user stats, create points log
+     */
+    void settleTrip(String userId, PointsDto.SettleTripRequest request);
+
     // --- Helper Methods for Complex Trips ---
 
     /**
      * Generate description string: "StartName -> EndName (Distancekm)"
      */
     String formatTripDescription(String startPlace, String endPlace, double totalDistance);
+
+    /**
+     * Generate description string from LocationInfo objects
+     */
+    String formatTripDescription(PointsDto.LocationInfo start, PointsDto.LocationInfo end, double totalDistance);
 
     /**
      * Generate description string: "Purchased Badge: BadgeName"

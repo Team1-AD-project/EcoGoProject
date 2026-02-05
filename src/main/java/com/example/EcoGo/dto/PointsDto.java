@@ -63,4 +63,30 @@ public class PointsDto {
         public String description;
         public String relatedId; // TripID, BadgeID, OrderID
     }
+
+    // --- Trip Settlement DTOs ---
+
+    public static class LocationInfo {
+        public String address;      // 详细地址
+        public String placeName;    // 地点名称
+        public String campusZone;   // 区域分类：商务区/校园/商圈
+
+        public LocationInfo() {}
+
+        public LocationInfo(String address, String placeName, String campusZone) {
+            this.address = address;
+            this.placeName = placeName;
+            this.campusZone = campusZone;
+        }
+    }
+
+    public static class SettleTripRequest {
+        public String tripId;               // 行程ID
+        public String detectedMode;         // ML识别的主要交通方式
+        public double distance;             // 行程总距离(km)
+        public long carbonSaved;            // 本次碳减排量(g)
+        public boolean isGreenTrip;         // 是否为绿色出行
+        public LocationInfo startLocation;  // 起点信息
+        public LocationInfo endLocation;    // 终点信息
+    }
 }
