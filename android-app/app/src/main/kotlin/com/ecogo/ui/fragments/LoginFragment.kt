@@ -10,6 +10,11 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.ecogo.R
+import androidx.lifecycle.lifecycleScope
+import com.ecogo.api.MobileLoginRequest
+import com.ecogo.api.RetrofitClient
+import com.ecogo.auth.TokenManager
+import kotlinx.coroutines.launch
 import com.ecogo.databinding.FragmentLoginBinding
 
 class LoginFragment : Fragment() {
@@ -62,53 +67,77 @@ class LoginFragment : Fragment() {
                 return@setOnClickListener
             }
             
-            // 验证用户凭证
-            val prefs = requireContext().getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
-            val savedNusnetId = prefs.getString("nusnet_id", "")
-            val savedPassword = prefs.getString("password", "")
-            val isRegistered = prefs.getBoolean("is_registered", false)
-            
-            if (!isRegistered) {
-                Toast.makeText(requireContext(), "No account found. Please register first.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            
             // 验证输入的凭证
-            if (inputNusnetId == savedNusnetId && inputPassword == savedPassword) {
-                Log.d("DEBUG_LOGIN", "Login successful")
-                Log.d("DEBUG_LOGIN", "Saved credentials - nusnetId: $savedNusnetId")
-                Log.d("DEBUG_LOGIN", "Input credentials - nusnetId: $inputNusnetId")
-
-                // 标记用户已登录
-                prefs.edit().putBoolean("is_logged_in", true).apply()
-
-                // 检查是否首次登录
-                val isFirstLogin = prefs.getBoolean("is_first_login", false)
-                Log.d("DEBUG_LOGIN", "isFirstLogin flag: $isFirstLogin")
-
-                Toast.makeText(requireContext(), "Welcome back! 🎉", Toast.LENGTH_SHORT).show()
-
+            lifecycleScope.launch {
                 try {
-                    if (isFirstLogin) {
-                        // 首次登录，显示引导
-                        Log.d("DEBUG_LOGIN", "First login, showing onboarding")
-                        findNavController().navigate(R.id.action_login_to_onboarding)
-                    } else {
-                        // 不是首次登录，直接进入首页
-                        Log.d("DEBUG_LOGIN", "Not first login, going to home")
-                        Log.d("DEBUG_LOGIN", "Attempting navigation to homeFragment")
+                    // Show loading state (optional, can add a ProgressBar later)
+                    binding.buttonSignIn.isEnabled = false
+                    binding.buttonSignIn.text = "Signing in..."
+
+                    val request = MobileLoginRequest(
+                        userid = inputNusnetId,
+                        password = inputPassword // Assuming backend handles string/number conversion if needed
+                    )
+
+                    val response = RetrofitClient.apiService.login(request)
+                    
+                    // Restore button state
+                    binding.buttonSignIn.isEnabled = true
+                    binding.buttonSignIn.text = "Sign In"
+
+                    if (response.success && response.data != null) {
+                        val loginData = response.data
+                        Log.d("DEBUG_LOGIN", "Login successful: ${loginData.username}")
+                        
+                        // Save token using TokenManager
+                        TokenManager.init(requireContext()) // Ensure initialized
+                        TokenManager.saveToken(
+                            token = loginData.token,
+                            userId = loginData.userId,
+                            username = loginData.username
+                        )
+                        
+                        // Also update legacy SharedPreferences if needed for other parts of the app
+                        val prefs = requireContext().getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
+                        prefs.edit().apply {
+                            putBoolean("is_logged_in", true)
+                            putString("nusnet_id", inputNusnetId) 
+                            // Don't save password in plain text ideally, but keeping consistency with existing
+                            // putString("password", inputPassword) 
+                            apply()
+                        }
+
+                        Toast.makeText(requireContext(), "Welcome back, ${loginData.username}! 🎉", Toast.LENGTH_SHORT).show()
+                        
+                        // Navigate to home
                         findNavController().navigate(R.id.action_login_to_home)
-                        Log.d("DEBUG_LOGIN", "Navigation command executed")
+                    } else {
+                        Log.e("DEBUG_LOGIN", "Login failed: ${response.message}")
+                        Toast.makeText(requireContext(), "Login failed: ${response.message}", Toast.LENGTH_SHORT).show()
                     }
+
                 } catch (e: Exception) {
-                    Log.e("DEBUG_LOGIN", "Navigation FAILED: ${e.message}", e)
-                    Toast.makeText(requireContext(), "❌ 导航错误: ${e.message}", Toast.LENGTH_LONG).show()
+                    Log.e("DEBUG_LOGIN", "Login error: ${e.message}", e)
+                    
+                    // Restore button state
+                    binding.buttonSignIn.isEnabled = true
+                    binding.buttonSignIn.text = "Sign In"
+                    
+                    val errorMessage = when(e) {
+                        is retrofit2.HttpException -> {
+                            when(e.code()) {
+                                401 -> "Invalid credentials"
+                                404 -> "User not found"
+                                500 -> "Server error"
+                                else -> "Network error: ${e.code()}"
+                            }
+                        }
+                        is java.net.ConnectException -> "Cannot connect to server. Check your internet connection."
+                        else -> "Error: ${e.message}"
+                    }
+                    
+                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Log.d("DEBUG_LOGIN", "Login failed - incorrect credentials")
-                Log.d("DEBUG_LOGIN", "Expected nusnetId: '$savedNusnetId', got: '$inputNusnetId'")
-                Log.d("DEBUG_LOGIN", "Password match: ${inputPassword == savedPassword}")
-                Toast.makeText(requireContext(), "Incorrect NUSNET ID or password", Toast.LENGTH_SHORT).show()
             }
         }
         

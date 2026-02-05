@@ -13,7 +13,7 @@ object ApiConfig {
      * - 真实设备访问本机: http://192.168.x.x:8090/ (替换为你的电脑IP)
      * - 生产环境: https://your-domain.com/
      */
-    const val BASE_URL = "http://10.0.2.2:8090/"
+    const val BASE_URL = "http://47.129.124.55:8090/"
     
     /**
      * API 版本
