@@ -1,0 +1,14 @@
+# OWASP ZAP 自定义规则
+# 格式: 规则ID	风险级别	URL正则	参数	启用	操作
+#
+# 风险级别: INFO, LOW, MEDIUM, HIGH
+# 操作: IGNORE (忽略), WARN (警告), FAIL (失败)
+
+# 忽略已知的误报
+10021	IGNORE	http://localhost:8090/actuator/.*	.*	TRUE	Actuator endpoints are internal monitoring tools
+10202	IGNORE	http://localhost:8090/webjars/.*	.*	TRUE	Third-party web resources
+10096	IGNORE	http://localhost:8090/static/.*	.*	TRUE	Static resources are safe
+
+# 调整特定规则的风险级别
+# 例如：将某些低风险问题设置为信息级别
+# 10015	INFO	.*	.*	TRUE	Informational finding only

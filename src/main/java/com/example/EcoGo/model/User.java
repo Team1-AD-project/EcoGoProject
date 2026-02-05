@@ -4,19 +4,25 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 @Document(collection = "users")
 public class User {
     @Id
     private String id;
     private String userid;
-    private String username;
+    // private String username; // Removed
     private String email;
     private String phone;
     private String password;
     private String nickname;
     private String avatar;
+    @JsonProperty("isAdmin")
     private boolean isAdmin;
+    @JsonProperty("isDeactivated")
+    private boolean isDeactivated;
+
+    private String faculty; // New field
 
     private Vip vip;
     private Stats stats;
@@ -51,12 +57,20 @@ public class User {
         this.userid = userid;
     }
 
-    public String getUsername() {
-        return username;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getEmail() {
@@ -105,6 +119,22 @@ public class User {
 
     public void setAdmin(boolean admin) {
         isAdmin = admin;
+    }
+
+    public boolean isDeactivated() {
+        return isDeactivated;
+    }
+
+    public void setDeactivated(boolean deactivated) {
+        isDeactivated = deactivated;
+    }
+
+    public String getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(String faculty) {
+        this.faculty = faculty;
     }
 
     public Vip getVip() {
@@ -190,11 +220,12 @@ public class User {
     // Nested Classes (unchanged)
 
     public static class Vip {
-        private boolean isActive;
+        private boolean isActive = false;
+        private LocalDateTime startDate;
         private LocalDateTime expiryDate;
         private String plan;
-        private boolean autoRenew;
-        private int pointsMultiplier;
+        private boolean autoRenew = false;
+        private int pointsMultiplier = 1; // Default to 1x for normal users
 
         public boolean isActive() {
             return isActive;
@@ -202,6 +233,14 @@ public class User {
 
         public void setActive(boolean active) {
             isActive = active;
+        }
+
+        public LocalDateTime getStartDate() {
+            return startDate;
+        }
+
+        public void setStartDate(LocalDateTime startDate) {
+            this.startDate = startDate;
         }
 
         public LocalDateTime getExpiryDate() {
@@ -244,12 +283,23 @@ public class User {
         private int weeklyRank;
         private int monthlyRank;
 
+        // Cache field for trip-specific points
+        private long totalPointsFromTrips;
+
         public int getTotalTrips() {
             return totalTrips;
         }
 
         public void setTotalTrips(int totalTrips) {
             this.totalTrips = totalTrips;
+        }
+
+        public long getTotalPointsFromTrips() {
+            return totalPointsFromTrips;
+        }
+
+        public void setTotalPointsFromTrips(long totalPointsFromTrips) {
+            this.totalPointsFromTrips = totalPointsFromTrips;
         }
 
         public double getTotalDistance() {
@@ -286,7 +336,7 @@ public class User {
     }
 
     public static class Preferences {
-        private String preferredTransport;
+        private java.util.List<String> preferredTransport; // Changed to List
         private boolean enablePush;
         private boolean enableEmail;
         private boolean enableBusReminder;
@@ -296,11 +346,25 @@ public class User {
         private boolean showOnLeaderboard;
         private boolean shareAchievements;
 
-        public String getPreferredTransport() {
+        // New Location Fields
+        private String dormitoryOrResidence;
+        private String mainTeachingBuilding;
+        private String favoriteStudySpot;
+
+        // New Interests & Goals
+        private java.util.List<String> interests;
+        private int weeklyGoals;
+
+        // New Notifications
+        private boolean newChallenges;
+        private boolean activityReminders;
+        private boolean friendActivity;
+
+        public java.util.List<String> getPreferredTransport() {
             return preferredTransport;
         }
 
-        public void setPreferredTransport(String preferredTransport) {
+        public void setPreferredTransport(java.util.List<String> preferredTransport) {
             this.preferredTransport = preferredTransport;
         }
 
@@ -366,6 +430,70 @@ public class User {
 
         public void setShareAchievements(boolean shareAchievements) {
             this.shareAchievements = shareAchievements;
+        }
+
+        public String getDormitoryOrResidence() {
+            return dormitoryOrResidence;
+        }
+
+        public void setDormitoryOrResidence(String dormitoryOrResidence) {
+            this.dormitoryOrResidence = dormitoryOrResidence;
+        }
+
+        public String getMainTeachingBuilding() {
+            return mainTeachingBuilding;
+        }
+
+        public void setMainTeachingBuilding(String mainTeachingBuilding) {
+            this.mainTeachingBuilding = mainTeachingBuilding;
+        }
+
+        public String getFavoriteStudySpot() {
+            return favoriteStudySpot;
+        }
+
+        public void setFavoriteStudySpot(String favoriteStudySpot) {
+            this.favoriteStudySpot = favoriteStudySpot;
+        }
+
+        public java.util.List<String> getInterests() {
+            return interests;
+        }
+
+        public void setInterests(java.util.List<String> interests) {
+            this.interests = interests;
+        }
+
+        public int getWeeklyGoals() {
+            return weeklyGoals;
+        }
+
+        public void setWeeklyGoals(int weeklyGoals) {
+            this.weeklyGoals = weeklyGoals;
+        }
+
+        public boolean isNewChallenges() {
+            return newChallenges;
+        }
+
+        public void setNewChallenges(boolean newChallenges) {
+            this.newChallenges = newChallenges;
+        }
+
+        public boolean isActivityReminders() {
+            return activityReminders;
+        }
+
+        public void setActivityReminders(boolean activityReminders) {
+            this.activityReminders = activityReminders;
+        }
+
+        public boolean isFriendActivity() {
+            return friendActivity;
+        }
+
+        public void setFriendActivity(boolean friendActivity) {
+            this.friendActivity = friendActivity;
         }
     }
 

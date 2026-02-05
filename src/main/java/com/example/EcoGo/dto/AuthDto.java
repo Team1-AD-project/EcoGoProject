@@ -6,16 +6,23 @@ import jakarta.validation.constraints.NotBlank;
 public class AuthDto {
 
     public static class MobileRegisterRequest {
-        // @NotBlank(message = "用户ID不能为空")
-        // public String userid;
-        // @NotBlank(message = "手机号不能为空")
-        // public String phone;
         @NotBlank(message = "邮箱不能为空")
         public String email;
+
         @NotBlank(message = "昵称不能为空")
+        @jakarta.validation.constraints.Size(min = 3, message = "昵称至少需要3个字符")
         public String nickname;
+
+        @NotBlank(message = "User ID不能为空")
+        @jakarta.validation.constraints.Pattern(regexp = "^e.{6,}$", message = "User ID必须以'e'开头且至少7位")
+        public String userid;
+
         @NotBlank(message = "密码不能为空")
+        @jakarta.validation.constraints.Size(min = 6, message = "密码至少需要6个字符")
         public String password;
+
+        @NotBlank(message = "确认密码不能为空")
+        public String repassword;
     }
 
     public static class MobileLoginRequest {

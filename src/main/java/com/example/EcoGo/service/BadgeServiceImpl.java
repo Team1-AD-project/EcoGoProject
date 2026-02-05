@@ -1,18 +1,25 @@
 package com.example.EcoGo.service;
 
+import com.example.EcoGo.dto.PointsDto;
 import com.example.EcoGo.interfacemethods.BadgeService;
+import com.example.EcoGo.interfacemethods.PointsService;
 import com.example.EcoGo.model.Badge;
 import com.example.EcoGo.model.User;
 import com.example.EcoGo.model.UserBadge;
 import com.example.EcoGo.repository.BadgeRepository;
 import com.example.EcoGo.repository.UserBadgeRepository;
-import com.example.EcoGo.repository.UserRepository; 
+import com.example.EcoGo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class BadgeServiceImpl implements BadgeService {
@@ -20,6 +27,7 @@ public class BadgeServiceImpl implements BadgeService {
     @Autowired private BadgeRepository badgeRepository;
     @Autowired private UserBadgeRepository userBadgeRepository;
     @Autowired private UserRepository userRepository;
+    @Autowired @Lazy private PointsService pointsService;
 
     /**
      * 1. 购买徽章
@@ -32,19 +40,24 @@ public class BadgeServiceImpl implements BadgeService {
         
         Badge badge = badgeRepository.findByBadgeId(badgeId)
                 .orElseThrow(() -> new RuntimeException("商品不存在"));
-        
-        int cost = badge.getPurchaseCost();
-        if (cost <= 0) throw new RuntimeException("该徽章不可购买");
 
-        User user = userRepository.findByUserid(userId)
-        .orElseThrow(() -> new RuntimeException("用户不存在"));
-
-        if (user.getTotalPoints() < cost) {
-            throw new RuntimeException("积分不足");
+        // 检查获取方式是否为 purchase
+        String method = badge.getAcquisitionMethod();
+        if (method != null && !method.isEmpty() && !"purchase".equalsIgnoreCase(method)) {
+            throw new RuntimeException("该徽章不可通过购买获得");
         }
 
-        user.setTotalPoints(user.getTotalPoints() - cost);
-        userRepository.save(user);
+        Integer cost = badge.getPurchaseCost();
+        if (cost == null || cost <= 0) throw new RuntimeException("该徽章不可购买");
+
+       // 使用 PointsService 统一处理积分扣除和日志记录
+        String badgeName = badge.getName() != null ? badge.getName().getOrDefault("en", "Unknown Badge") : "Unknown Badge";
+        PointsDto.SettleResult settleResult = new PointsDto.SettleResult();
+        settleResult.points = -cost;
+        settleResult.source = "badge";
+        settleResult.description = pointsService.formatBadgeDescription(badgeName);
+        settleResult.relatedId = badgeId;
+        pointsService.settle(userId, settleResult);
 
         UserBadge newBadge = new UserBadge();
         newBadge.setUserId(userId);
@@ -52,7 +65,7 @@ public class BadgeServiceImpl implements BadgeService {
         newBadge.setUnlockedAt(new Date());
         newBadge.setDisplay(false); // 默认不佩戴
         newBadge.setCreatedAt(new Date());
-        
+
         return userBadgeRepository.save(newBadge);
     }
 
@@ -106,7 +119,141 @@ public class BadgeServiceImpl implements BadgeService {
     }
 
     // ... 其他 getter 方法 (getShopList, getMyBadges) 保持不变 ...
-    public List<Badge> getShopList() { return badgeRepository.findByIsActive(true); }
+    public List<Badge> getShopList() {
+        return badgeRepository.findByIsActiveAndAcquisitionMethod(true, "purchase");
+    }
     public List<UserBadge> getMyBadges(String userId) { return userBadgeRepository.findByUserId(userId); }
     public Badge createBadge(Badge badge) { return badgeRepository.save(badge); }
+
+    /**
+     * 按子分类获取徽章列表
+     */
+    public List<Badge> getBadgesBySubCategory(String subCategory) {
+        return badgeRepository.findBySubCategory(subCategory);
+    }
+
+    /**
+     * 按获取方式获取徽章列表
+     */
+    public List<Badge> getBadgesByAcquisitionMethod(String acquisitionMethod) {
+        return badgeRepository.findByAcquisitionMethod(acquisitionMethod);
+    }
+
+    /**
+     * 3. 获取 Badge 购买统计
+     * 返回每个 badge 的购买次数，供管理员查看
+     */
+    public List<Map<String, Object>> getBadgePurchaseStats() {
+        return userBadgeRepository.countPurchasesByBadge();
+    }
+
+    /**
+     * 4. 修改徽章（管理员用）
+     */
+    @Transactional
+    public Badge updateBadge(String badgeId, Badge updatedBadge) {
+        Badge existingBadge = badgeRepository.findByBadgeId(badgeId)
+                .orElseThrow(() -> new RuntimeException("徽章不存在"));
+
+        // 更新字段（只更新非空字段）
+        if (updatedBadge.getName() != null) {
+            existingBadge.setName(updatedBadge.getName());
+        }
+        if (updatedBadge.getDescription() != null) {
+            existingBadge.setDescription(updatedBadge.getDescription());
+        }
+        if (updatedBadge.getPurchaseCost() != null) {
+            existingBadge.setPurchaseCost(updatedBadge.getPurchaseCost());
+        }
+        if (updatedBadge.getCategory() != null) {
+            existingBadge.setCategory(updatedBadge.getCategory());
+        }
+        if (updatedBadge.getIcon() != null) {
+            existingBadge.setIcon(updatedBadge.getIcon());
+        }
+        if (updatedBadge.getIsActive() != null) {
+            existingBadge.setIsActive(updatedBadge.getIsActive());
+        }
+        if (updatedBadge.getSubCategory() != null) {
+            existingBadge.setSubCategory(updatedBadge.getSubCategory());
+        }
+        if (updatedBadge.getAcquisitionMethod() != null) {
+            existingBadge.setAcquisitionMethod(updatedBadge.getAcquisitionMethod());
+        }
+        if (updatedBadge.getCarbonThreshold() != null) {
+            existingBadge.setCarbonThreshold(updatedBadge.getCarbonThreshold());
+        }
+
+        return badgeRepository.save(existingBadge);
+    }
+
+    /**
+     * 检查并自动解锁碳减排成就徽章
+     * 查找所有 acquisitionMethod="achievement" 且 carbonThreshold <= 用户 totalCarbon 的徽章，
+     * 如果用户尚未拥有则自动解锁。
+     */
+    @Transactional
+    public List<UserBadge> checkAndUnlockCarbonBadges(String userId) {
+        User user = userRepository.findByUserid(userId)
+                .orElseThrow(() -> new RuntimeException("用户不存在"));
+
+        long userCarbon = user.getTotalCarbon();
+
+        // 查找所有已启用的、achievement 类型的、用户碳减排已达标的徽章
+        List<Badge> qualifiedBadges = badgeRepository
+                .findByIsActiveTrueAndAcquisitionMethodAndCarbonThresholdLessThanEqual("achievement", userCarbon);
+
+        if (qualifiedBadges.isEmpty()) {
+            return List.of();
+        }
+
+        // 获取用户已拥有的徽章 ID 集合
+        List<UserBadge> ownedBadges = userBadgeRepository.findByUserId(userId);
+        Set<String> ownedBadgeIds = ownedBadges.stream()
+                .map(UserBadge::getBadgeId)
+                .collect(Collectors.toSet());
+
+        // 过滤出用户尚未拥有的徽章，逐个解锁
+        List<UserBadge> newlyUnlocked = new ArrayList<>();
+        for (Badge badge : qualifiedBadges) {
+            if (!ownedBadgeIds.contains(badge.getBadgeId())) {
+                UserBadge newBadge = new UserBadge();
+                newBadge.setUserId(userId);
+                newBadge.setBadgeId(badge.getBadgeId());
+                newBadge.setUnlockedAt(new Date());
+                newBadge.setDisplay(false);
+                newBadge.setCreatedAt(new Date());
+                newlyUnlocked.add(userBadgeRepository.save(newBadge));
+            }
+        }
+
+        return newlyUnlocked;
+    }
+
+    /**
+     * 5. 删除徽章（管理员用）
+     */
+    @Transactional
+    public void deleteBadge(String badgeId) {
+        Badge badge = badgeRepository.findByBadgeId(badgeId)
+                .orElseThrow(() -> new RuntimeException("徽章不存在"));
+
+        // 删除徽章本身
+        badgeRepository.delete(badge);
+
+        // 可选：同时删除所有用户持有的该徽章
+        // List<UserBadge> userBadges = userBadgeRepository.findByBadgeId(badgeId);
+        // userBadgeRepository.deleteAll(userBadges);
+    }
+
+    /**
+     * 6. 获取所有徽章（管理员用）
+     * @param category 可选，按大类过滤 (badge/cloth)
+     */
+    public List<Badge> getAllBadges(String category) {
+        if (category != null && !category.isEmpty()) {
+            return badgeRepository.findByCategory(category);
+        }
+        return badgeRepository.findAll();
+    }
 }

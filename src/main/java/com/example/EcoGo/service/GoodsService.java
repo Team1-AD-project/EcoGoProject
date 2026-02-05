@@ -20,12 +20,15 @@ public interface GoodsService {
     // 删除所有商品
     void deleteAllGoods();
     
-    // 插入测试商品数据
-    void insertTestData();
-    
     // 根据ID获取商品
     Goods getGoodsById(String id);
     
     // 批量更新商品库存
     void batchUpdateStock(BatchStockUpdateRequest request);
+
+    // 兑换用：扣库存
+    void reserveStock(String goodsId, int quantity);
+
+    // 兑换失败回滚库存
+    void releaseStock(String goodsId, int quantity);
 }

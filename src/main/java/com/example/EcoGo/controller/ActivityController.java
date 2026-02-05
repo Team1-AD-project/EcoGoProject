@@ -10,12 +10,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-/**
- * 活动管理接口控制器
- * 路径规范：/api/v1/activities
- */
 @RestController
-@RequestMapping("/api/v1/activities")
+@RequestMapping("/api/v1") // Refactored for flexibility
 public class ActivityController {
     private static final Logger logger = LoggerFactory.getLogger(ActivityController.class);
 
@@ -23,12 +19,23 @@ public class ActivityController {
     private ActivityInterface activityService;
 
     /**
-     * 获取所有活动
+     * 获取所有活动 (Web端)
      * GET /api/v1/activities
      */
-    @GetMapping
+    @GetMapping("/activities")
     public ResponseMessage<List<Activity>> getAllActivities() {
         logger.info("获取所有活动列表");
+        List<Activity> activities = activityService.getAllActivities();
+        return ResponseMessage.success(activities);
+    }
+
+    /**
+     * 获取所有活动 (移动端)
+     * GET /api/v1/mobile/activities
+     */
+    @GetMapping("/mobile/activities")
+    public ResponseMessage<List<Activity>> getAllMobileActivities() {
+        logger.info("获取所有活动列表 (移动端)");
         List<Activity> activities = activityService.getAllActivities();
         return ResponseMessage.success(activities);
     }
@@ -37,7 +44,7 @@ public class ActivityController {
      * 根据ID获取活动
      * GET /api/v1/activities/{id}
      */
-    @GetMapping("/{id}")
+    @GetMapping("/activities/{id}")
     public ResponseMessage<Activity> getActivityById(@PathVariable String id) {
         logger.info("获取活动详情，ID：{}", id);
         Activity activity = activityService.getActivityById(id);
@@ -48,7 +55,7 @@ public class ActivityController {
      * 创建活动
      * POST /api/v1/activities
      */
-    @PostMapping
+    @PostMapping("/activities")
     public ResponseMessage<Activity> createActivity(@RequestBody Activity activity) {
         logger.info("创建新活动：{}", activity.getTitle());
         Activity created = activityService.createActivity(activity);
@@ -59,7 +66,7 @@ public class ActivityController {
      * 更新活动
      * PUT /api/v1/activities/{id}
      */
-    @PutMapping("/{id}")
+    @PutMapping("/activities/{id}")
     public ResponseMessage<Activity> updateActivity(
             @PathVariable String id,
             @RequestBody Activity activity) {
@@ -72,7 +79,7 @@ public class ActivityController {
      * 删除活动
      * DELETE /api/v1/activities/{id}
      */
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/activities/{id}")
     public ResponseMessage<Void> deleteActivity(@PathVariable String id) {
         logger.info("删除活动，ID：{}", id);
         activityService.deleteActivity(id);
@@ -83,7 +90,7 @@ public class ActivityController {
      * 根据状态获取活动
      * GET /api/v1/activities/status/{status}
      */
-    @GetMapping("/status/{status}")
+    @GetMapping("/activities/status/{status}")
     public ResponseMessage<List<Activity>> getActivitiesByStatus(@PathVariable String status) {
         logger.info("按状态查询活动：{}", status);
         List<Activity> activities = activityService.getActivitiesByStatus(status);
@@ -94,7 +101,7 @@ public class ActivityController {
      * 发布活动
      * POST /api/v1/activities/{id}/publish
      */
-    @PostMapping("/{id}/publish")
+    @PostMapping("/activities/{id}/publish")
     public ResponseMessage<Activity> publishActivity(@PathVariable String id) {
         logger.info("发布活动，ID：{}", id);
         Activity activity = activityService.publishActivity(id);
@@ -105,7 +112,7 @@ public class ActivityController {
      * 参加活动
      * POST /api/v1/activities/{id}/join
      */
-    @PostMapping("/{id}/join")
+    @PostMapping("/activities/{id}/join")
     public ResponseMessage<Activity> joinActivity(
             @PathVariable String id,
             @RequestParam String userId) {
@@ -118,7 +125,7 @@ public class ActivityController {
      * 退出活动
      * POST /api/v1/activities/{id}/leave
      */
-    @PostMapping("/{id}/leave")
+    @PostMapping("/activities/{id}/leave")
     public ResponseMessage<Activity> leaveActivity(
             @PathVariable String id,
             @RequestParam String userId) {

@@ -61,6 +61,13 @@ public class JwtUtils {
     }
 
     /**
+     * Parse Token to get User ID (Subject)
+     */
+    public String getUserIdFromToken(String token) {
+        return validateToken(token).getSubject();
+    }
+
+    /**
      * 获取过期时间
      */
     public Date getExpirationDate(String token) {

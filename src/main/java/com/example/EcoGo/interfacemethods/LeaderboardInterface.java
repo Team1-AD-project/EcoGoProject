@@ -1,24 +1,17 @@
 package com.example.EcoGo.interfacemethods;
 
+import com.example.EcoGo.dto.LeaderboardStatsDto;
 import com.example.EcoGo.model.Ranking;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 public interface LeaderboardInterface {
 
-    /**
-     * Gets all ranking entries for a specific period (e.g., a specific week).
-     * @param period The period identifier, e.g., "Week 4, 2026".
-     * @return A list of rankings for that period, ordered by rank.
-     */
-    List<Ranking> getRankingsByPeriod(String period);
+    Page<Ranking> getRankingsByPeriod(String period, String name, Pageable pageable);
 
-    /**
-     * Gets a list of all available, distinct periods.
-     * @return A list of unique period strings, e.g., ["Week 4, 2026", "Week 3, 2026"].
-     */
+    LeaderboardStatsDto getRankingsAndStatsByPeriod(String period, String name, int page, int size);
+
     List<String> getAvailablePeriods();
-
-    // Note: Creating, updating, or deleting single rank entries might not be a direct user action.
-    // These operations are usually the result of a backend calculation process.
-    // We will keep the interface simple for now, focusing on retrieving data for the UI.
 }

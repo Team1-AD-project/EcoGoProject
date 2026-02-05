@@ -1,11 +1,13 @@
 package com.example.EcoGo.interfacemethods;
 
 import com.example.EcoGo.model.Advertisement;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface AdvertisementInterface {
-    List<Advertisement> getAllAdvertisements();
+    Page<Advertisement> getAllAdvertisements(String name, Pageable pageable);
     Advertisement getAdvertisementById(String id);
     Advertisement createAdvertisement(Advertisement advertisement);
     Advertisement updateAdvertisement(String id, Advertisement advertisement);
