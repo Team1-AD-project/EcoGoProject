@@ -70,4 +70,33 @@ public class UserVoucherController {
             throw new BusinessException(ErrorCode.DB_ERROR, e.getMessage());
         }
     }
+
+    @GetMapping("/{id}")
+    public ResponseMessage<UserVoucher> getUserVoucherById(@PathVariable String id) {
+
+        if (id == null || id.isBlank()) {
+            return new ResponseMessage<>(
+                ErrorCode.PARAM_CANNOT_BE_NULL.getCode(),
+                ErrorCode.PARAM_CANNOT_BE_NULL.getMessage(),
+                null
+            );
+        }
+
+        UserVoucher uv = userVoucherRepository.findById(id).orElse(null);
+
+        if (uv == null) {
+            return new ResponseMessage<>(
+                ErrorCode.PARAM_ERROR.getCode(),
+                "userVoucher not found",
+                null
+            );
+        }
+
+        return new ResponseMessage<>(
+            ErrorCode.SUCCESS.getCode(),
+            ErrorCode.SUCCESS.getMessage(),
+            uv
+        );
+    }
+
 }
