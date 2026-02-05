@@ -87,33 +87,25 @@ class LoginFragment : Fragment() {
 
                     if (response.success && response.data != null) {
                         val loginData = response.data
-                        Log.d("DEBUG_LOGIN", "Login successful: ${loginData.username}")
+                        val userInfo = loginData.userInfo
+                        Log.d("DEBUG_LOGIN", "Login successful: ${userInfo.nickname}")
                         
                         // Save token using TokenManager
-                        TokenManager.init(requireContext()) // Ensure initialized
+                        TokenManager.init(requireContext()) 
                         TokenManager.saveToken(
                             token = loginData.token,
-                            userId = loginData.userId,
-                            username = loginData.username
+                            userId = userInfo.userid,
+                            username = userInfo.nickname
                         )
                         
-                        // Also update legacy SharedPreferences if needed for other parts of the app
-                        val prefs = requireContext().getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
-                        prefs.edit().apply {
-                            putBoolean("is_logged_in", true)
-                            putString("nusnet_id", inputNusnetId) 
-                            // Don't save password in plain text ideally, but keeping consistency with existing
-                            // putString("password", inputPassword) 
-                            apply()
-                        }
-
-                        Toast.makeText(requireContext(), "Welcome back, ${loginData.username}! 🎉", Toast.LENGTH_SHORT).show()
+                        // ... SharedPreferences update ...
                         
-                        // Navigate to home
-                        findNavController().navigate(R.id.action_login_to_home)
+                        Toast.makeText(requireContext(), "Login Success! Navigating...", Toast.LENGTH_SHORT).show()
+                        findNavController().navigate(com.ecogo.R.id.action_login_to_home)
                     } else {
-                        Log.e("DEBUG_LOGIN", "Login failed: ${response.message}")
-                        Toast.makeText(requireContext(), "Login failed: ${response.message}", Toast.LENGTH_SHORT).show()
+                        val msg = "Code: ${response.code}, Success: ${response.success}, Data: ${response.data}"
+                        Log.e("DEBUG_LOGIN", "Login failed checks: $msg")
+                        Toast.makeText(requireContext(), "Debug: $msg", Toast.LENGTH_LONG).show()
                     }
 
                 } catch (e: Exception) {

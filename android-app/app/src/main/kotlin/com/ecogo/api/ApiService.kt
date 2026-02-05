@@ -493,14 +493,22 @@ data class MobileLoginRequest(
     // Let's defer to String for now as passwords should be strings.
 )
 
+import com.google.gson.annotations.SerializedName
+
 /**
  * 移动端登录响应
  */
 data class MobileLoginResponse(
     val token: String,
-    val userId: String,
-    val username: String,
-    val role: String? = null
+    @SerializedName("user_info") val userInfo: UserInfo
+    // expire_at is also available if needed
+)
+
+data class UserInfo(
+    val id: String,
+    val userid: String,
+    val nickname: String,
+    val isAdmin: Boolean
 )
 
 /**

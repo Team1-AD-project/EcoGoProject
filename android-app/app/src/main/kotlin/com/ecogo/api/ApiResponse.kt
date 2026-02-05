@@ -8,7 +8,7 @@ data class ApiResponse<T>(
     val code: Int,
     val message: String,
     val data: T?,
-    val success: Boolean = code == 200
+    val success: Boolean = code == 200 || code == 0
 )
 
 /**
