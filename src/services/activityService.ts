@@ -53,55 +53,38 @@ export interface UpdateActivityRequest {
     endTime?: string;
 }
 
-// Fetch all activities
+// auth.ts baseURL = '/api/v1/web', 所以这里不需要再加 /web 前缀
+
 export const fetchActivities = async (): Promise<ActivityListResponse> => {
-    const response = await api.get<ActivityListResponse>('/activities', { baseURL: '/api/v1' });
+    const response = await api.get<ActivityListResponse>('/activities');
     return response.data;
 };
 
-// Fetch activities by status
 export const fetchActivitiesByStatus = async (status: ActivityStatus): Promise<ActivityListResponse> => {
-    const response = await api.get<ActivityListResponse>(`/activities/status/${status}`, { baseURL: '/api/v1' });
+    const response = await api.get<ActivityListResponse>(`/activities/status/${status}`);
     return response.data;
 };
 
-// Fetch single activity by ID
 export const fetchActivityById = async (id: string): Promise<ActivityResponse> => {
-    const response = await api.get<ActivityResponse>(`/activities/${id}`, { baseURL: '/api/v1' });
+    const response = await api.get<ActivityResponse>(`/activities/${id}`);
     return response.data;
 };
 
-// Create new activity
 export const createActivity = async (data: CreateActivityRequest): Promise<ActivityResponse> => {
-    const response = await api.post<ActivityResponse>('/activities', data, { baseURL: '/api/v1' });
+    const response = await api.post<ActivityResponse>('/activities', data);
     return response.data;
 };
 
-// Update activity
 export const updateActivity = async (id: string, data: UpdateActivityRequest): Promise<ActivityResponse> => {
-    const response = await api.put<ActivityResponse>(`/activities/${id}`, data, { baseURL: '/api/v1' });
+    const response = await api.put<ActivityResponse>(`/activities/${id}`, data);
     return response.data;
 };
 
-// Delete activity
 export const deleteActivity = async (id: string): Promise<void> => {
-    await api.delete(`/activities/${id}`, { baseURL: '/api/v1' });
+    await api.delete(`/activities/${id}`);
 };
 
-// Publish activity
 export const publishActivity = async (id: string): Promise<ActivityResponse> => {
-    const response = await api.post<ActivityResponse>(`/activities/${id}/publish`, {}, { baseURL: '/api/v1' });
-    return response.data;
-};
-
-// Join activity
-export const joinActivity = async (activityId: string, userId: string): Promise<ActivityResponse> => {
-    const response = await api.post<ActivityResponse>(`/activities/${activityId}/join?userId=${userId}`, {}, { baseURL: '/api/v1' });
-    return response.data;
-};
-
-// Leave activity
-export const leaveActivity = async (activityId: string, userId: string): Promise<ActivityResponse> => {
-    const response = await api.post<ActivityResponse>(`/activities/${activityId}/leave?userId=${userId}`, {}, { baseURL: '/api/v1' });
+    const response = await api.post<ActivityResponse>(`/activities/${id}/publish`, {});
     return response.data;
 };

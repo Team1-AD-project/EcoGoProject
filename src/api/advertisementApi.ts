@@ -1,33 +1,6 @@
-// API 基础配置
-const API_BASE_URL = 'http://localhost:8090/api/v1';
+import { api } from '../services/auth';
 
-// 响应类型
-interface ApiResponse<T> {
-  code: number;
-  message: string;
-  data: T;
-}
-
-// 通用请求函数
-async function fetchApi<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const response = await fetch(url, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-  });
-
-  if (!response.ok) {
-    const error = await response.json().catch(() => ({ message: 'Request failed' }));
-    throw new Error(error.message || `HTTP error! status: ${response.status}`);
-  }
-
-  return response.json();
-}
-
-// 后端 Advertisement 模型
+// 定义广告的数据结构
 export interface Advertisement {
   id: string;
   name: string;
@@ -40,9 +13,10 @@ export interface Advertisement {
   position: 'banner' | 'sidebar' | 'popup' | 'feed';
   impressions: number;
   clicks: number;
-  clickRate?: number;  // 后端计算返回
+  clickRate?: number;
 }
 
+// 定义分页数据结构
 export interface Page<T> {
   content: T[];
   totalPages: number;
@@ -51,60 +25,49 @@ export interface Page<T> {
   number: number;
 }
 
-// 获取所有广告
+// 定义通用的API响应结构
+interface ApiResponse<T> {
+  code: number;
+  message: string;
+  data: T;
+}
+
+// --- API Functions ---
+// auth.ts baseURL = '/api/v1/web', 所以这里不需要再加 /web 前缀
+
 export async function getAllAdvertisements(name: string = '', page: number = 0, size: number = 10): Promise<Page<Advertisement>> {
-  const encodedName = encodeURIComponent(name);
-  const response = await fetchApi<ApiResponse<Page<Advertisement>>>(`/advertisements?name=${encodedName}&page=${page}&size=${size}`);
-  return response.data;
+  const response = await api.get<ApiResponse<Page<Advertisement>>>('/advertisements', {
+    params: { name, page, size },
+  });
+  return response.data.data;
 }
 
-// 根据 ID 获取广告
 export async function getAdvertisementById(id: string): Promise<Advertisement> {
-  const response = await fetchApi<ApiResponse<Advertisement>>(`/advertisements/${id}`);
-  return response.data;
+  const response = await api.get<ApiResponse<Advertisement>>(`/advertisements/${id}`);
+  return response.data.data;
 }
 
-// 创建广告
-export async function createAdvertisement(ad: Omit<Advertisement, 'id'>): Promise<Advertisement> {
-  const response = await fetchApi<ApiResponse<Advertisement>>('/advertisements', {
-    method: 'POST',
-    body: JSON.stringify(ad),
-  });
-  return response.data;
+export async function createAdvertisement(ad: Omit<Advertisement, 'id' | 'impressions' | 'clicks' | 'clickRate'>): Promise<Advertisement> {
+  const response = await api.post<ApiResponse<Advertisement>>('/advertisements', ad);
+  return response.data.data;
 }
 
-// 更新广告
 export async function updateAdvertisement(id: string, ad: Partial<Advertisement>): Promise<Advertisement> {
-  const response = await fetchApi<ApiResponse<Advertisement>>(`/advertisements/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(ad),
-  });
-  return response.data;
+  const response = await api.put<ApiResponse<Advertisement>>(`/advertisements/${id}`, ad);
+  return response.data.data;
 }
 
-// 删除广告
 export async function deleteAdvertisement(id: string): Promise<void> {
-  await fetchApi<ApiResponse<void>>(`/advertisements/${id}`, {
-    method: 'DELETE',
-  });
+  await api.delete(`/advertisements/${id}`);
 }
 
-// 按状态获取广告
-export async function getAdvertisementsByStatus(status: string): Promise<Advertisement[]> {
-  const response = await fetchApi<ApiResponse<Advertisement[]>>(`/advertisements/status/${status}`);
-  return response.data;
-}
-
-// 更新广告状态
 export async function updateAdvertisementStatus(id: string, status: string): Promise<Advertisement> {
-  const response = await fetchApi<ApiResponse<Advertisement>>(`/advertisements/${id}/status?status=${status}`, {
-    method: 'PATCH',
-  });
-  return response.data;
+  const response = await api.patch<ApiResponse<Advertisement>>(`/advertisements/${id}/status`, null, { params: { status } });
+  return response.data.data;
 }
 
-// 获取活跃广告
+// Mobile端点需要覆盖 baseURL
 export async function getActiveAdvertisements(): Promise<Advertisement[]> {
-  const response = await fetchApi<ApiResponse<Advertisement[]>>('/advertisements/active');
-  return response.data;
+    const response = await api.get<ApiResponse<Advertisement[]>>('/mobile/advertisements/active', { baseURL: '/api/v1' });
+    return response.data.data;
 }
