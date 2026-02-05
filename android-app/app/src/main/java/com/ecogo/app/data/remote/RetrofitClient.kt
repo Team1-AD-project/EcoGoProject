@@ -11,11 +11,12 @@ import java.util.concurrent.TimeUnit
  */
 object RetrofitClient {
 
-    // 后端服务器地址 (开发环境)
-    private const val BASE_URL = "http://10.0.2.2:8080/"  // Android 模拟器访问本地服务器
+    // 后端服务器地址
+    private const val BASE_URL = "http://47.129.124.55:8090/api/v1/"  // EcoGo服务器
 
-    // 生产环境地址 (替换为实际服务器)
-    // private const val BASE_URL = "https://api.ecogo.com/"
+    // 其他环境地址
+    // private const val BASE_URL = "http://10.0.2.2:8090/api/v1/"  // 本地开发（模拟器）
+    // private const val BASE_URL = "http://localhost:8090/api/v1/"  // 本地开发（真机）
 
     private val loggingInterceptor = HttpLoggingInterceptor().apply {
         level = HttpLoggingInterceptor.Level.BODY
@@ -46,4 +47,9 @@ object RetrofitClient {
         .build()
 
     val apiService: ApiService = retrofit.create(ApiService::class.java)
+
+    /**
+     * 行程API服务实例
+     */
+    val tripApiService: TripApiService = retrofit.create(TripApiService::class.java)
 }

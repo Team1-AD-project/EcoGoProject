@@ -18,6 +18,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.ecogo.app.R
 import com.ecogo.app.databinding.ActivityMapBinding
 import com.ecogo.app.data.model.TransportMode
@@ -25,6 +27,8 @@ import com.ecogo.app.service.DirectionsService
 import com.ecogo.app.service.LocationManager
 import com.ecogo.app.service.LocationTrackingService
 import com.ecogo.app.service.NavigationManager
+import com.ecogo.app.ml.TransportModeDetector
+import com.ecogo.app.data.repository.NavigationHistoryRepository
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -49,6 +53,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var googleMap: GoogleMap? = null
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var transportModeDetector: TransportModeDetector
 
     // 地图标记
     private var originMarker: Marker? = null
@@ -84,6 +89,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     // 里程碑追踪（用于显示鼓励信息）
     private val milestones = listOf(1000f, 2000f, 3000f, 5000f, 10000f) // 单位：米
     private var reachedMilestones = mutableSetOf<Float>()
+
+    // 导航记录相关
+    private var navigationStartTime: Long = 0  // 导航开始时间
+    private var detectedTransportMode: String? = null  // AI检测到的交通方式
 
     // 行程计时器
     private val timerHandler = Handler(Looper.getMainLooper())
@@ -154,6 +163,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         // 初始化定位客户端
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
+        // 初始化交通方式检测器
+        transportModeDetector = TransportModeDetector(this)
+
         // 初始化地图
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.mapFragment) as SupportMapFragment
@@ -163,6 +175,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         observeViewModel()
         observeLocationManager()
         observeNavigationManager()
+        observeTransportModeDetector()
 
         // 请求通知权限 (Android 13+)
         requestNotificationPermission()
@@ -337,7 +350,52 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         // 重置里程碑追踪
         reachedMilestones.clear()
 
+        // 记录导航开始时间
+        navigationStartTime = System.currentTimeMillis()
+        detectedTransportMode = null
+
         isFollowingUser = true
+
+        // 启动交通方式检测
+        transportModeDetector.startDetection()
+        Log.d(TAG, "Transport mode detection started")
+
+        // 检测是否为模拟器（改进版）
+        val isEmulator = isRunningOnEmulator()
+        Log.d(TAG, "========== Device Detection ==========")
+        Log.d(TAG, "isEmulator: $isEmulator")
+        Log.d(TAG, "FINGERPRINT: ${Build.FINGERPRINT}")
+        Log.d(TAG, "MODEL: ${Build.MODEL}")
+        Log.d(TAG, "MANUFACTURER: ${Build.MANUFACTURER}")
+        Log.d(TAG, "BRAND: ${Build.BRAND}")
+        Log.d(TAG, "DEVICE: ${Build.DEVICE}")
+        Log.d(TAG, "PRODUCT: ${Build.PRODUCT}")
+        Log.d(TAG, "======================================")
+
+        // 临时强制模拟器模式（用于调试）
+        // TODO: 确认设备检测正常后移除这个强制逻辑
+        val forceEmulatorMode = true
+
+        // 模拟器测试：10秒后显示模拟检测结果
+        if (isEmulator || forceEmulatorMode) {
+            Log.w(TAG, "Running on emulator (detected=$isEmulator, forced=$forceEmulatorMode) - will show simulated detection in 10 seconds")
+            Handler(Looper.getMainLooper()).postDelayed({
+                showEmulatorMockDetection()
+            }, 10000) // 10秒后显示模拟结果
+        } else {
+            Log.d(TAG, "Running on real device - using real sensor detection")
+        }
+
+        // 备用机制：10秒后如果还没有检测结果，强制显示提示
+        Handler(Looper.getMainLooper()).postDelayed({
+            if (binding.tvRouteType.text.toString().contains("正在检测交通方式")) {
+                Log.w(TAG, "Detection timeout - forcing fallback message")
+                runOnUiThread {
+                    binding.tvRouteType.text = "⚠️ 交通方式检测异常\n请查看日志或使用真机测试"
+                    Toast.makeText(this, "传感器数据采集失败\n建议使用真机测试", Toast.LENGTH_LONG).show()
+                }
+            }
+        }, 10000) // 10秒后检查
 
         // 启动计时器
         startTimer()
@@ -381,6 +439,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         // 停止计时器（保留显示最终用时）
         stopTimer()
 
+        // 保存导航历史记录（如果有有效数据）
+        saveNavigationHistory()
+
         // 停止导航
         if (isNavigationMode) {
             NavigationManager.stopNavigation()
@@ -391,6 +452,105 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             traveledPolyline = null
             remainingPolyline?.remove()
             remainingPolyline = null
+        }
+
+        // 停止交通方式检测
+        transportModeDetector.stopDetection()
+        Log.d(TAG, "Transport mode detection stopped")
+    }
+
+    /**
+     * 保存导航历史记录
+     */
+    private fun saveNavigationHistory() {
+        // 检查是否有有效的导航数据
+        if (navigationStartTime == 0L) {
+            Log.w(TAG, "Navigation start time not set, skipping history save")
+            return
+        }
+
+        val origin = originLatLng ?: viewModel.currentLocation.value
+        val destination = destinationLatLng
+
+        if (origin == null || destination == null) {
+            Log.w(TAG, "Origin or destination not set, skipping history save")
+            return
+        }
+
+        // 获取路线数据
+        val routePoints = viewModel.routePoints.value ?: emptyList()
+        val trackPoints = if (isNavigationMode) {
+            NavigationManager.traveledPoints.value ?: emptyList()
+        } else {
+            LocationManager.trackPoints.value ?: emptyList()
+        }
+
+        // 如果没有轨迹点，跳过保存
+        if (trackPoints.isEmpty()) {
+            Log.w(TAG, "No track points recorded, skipping history save")
+            return
+        }
+
+        // 获取距离数据
+        val totalDistance = viewModel.routePoints.value?.let { points ->
+            // 计算路线总距离（如果有规划路线）
+            viewModel.recommendedRoute.value?.total_distance?.times(1000) ?: 0.0
+        } ?: 0.0
+
+        val traveledDistance = if (isNavigationMode) {
+            NavigationManager.traveledDistance.value?.toDouble() ?: 0.0
+        } else {
+            LocationManager.totalDistance.value?.toDouble() ?: 0.0
+        }
+
+        // 获取交通方式
+        val transportMode = viewModel.selectedTransportMode.value?.value ?: "walking"
+
+        // 获取环保数据
+        val carbonResult = viewModel.carbonResult.value
+        val totalCarbon = carbonResult?.total_carbon_emission ?: 0.0
+        val carbonSaved = carbonResult?.carbon_saved ?: 0.0
+        val isGreenTrip = carbonResult?.is_green_trip ?: (carbonSaved > 0)
+        val greenPoints = carbonResult?.green_points ?: 0
+
+        // 获取路线类型
+        val routeType = viewModel.recommendedRoute.value?.route_type
+
+        // 在后台线程保存数据
+        lifecycleScope.launch {
+            try {
+                val repository = NavigationHistoryRepository.getInstance()
+                val historyId = repository.saveNavigationHistory(
+                    tripId = null, // 如果有后端trip_id可以传入
+                    userId = null, // 如果有用户系统可以传入用户ID
+                    startTime = navigationStartTime,
+                    endTime = System.currentTimeMillis(),
+                    origin = origin,
+                    originName = originName,
+                    destination = destination,
+                    destinationName = destinationName,
+                    routePoints = routePoints,
+                    trackPoints = trackPoints,
+                    totalDistance = totalDistance,
+                    traveledDistance = traveledDistance,
+                    transportMode = transportMode,
+                    detectedMode = detectedTransportMode,
+                    totalCarbon = totalCarbon,
+                    carbonSaved = carbonSaved,
+                    isGreenTrip = isGreenTrip,
+                    greenPoints = greenPoints,
+                    routeType = routeType
+                )
+
+                Log.d(TAG, "Navigation history saved successfully with ID: $historyId")
+
+                // 可以在这里显示保存成功的提示（可选）
+                // runOnUiThread {
+                //     Toast.makeText(this@MapActivity, "行程已保存", Toast.LENGTH_SHORT).show()
+                // }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to save navigation history", e)
+            }
         }
     }
 
@@ -407,11 +567,24 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             if (LocationManager.isTracking.value == true && isFollowingUser) {
                 googleMap?.animateCamera(CameraUpdateFactory.newLatLng(latLng))
             }
+
+            // 更新交通方式检测器的位置（用于 GPS 速度）
+            if (LocationManager.isTracking.value == true) {
+                val location = android.location.Location("gps").apply {
+                    latitude = latLng.latitude
+                    longitude = latLng.longitude
+                    time = System.currentTimeMillis()
+                    // 注意：这里的 speed 需要从实际的 Location 对象获取
+                    // 当前使用默认值 0，实际应该从 LocationTrackingService 获取
+                }
+                transportModeDetector.updateLocation(location)
+                Log.d(TAG, "Location updated for detector: lat=${latLng.latitude}, lng=${latLng.longitude}")
+            }
         }
 
-        // 观察轨迹点
+        // 观察轨迹点（仅在非导航模式下绘制）
         LocationManager.trackPoints.observe(this) { points ->
-            if (points.isNotEmpty()) {
+            if (points.isNotEmpty() && !isNavigationMode) {
                 drawTrackPolyline(points)
             }
         }
@@ -453,6 +626,110 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         NavigationManager.currentRouteIndex.observe(this) { _ ->
             if (NavigationManager.hasReachedDestination()) {
                 onReachedDestination()
+            }
+        }
+    }
+
+    /**
+     * 观察交通方式检测器
+     */
+    private fun observeTransportModeDetector() {
+        lifecycleScope.launch {
+            Log.d(TAG, "Started observing transport mode detector")
+            transportModeDetector.detectedMode.collect { prediction ->
+                Log.d(TAG, "Received prediction: $prediction")
+                prediction?.let {
+                    onTransportModeDetected(it)
+                }
+            }
+        }
+    }
+
+    /**
+     * 处理检测到的交通方式
+     */
+    private fun onTransportModeDetected(prediction: com.ecogo.app.ml.TransportModePrediction) {
+        if (!LocationManager.isTracking.value!!) return
+
+        // 记录检测到的交通方式（用于保存到历史记录）
+        detectedTransportMode = prediction.mode.name.lowercase()
+
+        val modeIcon = when (prediction.mode) {
+            com.ecogo.app.ml.TransportModeLabel.WALKING -> "🚶"
+            com.ecogo.app.ml.TransportModeLabel.CYCLING -> "🚴"
+            com.ecogo.app.ml.TransportModeLabel.BUS -> "🚌"
+            com.ecogo.app.ml.TransportModeLabel.SUBWAY -> "🚇"
+            com.ecogo.app.ml.TransportModeLabel.DRIVING -> "🚗"
+            else -> "❓"
+        }
+
+        val modeText = when (prediction.mode) {
+            com.ecogo.app.ml.TransportModeLabel.WALKING -> "步行"
+            com.ecogo.app.ml.TransportModeLabel.CYCLING -> "骑行"
+            com.ecogo.app.ml.TransportModeLabel.BUS -> "公交"
+            com.ecogo.app.ml.TransportModeLabel.SUBWAY -> "地铁"
+            com.ecogo.app.ml.TransportModeLabel.DRIVING -> "驾车"
+            else -> "未知"
+        }
+
+        val confidencePercent = (prediction.confidence * 100).toInt()
+
+        // 更新 UI 显示检测到的交通方式（在顶部显著位置）
+        runOnUiThread {
+            if (binding.cardRouteInfo.visibility == View.VISIBLE) {
+                // 在路线类型位置显示当前交通方式
+                if (isNavigationMode) {
+                    binding.tvRouteType.text = "$modeIcon 当前交通: $modeText ($confidencePercent%)"
+                } else {
+                    binding.tvRouteType.text = "$modeIcon 检测到: $modeText ($confidencePercent%)"
+                }
+            }
+        }
+
+        Log.d(TAG, "检测到交通方式: $modeText, 置信度: ${prediction.confidence}")
+    }
+
+    /**
+     * 检测是否运行在模拟器上
+     * 检查多个设备属性以提高可靠性
+     */
+    private fun isRunningOnEmulator(): Boolean {
+        return (Build.FINGERPRINT.startsWith("generic")
+                || Build.FINGERPRINT.startsWith("unknown")
+                || Build.MODEL.contains("google_sdk")
+                || Build.MODEL.contains("Emulator")
+                || Build.MODEL.contains("Android SDK built for x86")
+                || Build.MANUFACTURER.contains("Genymotion")
+                || (Build.BRAND.startsWith("generic") && Build.DEVICE.startsWith("generic"))
+                || "google_sdk" == Build.PRODUCT)
+    }
+
+    /**
+     * 模拟器模拟检测结果（仅用于 UI 测试）
+     */
+    private fun showEmulatorMockDetection() {
+        Log.d(TAG, "showEmulatorMockDetection() called")
+        Log.d(TAG, "LocationManager.isTracking.value = ${LocationManager.isTracking.value}")
+
+        val isTracking = LocationManager.isTracking.value ?: false
+        if (!isTracking) {
+            Log.w(TAG, "Cannot show mock detection - tracking is not active")
+            return
+        }
+
+        runOnUiThread {
+            Log.d(TAG, "cardRouteInfo.visibility = ${binding.cardRouteInfo.visibility}")
+
+            if (binding.cardRouteInfo.visibility == View.VISIBLE) {
+                binding.tvRouteType.text = "🚶 模拟检测: 步行 (模拟器测试)"
+                Log.w(TAG, "Showing emulator mock detection (real sensors not available)")
+                Toast.makeText(
+                    this,
+                    "⚠️ 模拟器无真实传感器\n显示模拟结果\n请用真机测试实际检测功能",
+                    Toast.LENGTH_LONG
+                ).show()
+            } else {
+                Log.w(TAG, "Cannot show mock detection - cardRouteInfo is not visible")
             }
         }
     }
@@ -1231,15 +1508,16 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 // 显示追踪信息卡片
                 binding.cardRouteInfo.visibility = View.VISIBLE
 
+                // 显示正在检测交通方式
+                binding.tvRouteType.text = "🔄 正在检测交通方式..."
+
                 if (isNavigationMode) {
                     // 导航模式
-                    binding.tvRouteType.text = "导航中"
                     binding.tvCarbonSaved.text = "已行进: 0.00 公里"
                     val remainingKm = (NavigationManager.remainingDistance.value ?: 0f) / 1000f
                     binding.tvDuration.text = String.format("剩余: %.2f 公里", remainingKm)
                 } else {
                     // 纯轨迹记录模式
-                    binding.tvRouteType.text = "行程追踪中"
                     binding.tvCarbonSaved.text = "已行进: 0.00 公里"
                     binding.tvDuration.text = "实时记录GPS轨迹"
                 }
@@ -1271,5 +1549,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         if (NavigationManager.isNavigating.value == true) {
             NavigationManager.clearNavigation()
         }
+        // 清除交通方式检测器
+        transportModeDetector.cleanup()
     }
 }

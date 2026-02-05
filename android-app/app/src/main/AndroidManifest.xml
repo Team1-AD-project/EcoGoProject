@@ -17,6 +17,7 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
+        android:name=".EcoGoApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -39,6 +40,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- 机器学习数据收集 Activity -->
+        <activity
+            android:name=".ui.ml.DataCollectionActivity"
+            android:exported="false"
+            android:label="数据收集"
+            android:screenOrientation="portrait" />
 
         <!-- 定位前台服务 -->
         <service
