@@ -228,7 +228,7 @@ jobs:
         if: env.SONAR_TOKEN != ''
         run: |
           mvn clean verify sonar:sonar -DskipTests \
-            -Dsonar.projectKey=team1-ad-project \
+            -Dsonar.projectKey=Team1-AD-project_EcoGo \
             -Dsonar.organization=team1-ad-project \
             -Dsonar.sources=src/main \
             -Dsonar.tests=src/test \
