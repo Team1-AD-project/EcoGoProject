@@ -59,6 +59,12 @@ public interface PointsService {
      */
     List<PointsDto.PointsLogResponse> getAllPointsHistory();
 
+    /**
+     * Get total points gained by all members of the user's faculty.
+     * Calculated from points logs with changeType='gain'.
+     */
+    long getFacultyTotalPoints(String userId);
+
     // --- Internal Logic (Not exposed directly as API) ---
     void settle(String userId, PointsDto.SettleResult result);
 
@@ -69,7 +75,8 @@ public interface PointsService {
     // --- Trip Settlement ---
 
     /**
-     * Settle a completed trip: calculate points, update user stats, create points log
+     * Settle a completed trip: calculate points, update user stats, create points
+     * log
      */
     void settleTrip(String userId, PointsDto.SettleTripRequest request);
 

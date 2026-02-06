@@ -21,4 +21,7 @@ public interface UserPointsLogRepository extends MongoRepository<UserPointsLog, 
     // Find logs within date range if needed (future)
     // List<UserPointsLog> findByUserIdAndCreatedAtBetween(String userId,
     // LocalDateTime start, LocalDateTime end);
+
+    // Find logs for a list of users with specific change type (e.g. "gain")
+    List<UserPointsLog> findByUserIdInAndChangeType(java.util.Collection<String> userIds, String changeType);
 }

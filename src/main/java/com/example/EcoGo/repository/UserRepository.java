@@ -20,4 +20,6 @@ public interface UserRepository extends MongoRepository<User, String> {
 
     // Find active VIPs whose expiry date is before the given time
     java.util.List<User> findByVipIsActiveTrueAndVipExpiryDateBefore(java.time.LocalDateTime time);
+
+    java.util.List<User> findByFaculty(String faculty);
 }

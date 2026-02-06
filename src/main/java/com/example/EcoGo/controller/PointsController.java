@@ -72,6 +72,18 @@ public class PointsController {
         return ResponseMessage.success(pointsService.getTripStats(userId));
     }
 
+    /**
+     * Mobile: Get Total Faculty Points (Calculated from Logs)
+     * GET /api/v1/mobile/points/stats/faculty
+     */
+    @GetMapping("/api/v1/mobile/points/stats/faculty")
+    public ResponseMessage<Long> getFacultyPoints(
+            @RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String userId = jwtUtils.getUserIdFromToken(token);
+        return ResponseMessage.success(pointsService.getFacultyTotalPoints(userId));
+    }
+
     // --- Web / Admin Endpoints ---
 
     /**

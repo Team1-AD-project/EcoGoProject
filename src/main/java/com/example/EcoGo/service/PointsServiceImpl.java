@@ -299,4 +299,35 @@ public class PointsServiceImpl implements PointsService {
         // Format: "Purchased Badge: Eco Pioneer"
         return "Purchased Badge: " + (badgeName != null ? badgeName : "Unknown Badge");
     }
+
+    @Override
+    public long getFacultyTotalPoints(String userId) {
+        // 1. Get current user
+        User user = userRepository.findByUserid(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
+        String faculty = user.getFaculty();
+        if (faculty == null || faculty.isEmpty()) {
+            return 0;
+        }
+
+        // 2. Find all users in the same faculty
+        List<User> facultyUsers = userRepository.findByFaculty(faculty);
+        if (facultyUsers.isEmpty()) {
+            return 0;
+        }
+
+        // 3. Extract Business UserIDs
+        List<String> userIds = facultyUsers.stream()
+                .map(User::getUserid)
+                .collect(Collectors.toList());
+
+        // 4. Find all 'gain' logs for these users
+        List<UserPointsLog> logs = pointsLogRepository.findByUserIdInAndChangeType(userIds, "gain");
+
+        // 5. Sum points
+        return logs.stream()
+                .mapToLong(UserPointsLog::getPoints)
+                .sum();
+    }
 }
