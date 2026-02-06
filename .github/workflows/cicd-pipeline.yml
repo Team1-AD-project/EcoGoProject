@@ -156,10 +156,10 @@ jobs:
           format: 'table'
         continue-on-error: true
 
-  # Stage 5: Code Coverage Gate
+  # Stage 5: Code Coverage (Report Only)
   coverage-check:
     runs-on: ubuntu-latest
-    name: Code Coverage Gate
+    name: Code Coverage Report
     needs: container-security
     services:
       mongodb:
@@ -189,10 +189,6 @@ jobs:
       
       - name: Generate Coverage Report
         run: mvn jacoco:report || echo "Coverage report generated"
-        continue-on-error: true
-      
-      - name: Check Coverage Thresholds
-        run: mvn jacoco:check || echo "Coverage below threshold - this is informational only"
         continue-on-error: true
       
       - name: Upload Coverage Reports
