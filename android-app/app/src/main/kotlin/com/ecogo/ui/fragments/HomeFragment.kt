@@ -181,7 +181,8 @@ class HomeFragment : Fragment() {
     }
     
     private suspend fun loadUserProfile() {
-        val result = repository.getMobileUserProfile()
+        val userId = com.ecogo.auth.TokenManager.getUserId() ?: return
+        val result = repository.getMobileUserProfile(userId)
         val profile = result.getOrNull()
         if (profile != null) {
             val userInfo = profile.userInfo
@@ -238,7 +239,7 @@ class HomeFragment : Fragment() {
 
         // 1. 获取积分数据
         val pointsResult = repository.getCurrentPoints().getOrNull()
-        val userProfile = repository.getMobileUserProfile().getOrNull()
+        val userProfile = repository.getMobileUserProfile(userId).getOrNull()
         val currentPoints = pointsResult?.currentPoints
             ?: userProfile?.userInfo?.currentPoints?.toLong()
             ?: 0L

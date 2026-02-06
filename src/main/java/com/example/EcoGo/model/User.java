@@ -37,6 +37,17 @@ public class User {
     private MascotOutfit mascotOutfit;
     private java.util.List<String> inventory;
 
+    // Profile / Edit Profile fields
+    private String faculty;
+    private String dormitoryOrResidence;
+    private String mainTeachingBuilding;
+    private String favoriteStudySpot;
+    private java.util.List<String> interests;
+    private int weeklyGoals;
+    private boolean newChallenges;
+    private boolean activityReminders;
+    private boolean friendActivity;
+
     // Getters and Setters
 
     public String getId() {
@@ -205,6 +216,78 @@ public class User {
 
     public void setInventory(java.util.List<String> inventory) {
         this.inventory = inventory;
+    }
+
+    public String getFaculty() {
+        return faculty;
+    }
+
+    public void setFaculty(String faculty) {
+        this.faculty = faculty;
+    }
+
+    public String getDormitoryOrResidence() {
+        return dormitoryOrResidence;
+    }
+
+    public void setDormitoryOrResidence(String dormitoryOrResidence) {
+        this.dormitoryOrResidence = dormitoryOrResidence;
+    }
+
+    public String getMainTeachingBuilding() {
+        return mainTeachingBuilding;
+    }
+
+    public void setMainTeachingBuilding(String mainTeachingBuilding) {
+        this.mainTeachingBuilding = mainTeachingBuilding;
+    }
+
+    public String getFavoriteStudySpot() {
+        return favoriteStudySpot;
+    }
+
+    public void setFavoriteStudySpot(String favoriteStudySpot) {
+        this.favoriteStudySpot = favoriteStudySpot;
+    }
+
+    public java.util.List<String> getInterests() {
+        return interests;
+    }
+
+    public void setInterests(java.util.List<String> interests) {
+        this.interests = interests;
+    }
+
+    public int getWeeklyGoals() {
+        return weeklyGoals;
+    }
+
+    public void setWeeklyGoals(int weeklyGoals) {
+        this.weeklyGoals = weeklyGoals;
+    }
+
+    public boolean isNewChallenges() {
+        return newChallenges;
+    }
+
+    public void setNewChallenges(boolean newChallenges) {
+        this.newChallenges = newChallenges;
+    }
+
+    public boolean isActivityReminders() {
+        return activityReminders;
+    }
+
+    public void setActivityReminders(boolean activityReminders) {
+        this.activityReminders = activityReminders;
+    }
+
+    public boolean isFriendActivity() {
+        return friendActivity;
+    }
+
+    public void setFriendActivity(boolean friendActivity) {
+        this.friendActivity = friendActivity;
     }
 
     // Nested Classes (unchanged)

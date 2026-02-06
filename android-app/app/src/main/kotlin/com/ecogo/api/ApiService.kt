@@ -491,14 +491,10 @@ interface ApiService {
 
     /**
      * 获取移动端用户详细资料
-     * GET /api/v1/mobile/users/profile
+     * GET /api/v1/mobile/users/profile/{userId}
      */
-    /**
-     * 获取移动端用户详细资料
-     * GET /api/v1/mobile/users/profile
-     */
-    @GET("api/v1/mobile/users/profile")
-    suspend fun getMobileUserProfile(): ApiResponse<MobileProfileResponse>
+    @GET("api/v1/mobile/users/profile/{userId}")
+    suspend fun getMobileUserProfile(@Path("userId") userId: String): ApiResponse<MobileProfileResponse>
 
     /**
      * 获取当前积分

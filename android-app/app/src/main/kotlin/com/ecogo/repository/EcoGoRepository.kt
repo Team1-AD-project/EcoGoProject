@@ -512,10 +512,10 @@ class EcoGoRepository {
     /**
      * 获取移动端用户详细资料 (Authenticated)
      */
-    suspend fun getMobileUserProfile(): Result<MobileProfileResponse> =
+    suspend fun getMobileUserProfile(userId: String): Result<MobileProfileResponse> =
         withContext(Dispatchers.IO) {
             try {
-                val response = api.getMobileUserProfile()
+                val response = api.getMobileUserProfile(userId)
                 if (response.success && response.data != null) {
                     Result.success(response.data)
                 } else {

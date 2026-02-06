@@ -79,8 +79,9 @@ class ProfileFragment : Fragment() {
         // First restore from local cache immediately (fast UI)
         restoreFromLocalCache()
 
+        val userId = TokenManager.getUserId() ?: return
         viewLifecycleOwner.lifecycleScope.launch {
-            val result = repository.getMobileUserProfile()
+            val result = repository.getMobileUserProfile(userId)
             val profile = result.getOrNull()
             if (profile != null) {
                 val userInfo = profile.userInfo

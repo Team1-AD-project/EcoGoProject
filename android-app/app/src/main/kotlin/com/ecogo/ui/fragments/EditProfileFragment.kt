@@ -91,9 +91,10 @@ class EditProfileFragment : Fragment() {
     }
 
     private fun loadProfile() {
+        val userId = com.ecogo.auth.TokenManager.getUserId() ?: return
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                val result = repository.getMobileUserProfile()
+                val result = repository.getMobileUserProfile(userId)
                 val profile = result.getOrNull()
 
                 if (profile != null) {

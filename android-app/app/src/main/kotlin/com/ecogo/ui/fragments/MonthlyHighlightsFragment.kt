@@ -159,7 +159,7 @@ class MonthlyHighlightsFragment : Fragment() {
 
         // 1. 获取真实积分数据
         val pointsResult = repository.getCurrentPoints().getOrNull()
-        val userProfile = repository.getMobileUserProfile().getOrNull()
+        val userProfile = repository.getMobileUserProfile(userId).getOrNull()
 
         val currentPoints = pointsResult?.currentPoints
             ?: userProfile?.userInfo?.currentPoints?.toLong()
