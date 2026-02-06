@@ -11,7 +11,8 @@ import {
   Trophy,
   MessageSquare,
   LogOut,
-  Activity
+  Activity,
+  Target
 } from 'lucide-react';
 import { cn } from '@/components/ui/utils';
 
@@ -88,6 +89,11 @@ export function Sidebar({ selectedModule, onModuleSelect, onLogout }: SidebarPro
       id: 'activity-management',
       label: 'Activity Logs',
       icon: <Activity className="size-5" />
+    },
+    {
+      id: 'challenge-management',
+      label: 'Challenges',
+      icon: <Target className="size-5" />
     }
   ];
 
