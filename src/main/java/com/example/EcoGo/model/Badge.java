@@ -53,5 +53,3 @@ public class Badge {
         private String colorScheme;
     }
 }
-
-   
