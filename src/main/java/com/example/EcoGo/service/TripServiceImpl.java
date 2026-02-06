@@ -12,7 +12,8 @@ import com.example.EcoGo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import com.example.EcoGo.interfacemethods.VipSwitchService;
+import com.example.EcoGo.model.User;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 @Service
 @Transactional
 public class TripServiceImpl implements TripService {
+
+    @Autowired
+    private VipSwitchService vipSwitchService;
 
     @Autowired
     private TripRepository tripRepository;
@@ -89,8 +93,17 @@ public class TripServiceImpl implements TripService {
             trip.setPolylinePoints(points);
         }
 
-        // Calculate points and format description
-        long pointsGained = pointsService.calculatePoints(request.detectedMode, request.distance);
+            // Calculate points: carbon取整 * 10, VIP双倍
+        long basePoints = (long) Math.round(request.carbonSaved) * 10;
+
+        // Check if user is VIP and double points switch is enabled
+        User user = userRepository.findByUserid(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+        boolean isVip = user.getVip() != null && user.getVip().isActive();
+        boolean isEnabled = vipSwitchService.isSwitchEnabled("Double_points");
+
+        long pointsGained = (isVip && isEnabled) ? basePoints * 2 : basePoints;
+
         String description = pointsService.formatTripDescription(
                 trip.getStartLocation() != null ? trip.getStartLocation().getPlaceName() : null,
                 request.endPlaceName,
@@ -105,6 +118,12 @@ public class TripServiceImpl implements TripService {
         pointsService.settle(userId, settleResult);
         trip.setPointsGained(pointsGained);
         trip.setCarbonStatus("completed");
+
+        // Update user's totalCarbon
+        if (request.carbonSaved > 0) {
+            user.setTotalCarbon(user.getTotalCarbon() + (long) request.carbonSaved);
+            userRepository.save(user);
+        }
 
         return tripRepository.save(trip);
     }
