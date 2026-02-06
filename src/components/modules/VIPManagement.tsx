@@ -17,59 +17,29 @@ import {
   Loader2
 } from 'lucide-react';
 import { fetchUserList, type User } from '@/services/userService';
+import { fetchVipSwitches, updateVipSwitch, type VipSwitch } from '@/services/vipService';
 import { toast } from 'sonner';
 
-interface VIPFeature {
-  id: string;
-  name: string;
-  description: string;
-  enabled: boolean;
-  icon: React.ReactNode;
-}
+// Helper to map keys to icons
+const getFeatureIcon = (key: string) => {
+  const lowerKey = key.toLowerCase();
+  if (lowerKey.includes('badge')) return <Crown className="size-5 text-purple-600" />;
+  if (lowerKey.includes('point')) return <Zap className="size-5 text-yellow-600" />;
+  if (lowerKey.includes('support')) return <CheckCircle className="size-5 text-green-600" />;
+  if (lowerKey.includes('analytic')) return <TrendingUp className="size-5 text-blue-600" />;
+  if (lowerKey.includes('goods')) return <Users className="size-5 text-blue-600" />;
+  if (lowerKey.includes('voucher')) return <Calendar className="size-5 text-orange-600" />;
+  return <Settings className="size-5 text-gray-600" />;
+};
 
 export function VIPManagement() {
   const [users, setUsers] = useState<User[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [vipFeatures, setVipFeatures] = useState<VIPFeature[]>([
-    {
-      id: 'F001',
-      name: 'Exclusive Badges',
-      description: 'Access to premium badge collection',
-      enabled: true,
-      icon: <Crown className="size-5 text-purple-600" />
-    },
-    {
-      id: 'F002',
-      name: 'Double Points',
-      description: 'Earn 2x points on all activities',
-      enabled: true,
-      icon: <Zap className="size-5 text-yellow-600" />
-    },
-    {
-      id: 'F003',
-      name: 'Priority Support',
-      description: '24/7 dedicated customer support',
-      enabled: true,
-      icon: <CheckCircle className="size-5 text-green-600" />
-    },
-    {
-      id: 'F004',
-      name: 'Advanced Analytics',
-      description: 'Detailed activity reports and insights',
-      enabled: true,
-      icon: <TrendingUp className="size-5 text-blue-600" />
-    },
-    {
-      id: 'F005',
-      name: 'Early Access',
-      description: 'Try new features before public release',
-      enabled: false,
-      icon: <Calendar className="size-5 text-orange-600" />
-    }
-  ]);
+  const [vipFeatures, setVipFeatures] = useState<VipSwitch[]>([]);
 
   useEffect(() => {
     loadUsers();
+    loadVipFeatures();
   }, []);
 
   const loadUsers = async () => {
@@ -91,19 +61,38 @@ export function VIPManagement() {
     }
   };
 
-  const handleToggleAutoRenew = (userId: string) => {
-    // Optimistic update - in real app, call API to toggle
-    setUsers(users.map(user =>
-      user.id === userId && user.vip ? { ...user, vip: { ...user.vip, autoRenew: !user.vip.autoRenew } } : user
-    ));
-    toast.success('Auto-renew updated locally');
+  const loadVipFeatures = async () => {
+    try {
+      const response = await fetchVipSwitches();
+      if (response && response.code === 200 && response.data) {
+        setVipFeatures(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to load VIP features', error);
+      toast.error('Failed to load VIP features');
+    }
   };
 
-  const handleToggleFeature = (featureId: string) => {
-    setVipFeatures(vipFeatures.map(feature =>
-      feature.id === featureId ? { ...feature, enabled: !feature.enabled } : feature
-    ));
+  const handleToggleFeature = async (id: string, currentStatus: boolean, switchKey: string) => {
+    // Optimistic update
+    setVipFeatures(prev => prev.map(f => f.id === id ? { ...f, enabled: !f.enabled } : f));
+
+    try {
+      await updateVipSwitch({
+        switchKey,
+        isEnabled: !currentStatus,
+        updatedBy: 'admin'
+      });
+      toast.success('Feature status updated');
+      loadVipFeatures();
+    } catch (error) {
+      console.error('Failed to update feature', error);
+      toast.error('Failed to update feature');
+      loadVipFeatures();
+    }
   };
+
+
 
   // Filter only users who are VIPs or have a plan
   const vipUsers = users.filter(u => u.vip?.active || u.vip?.plan);
@@ -283,22 +272,7 @@ export function VIPManagement() {
                             </div>
                           </div>
 
-                          <div className="flex items-center justify-between pt-3 border-t">
-                            <div className="flex items-center gap-2">
-                              <Switch
-                                checked={user.vip?.autoRenew || false}
-                                onCheckedChange={() => handleToggleAutoRenew(user.id)}
-                              />
-                              <span className="text-sm text-gray-700">Auto Renew</span>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {user.vip?.autoRenew ? (
-                                <CheckCircle className="size-4 text-green-600" />
-                              ) : (
-                                <XCircle className="size-4 text-gray-400" />
-                              )}
-                            </div>
-                          </div>
+
                         </div>
                       </div>
                     </Card>
@@ -321,19 +295,19 @@ export function VIPManagement() {
                 <Card key={feature.id} className="p-4 hover:shadow-md transition-shadow">
                   <div className="flex items-center gap-4">
                     <div className="flex-shrink-0">
-                      {feature.icon}
+                      {getFeatureIcon(feature.switchKey)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-semibold text-gray-900 mb-1">{feature.name}</h4>
+                      <h4 className="font-semibold text-gray-900 mb-1">{feature.displayName}</h4>
                       <p className="text-sm text-gray-600">{feature.description}</p>
                     </div>
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <Badge className={feature.enabled ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}>
-                        {feature.enabled ? 'Enabled' : 'Disabled'}
+                        {feature.enabled ? 'Active' : 'Disabled'}
                       </Badge>
                       <Switch
                         checked={feature.enabled}
-                        onCheckedChange={() => handleToggleFeature(feature.id)}
+                        onCheckedChange={() => handleToggleFeature(feature.id, feature.enabled, feature.switchKey)}
                       />
                     </div>
                   </div>
