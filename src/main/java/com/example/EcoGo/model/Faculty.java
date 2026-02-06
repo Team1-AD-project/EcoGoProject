@@ -12,14 +12,11 @@ public class Faculty {
     @Indexed(unique = true)
     private String name;
 
-    private long totalPoints;
-
     public Faculty() {
     }
 
     public Faculty(String name) {
         this.name = name;
-        this.totalPoints = 0;
     }
 
     public String getId() {
@@ -36,13 +33,5 @@ public class Faculty {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public long getTotalPoints() {
-        return totalPoints;
-    }
-
-    public void setTotalPoints(long totalPoints) {
-        this.totalPoints = totalPoints;
     }
 }

@@ -28,9 +28,6 @@ public class PointsServiceImpl implements PointsService {
     private UserPointsLogRepository pointsLogRepository;
 
     @Autowired
-    private com.example.EcoGo.repository.FacultyRepository facultyRepository;
-
-    @Autowired
     @Lazy
     private BadgeService badgeService;
 
@@ -71,18 +68,6 @@ public class PointsServiceImpl implements PointsService {
         if (points > 0 && isTripSource) {
             long carbonSaved = points / 10;
             user.setTotalCarbon(user.getTotalCarbon() + carbonSaved);
-        }
-
-        // Update Faculty Points
-        // Condition: Points > 0 and User belongs to a faculty
-        if (points > 0 && user.getFaculty() != null && !user.getFaculty().isEmpty()) {
-            final long pointsToAdd = points;
-            String facultyName = user.getFaculty();
-            com.example.EcoGo.model.Faculty faculty = facultyRepository.findByName(facultyName)
-                    .orElseGet(() -> new com.example.EcoGo.model.Faculty(facultyName));
-
-            faculty.setTotalPoints(faculty.getTotalPoints() + pointsToAdd);
-            facultyRepository.save(faculty);
         }
 
         userRepository.save(user);
@@ -276,7 +261,8 @@ public class PointsServiceImpl implements PointsService {
         // 2. Generate description from LocationInfo
         String description = formatTripDescription(request.startLocation, request.endLocation, request.distance);
 
-        // 3. Adjust points (handles balance, totalPoints, totalCarbon, badge check, log)
+        // 3. Adjust points (handles balance, totalPoints, totalCarbon, badge check,
+        // log)
         adjustPoints(userId, points, "trip", description, request.tripId, null);
 
         // 4. Update User.Stats cache
@@ -297,11 +283,14 @@ public class PointsServiceImpl implements PointsService {
     }
 
     @Override
-    public String formatTripDescription(PointsDto.LocationInfo start, PointsDto.LocationInfo end, double totalDistance) {
+    public String formatTripDescription(PointsDto.LocationInfo start, PointsDto.LocationInfo end,
+            double totalDistance) {
         String startName = (start != null && start.placeName != null && !start.placeName.isEmpty())
-                ? start.placeName : "Unknown Start";
+                ? start.placeName
+                : "Unknown Start";
         String endName = (end != null && end.placeName != null && !end.placeName.isEmpty())
-                ? end.placeName : "Unknown Destination";
+                ? end.placeName
+                : "Unknown Destination";
         return String.format("%s -> %s (%.1fkm)", startName, endName, totalDistance);
     }
 
