@@ -1,9 +1,11 @@
 package com.example.EcoGo.service;
 
 import com.example.EcoGo.interfacemethods.PointsService;
+import com.example.EcoGo.interfacemethods.VipSwitchService;
 import com.example.EcoGo.model.Goods;
 import com.example.EcoGo.model.Order;
 import com.example.EcoGo.model.User;
+import com.example.EcoGo.repository.GoodsRepository;
 import com.example.EcoGo.repository.OrderRepository;
 import com.example.EcoGo.repository.UserRepository;
 import com.example.EcoGo.repository.UserVoucherRepository;
@@ -28,8 +30,13 @@ import java.util.UUID;
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
+    private VipSwitchServiceImpl vipSwitchService;
+
+    @Autowired
     private UserVoucherRepository userVoucherRepository;
 
+    @Autowired
+    private GoodsRepository goodsRepository;
 
     @Autowired
     private OrderRepository orderRepository;
@@ -170,43 +177,79 @@ public class OrderServiceImpl implements OrderService {
 
         // 0) 基础校验
         if (order == null) throw new BusinessException(ErrorCode.PARAM_ERROR, "INVALID_ORDER");
-        if (order.getUserId() == null || order.getUserId().isEmpty()) throw new BusinessException(ErrorCode.PARAM_ERROR, "MISSING_USER_ID");
-        if (order.getItems() == null || order.getItems().isEmpty()) throw new BusinessException(ErrorCode.PARAM_ERROR, "MISSING_ORDER_ITEMS");
+        if (order.getUserId() == null || order.getUserId().isEmpty())
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "MISSING_USER_ID");
+        if (order.getItems() == null || order.getItems().isEmpty())
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "MISSING_ORDER_ITEMS");
 
         long totalPointsCost = 0L;
         List<String> reservedGoodsIds = new ArrayList<>();
         List<Integer> reservedQty = new ArrayList<>();
 
-
         // ✅ 统计本次兑换的 VIP 数量（每个 vip = 30 天）
         int vipQtyTotal = 0;
         List<UserVoucher> vouchersToCreate = new ArrayList<>();
+
+        boolean pointsDeducted = false; // ✅ 防止失败时“误退积分/重复退积分”
 
         try {
             String userId = order.getUserId();
 
             // 1) 校验每个 item，并计算总积分；同时扣库存
             for (Order.OrderItem item : order.getItems()) {
+
                 if (item.getGoodsId() == null || item.getGoodsId().isEmpty()) {
                     throw new BusinessException(ErrorCode.PARAM_ERROR, "MISSING_GOODS_ID");
                 }
+
                 int qty = (item.getQuantity() == null || item.getQuantity() <= 0) ? 1 : item.getQuantity();
 
                 Goods goods = goodsService.getGoodsById(item.getGoodsId());
-                if (goods == null) throw new RuntimeException("GOODS_NOT_FOUND: " + item.getGoodsId());
+                if (goods == null) {
+                    throw new BusinessException(ErrorCode.PARAM_ERROR, "GOODS_NOT_FOUND: " + item.getGoodsId());
+                }
+
                 if (!Boolean.TRUE.equals(goods.getIsForRedemption())) {
                     throw new BusinessException(ErrorCode.PARAM_ERROR, "GOODS_NOT_FOR_REDEMPTION: " + item.getGoodsId());
-                }
+                }   
 
-                // ✅ VIP_REQUIRED：vipLevelRequired=1 => 必须是 VIP 用户
-                if (goods.getVipLevelRequired() != null && goods.getVipLevelRequired() == 1) {
-                    if (!isVipActive(userId)) {
-                        throw new BusinessException(ErrorCode.PARAM_ERROR,"VIP_REQUIRED: " + item.getGoodsId());
+                // ========= ✅ VIP-exclusive 兑换校验（只在兑换阶段拦） =========
+                // 规则：
+                // - VIP 商品定义：vipLevelRequired == 1
+                // - 全局开关：goods 用 Exclusive_goods；voucher 用 Exclusive_vouchers
+                // - 但“vip订阅商品(type=vip)”必须放行（否则普通用户无法购买VIP）
+                boolean isVipSubscription = "vip".equalsIgnoreCase(goods.getType());
+                boolean isVipExclusive = goods.getVipLevelRequired() != null && goods.getVipLevelRequired() == 1;
+
+                if (isVipExclusive && !isVipSubscription) {
+
+                    boolean isVoucherType = "voucher".equalsIgnoreCase(goods.getType());
+                    boolean enabled = isVoucherType
+                            ? vipSwitchService.isSwitchEnabled("Exclusive_vouchers")
+                            : vipSwitchService.isSwitchEnabled("Exclusive_goods");
+
+                    // 1) 全局关：所有人都不能买
+                    if (!enabled) {
+                        throw new BusinessException(
+                                ErrorCode.PARAM_ERROR,
+                                "VIP_DISABLED: " + item.getGoodsId()
+                        );
                     }
-                }
+
+                    // 2) 全局开：必须是 VIP 用户
+                    if (!isVipActive(userId)) {
+                        throw new BusinessException(
+                                ErrorCode.PARAM_ERROR,
+                                "VIP_REQUIRED: " + item.getGoodsId()
+                        );
+                    }
+                }   
+                // ========= 校验结束 =========
 
                 int pointsPerUnit = (goods.getRedemptionPoints() == null) ? 0 : goods.getRedemptionPoints();
-                if (pointsPerUnit <= 0) throw new BusinessException(ErrorCode.PARAM_ERROR, "INVALID_REDEMPTION_POINTS: " + item.getGoodsId());
+                if (pointsPerUnit <= 0) {
+                    throw new BusinessException(ErrorCode.PARAM_ERROR, "INVALID_REDEMPTION_POINTS: " + item.getGoodsId());
+                }
 
                 long cost = (long) pointsPerUnit * (long) qty;
                 totalPointsCost += cost;
@@ -221,14 +264,12 @@ public class OrderServiceImpl implements OrderService {
                     reservedQty.add(qty);
                 }
 
-
                 // 兑换订单项：price/subtotal 用“积分”
                 item.setGoodsName(goods.getName());
                 item.setPrice((double) pointsPerUnit);
                 item.setSubtotal((double) pointsPerUnit * qty);
                 item.setQuantity(qty);
 
-                // ✅ 判断是否为 vip 商品（名字等于 vip，忽略大小写）
                 // ✅ VIP：用 type 判断（更稳）
                 if ("vip".equalsIgnoreCase(goods.getType())) {
                     vipQtyTotal += qty;
@@ -238,17 +279,15 @@ public class OrderServiceImpl implements OrderService {
                 if ("voucher".equalsIgnoreCase(goods.getType())) {
                     for (int i = 0; i < qty; i++) {
                         UserVoucher uv = new UserVoucher();
-                        uv.setUserId(userId); // 注意：这里用的是 order.getUserId()，建议你把 userId 提前定义
+                        uv.setUserId(userId);
                         uv.setGoodsId(goods.getId());
                         uv.setVoucherName(goods.getName());
                         uv.setImageUrl(goods.getImageUrl());
                         uv.setStatus(VoucherStatus.ACTIVE);
                         vouchersToCreate.add(uv);
                     }
-                }   
-
+                }
             }
-            
 
             // 2) 扣积分（并写 userpointlog：source/store + description）
             List<String> purchasedNames = new ArrayList<>();
@@ -269,6 +308,7 @@ public class OrderServiceImpl implements OrderService {
                     null,
                     null
             );
+            pointsDeducted = true;
 
             // 3) ✅ 如果包含 VIP：开通/续期（每个 vip = 30 天）
             if (vipQtyTotal > 0) {
@@ -285,7 +325,6 @@ public class OrderServiceImpl implements OrderService {
                 uv.setUpdatedAt(now);
                 userVoucherRepository.save(uv);
             }
-
 
             // 4) 建订单（兑换订单：金额0、支付状态已支付、记录 pointsUsed）
             order.setIsRedemptionOrder(true);
@@ -322,72 +361,78 @@ public class OrderServiceImpl implements OrderService {
                 } catch (Exception ignore) {}
             }
 
-            // ✅ 若已扣过积分，也尽量退回（这里无法100%判断是否扣成功，所以“尽力而为”）
-            //    规则：如果失败发生在扣积分之后，这里可以把 totalPointsCost 加回去
-            try {
-                if (order != null && order.getUserId() != null && totalPointsCost > 0) {
-                    pointsService.adjustPoints(
-                            order.getUserId(),
-                            totalPointsCost,
-                            "store",
-                            "Rollback redemption: " + safeMsg(e),
-                            null,
-                            null
-                    );
-                }
-            } catch (Exception ignore) {}
+            // ✅ 若已扣过积分，尽量退回（避免 pointsService 失败前误退）
+            if (pointsDeducted) {
+                try {
+                    if (order.getUserId() != null && totalPointsCost > 0) {
+                        pointsService.adjustPoints(
+                                order.getUserId(),
+                                totalPointsCost,
+                                "store",
+                                "Rollback redemption: " + safeMsg(e),
+                                null,
+                                null
+                        );
+                    }
+                } catch (Exception ignore) {}
+            }
 
-            throw (e instanceof RuntimeException) ? (RuntimeException) e : new RuntimeException(e.getMessage());
+            // ✅ 保留 BusinessException 的错误码/信息
+            if (e instanceof BusinessException) throw (BusinessException) e;
+            if (e instanceof RuntimeException) throw (RuntimeException) e;
+
+            throw new RuntimeException(e.getMessage());
         }
     }
 
-    /**
-     * ✅ 内部VIP激活：若用户当前VIP未过期 -> 在 expiryDate 上续期；否则从现在开始
-     */
-    private void activateVipInternal(String userId, int durationDays) {
-        if (durationDays <= 0) return;
 
-        // 你们项目里 userId 一般是 users.userid（不是 _id）
-        // 如果你 UserRepository 没有 findByUserid，请在 UserRepository 加这个方法
-        Optional<User> userOpt = userRepository.findByUserid(userId);
-        if (userOpt.isEmpty()) {
-            // 兜底：有的项目用 _id 作为 userId
-            userOpt = userRepository.findById(userId);
+        /**
+        * ✅ 内部VIP激活：若用户当前VIP未过期 -> 在 expiryDate 上续期；否则从现在开始
+        */
+        private void activateVipInternal(String userId, int durationDays) {
+            if (durationDays <= 0) return;
+
+            // 你们项目里 userId 一般是 users.userid（不是 _id）
+            // 如果你 UserRepository 没有 findByUserid，请在 UserRepository 加这个方法
+            Optional<User> userOpt = userRepository.findByUserid(userId);
+            if (userOpt.isEmpty()) {
+                // 兜底：有的项目用 _id 作为 userId
+                userOpt = userRepository.findById(userId);
+            }
+            User user = userOpt.orElseThrow(() -> new RuntimeException("USER_NOT_FOUND: " + userId));
+
+            LocalDateTime now = LocalDateTime.now();
+
+            User.Vip vip = user.getVip();
+            if (vip == null) {
+                vip = new User.Vip();
+                user.setVip(vip);
+            }
+
+            LocalDateTime currentExpiry = vip.getExpiryDate();
+
+            // 判断当前VIP是否仍有效
+            boolean stillActive = vip.isActive() && currentExpiry != null && currentExpiry.isAfter(now);
+
+            if (stillActive) {
+                vip.setExpiryDate(currentExpiry.plusDays(durationDays));
+            } else {
+                vip.setActive(true);
+                vip.setStartDate(now);
+                vip.setExpiryDate(now.plusDays(durationDays));
+                vip.setPlan("vip");
+                vip.setAutoRenew(false);
+                vip.setPointsMultiplier(2); // 如果你们 VIP 是 2x，可改；不需要就设回 1
+            }
+
+            user.setUpdatedAt(now);
+            userRepository.save(user);
         }
-        User user = userOpt.orElseThrow(() -> new RuntimeException("USER_NOT_FOUND: " + userId));
 
-        LocalDateTime now = LocalDateTime.now();
-
-        User.Vip vip = user.getVip();
-        if (vip == null) {
-            vip = new User.Vip();
-            user.setVip(vip);
+        private String safeMsg(Exception e) {
+            String m = e.getMessage();
+            return (m == null) ? e.getClass().getSimpleName() : m;
         }
-
-        LocalDateTime currentExpiry = vip.getExpiryDate();
-
-        // 判断当前VIP是否仍有效
-        boolean stillActive = vip.isActive() && currentExpiry != null && currentExpiry.isAfter(now);
-
-        if (stillActive) {
-            vip.setExpiryDate(currentExpiry.plusDays(durationDays));
-        } else {
-            vip.setActive(true);
-            vip.setStartDate(now);
-            vip.setExpiryDate(now.plusDays(durationDays));
-            vip.setPlan("vip");
-            vip.setAutoRenew(false);
-            vip.setPointsMultiplier(2); // 如果你们 VIP 是 2x，可改；不需要就设回 1
-        }
-
-        user.setUpdatedAt(now);
-        userRepository.save(user);
-    }
-
-    private String safeMsg(Exception e) {
-        String m = e.getMessage();
-        return (m == null) ? e.getClass().getSimpleName() : m;
-    }
 
     @Override
     public void deleteOrder(String id) {
