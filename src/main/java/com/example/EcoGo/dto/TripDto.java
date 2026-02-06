@@ -73,6 +73,7 @@ public class TripDto {
     // === Response: 行程摘要（列表用） ===
     public static class TripSummaryResponse {
         public String id;
+        public String userId;
         public String startPlaceName;
         public String endPlaceName;
         public String detectedMode;

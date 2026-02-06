@@ -234,6 +234,7 @@ public class TripServiceImpl implements TripService {
     private TripDto.TripSummaryResponse convertToSummary(Trip trip) {
         TripDto.TripSummaryResponse resp = new TripDto.TripSummaryResponse();
         resp.id = trip.getId();
+        resp.userId = trip.getUserId();
         resp.detectedMode = trip.getDetectedMode();
         resp.distance = trip.getDistance();
         resp.carbonSaved = trip.getCarbonSaved();
