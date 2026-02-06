@@ -521,6 +521,44 @@ class EcoGoRepository {
                 Result.failure(e)
             }
         }
+
+    /**
+     * 获取当前积分
+     */
+    suspend fun getCurrentPoints(): Result<com.ecogo.api.CurrentPointsResponse> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = api.getCurrentPoints()
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+
+    /**
+     * 获取用户已加入的活动数量
+     * 遍历所有活动，筛选包含当前用户ID的活动
+     */
+    suspend fun getJoinedActivitiesCount(userId: String): Result<Int> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = api.getAllActivities()
+                if (response.success && response.data != null) {
+                    val joinedCount = response.data.count { activity ->
+                        activity.participantIds.contains(userId)
+                    }
+                    Result.success(joinedCount)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
     
     /**
      * 每日签到

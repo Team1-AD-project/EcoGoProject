@@ -36,17 +36,17 @@ interface ApiService {
     // ==================== 活动相关 ====================
     
     /**
-     * 获取所有活动
-     * GET /api/v1/activities
+     * 获取所有活动 (Mobile)
+     * GET /api/v1/mobile/activities
      */
-    @GET("api/v1/activities")
+    @GET("api/v1/mobile/activities")
     suspend fun getAllActivities(): ApiResponse<List<Activity>>
     
     /**
-     * 根据 ID 获取活动
-     * GET /api/v1/activities/{id}
+     * 根据 ID 获取活动 (Mobile)
+     * GET /api/v1/mobile/activities/{id}
      */
-    @GET("api/v1/activities/{id}")
+    @GET("api/v1/mobile/activities/{id}")
     suspend fun getActivityById(@Path("id") id: String): ApiResponse<Activity>
     
     /**
@@ -81,20 +81,20 @@ interface ApiService {
     suspend fun getActivitiesByStatus(@Path("status") status: String): ApiResponse<List<Activity>>
     
     /**
-     * 参加活动
-     * POST /api/v1/activities/{id}/join?userId={userId}
+     * 参加活动 (Mobile)
+     * POST /api/v1/mobile/activities/{id}/join?userId={userId}
      */
-    @POST("api/v1/activities/{id}/join")
+    @POST("api/v1/mobile/activities/{id}/join")
     suspend fun joinActivity(
         @Path("id") activityId: String,
         @Query("userId") userId: String
     ): ApiResponse<Activity>
-    
+
     /**
-     * 退出活动
-     * POST /api/v1/activities/{id}/leave?userId={userId}
+     * 退出活动 (Mobile)
+     * POST /api/v1/mobile/activities/{id}/leave?userId={userId}
      */
-    @POST("api/v1/activities/{id}/leave")
+    @POST("api/v1/mobile/activities/{id}/leave")
     suspend fun leaveActivity(
         @Path("id") activityId: String,
         @Query("userId") userId: String
@@ -501,6 +501,13 @@ interface ApiService {
     suspend fun getMobileUserProfile(): ApiResponse<MobileProfileResponse>
 
     /**
+     * 获取当前积分
+     * GET /api/v1/mobile/points/current
+     */
+    @GET("api/v1/mobile/points/current")
+    suspend fun getCurrentPoints(): ApiResponse<CurrentPointsResponse>
+
+    /**
      * 获取用户积分历史
      * GET /api/v1/mobile/points/history
      */
@@ -782,6 +789,15 @@ data class DashboardStatsDto(
     val totalCarbonCredits: Long,
     val totalCarbonReduction: Long,
     val redemptionVolume: Long
+)
+
+/**
+ * 当前积分响应
+ */
+data class CurrentPointsResponse(
+    val userId: String,
+    val currentPoints: Long,
+    val totalPoints: Long
 )
 
 /**
