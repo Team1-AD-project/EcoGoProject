@@ -30,13 +30,13 @@ public class GoodsController {
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Boolean isForRedemption,
-            @RequestParam(required = false, defaultValue = "false") Boolean isVipActive
-    ) {
+            @RequestParam(required = false, defaultValue = "false") Boolean isVipActive) {
 
         List<Goods> goodsList = goodsService.getAllGoods();
 
         goodsList = goodsList.stream()
-                .filter(g -> g.getType() == null || !g.getType().trim().equalsIgnoreCase("voucher"))
+                .filter(g -> g.getType() == null ||
+                        !g.getType().trim().equalsIgnoreCase("voucher"))
                 .collect(Collectors.toList());
 
         // ✅ VIP 过滤：非 VIP 只能看到 vipLevelRequired=0（或字段缺失）
@@ -44,29 +44,25 @@ public class GoodsController {
             goodsList = goodsList.stream()
                     .filter(g -> g.getVipLevelRequired() == null || g.getVipLevelRequired() == 0)
                     .collect(Collectors.toList());
-        }       
-
+        }
 
         // 筛选逻辑
         if (category != null && !category.isEmpty()) {
-        String c = category.trim().toLowerCase();
+            String c = category.trim().toLowerCase();
 
-        // ✅ all items / all：表示不过滤
-        if (!c.equals("all") && !c.equals("all items")) {
-            goodsList = goodsList.stream()
-                    .filter(g -> g.getCategory() != null && c.equals(g.getCategory().trim().toLowerCase()))
-                    .collect(Collectors.toList());
+            // ✅ all items / all：表示不过滤
+            if (!c.equals("all") && !c.equals("all items")) {
+                goodsList = goodsList.stream()
+                        .filter(g -> g.getCategory() != null && c.equals(g.getCategory().trim().toLowerCase()))
+                        .collect(Collectors.toList());
+            }
         }
-}
-
 
         if (keyword != null && !keyword.isEmpty()) {
             String kw = keyword.toLowerCase();
             goodsList = goodsList.stream()
-                    .filter(goods ->
-                            goods.getName() != null && goods.getName().toLowerCase().contains(kw)
-                                    || (goods.getDescription() != null && goods.getDescription().toLowerCase().contains(kw))
-                    )
+                    .filter(goods -> goods.getName() != null && goods.getName().toLowerCase().contains(kw)
+                            || (goods.getDescription() != null && goods.getDescription().toLowerCase().contains(kw)))
                     .collect(Collectors.toList());
         }
 
@@ -89,8 +85,7 @@ public class GoodsController {
                 "page", page,
                 "size", size,
                 "total", total,
-                "totalPages", (int) Math.ceil((double) total / size)
-        ));
+                "totalPages", (int) Math.ceil((double) total / size)));
 
         return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), data);
     }
@@ -179,8 +174,6 @@ public class GoodsController {
         }
     }
 
-
-
     // 5. 删除商品
     @DeleteMapping("/{id}")
     public ResponseMessage<Void> deleteGoods(@PathVariable String id) {
@@ -263,7 +256,7 @@ public class GoodsController {
     }
 
     // 返回所有商品分类（给前端 Tabs 用）
-   @GetMapping("/categories")
+    @GetMapping("/categories")
     public ResponseMessage<Map<String, Object>> getGoodsCategories() {
 
         List<String> categories = List.of("food", "beverage", "merchandise", "service");
@@ -280,14 +273,12 @@ public class GoodsController {
         return new ResponseMessage<>(
                 ErrorCode.SUCCESS.getCode(),
                 ErrorCode.SUCCESS.getMessage(),
-                data
-    );
-}
+                data);
+    }
 
     @GetMapping("/coupons")
     public ResponseMessage<List<Goods>> getVoucherMarketplace(
-        @RequestParam(required = false, defaultValue = "false") Boolean isVipActive
-    ) {
+            @RequestParam(required = false, defaultValue = "false") Boolean isVipActive) {
         try {
             List<Goods> goodsList = goodsService.getAllGoods();
 
@@ -304,7 +295,6 @@ public class GoodsController {
                         .toList();
             }
 
-
             return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), goodsList);
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.DB_ERROR, e.getMessage());
@@ -319,12 +309,12 @@ public class GoodsController {
         if (goods.getRedemptionPoints() == null || goods.getRedemptionPoints() <= 0) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "VOUCHER_REDEMPTION_POINTS_INVALID");
         }
-        if (goods.getStock() == null) goods.setStock(0);
+        if (goods.getStock() == null)
+            goods.setStock(0);
 
         Goods created = goodsService.createGoods(goods);
         return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), created);
     }
-
 
     @PutMapping("/admin/vouchers/{id}")
     public ResponseMessage<Goods> updateVoucher(@PathVariable String id, @RequestBody Goods goods) {
@@ -340,7 +330,6 @@ public class GoodsController {
         return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), updated);
     }
 
-
     @DeleteMapping("/admin/vouchers/{id}")
     public ResponseMessage<Void> deleteVoucher(@PathVariable String id) {
         Goods existing = goodsService.getGoodsById(id);
@@ -351,7 +340,6 @@ public class GoodsController {
         goodsService.deleteGoods(id);
         return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), null);
     }
-
 
     @GetMapping("/admin/vouchers")
     public ResponseMessage<List<Goods>> adminGetAllVouchers() {
@@ -365,8 +353,7 @@ public class GoodsController {
             return new ResponseMessage<>(
                     ErrorCode.SUCCESS.getCode(),
                     ErrorCode.SUCCESS.getMessage(),
-                    goodsList
-            );
+                    goodsList);
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.DB_ERROR, e.getMessage());
         }
