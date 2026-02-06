@@ -490,8 +490,48 @@ public class UserServiceImpl implements UserInterface {
             if (user.getVip() == null) {
                 user.setVip(new User.Vip());
             }
+
+            boolean wasActive = user.getVip().isActive();
+            // Check if effectively expired even if flag was true (sanity check)
+            boolean isExpired = user.getVip().getExpiryDate() != null
+                    && user.getVip().getExpiryDate().isBefore(LocalDateTime.now());
+
             user.getVip().setActive(request.isVipActive);
+
+            // If activating and (was not active OR was expired), reset Start Date to now
+            if (request.isVipActive && (!wasActive || isExpired)) {
+                user.getVip().setStartDate(LocalDateTime.now());
+            }
+            // If disabling, we just set active=false (logic above), dates remain as history
         }
+
+        // Update VIP Plan
+        if (request.vipPlan != null && !request.vipPlan.isEmpty()) {
+            if (user.getVip() == null) {
+                user.setVip(new User.Vip());
+            }
+            user.getVip().setPlan(request.vipPlan);
+        }
+
+        // Update VIP Expiry
+        if (request.vipExpiryDate != null && !request.vipExpiryDate.isEmpty()) {
+            if (user.getVip() == null) {
+                user.setVip(new User.Vip());
+            }
+            try {
+                // Support "yyyy-MM-dd"
+                java.time.LocalDate date = java.time.LocalDate.parse(request.vipExpiryDate);
+                user.getVip().setExpiryDate(date.atTime(23, 59, 59));
+            } catch (Exception e) {
+                // Fallback for full ISO format
+                try {
+                    user.getVip().setExpiryDate(LocalDateTime.parse(request.vipExpiryDate));
+                } catch (Exception ex) {
+                    logger.warn("Invalid date format for vipExpiryDate: {}", request.vipExpiryDate);
+                }
+            }
+        }
+
         if (request.isDeactivated != null) {
             user.setDeactivated(request.isDeactivated);
         }

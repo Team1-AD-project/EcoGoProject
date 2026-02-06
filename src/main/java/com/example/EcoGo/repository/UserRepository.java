@@ -17,4 +17,7 @@ public interface UserRepository extends MongoRepository<User, String> {
     org.springframework.data.domain.Page<User> findByIsAdminFalse(org.springframework.data.domain.Pageable pageable);
 
     Optional<User> findByPhoneOrUserid(String phone, String userid);
+
+    // Find active VIPs whose expiry date is before the given time
+    java.util.List<User> findByVipIsActiveTrueAndVipExpiryDateBefore(java.time.LocalDateTime time);
 }

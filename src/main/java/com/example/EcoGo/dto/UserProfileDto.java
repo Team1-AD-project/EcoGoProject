@@ -57,6 +57,8 @@ public class UserProfileDto {
         public String nickname;
         public String email;
         public Boolean isVipActive; // Replaces isAdmin
+        public String vipPlan; // New: e.g. "Monthly", "Yearly"
+        public String vipExpiryDate; // New: YYYY-MM-DD or ISO format
         @com.fasterxml.jackson.annotation.JsonProperty("isDeactivated")
         public Boolean isDeactivated;
     }
