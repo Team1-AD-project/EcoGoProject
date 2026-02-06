@@ -12,6 +12,8 @@ public class UserProfileDto {
         public String avatar;
         public String phone;
         public User.Preferences preferences;
+        public User.MascotOutfit mascotOutfit;
+        public List<String> inventory;
     }
 
     public static class AdminManageUserRequest {

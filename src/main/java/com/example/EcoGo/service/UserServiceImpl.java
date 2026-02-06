@@ -336,6 +336,10 @@ public class UserServiceImpl implements UserInterface {
             user.setAvatar(request.avatar);
         if (request.preferences != null)
             user.setPreferences(request.preferences);
+        if (request.mascotOutfit != null)
+            user.setMascotOutfit(request.mascotOutfit);
+        if (request.inventory != null)
+            user.setInventory(request.inventory);
 
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);

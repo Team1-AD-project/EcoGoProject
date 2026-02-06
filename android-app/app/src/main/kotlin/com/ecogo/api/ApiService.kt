@@ -518,14 +518,12 @@ interface ApiService {
     suspend fun register(@Body request: MobileRegisterRequest): ApiResponse<MobileRegisterData>
 
     /**
-     * 更新用户资料 (Internal API - No Token)
-     * PUT /api/v1/internal/users/{userid}/profile
-     * Note: ideally this should be the authenticated /api/v1/mobile/users/profile endpoint for PUT too,
-     * but for now we keep the wizard flow as is or migrate if needed.
+     * 更新用户资料 (Authenticated)
+     * PUT /api/v1/mobile/users/profile/{userId}
      */
-    @PUT("api/v1/internal/users/{userid}/profile")
+    @PUT("api/v1/mobile/users/profile/{userId}")
     suspend fun updateProfile(
-        @Path("userid") userId: String,
+        @Path("userId") userId: String,
         @Body request: UpdateProfileRequest
     ): ApiResponse<Any>
 }
@@ -572,7 +570,9 @@ data class UserInfo(
     val lastLoginAt: String?,
     val createdAt: String?,
     val isAdmin: Boolean = false,
-    val faculty: String? = null // Added based on context, though optional in sample
+    val faculty: String? = null,
+    val mascotOutfit: MascotOutfitDto? = null,
+    val inventory: List<String>? = null
 )
 
 data class UserStats(
@@ -636,6 +636,8 @@ data class MobileRegisterData(
  * 更新个人资料请求 (支持部分更新)
  */
 data class UpdateProfileRequest(
+    val nickname: String? = null,
+    val phone: String? = null,
     val faculty: String? = null,
     val preferences: TransportPreferencesWrapper? = null,
     val dormitoryOrResidence: String? = null,
@@ -645,11 +647,23 @@ data class UpdateProfileRequest(
     val weeklyGoals: Int? = null,
     val newChallenges: Boolean? = null,
     val activityReminders: Boolean? = null,
-    val friendActivity: Boolean? = null
+    val friendActivity: Boolean? = null,
+    val mascotOutfit: MascotOutfitDto? = null,
+    val inventory: List<String>? = null
 )
 
 data class TransportPreferencesWrapper(
     val preferredTransport: List<String>
+)
+
+/**
+ * 小狮子装扮 DTO
+ */
+data class MascotOutfitDto(
+    val head: String = "none",
+    val face: String = "none",
+    val body: String = "none",
+    val badge: String = "none"
 )
 
 
