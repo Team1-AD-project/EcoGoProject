@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/v1/internal/vip-switches")
+@RequestMapping("/api/v1/admin/vip-switches")
 @CrossOrigin(origins = "*")
 public class VipSwitchController {
 
@@ -35,10 +35,10 @@ public class VipSwitchController {
     public ResponseMessage<VipGlobalSwitch> setSwitch(@RequestBody Map<String, Object> payload) {
         String key = (String) payload.get("switchKey");
         Boolean isEnabled = (Boolean) payload.get("isEnabled");
-        String updatedBy = (String) payload.getOrDefault("updatedBy", "admin");
+        String updatedBy = (String) payload.get("updatedBy");
 
-        if (key == null || isEnabled == null) {
-            throw new IllegalArgumentException("switchKey and isEnabled are required");
+        if (key == null || isEnabled == null || updatedBy == null || updatedBy.isBlank()) {
+            throw new IllegalArgumentException("switchKey, isEnabled, and updatedBy are required");
         }
 
         return ResponseMessage.success(vipSwitchService.setSwitch(key, isEnabled, updatedBy));
