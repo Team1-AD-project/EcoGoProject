@@ -79,7 +79,6 @@ export interface OrderListResponse {
 
 // Fetch rewards list with pagination
 export const fetchRewards = async (page: number = 1, size: number = 20): Promise<RewardListResponse> => {
-    // Note: The API is /goods, user indicates base is /api/v1 for orders, assuming same for goods
     const response = await api.get<RewardListResponse>(`/goods?page=${page}&size=${size}&_t=${new Date().getTime()}`, { baseURL: '/api/v1' });
     return response.data;
 };
@@ -117,5 +116,44 @@ export const updateReward = async (id: string, data: Partial<CreateRewardRequest
 
 export const deleteReward = async (id: string): Promise<any> => {
     const response = await api.delete(`/goods/${id}`, { baseURL: '/api/v1' });
+    return response.data;
+};
+
+// ----- Vouchers API -----
+
+export const fetchVouchers = async (page: number = 1, size: number = 20): Promise<RewardListResponse> => {
+    const response = await api.get<RewardListResponse>(`/goods/admin/vouchers?page=${page}&size=${size}&_t=${new Date().getTime()}`, { baseURL: '/api/v1' });
+    return response.data;
+};
+
+export const createVoucher = async (data: CreateRewardRequest): Promise<any> => {
+    const response = await api.post('/goods/admin/vouchers', data, { baseURL: '/api/v1' });
+    return response.data;
+};
+
+export const updateVoucher = async (id: string, data: Partial<CreateRewardRequest>): Promise<any> => {
+    const response = await api.put(`/goods/admin/vouchers/${id}`, data, { baseURL: '/api/v1' });
+    return response.data;
+};
+
+export const deleteVoucher = async (id: string): Promise<any> => {
+    const response = await api.delete(`/goods/admin/vouchers/${id}`, { baseURL: '/api/v1' });
+    return response.data;
+};
+
+// ----- Categories API -----
+
+export interface CategoryResponse {
+    code: number;
+    message: string;
+    data: {
+        default: string;
+        allItemsKey: string;
+        categories: string[];
+    };
+}
+
+export const fetchCategories = async (): Promise<CategoryResponse> => {
+    const response = await api.get<CategoryResponse>(`/goods/categories?_t=${new Date().getTime()}`, { baseURL: '/api/v1' });
     return response.data;
 };

@@ -36,10 +36,25 @@ import {
   User,
   Truck,
   CheckCircle,
-  XCircle
+  XCircle,
+  Ticket
 } from 'lucide-react';
 import { ImageWithFallback } from '@/components/figma/ImageWithFallback';
-import { fetchRewards, fetchOrders, createReward, updateReward, deleteReward, type Reward, type Order, type CreateRewardRequest } from '@/services/rewardService';
+import {
+  fetchRewards,
+  fetchOrders,
+  createReward,
+  updateReward,
+  deleteReward,
+  fetchVouchers,
+  createVoucher,
+  updateVoucher,
+  deleteVoucher,
+  fetchCategories,
+  type Reward,
+  type Order,
+  type CreateRewardRequest
+} from '@/services/rewardService';
 import { toast } from 'sonner';
 
 export function RewardStoreManagement() {
@@ -60,15 +75,82 @@ export function RewardStoreManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
+  const [ordersTotalItems, setOrdersTotalItems] = useState(0);
+
+  const [vouchers, setVouchers] = useState<Reward[]>([]);
+  const [isLoadingVouchers, setIsLoadingVouchers] = useState(false);
+  const [vouchersPage, setVouchersPage] = useState(1);
+  const [vouchersTotalPages, setVouchersTotalPages] = useState(1);
+  const [vouchersTotalItems, setVouchersTotalItems] = useState(0);
+
+  const [categories, setCategories] = useState<string[]>([]);
+
+  const [activeTab, setActiveTab] = useState('products');
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
   useEffect(() => {
     loadRewards();
+    loadCategories();
   }, [page]);
+
+  useEffect(() => {
+    loadVouchers();
+  }, [vouchersPage]);
 
   useEffect(() => {
     loadOrders();
   }, [ordersPage]);
+
+  const loadCategories = async () => {
+    try {
+      const response = await fetchCategories();
+      if (response && response.code === 200 && response.data?.categories) {
+        setCategories(response.data.categories);
+      }
+    } catch (error) {
+      console.error('Failed to load categories', error);
+      toast.error('Failed to load categories');
+    }
+  };
+
+  const loadVouchers = async () => {
+    setIsLoadingVouchers(true);
+    try {
+      const response = await fetchVouchers(vouchersPage, 20);
+      if (response && response.code === 200) {
+        let list: Reward[] = [];
+        const responseData = response.data as any;
+        if (Array.isArray(responseData)) {
+          list = responseData;
+        } else if (responseData && typeof responseData === 'object') {
+          list = responseData.list || responseData.goods || responseData.records || responseData.items || [];
+          if (responseData.pagination) {
+            setVouchersTotalPages(responseData.pagination.totalPages || 1);
+            setVouchersTotalItems(responseData.pagination.total || 0);
+          } else if (responseData.total) {
+            setVouchersTotalItems(responseData.total || 0);
+            setVouchersTotalPages(responseData.totalPages || 1);
+          }
+        }
+        // Ensure ID mapping is robust
+        const mappedList = list.map((item: any) => ({
+          ...item,
+          id: item.id || item.goodsId || item._id || '',
+          // Ensure other fields are present to avoid UI issues
+          name: item.name || 'Unnamed Voucher',
+          stock: item.stock || 0
+        }));
+        setVouchers(mappedList);
+      } else {
+        toast.error(response.message || 'Failed to fetch vouchers');
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error('Error loading vouchers');
+    } finally {
+      setIsLoadingVouchers(false);
+    }
+  };
 
   const loadRewards = async () => {
     setIsLoading(true);
@@ -187,19 +269,31 @@ export function RewardStoreManagement() {
           redemptionLimit: selectedReward.redemptionLimit
         };
 
-        if (selectedReward.id) {
-          await updateReward(selectedReward.id, payload);
-          toast.success('Reward updated successfully');
+        if (activeTab === 'vouchers') {
+          if (selectedReward.id) {
+            await updateVoucher(selectedReward.id, payload);
+            toast.success('Voucher updated successfully');
+          } else {
+            await createVoucher(payload);
+            toast.success('Voucher created successfully');
+          }
+          loadVouchers();
         } else {
-          await createReward(payload);
-          toast.success('Reward created successfully');
+          if (selectedReward.id) {
+            await updateReward(selectedReward.id, payload);
+            toast.success('Reward updated successfully');
+          } else {
+            await createReward(payload);
+            toast.success('Reward created successfully');
+          }
+          loadRewards();
         }
+
         setIsEditDialogOpen(false);
         setSelectedReward(null);
-        loadRewards();
       } catch (error: any) {
         console.error(error);
-        const errorMessage = error.response?.data?.message || error.message || 'Failed to save reward';
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to save item';
         toast.error(`Error: ${errorMessage}`);
       }
     }
@@ -213,16 +307,22 @@ export function RewardStoreManagement() {
   const handleDeleteConfirm = async () => {
     if (selectedReward) {
       try {
-        await deleteReward(selectedReward.id);
-        toast.success('Reward deleted successfully');
-        setRewards(rewards.filter(r => r.id !== selectedReward.id));
+        if (activeTab === 'vouchers') {
+          await deleteVoucher(selectedReward.id);
+          toast.success('Voucher deleted successfully');
+          setVouchers(vouchers.filter(r => r.id !== selectedReward.id));
+          loadVouchers();
+        } else {
+          await deleteReward(selectedReward.id);
+          toast.success('Reward deleted successfully');
+          setRewards(rewards.filter(r => r.id !== selectedReward.id));
+          loadRewards();
+        }
         setIsDeleteDialogOpen(false);
         setSelectedReward(null);
-        // Refresh list to ensure sync
-        loadRewards();
       } catch (error: any) {
         console.error(error);
-        const errorMessage = error.response?.data?.message || error.message || 'Failed to delete reward';
+        const errorMessage = error.response?.data?.message || error.message || 'Failed to delete item';
         toast.error(`Error: ${errorMessage}`);
       }
     }
@@ -291,11 +391,15 @@ export function RewardStoreManagement() {
           </Card>
         </div>
 
-        <Tabs defaultValue="products" className="space-y-4">
-          <TabsList>
+        <Tabs defaultValue="products" value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+          <TabsList className="grid w-full max-w-2xl grid-cols-3">
             <TabsTrigger value="products" className="flex items-center gap-2">
               <Package className="size-4" />
               Products
+            </TabsTrigger>
+            <TabsTrigger value="vouchers" className="flex items-center gap-2">
+              <Ticket className="size-4" />
+              Vouchers
             </TabsTrigger>
             <TabsTrigger value="orders" className="flex items-center gap-2">
               <ShoppingBag className="size-4" />
@@ -304,7 +408,7 @@ export function RewardStoreManagement() {
           </TabsList>
 
           {/* Products Tab */}
-          <TabsContent value="products" className="space-y-6">
+          <TabsContent value="products">
             {/* Filters & Actions */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
@@ -317,33 +421,26 @@ export function RewardStoreManagement() {
             </div>
 
             {/* Products Grid */}
-            {isLoading ? (
-              <div className="text-center py-20 text-gray-500">Loading rewards...</div>
-            ) : rewards.length === 0 ? (
-              <div className="text-center py-20 text-gray-500">No rewards found.</div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {rewards.map((reward) => (
-                  <Card key={reward.id} className="overflow-hidden hover:shadow-lg transition-shadow bg-white flex flex-col">
-                    <div className="relative h-48 bg-gray-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {isLoading ? (
+                <div className="col-span-full text-center py-12 text-gray-500">Loading rewards...</div>
+              ) : rewards.length === 0 ? (
+                <div className="col-span-full text-center py-12 text-gray-500">No rewards found. Add your first product!</div>
+              ) : (
+                rewards.map((reward) => (
+                  <Card key={reward.id} className="overflow-hidden bg-white hover:shadow-lg transition-all duration-300 border-gray-100 group">
+                    <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
                       <ImageWithFallback
                         src={reward.imageUrl || ''}
                         alt={reward.name || 'Product'}
-                        className="w-full h-full object-cover"
-                        fallbackText={reward.name?.charAt(0) || 'P'}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        fallbackText={reward.name ? reward.name.charAt(0).toUpperCase() : 'P'}
                       />
-                      {reward.vipLevelRequired > 0 && (
-                        <div className="absolute top-2 right-2">
-                          <Badge className="bg-purple-600 text-white">
-                            <Crown className="size-3 mr-1" />
-                            VIP {reward.vipLevelRequired}+
-                          </Badge>
-                        </div>
-                      )}
-                      <div className="absolute top-2 left-2">
-                        <Badge variant={reward.isActive && reward.stock > 0 ? "default" : "destructive"}>
-                          {reward.isActive ? (reward.stock > 0 ? 'Active' : 'Out of Stock') : 'Inactive'}
-                        </Badge>
+                      {/* Status Badges */}
+                      <div className="absolute top-2 right-2 flex flex-col gap-1">
+                        {!reward.isActive && <Badge variant="destructive" className="bg-red-500/90 hover:bg-red-500">Inactive</Badge>}
+                        {reward.vipLevelRequired > 0 && <Badge className="bg-purple-500/90 hover:bg-purple-500">VIP {reward.vipLevelRequired}+</Badge>}
+                        {!reward.isForRedemption && <Badge className="bg-gray-500/90 hover:bg-gray-500">Unavailable</Badge>}
                       </div>
                     </div>
 
@@ -370,7 +467,7 @@ export function RewardStoreManagement() {
                         </div>
                         <div className="flex items-center justify-between pt-3 mt-2 border-t text-base">
                           <span className="text-gray-600">Category:</span>
-                          <Badge variant="secondary" className="font-normal">{reward.category || 'General'}</Badge>
+                          <Badge variant="secondary" className="font-normal capitalize">{reward.category || 'General'}</Badge>
                         </div>
                       </div>
 
@@ -394,9 +491,9 @@ export function RewardStoreManagement() {
                       </div>
                     </div>
                   </Card>
-                ))}
-              </div>
-            )}
+                ))
+              )}
+            </div>
 
             {/* Pagination Footer */}
             <div className="mt-8 flex items-center justify-center gap-2 border-t pt-4">
@@ -437,6 +534,138 @@ export function RewardStoreManagement() {
                 size="sm"
                 onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                 disabled={page === totalPages || isLoading}
+              >
+                Next
+              </Button>
+            </div>
+          </TabsContent>
+
+          {/* Vouchers Tab */}
+          <TabsContent value="vouchers">
+            {/* Filters & Actions */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                {/* Category Filter could be re-enabled if API supports it or client-side filter */}
+              </div>
+              <Button className="gap-2" onClick={handleAddProduct}> {/* Re-using handleAddProduct for vouchers too */}
+                <Plus className="size-4" />
+                Add Voucher
+              </Button>
+            </div>
+
+            {/* Vouchers Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {isLoadingVouchers ? (
+                <div className="col-span-full text-center py-12 text-gray-500">Loading vouchers...</div>
+              ) : vouchers.length === 0 ? (
+                <div className="col-span-full text-center py-12 text-gray-500">No vouchers found. Add your first voucher!</div>
+              ) : (
+                vouchers.map((voucher) => (
+                  <Card key={voucher.id} className="overflow-hidden bg-white hover:shadow-lg transition-all duration-300 border-gray-100 group">
+                    <div className="relative aspect-[4/3] bg-gray-100 overflow-hidden">
+                      <ImageWithFallback
+                        src={voucher.imageUrl || ''}
+                        alt={voucher.name || 'Voucher'}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        fallbackText={voucher.name ? voucher.name.charAt(0).toUpperCase() : 'V'}
+                      />
+                      <div className="absolute top-2 right-2 flex flex-col gap-1">
+                        {!voucher.isActive && <Badge variant="destructive" className="bg-red-500/90 hover:bg-red-500">Inactive</Badge>}
+                        {voucher.vipLevelRequired > 0 && <Badge className="bg-purple-500/90 hover:bg-purple-500">VIP {voucher.vipLevelRequired}+</Badge>}
+                        {!voucher.isForRedemption && <Badge className="bg-gray-500/90 hover:bg-gray-500">Unavailable</Badge>}
+                      </div>
+                    </div>
+
+                    <div className="p-4 flex-1 flex flex-col">
+                      <h3 className="text-xl font-bold text-gray-900 mb-1 line-clamp-1" title={voucher.name || ''}>{voucher.name || 'Unnamed Voucher'}</h3>
+                      <p className="text-sm text-gray-500 mb-4 line-clamp-2 h-10">{voucher.description || 'No description available'}</p>
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between text-base">
+                          <span className="text-gray-600">Points:</span>
+                          <span className="font-bold text-blue-600">{voucher.redemptionPoints} pts</span>
+                        </div>
+                        <div className="flex items-center justify-between text-base">
+                          <span className="text-gray-600">Value:</span>
+                          <span className="font-medium text-gray-500">${voucher.price || 0}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-base">
+                          <span className="text-gray-600">Stock:</span>
+                          <span className="font-bold text-gray-900">{voucher.stock}</span>
+                        </div>
+                        <div className="flex items-center justify-between text-base">
+                          <span className="text-gray-600">Sold:</span>
+                          <span className="font-bold text-green-600">{voucher.totalRedemptionCount}</span>
+                        </div>
+                        <div className="flex items-center justify-between pt-3 mt-2 border-t text-base">
+                          <span className="text-gray-600">Category:</span>
+                          <Badge variant="secondary" className="font-normal capitalize">{voucher.category || 'Voucher'}</Badge>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 mt-6">
+                        <Button
+                          variant="outline"
+                          className="flex-1"
+                          onClick={() => handleEdit(voucher)}
+                        >
+                          <Edit className="size-4 mr-2" />
+                          Edit
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => handleDeleteClick(voucher)}
+                        >
+                          <Trash2 className="size-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))
+              )}
+            </div>
+
+            {/* Vouchers Pagination Footer */}
+            <div className="mt-8 flex items-center justify-center gap-2 border-t pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setVouchersPage(p => Math.max(1, p - 1))}
+                disabled={vouchersPage === 1 || isLoadingVouchers}
+              >
+                Previous
+              </Button>
+
+              <div className="flex items-center gap-1">
+                {vouchersTotalPages > 0 && Array.from({ length: Math.min(5, vouchersTotalPages) }, (_, i) => {
+                  let p = i + 1;
+                  if (vouchersTotalPages > 5) {
+                    if (vouchersPage <= 3) p = i + 1;
+                    else if (vouchersPage >= vouchersTotalPages - 2) p = vouchersTotalPages - 4 + i;
+                    else p = vouchersPage - 2 + i;
+                  }
+
+                  return (
+                    <Button
+                      key={p}
+                      variant={p === vouchersPage ? "default" : "outline"}
+                      size="sm"
+                      className="w-8 h-8 p-0"
+                      onClick={() => setVouchersPage(p)}
+                    >
+                      {p}
+                    </Button>
+                  );
+                })}
+              </div>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setVouchersPage(p => Math.min(vouchersTotalPages, p + 1))}
+                disabled={vouchersPage === vouchersTotalPages || isLoadingVouchers}
               >
                 Next
               </Button>
@@ -574,11 +803,15 @@ export function RewardStoreManagement() {
                       <SelectValue placeholder="Select Category" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Lifestyle">Lifestyle</SelectItem>
-                      <SelectItem value="Digital">Digital</SelectItem>
-                      <SelectItem value="Home">Home</SelectItem>
-                      <SelectItem value="Accessories">Accessories</SelectItem>
-                      <SelectItem value="Virtual">Virtual</SelectItem>
+                      {categories.length > 0 ? (
+                        categories.map((cat) => (
+                          <SelectItem key={cat} value={cat}>
+                            {cat.charAt(0).toUpperCase() + cat.slice(1)}
+                          </SelectItem>
+                        ))
+                      ) : (
+                        <div className="p-2 text-sm text-gray-500">No categories available</div>
+                      )}
                     </SelectContent>
                   </Select>
                 </div>
