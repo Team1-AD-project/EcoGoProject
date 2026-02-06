@@ -495,8 +495,8 @@ jobs:
   performance-tests:
     runs-on: ubuntu-latest
     name: Performance Tests - JMeter
-    needs: smoke-tests-staging
-    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/feature/cicdfeature'
+    needs: sonarqube
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/feature/cicdfeature'
     services:
       mongodb:
         image: mongo:latest
@@ -574,7 +574,7 @@ jobs:
     runs-on: ubuntu-latest
     name: DAST with OWASP ZAP
     needs: performance-tests
-    if: github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/feature/cicdfeature'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/feature/cicdfeature'
     services:
       mongodb:
         image: mongo:latest
