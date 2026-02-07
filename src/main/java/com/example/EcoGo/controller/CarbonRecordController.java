@@ -90,4 +90,19 @@ public class CarbonRecordController {
         Integer total = carbonRecordService.getTotalCreditsByUserId(userId);
         return ResponseMessage.success(total);
     }
+
+    @Autowired
+    private com.example.EcoGo.utils.JwtUtils jwtUtils;
+
+    /**
+     * Get Faculty Total Carbon
+     * GET /api/v1/carbon-records/faculty/total
+     */
+    @GetMapping("/faculty/total")
+    public ResponseMessage<Long> getFacultyTotalCarbon(
+            @org.springframework.web.bind.annotation.RequestHeader("Authorization") String authHeader) {
+        String token = authHeader.replace("Bearer ", "");
+        String userId = jwtUtils.getUserIdFromToken(token);
+        return ResponseMessage.success(carbonRecordService.getFacultyTotalCarbon(userId));
+    }
 }
