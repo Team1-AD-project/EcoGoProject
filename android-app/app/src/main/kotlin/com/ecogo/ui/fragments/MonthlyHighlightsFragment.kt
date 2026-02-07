@@ -147,6 +147,9 @@ class MonthlyHighlightsFragment : Fragment() {
             // 加载挑战进度
             loadChallenges()
             
+            // 加载排行榜前三
+            loadLeaderboardTop3()
+
             // 加载流行路线
             loadPopularRoutes()
             
@@ -298,6 +301,34 @@ class MonthlyHighlightsFragment : Fragment() {
         (binding.recyclerChallenges.adapter as? MonthlyChallengeAdapter)?.updateData(challengeItems)
     }
     
+    private suspend fun loadLeaderboardTop3() {
+        try {
+            val response = com.ecogo.api.RetrofitClient.apiService.getMobileLeaderboardRankings(
+                type = "MONTHLY", page = 0, size = 3
+            )
+            if (response.code == 200 && response.data != null) {
+                val rankings = response.data.rankingsPage.content
+                if (rankings.isNotEmpty()) {
+                    val r1 = rankings[0]
+                    binding.textRank1Name.text = r1.nickname
+                    binding.textRank1Subtitle.text = String.format("%.2f kg CO\u2082", r1.carbonSaved)
+                }
+                if (rankings.size > 1) {
+                    val r2 = rankings[1]
+                    binding.textRank2Name.text = r2.nickname
+                    binding.textRank2Subtitle.text = String.format("%.2f kg CO\u2082", r2.carbonSaved)
+                }
+                if (rankings.size > 2) {
+                    val r3 = rankings[2]
+                    binding.textRank3Name.text = r3.nickname
+                    binding.textRank3Subtitle.text = String.format("%.2f kg CO\u2082", r3.carbonSaved)
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("MonthlyHighlights", "Error loading leaderboard top 3", e)
+        }
+    }
+
     private suspend fun loadPopularRoutes() {
         val routes = repository.getBusRoutes().getOrElse { emptyList() }
         

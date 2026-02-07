@@ -109,7 +109,8 @@ class HomeFragment : Fragment() {
             binding.textPointsChange.text = "+150 this week"
             binding.textSocScore.text = "5,530"
             binding.textSocRank.text = "Rank #1"
-            binding.textLocation.text = getString(com.ecogo.R.string.home_location)
+            binding.textLocation.text = java.time.LocalDate.now()
+                .format(java.time.format.DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", java.util.Locale.ENGLISH))
 
             Log.d("DEBUG_HOME", "Basic UI setup completed, setting up mascot")
 
