@@ -41,12 +41,12 @@
                 app:icon="@drawable/ic_trophy"
                 app:iconSize="16dp" />
 
-            <!-- Feed Button -->
+            <!-- Activities Button -->
             <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_feed"
+                android:id="@+id/btn_activities"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
-                android:text="Feed"
+                android:text="Activities"
                 android:textSize="12sp"
                 app:backgroundTint="@color/secondary"
                 app:cornerRadius="18dp"
@@ -54,7 +54,7 @@
                 app:iconSize="16dp" />
         </LinearLayout>
 
-        <!-- Tab Layout -->
+        <!-- Tab Layout: Faculty / Individual -->
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
             android:layout_width="match_parent"
@@ -70,26 +70,22 @@
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/community_tab_faculties" />
+                android:text="@string/community_tab_faculty" />
 
             <com.google.android.material.tabs.TabItem
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/community_tab_friends" />
-
-            <com.google.android.material.tabs.TabItem
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/community_tab_steps" />
+                android:text="@string/community_tab_individual" />
         </com.google.android.material.tabs.TabLayout>
 
-        <!-- Faculty Leaderboard (default visible) -->
+        <!-- ======== Tab 0: Faculty Leaderboard (default visible) ======== -->
         <LinearLayout
             android:id="@+id/layout_faculty_leaderboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- Top Faculty Leader Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_leader"
                 android:layout_width="match_parent"
@@ -135,7 +131,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans-serif-black"
-                            android:text="School of Computing"
+                            android:text="—"
                             android:textColor="#14532D"
                             android:textSize="16sp" />
 
@@ -143,7 +139,7 @@
                             android:id="@+id/text_leader_points"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="4,520 pts • +12% this week"
+                            android:text="0.00 kg CO₂ saved"
                             android:textColor="#15803D"
                             android:textSize="11sp" />
                     </LinearLayout>
@@ -159,6 +155,14 @@
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
+            <ProgressBar
+                android:id="@+id/progress_faculty"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="24dp"
+                android:visibility="gone" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recycler_community"
                 android:layout_width="match_parent"
@@ -167,139 +171,51 @@
                 android:nestedScrollingEnabled="false" />
         </LinearLayout>
 
-        <!-- Friends Leaderboard (initially hidden) -->
+        <!-- ======== Tab 1: Individual Leaderboard (initially hidden) ======== -->
         <LinearLayout
-            android:id="@+id/layout_friends_leaderboard"
+            android:id="@+id/layout_individual_leaderboard"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:orientation="vertical"
             android:visibility="gone">
 
-            <!-- My Rank Card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardBackgroundColor="#FEF3C7"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="1dp"
-                app:strokeColor="#F59E0B"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:layout_width="36dp"
-                        android:layout_height="36dp"
-                        android:background="@drawable/badge_background"
-                        android:gravity="center"
-                        android:text="🌟"
-                        android:textSize="20sp" />
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="12dp"
-                        android:layout_weight="1"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Your Rank"
-                            android:textAllCaps="true"
-                            android:textColor="#92400E"
-                            android:textSize="11sp"
-                            android:textStyle="bold" />
-
-                        <TextView
-                            android:id="@+id/text_my_rank"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Rank #5"
-                            android:textColor="#78350F"
-                            android:textSize="16sp"
-                            android:textStyle="bold" />
-                    </LinearLayout>
-
-                    <TextView
-                        android:id="@+id/text_my_points"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="850 pts"
-                        android:textColor="#78350F"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
+            <!-- Daily / Monthly Toggle -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
+                android:gravity="center"
+                android:orientation="horizontal"
+                android:padding="4dp">
 
-                <TextView
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_daily"
+                    style="@style/Widget.MaterialComponents.Button"
                     android:layout_width="0dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="40dp"
+                    android:layout_marginEnd="4dp"
                     android:layout_weight="1"
-                    android:text="Friend Rankings"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                    android:text="@string/community_daily"
+                    android:textSize="13sp"
+                    app:backgroundTint="@color/primary"
+                    app:cornerRadius="20dp" />
 
-                <TextView
-                    android:id="@+id/text_view_all_friends_leaderboard"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Manage Friends"
-                    android:textColor="@color/primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_monthly"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="0dp"
+                    android:layout_height="40dp"
+                    android:layout_marginStart="4dp"
+                    android:layout_weight="1"
+                    android:text="@string/community_monthly"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="13sp"
+                    app:cornerRadius="20dp"
+                    app:strokeColor="@color/text_secondary" />
             </LinearLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_friends_leaderboard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:nestedScrollingEnabled="false" />
-        </LinearLayout>
-
-        <!-- Steps Leaderboard (API, initially hidden) -->
-        <LinearLayout
-            android:id="@+id/layout_steps_leaderboard"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/community_steps_leaderboard_title"
-                android:textColor="@color/text_secondary"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <Spinner
-                android:id="@+id/spinner_period"
-                android:layout_width="match_parent"
-                android:layout_height="48dp"
-                android:layout_marginTop="8dp"
-                android:background="@drawable/card_background"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp" />
-
             <ProgressBar
-                android:id="@+id/progress_steps_leaderboard"
+                android:id="@+id/progress_individual"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -307,18 +223,18 @@
                 android:visibility="gone" />
 
             <TextView
-                android:id="@+id/text_steps_leaderboard_empty"
+                android:id="@+id/text_individual_empty"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="24dp"
-                android:visibility="gone"
-                android:text="@string/community_steps_leaderboard_empty"
+                android:text="@string/community_individual_empty"
                 android:textColor="@color/text_secondary"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                android:visibility="gone" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_steps_leaderboard"
+                android:id="@+id/recycler_individual"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"

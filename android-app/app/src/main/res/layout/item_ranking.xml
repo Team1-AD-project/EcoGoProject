@@ -74,11 +74,11 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/text_steps"
+            android:id="@+id/text_carbon_saved"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-black"
-            android:text="0"
+            android:text="0.00"
             android:textColor="@color/primary"
             android:textSize="16sp" />
 
@@ -86,7 +86,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="4dp"
-            android:text="@string/community_steps_unit"
+            android:text="@string/community_carbon_unit"
             android:textColor="@color/text_secondary"
             android:textSize="12sp" />
     </LinearLayout>

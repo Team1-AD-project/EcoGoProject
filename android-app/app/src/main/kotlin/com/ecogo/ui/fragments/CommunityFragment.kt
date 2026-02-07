@@ -5,29 +5,26 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.ecogo.data.MockData
-import com.ecogo.data.Community
-import com.ecogo.data.Friend
+import com.ecogo.data.FacultyCarbonData
 import com.ecogo.databinding.FragmentCommunityBinding
 import com.ecogo.ui.adapters.CommunityAdapter
-import com.ecogo.ui.adapters.FriendAdapter
 import com.ecogo.ui.adapters.LeaderboardAdapter
 import com.ecogo.repository.EcoGoRepository
 import com.google.android.material.tabs.TabLayout
 import kotlinx.coroutines.launch
 
 class CommunityFragment : Fragment() {
-    
+
     private var _binding: FragmentCommunityBinding? = null
     private val binding get() = _binding!!
     private val repository = EcoGoRepository()
-    
+    private var currentIndividualType = "DAILY" // DAILY or MONTHLY
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,25 +33,23 @@ class CommunityFragment : Fragment() {
         _binding = FragmentCommunityBinding.inflate(inflater, container, false)
         return binding.root
     }
-    
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         setupTabs()
         setupRecyclerView()
-        setupLeader()
         setupAnimations()
         setupActions()
-        loadCommunities()
+        loadFacultyLeaderboard()
     }
-    
+
     private fun setupTabs() {
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 when (tab?.position) {
                     0 -> showFacultyLeaderboard()
-                    1 -> showFriendsLeaderboard()
-                    2 -> showStepsLeaderboard()
+                    1 -> showIndividualLeaderboard()
                 }
             }
 
@@ -65,23 +60,15 @@ class CommunityFragment : Fragment() {
 
     private fun showFacultyLeaderboard() {
         binding.layoutFacultyLeaderboard.visibility = View.VISIBLE
-        binding.layoutFriendsLeaderboard.visibility = View.GONE
-        binding.layoutStepsLeaderboard.visibility = View.GONE
-        loadCommunities()
+        binding.layoutIndividualLeaderboard.visibility = View.GONE
+        loadFacultyLeaderboard()
     }
 
-    private fun showFriendsLeaderboard() {
+    private fun showIndividualLeaderboard() {
         binding.layoutFacultyLeaderboard.visibility = View.GONE
-        binding.layoutFriendsLeaderboard.visibility = View.VISIBLE
-        binding.layoutStepsLeaderboard.visibility = View.GONE
-        loadFriendsLeaderboard()
-    }
-
-    private fun showStepsLeaderboard() {
-        binding.layoutFacultyLeaderboard.visibility = View.GONE
-        binding.layoutFriendsLeaderboard.visibility = View.GONE
-        binding.layoutStepsLeaderboard.visibility = View.VISIBLE
-        loadStepsLeaderboard()
+        binding.layoutIndividualLeaderboard.visibility = View.VISIBLE
+        setupIndividualToggle()
+        loadIndividualRankings(currentIndividualType)
     }
 
     private fun setupRecyclerView() {
@@ -90,132 +77,133 @@ class CommunityFragment : Fragment() {
             adapter = CommunityAdapter(emptyList())
         }
 
-        binding.recyclerFriendsLeaderboard.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = FriendAdapter(emptyList(),
-                onMessageClick = { friend ->
-                    findNavController().navigate(com.ecogo.R.id.chatFragment)
-                },
-                onFriendClick = { friend ->
-                    findNavController().navigate(com.ecogo.R.id.profileFragment)
-                }
-            )
-        }
-
-        binding.recyclerStepsLeaderboard.apply {
+        binding.recyclerIndividual.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = LeaderboardAdapter(emptyList())
         }
     }
 
-    private fun setupLeader() {
-        val leader = MockData.COMMUNITIES.firstOrNull()
-        if (leader != null) {
-            binding.textLeaderName.text = leader.name
-            binding.textLeaderPoints.text = "${leader.points} pts • +12% this week"
+    private fun setupIndividualToggle() {
+        binding.btnDaily.setOnClickListener {
+            currentIndividualType = "DAILY"
+            updateToggleStyle()
+            loadIndividualRankings("DAILY")
+        }
+
+        binding.btnMonthly.setOnClickListener {
+            currentIndividualType = "MONTHLY"
+            updateToggleStyle()
+            loadIndividualRankings("MONTHLY")
+        }
+
+        updateToggleStyle()
+    }
+
+    private fun updateToggleStyle() {
+        val ctx = requireContext()
+        if (currentIndividualType == "DAILY") {
+            binding.btnDaily.backgroundTintList =
+                ContextCompat.getColorStateList(ctx, com.ecogo.R.color.primary)
+            binding.btnDaily.setTextColor(ContextCompat.getColor(ctx, android.R.color.white))
+
+            binding.btnMonthly.backgroundTintList =
+                ContextCompat.getColorStateList(ctx, android.R.color.transparent)
+            binding.btnMonthly.setTextColor(
+                ContextCompat.getColor(ctx, com.ecogo.R.color.text_secondary)
+            )
+            binding.btnMonthly.strokeColor =
+                ContextCompat.getColorStateList(ctx, com.ecogo.R.color.text_secondary)
+        } else {
+            binding.btnMonthly.backgroundTintList =
+                ContextCompat.getColorStateList(ctx, com.ecogo.R.color.primary)
+            binding.btnMonthly.setTextColor(ContextCompat.getColor(ctx, android.R.color.white))
+
+            binding.btnDaily.backgroundTintList =
+                ContextCompat.getColorStateList(ctx, android.R.color.transparent)
+            binding.btnDaily.setTextColor(
+                ContextCompat.getColor(ctx, com.ecogo.R.color.text_secondary)
+            )
+            binding.btnDaily.strokeColor =
+                ContextCompat.getColorStateList(ctx, com.ecogo.R.color.text_secondary)
         }
     }
 
     private fun setupActions() {
-        binding.textViewAllFriendsLeaderboard?.setOnClickListener {
-            findNavController().navigate(com.ecogo.R.id.friendsFragment)
-        }
-        
-        // === 新功能入口 ===
-        
-        // Challenges按钮
+        // Challenges button
         binding.btnChallenges.setOnClickListener {
             findNavController().navigate(com.ecogo.R.id.action_community_to_challenges)
         }
-        
-        // Feed按钮
-        binding.btnFeed.setOnClickListener {
-            findNavController().navigate(com.ecogo.R.id.action_community_to_feed)
+
+        // Activities button
+        binding.btnActivities.setOnClickListener {
+            findNavController().navigate(com.ecogo.R.id.action_community_to_activities)
         }
     }
 
-    private fun loadCommunities() {
+    // =============== Faculty Leaderboard ===============
+
+    private fun loadFacultyLeaderboard() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val faculties = repository.getFaculties().getOrElse { emptyList() }
-            val communities = if (faculties.isNotEmpty()) {
-                faculties.map { faculty -> Community(name = faculty.name, points = faculty.score, change = 0) }
+            binding.progressFaculty.visibility = View.VISIBLE
+            binding.recyclerCommunity.visibility = View.GONE
+
+            val result = repository.getFacultyMonthlyCarbonStats()
+
+            binding.progressFaculty.visibility = View.GONE
+
+            val faculties = result.getOrNull()
+            if (faculties != null && faculties.isNotEmpty()) {
+                // Data is already sorted descending from repository
+                binding.recyclerCommunity.adapter = CommunityAdapter(faculties)
+                binding.recyclerCommunity.visibility = View.VISIBLE
+
+                // Update leader card
+                val leader = faculties.first()
+                binding.textLeaderName.text = leader.faculty
+                binding.textLeaderPoints.text = "%.2f kg CO₂ saved this month".format(leader.totalCarbon)
             } else {
-                MockData.COMMUNITIES
-            }
+                // Fallback: try the old faculties API
+                val fallback = repository.getFaculties().getOrNull()
+                if (fallback != null && fallback.isNotEmpty()) {
+                    val carbonList = fallback
+                        .map { FacultyCarbonData(faculty = it.name, totalCarbon = it.score.toDouble()) }
+                        .sortedByDescending { it.totalCarbon }
+                    binding.recyclerCommunity.adapter = CommunityAdapter(carbonList)
+                    binding.recyclerCommunity.visibility = View.VISIBLE
 
-            binding.recyclerCommunity.adapter = CommunityAdapter(communities)
-            val leader = communities.firstOrNull()
-            if (leader != null) {
-                binding.textLeaderName.text = leader.name
-                binding.textLeaderPoints.text = "${leader.points} pts • +12% this week"
-            }
-        }
-    }
-
-    private fun loadFriendsLeaderboard() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val friends = repository.getFriends("user123").getOrNull() ?: MockData.FRIENDS
-            val sortedFriends = friends.sortedByDescending { friend -> friend.points }
-            binding.textMyRank?.text = "Rank #5"
-            binding.textMyPoints?.text = "850 pts"
-            binding.recyclerFriendsLeaderboard.adapter = FriendAdapter(sortedFriends,
-                onMessageClick = { findNavController().navigate(com.ecogo.R.id.chatFragment) },
-                onFriendClick = { findNavController().navigate(com.ecogo.R.id.profileFragment) }
-            )
-        }
-    }
-
-    private fun loadStepsLeaderboard() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            binding.progressStepsLeaderboard.visibility = View.VISIBLE
-            binding.textStepsLeaderboardEmpty.visibility = View.GONE
-            binding.recyclerStepsLeaderboard.visibility = View.GONE
-            binding.spinnerPeriod.visibility = View.GONE
-
-            val periodsResult = repository.getAvailablePeriods()
-            val periods = periodsResult.getOrElse { emptyList() }
-
-            if (periods.isEmpty()) {
-                binding.progressStepsLeaderboard.visibility = View.GONE
-                binding.textStepsLeaderboardEmpty.visibility = View.VISIBLE
-                binding.textStepsLeaderboardEmpty.text = getString(com.ecogo.R.string.community_steps_leaderboard_empty)
-                return@launch
-            }
-
-            val periodAdapter = ArrayAdapter<String>(
-                requireContext(),
-                android.R.layout.simple_spinner_dropdown_item,
-                periods
-            )
-            binding.spinnerPeriod.adapter = periodAdapter
-            binding.spinnerPeriod.visibility = View.VISIBLE
-
-            loadRankingsForPeriod(periods.first())
-
-            binding.spinnerPeriod.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                    loadRankingsForPeriod(periods[position])
+                    val leader = carbonList.first()
+                    binding.textLeaderName.text = leader.faculty
+                    binding.textLeaderPoints.text = "%.2f kg CO₂ saved".format(leader.totalCarbon)
+                } else {
+                    binding.textLeaderName.text = "—"
+                    binding.textLeaderPoints.text = "No data available"
+                    binding.recyclerCommunity.adapter = CommunityAdapter(emptyList())
+                    binding.recyclerCommunity.visibility = View.VISIBLE
                 }
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
             }
         }
     }
 
-    private fun loadRankingsForPeriod(period: String) {
+    // =============== Individual Leaderboard ===============
+
+    private fun loadIndividualRankings(type: String) {
         viewLifecycleOwner.lifecycleScope.launch {
-            binding.progressStepsLeaderboard.visibility = View.VISIBLE
-            binding.recyclerStepsLeaderboard.visibility = View.GONE
-            binding.textStepsLeaderboardEmpty.visibility = View.GONE
+            binding.progressIndividual.visibility = View.VISIBLE
+            binding.recyclerIndividual.visibility = View.GONE
+            binding.textIndividualEmpty.visibility = View.GONE
 
-            val result = repository.getLeaderboard(period)
-            binding.progressStepsLeaderboard.visibility = View.GONE
+            val result = repository.getIndividualRankings(type)
 
-            val rankings = result.getOrElse { emptyList() }
-            binding.recyclerStepsLeaderboard.adapter = LeaderboardAdapter(rankings)
+            binding.progressIndividual.visibility = View.GONE
+
+            val stats = result.getOrNull()
+            val rankings = stats?.rankingsPage?.content ?: emptyList()
+
             if (rankings.isEmpty()) {
-                binding.textStepsLeaderboardEmpty.visibility = View.VISIBLE
+                binding.textIndividualEmpty.visibility = View.VISIBLE
             } else {
-                binding.recyclerStepsLeaderboard.visibility = View.VISIBLE
+                binding.recyclerIndividual.adapter = LeaderboardAdapter(rankings)
+                binding.recyclerIndividual.visibility = View.VISIBLE
             }
         }
     }
@@ -224,7 +212,7 @@ class CommunityFragment : Fragment() {
         val popIn = AnimationUtils.loadAnimation(requireContext(), com.ecogo.R.anim.pop_in)
         binding.cardLeader.startAnimation(popIn)
     }
-    
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

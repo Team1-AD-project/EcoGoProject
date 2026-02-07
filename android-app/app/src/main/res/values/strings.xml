@@ -55,21 +55,21 @@
     <string name="routes_crowding">Crowding Level</string>
     <string name="routes_wait_time">Wait Time</string>
     
-    <!-- Community -->
-    <string name="community_leaderboard">Faculty Leaderboard</string>
+    <!-- Community / Leaderboard -->
+    <string name="community_leaderboard">Leaderboard</string>
     <string name="community_rank">Rank</string>
     <string name="community_faculty">Faculty</string>
     <string name="community_points">Points</string>
     <string name="community_current_leader">Current Leader</string>
     <string name="community_rankings">Rankings</string>
     <string name="community_crowd_label">Crowd:</string>
-    <string name="community_tab_faculties">Faculties</string>
-    <string name="community_tab_friends">Friends</string>
-    <string name="community_tab_steps">Steps</string>
-    <string name="community_steps_leaderboard_title">Steps Leaderboard (by Period)</string>
-    <string name="community_steps_leaderboard_empty">No ranking data for this period</string>
-    <string name="community_steps_unit">steps</string>
+    <string name="community_tab_faculty">Faculty Leaderboard</string>
+    <string name="community_tab_individual">Individual Leaderboard</string>
+    <string name="community_individual_empty">No ranking data for this period</string>
+    <string name="community_carbon_unit">kg</string>
     <string name="community_vip_badge">VIP</string>
+    <string name="community_daily">Daily</string>
+    <string name="community_monthly">Monthly</string>
     
     <!-- Chat -->
     <string name="chat_title">Chat with LiNUS</string>

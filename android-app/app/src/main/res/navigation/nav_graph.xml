@@ -121,28 +121,10 @@
             android:id="@+id/action_community_to_challenges"
             app:destination="@id/challengesFragment" />
         <action
-            android:id="@+id/action_community_to_feed"
-            app:destination="@id/communityFeedFragment" />
+            android:id="@+id/action_community_to_activities"
+            app:destination="@id/activitiesFragment" />
     </fragment>
 
-    <fragment
-        android:id="@+id/communityFeedFragment"
-        android:name="com.ecogo.ui.fragments.CommunityFeedFragment"
-        android:label="社区动态"
-        tools:layout="@layout/fragment_community_feed">
-        <action
-            android:id="@+id/action_communityFeed_to_activityDetail"
-            app:destination="@id/activityDetailFragment" />
-        <action
-            android:id="@+id/action_communityFeed_to_profile"
-            app:destination="@id/profileFragment" />
-        <action
-            android:id="@+id/action_communityFeed_to_challengeDetail"
-            app:destination="@id/challengeDetailFragment" />
-        <action
-            android:id="@+id/action_communityFeed_to_tripSummary"
-            app:destination="@id/tripSummaryFragment" />
-    </fragment>
 
     <fragment
         android:id="@+id/chatFragment"

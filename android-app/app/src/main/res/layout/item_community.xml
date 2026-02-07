@@ -58,24 +58,24 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
-            android:gravity="end"
-            android:orientation="vertical">
+            android:gravity="end|center_vertical"
+            android:orientation="horizontal">
 
             <TextView
                 android:id="@+id/text_points"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-black"
-                android:text="4520"
+                android:text="0.00"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp" />
 
             <TextView
-                android:id="@+id/text_change"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="+12%"
-                android:textColor="#16A34A"
+                android:layout_marginStart="4dp"
+                android:text="@string/community_carbon_unit"
+                android:textColor="@color/text_secondary"
                 android:textSize="10sp" />
         </LinearLayout>
     </LinearLayout>

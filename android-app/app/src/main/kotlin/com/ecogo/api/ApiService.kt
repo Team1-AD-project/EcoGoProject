@@ -34,6 +34,7 @@ import retrofit2.http.*
 import retrofit2.http.GET
 import com.ecogo.api.ApiResponse
 import com.ecogo.data.PointsCurrentData
+import com.ecogo.data.LeaderboardStatsData
 
 /**
  * API 服务接口
@@ -176,20 +177,25 @@ interface ApiService {
     ): ApiResponse<Activity>
     
     // ==================== 排行榜相关 ====================
-    
+
     /**
-     * 获取可用的排行榜周期
-     * GET /api/v1/leaderboards/periods
+     * 获取学院月度碳排放统计排名
+     * GET /api/v1/faculties/stats/carbon/monthly
      */
-    @GET("api/v1/leaderboards/periods")
-    suspend fun getLeaderboardPeriods(): ApiResponse<List<String>>
-    
+    @GET("api/v1/faculties/stats/carbon/monthly")
+    suspend fun getFacultyMonthlyCarbonStats(): ApiResponse<List<FacultyCarbonData>>
+
     /**
-     * 获取指定周期的排名
-     * GET /api/v1/leaderboards/rankings?period={period}
+     * 获取个人排行榜（移动端，只能看今天/本月）
+     * GET /api/v1/mobile/leaderboards/rankings?type=DAILY&name=&page=0&size=50
      */
-    @GET("api/v1/leaderboards/rankings")
-    suspend fun getRankingsByPeriod(@Query("period") period: String): ApiResponse<List<Ranking>>
+    @GET("api/v1/mobile/leaderboards/rankings")
+    suspend fun getMobileLeaderboardRankings(
+        @Query("type") type: String,
+        @Query("name") name: String = "",
+        @Query("page") page: Int = 0,
+        @Query("size") size: Int = 50
+    ): ApiResponse<LeaderboardStatsData>
     
     // ==================== 商品相关 ====================
     @GET("api/v1/support/churn/me")

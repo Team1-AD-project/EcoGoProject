@@ -7,10 +7,10 @@ import android.widget.TextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.ecogo.R
-import com.ecogo.data.Ranking
+import com.ecogo.data.IndividualRanking
 
 class LeaderboardAdapter(
-    private val rankings: List<Ranking>
+    private val rankings: List<IndividualRanking>
 ) : RecyclerView.Adapter<LeaderboardAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -29,14 +29,14 @@ class LeaderboardAdapter(
         private val textRank: TextView = itemView.findViewById(R.id.text_rank)
         private val textNickname: TextView = itemView.findViewById(R.id.text_nickname)
         private val textUserId: TextView = itemView.findViewById(R.id.text_user_id)
-        private val textSteps: TextView = itemView.findViewById(R.id.text_steps)
+        private val textCarbonSaved: TextView = itemView.findViewById(R.id.text_carbon_saved)
         private val textVipBadge: TextView = itemView.findViewById(R.id.text_vip_badge)
 
-        fun bind(ranking: Ranking) {
+        fun bind(ranking: IndividualRanking) {
             textRank.text = "#${ranking.rank}"
             textNickname.text = ranking.nickname.ifBlank { "N/A" }
             textUserId.text = ranking.userId
-            textSteps.text = "%,d".format(ranking.steps)
+            textCarbonSaved.text = "%.2f".format(ranking.carbonSaved)
             textVipBadge.visibility = if (ranking.isVip) View.VISIBLE else View.GONE
 
             val rankColor = when (ranking.rank) {

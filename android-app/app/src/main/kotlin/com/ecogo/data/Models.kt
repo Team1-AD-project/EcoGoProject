@@ -25,7 +25,7 @@ data class Community(
     val change: Int
 )
 
-// Ranking (Leaderboard data, matches backend Ranking.java)
+// Ranking (Legacy - kept for compatibility)
 data class Ranking(
     val id: String? = null,
     val period: String,
@@ -34,6 +34,33 @@ data class Ranking(
     val nickname: String,
     val steps: Int,
     val isVip: Boolean = false
+)
+
+// Individual Leaderboard ranking entry (matches backend LeaderboardRankingDto)
+data class IndividualRanking(
+    val userId: String,
+    val nickname: String,
+    val rank: Int,
+    val carbonSaved: Double,
+    val isVip: Boolean = false,
+    val rewardPoints: Long = 0
+)
+
+// Leaderboard stats wrapper (matches backend LeaderboardStatsDto)
+data class LeaderboardStatsData(
+    val rankingsPage: LeaderboardPageData,
+    val totalCarbonSaved: Long = 0,
+    val totalVipUsers: Long = 0,
+    val totalRewardsDistributed: Long = 0
+)
+
+// Page wrapper for leaderboard rankings (matches Spring Page<T>)
+data class LeaderboardPageData(
+    val content: List<IndividualRanking> = emptyList(),
+    val totalElements: Long = 0,
+    val totalPages: Int = 0,
+    val number: Int = 0,
+    val size: Int = 10
 )
 
 // Shop Item
@@ -438,18 +465,6 @@ data class User(
     val username: String,
     val points: Int = 0,
     val avatar: String? = null
-)
-
-// FeedItem - Community feed data model
-data class FeedItem(
-    val id: String,
-    val userId: String,
-    val username: String,
-    val type: String, // TRIP, ACHIEVEMENT, ACTIVITY, CHALLENGE
-    val content: String,
-    val timestamp: Long,
-    val likes: Int = 0,
-    val iconUrl: String? = null
 )
 
 // GreenSpot - Green spot data model
