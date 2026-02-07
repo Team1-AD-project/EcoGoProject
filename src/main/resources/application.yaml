@@ -19,9 +19,8 @@ server:
 # Weather API configuration
 weather:
   api:
-    key: ${WEATHER_API_KEY:demo-key}
-    url: ${WEATHER_API_URL:https://api.openweathermap.org/data/2.5/weather}
-
+    key: fac4ae69bdf19368de7ee38add2460bf
+    url: https://api.openweathermap.org/data/2.5/weather
 # Actuator configuration for monitoring
 management:
   endpoints:
