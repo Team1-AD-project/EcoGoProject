@@ -28,7 +28,7 @@ import kotlin.math.abs
 
 /**
  * SignupWizardFragment - 注册向导
- * 
+ *
  * 六步流程:
  * Step 0: 个人信息填写（用户名、邮箱、NUSNET ID）
  * Step 1: 学院选择（滑动卡片）
@@ -38,41 +38,41 @@ import kotlin.math.abs
  * Step 5: 小狮子换装展示
  */
 class SignupWizardFragment : Fragment() {
-    
+
     private var _binding: FragmentSignupWizardBinding? = null
     private val binding get() = _binding!!
-    
+
     private var currentStep = 0
     private var selectedFaculty: FacultyData? = null
     private val repository = com.ecogo.repository.EcoGoRepository()
-    
+
     // Step 0: Personal info
     private var username: String = ""
     private var email: String = ""
     private var nusnetId: String = ""
     private var password: String = ""
-    
+
     // Step 2: Transport Preferences
     private val transportPrefs = mutableSetOf<String>()
-    
+
     // Step 3: Common Locations
     private var dormitory: String? = null
     private var teachingBuilding: String? = null
     private var studySpot: String? = null
     private val otherLocations = mutableSetOf<String>()
-    
+
     // Step 4: Interests & Goals
     private val interests = mutableSetOf<String>()
     private var weeklyGoal: Int = 5
     private var notifyChallenges: Boolean = true
     private var notifyReminders: Boolean = true
     private var notifyFriends: Boolean = false
-    
+
     // Animation references
     private var buttonAnimator: ValueAnimator? = null
     private var mascotScaleAnimator: ValueAnimator? = null
     private var mascotRotateAnimator: ValueAnimator? = null
-    
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -91,7 +91,7 @@ class SignupWizardFragment : Fragment() {
             throw e
         }
     }
-    
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         try {
@@ -103,10 +103,10 @@ class SignupWizardFragment : Fragment() {
             Toast.makeText(requireContext(), "SignupWizard 初始化失败: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
-    
+
     private fun showPersonalInfo() {
         currentStep = 0
-        
+
         // 显示个人信息界面
         binding.layoutPersonalInfo.visibility = View.VISIBLE
         binding.layoutFacultySelection.visibility = View.GONE
@@ -114,7 +114,7 @@ class SignupWizardFragment : Fragment() {
         binding.layoutCommonLocations.root.visibility = View.GONE
         binding.layoutInterestsGoals.root.visibility = View.GONE
         binding.layoutMascotReveal.visibility = View.GONE
-        
+
         // 输入验证
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -123,13 +123,13 @@ class SignupWizardFragment : Fragment() {
                 validatePersonalInfo()
             }
         }
-        
+
         binding.inputUsername.addTextChangedListener(textWatcher)
         binding.inputEmail.addTextChangedListener(textWatcher)
         binding.inputNusnet.addTextChangedListener(textWatcher)
         binding.inputPassword.addTextChangedListener(textWatcher)
         binding.inputConfirmPassword.addTextChangedListener(textWatcher)
-        
+
         // Next 按钮
         binding.btnNextToFaculty.isEnabled = false
         binding.btnNextToFaculty.alpha = 0.5f
@@ -138,11 +138,11 @@ class SignupWizardFragment : Fragment() {
             email = binding.inputEmail.text.toString()
             nusnetId = binding.inputNusnet.text.toString()
             password = binding.inputPassword.text.toString()
-            
+
             // Disable button and show loading state
             binding.btnNextToFaculty.isEnabled = false
             binding.btnNextToFaculty.text = "Creating Account..."
-            
+
             val request = com.ecogo.api.MobileRegisterRequest(
                 userid = nusnetId,
                 password = password,
@@ -150,24 +150,24 @@ class SignupWizardFragment : Fragment() {
                 nickname = username,
                 email = email
             )
-            
+
             // Call Register API
             viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                 try {
                     val apiService = com.ecogo.api.RetrofitClient.apiService
                     val response = apiService.register(request)
-                    
+
                     withContext(Dispatchers.Main) {
                         binding.btnNextToFaculty.isEnabled = true
                         binding.btnNextToFaculty.text = "Next: Choose Faculty"
-                        
+
                         if (response.success && response.data != null) {
                             Log.d("DEBUG_SIGNUP", "Step 0 Registration Success: ${response.data.userid}")
                             Toast.makeText(requireContext(), "Account created! Please complete your profile.", Toast.LENGTH_SHORT).show()
-                            
+
                             // Save registration data locally immediately
                             saveRegistrationData()
-                            
+
                             // Proceed to next step
                             showFacultySelection()
                         } else {
@@ -187,100 +187,71 @@ class SignupWizardFragment : Fragment() {
             }
         }
     }
-    
+
     private fun validatePersonalInfo() {
         val usernameText = binding.inputUsername.text.toString()
         val emailText = binding.inputEmail.text.toString()
         val nusnetText = binding.inputNusnet.text.toString()
         val passwordText = binding.inputPassword.text.toString()
         val confirmPasswordText = binding.inputConfirmPassword.text.toString()
-        
+
         // 基本验证
         val isUsernameValid = usernameText.length >= 3
         val isEmailValid = emailText.contains("@") && emailText.contains(".")
         val isNusnetValid = nusnetText.startsWith("e", ignoreCase = true) && nusnetText.length >= 7
         val isPasswordValid = passwordText.length >= 6
         val isPasswordMatch = passwordText == confirmPasswordText && passwordText.isNotEmpty()
-        
+
         val isValid = isUsernameValid && isEmailValid && isNusnetValid && isPasswordValid && isPasswordMatch
-        
+
         binding.btnNextToFaculty.isEnabled = isValid
         binding.btnNextToFaculty.alpha = if (isValid) 1f else 0.5f
-        
+
         // 错误提示
         if (usernameText.isNotEmpty() && !isUsernameValid) {
             binding.inputLayoutUsername.error = "Username must be at least 3 characters"
         } else {
             binding.inputLayoutUsername.error = null
         }
-        
+
         if (emailText.isNotEmpty() && !isEmailValid) {
             binding.inputLayoutEmail.error = "Invalid email format"
         } else {
             binding.inputLayoutEmail.error = null
         }
-        
+
         if (nusnetText.isNotEmpty() && !isNusnetValid) {
             binding.inputLayoutNusnet.error = "Must start with 'e' and be at least 7 characters"
         } else {
             binding.inputLayoutNusnet.error = null
         }
-        
+
         if (passwordText.isNotEmpty() && !isPasswordValid) {
             binding.inputLayoutPassword.error = "Password must be at least 6 characters"
         } else {
             binding.inputLayoutPassword.error = null
         }
-        
+
         if (confirmPasswordText.isNotEmpty() && !isPasswordMatch) {
             binding.inputLayoutConfirmPassword.error = "Passwords do not match"
         } else {
             binding.inputLayoutConfirmPassword.error = null
         }
     }
-    
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-=======
->>>>>>> 6eedbfe (fix:fixUserRegister&UserPoints)
+
     private fun updateProfileStep(
         request: com.ecogo.api.UpdateProfileRequest,
         onSuccess: () -> Unit
     ) {
         // Show loading if needed? Ideally keep UI responsive or show small indicator
         // For wizard flow, we ideally block or show loading on the button
-        
+
         Log.d("DEBUG_SIGNUP", "Updating profile for $nusnetId with request: $request")
-        
-<<<<<<< HEAD
-        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val apiService = com.ecogo.api.RetrofitClient.apiService
-                val response = apiService.updateProfile(nusnetId, request)
-                
-                withContext(Dispatchers.Main) {
-                    if (response.success) {
-                        Log.d("DEBUG_SIGNUP", "Profile update success")
-                        onSuccess()
-                    } else {
-                        Log.e("DEBUG_SIGNUP", "Profile update failed: ${response.message}")
-                        Toast.makeText(requireContext(), "Update failed: ${response.message}", Toast.LENGTH_SHORT).show()
-                        // Still allow proceeding? Ideally no, but for smooth UX/prototype maybe yes?
-                        // User requested "call this interface", implying strict flow.
-                        // We will BLOCK on failure to ensure data integrity as per implied requirement.
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Log.e("DEBUG_SIGNUP", "Profile update network error: ${e.message}")
-                    Toast.makeText(requireContext(), "Network error: ${e.message}", Toast.LENGTH_SHORT).show()
-                }
-=======
+
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val result = repository.updateInternalUserProfile(nusnetId, request)
-                
+
                 if (result.isSuccess) {
                     Log.d("DEBUG_SIGNUP", "Profile update success")
                     onSuccess()
@@ -292,18 +263,13 @@ class SignupWizardFragment : Fragment() {
             } catch (e: Exception) {
                 Log.e("DEBUG_SIGNUP", "Profile update network error: ${e.message}")
                 Toast.makeText(requireContext(), "Network error: ${e.message}", Toast.LENGTH_SHORT).show()
->>>>>>> 6eedbfe (fix:fixUserRegister&UserPoints)
             }
         }
     }
 
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> 6eedbfe (fix:fixUserRegister&UserPoints)
     private fun showFacultySelection() {
         currentStep = 1
-        
+
         // 切换界面
         binding.layoutPersonalInfo.visibility = View.GONE
         binding.layoutFacultySelection.visibility = View.VISIBLE
@@ -311,27 +277,27 @@ class SignupWizardFragment : Fragment() {
         binding.layoutCommonLocations.root.visibility = View.GONE
         binding.layoutInterestsGoals.root.visibility = View.GONE
         binding.layoutMascotReveal.visibility = View.GONE
-        
+
         // 设置ViewPager2适配器
         val adapter = FacultySwipeAdapter(MockData.FACULTY_DATA) { faculty ->
             // 选择后跳转到交通偏好
             selectedFaculty = faculty
             android.util.Log.d("DEBUG_SIGNUP", "Faculty selected: ${faculty.name}")
-            
-             // Call API for Faculty
+
+            // Call API for Faculty
             val request = com.ecogo.api.UpdateProfileRequest(
                 faculty = faculty.name // Or map to internal enum if needed, assuming name is fine
             )
-            
+
             updateProfileStep(request) {
-                 binding.viewpagerFaculties.postDelayed({
+                binding.viewpagerFaculties.postDelayed({
                     showTransportPreference()
                 }, 300)
             }
         }
-        
+
         binding.viewpagerFaculties.adapter = adapter
-        
+
         // 设置ViewPager2的页面切换监听
         binding.viewpagerFaculties.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
@@ -340,38 +306,38 @@ class SignupWizardFragment : Fragment() {
                 binding.textPageIndicator.text = "${position + 1} / ${MockData.FACULTY_DATA.size}"
             }
         })
-        
+
         // 初始化页面指示器
         binding.textPageIndicator.text = "1 / ${MockData.FACULTY_DATA.size}"
-        
+
         // 配置ViewPager2的页面转换效果
         setupPageTransformer()
     }
-    
+
     private fun setupPageTransformer() {
         binding.viewpagerFaculties.apply {
             // 设置页面间距
             offscreenPageLimit = 1
-            
+
             setPageTransformer { page, position ->
                 val absPosition = abs(position)
-                
+
                 // 缩放效果
                 page.scaleY = 0.85f + (1 - absPosition) * 0.15f
                 page.scaleX = 0.85f + (1 - absPosition) * 0.15f
-                
+
                 // 透明度效果
                 page.alpha = 0.5f + (1 - absPosition) * 0.5f
-                
+
                 // 轻微旋转效果
                 page.rotationY = position * -15f
             }
         }
     }
-    
+
     private fun showTransportPreference() {
         currentStep = 2
-        
+
         // 切换界面
         binding.layoutPersonalInfo.visibility = View.GONE
         binding.layoutFacultySelection.visibility = View.GONE
@@ -379,9 +345,9 @@ class SignupWizardFragment : Fragment() {
         binding.layoutCommonLocations.root.visibility = View.GONE
         binding.layoutInterestsGoals.root.visibility = View.GONE
         binding.layoutMascotReveal.visibility = View.GONE
-        
+
         Log.d("DEBUG_SIGNUP", "Showing transport preference")
-        
+
         // 设置交通卡片点击监听
         val cards = mapOf(
             binding.layoutTransportPreference.cardBus to Pair("bus", binding.layoutTransportPreference.checkBus),
@@ -389,7 +355,7 @@ class SignupWizardFragment : Fragment() {
             binding.layoutTransportPreference.cardCycling to Pair("cycling", binding.layoutTransportPreference.checkCycling),
             binding.layoutTransportPreference.cardCarpool to Pair("carpool", binding.layoutTransportPreference.checkCarpool)
         )
-        
+
         cards.forEach { (card, typeAndCheck) ->
             val (type, checkView) = typeAndCheck
             card.setOnClickListener {
@@ -402,54 +368,38 @@ class SignupWizardFragment : Fragment() {
                     card.strokeColor = ContextCompat.getColor(requireContext(), R.color.primary)
                     checkView.visibility = View.VISIBLE
                 }
-                
+
                 // 至少选择一个才能继续
                 binding.layoutTransportPreference.btnContinueTransport.isEnabled = transportPrefs.isNotEmpty()
                 binding.layoutTransportPreference.btnContinueTransport.alpha = if (transportPrefs.isNotEmpty()) 1f else 0.5f
             }
         }
-        
+
         // Continue按钮
-<<<<<<< HEAD
-         binding.layoutTransportPreference.btnContinueTransport.setOnClickListener {
-             // Prepare API Request
-             val request = com.ecogo.api.UpdateProfileRequest(
-                 preferences = com.ecogo.api.TransportPreferencesWrapper(
-=======
-<<<<<<< Updated upstream
         binding.layoutTransportPreference.btnContinueTransport.isEnabled = false
         binding.layoutTransportPreference.btnContinueTransport.alpha = 0.5f
         binding.layoutTransportPreference.btnContinueTransport.setOnClickListener {
-            Log.d("DEBUG_SIGNUP", "Transport prefs selected: ${transportPrefs.joinToString(", ")}")
-            showCommonLocations()
-=======
-         binding.layoutTransportPreference.btnContinueTransport.setOnClickListener {
-             // Prepare API Request
-             val request = com.ecogo.api.UpdateProfileRequest(
-                 preferences = com.ecogo.api.UpdatePreferencesWrapper(
->>>>>>> 6eedbfe (fix:fixUserRegister&UserPoints)
-                     preferredTransport = transportPrefs.toList()
-                 )
-             )
-             
-             // Disable button
-             binding.layoutTransportPreference.btnContinueTransport.isEnabled = false
-             binding.layoutTransportPreference.btnContinueTransport.text = "Saving..."
-             
-             updateProfileStep(request) {
-                 binding.layoutTransportPreference.btnContinueTransport.text = "Continue" // Reset text (though we move)
-                 showCommonLocations()
-             }
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> 6eedbfe (fix:fixUserRegister&UserPoints)
+            // Prepare API Request
+            val request = com.ecogo.api.UpdateProfileRequest(
+                preferences = com.ecogo.api.UpdatePreferencesWrapper(
+                    preferredTransport = transportPrefs.toList()
+                )
+            )
+
+            // Disable button
+            binding.layoutTransportPreference.btnContinueTransport.isEnabled = false
+            binding.layoutTransportPreference.btnContinueTransport.text = "Saving..."
+
+            updateProfileStep(request) {
+                binding.layoutTransportPreference.btnContinueTransport.text = "Continue" // Reset text (though we move)
+                showCommonLocations()
+            }
         }
     }
-    
+
     private fun showCommonLocations() {
         currentStep = 3
-        
+
         // 切换界面
         binding.layoutPersonalInfo.visibility = View.GONE
         binding.layoutFacultySelection.visibility = View.GONE
@@ -457,9 +407,9 @@ class SignupWizardFragment : Fragment() {
         binding.layoutCommonLocations.root.visibility = View.VISIBLE
         binding.layoutInterestsGoals.root.visibility = View.GONE
         binding.layoutMascotReveal.visibility = View.GONE
-        
+
         Log.d("DEBUG_SIGNUP", "Showing common locations")
-        
+
         // Chip监听
         binding.layoutCommonLocations.chipGym.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) otherLocations.add("gym") else otherLocations.remove("gym")
@@ -473,55 +423,39 @@ class SignupWizardFragment : Fragment() {
         binding.layoutCommonLocations.chipSports.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) otherLocations.add("sports") else otherLocations.remove("sports")
         }
-        
+
         // Skip按钮
         binding.layoutCommonLocations.btnSkipLocations.setOnClickListener {
             Log.d("DEBUG_SIGNUP", "Locations skipped")
             showInterestsGoals()
         }
-        
+
         // Continue按钮
         binding.layoutCommonLocations.btnContinueLocations.setOnClickListener {
             dormitory = binding.layoutCommonLocations.inputDorm.text.toString()
             teachingBuilding = binding.layoutCommonLocations.inputBuilding.text.toString()
             studySpot = binding.layoutCommonLocations.inputLibrary.text.toString()
-<<<<<<< HEAD
-            
-            val request = com.ecogo.api.UpdateProfileRequest(
-                dormitoryOrResidence = dormitory,
-                mainTeachingBuilding = teachingBuilding,
-                favoriteStudySpot = studySpot
-=======
-<<<<<<< Updated upstream
-            Log.d("DEBUG_SIGNUP", "Locations: dorm=$dormitory, building=$teachingBuilding, spot=$studySpot")
-            showInterestsGoals()
-=======
-            
+
             val request = com.ecogo.api.UpdateProfileRequest(
                 preferences = com.ecogo.api.UpdatePreferencesWrapper(
                     dormitoryOrResidence = dormitory,
                     mainTeachingBuilding = teachingBuilding,
                     favoriteStudySpot = studySpot
                 )
->>>>>>> 6eedbfe (fix:fixUserRegister&UserPoints)
             )
-            
+
             binding.layoutCommonLocations.btnContinueLocations.isEnabled = false
             binding.layoutCommonLocations.btnContinueLocations.text = "Saving..."
-            
+
             updateProfileStep(request) {
                 showInterestsGoals()
             }
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> 6eedbfe (fix:fixUserRegister&UserPoints)
         }
     }
-    
+
     private fun showInterestsGoals() {
         currentStep = 4
-        
+
         // 切换界面
         binding.layoutPersonalInfo.visibility = View.GONE
         binding.layoutFacultySelection.visibility = View.GONE
@@ -529,9 +463,9 @@ class SignupWizardFragment : Fragment() {
         binding.layoutCommonLocations.root.visibility = View.GONE
         binding.layoutInterestsGoals.root.visibility = View.VISIBLE
         binding.layoutMascotReveal.visibility = View.GONE
-        
+
         Log.d("DEBUG_SIGNUP", "Showing interests and goals")
-        
+
         // 兴趣Chips监听
         binding.layoutInterestsGoals.chipSustainability.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) interests.add("sustainability") else interests.remove("sustainability")
@@ -548,13 +482,13 @@ class SignupWizardFragment : Fragment() {
         binding.layoutInterestsGoals.chipLeaderboard.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) interests.add("leaderboard") else interests.remove("leaderboard")
         }
-        
+
         // 每周目标Slider
         binding.layoutInterestsGoals.sliderWeeklyGoal.addOnChangeListener { _, value, _ ->
             weeklyGoal = value.toInt()
             binding.layoutInterestsGoals.textGoalValue.text = weeklyGoal.toString()
         }
-        
+
         // 通知开关
         binding.layoutInterestsGoals.switchChallenges.setOnCheckedChangeListener { _, isChecked ->
             notifyChallenges = isChecked
@@ -565,23 +499,9 @@ class SignupWizardFragment : Fragment() {
         binding.layoutInterestsGoals.switchFriends.setOnCheckedChangeListener { _, isChecked ->
             notifyFriends = isChecked
         }
-        
+
         // Finish按钮
         binding.layoutInterestsGoals.btnFinishSignup.setOnClickListener {
-<<<<<<< HEAD
-            // Prepare request
-            val request = com.ecogo.api.UpdateProfileRequest(
-                interests = interests.toList(),
-                weeklyGoals = weeklyGoal,
-                newChallenges = notifyChallenges,
-                activityReminders = notifyReminders,
-                friendActivity = notifyFriends
-=======
-<<<<<<< Updated upstream
-            Log.d("DEBUG_SIGNUP", "Interests: ${interests.joinToString(", ")}, Goal: $weeklyGoal")
-            selectedFaculty?.let { faculty ->
-                showMascotReveal(faculty)
-=======
             // Prepare request
             val request = com.ecogo.api.UpdateProfileRequest(
                 preferences = com.ecogo.api.UpdatePreferencesWrapper(
@@ -591,27 +511,22 @@ class SignupWizardFragment : Fragment() {
                     activityReminders = notifyReminders,
                     friendActivity = notifyFriends
                 )
->>>>>>> 6eedbfe (fix:fixUserRegister&UserPoints)
             )
-            
+
             binding.layoutInterestsGoals.btnFinishSignup.isEnabled = false
             binding.layoutInterestsGoals.btnFinishSignup.text = "Finalizing..."
-            
+
             updateProfileStep(request) {
-                 selectedFaculty?.let { faculty ->
+                selectedFaculty?.let { faculty ->
                     showMascotReveal(faculty)
                 }
-<<<<<<< HEAD
-=======
->>>>>>> Stashed changes
->>>>>>> 6eedbfe (fix:fixUserRegister&UserPoints)
             }
         }
     }
-    
+
     private fun showMascotReveal(faculty: FacultyData) {
         currentStep = 5
-        
+
         // 切换到小狮子展示界面
         binding.layoutPersonalInfo.visibility = View.GONE
         binding.layoutFacultySelection.visibility = View.GONE
@@ -619,13 +534,13 @@ class SignupWizardFragment : Fragment() {
         binding.layoutCommonLocations.root.visibility = View.GONE
         binding.layoutInterestsGoals.root.visibility = View.GONE
         binding.layoutMascotReveal.visibility = View.VISIBLE
-        
+
         binding.textRevealTitle.text = "Welcome, $username!"
         binding.textRevealSubtitle.text = "Meet your new buddy."
-        
+
         // 设置小狮子装备
         binding.mascotReveal.outfit = faculty.outfit
-        
+
         // 入场动画
         mascotScaleAnimator = ValueAnimator.ofFloat(0.5f, 1f).apply {
             duration = 600
@@ -637,7 +552,7 @@ class SignupWizardFragment : Fragment() {
             }
         }
         mascotScaleAnimator?.start()
-        
+
         // 轻微旋转动画
         mascotRotateAnimator = ValueAnimator.ofFloat(-5f, 5f).apply {
             duration = 2000
@@ -649,12 +564,12 @@ class SignupWizardFragment : Fragment() {
             }
         }
         mascotRotateAnimator?.start()
-        
+
         // 学院信息
         binding.textFacultyName.text = faculty.name
         binding.textFacultySlogan.text = faculty.slogan
         binding.viewFacultyColor.setBackgroundColor(android.graphics.Color.parseColor(faculty.color))
-        
+
         // 服装预览
         val outfitItems = mutableListOf<String>()
         if (faculty.outfit.head != "none") {
@@ -667,7 +582,7 @@ class SignupWizardFragment : Fragment() {
             outfitItems.add(getItemName(faculty.outfit.body))
         }
         binding.textOutfitItems.text = "Starter Outfit: ${outfitItems.joinToString(", ")}"
-        
+
         // Let's Go! 按钮动画
         buttonAnimator = ValueAnimator.ofFloat(1f, 1.05f).apply {
             duration = 1000
@@ -681,34 +596,34 @@ class SignupWizardFragment : Fragment() {
             }
         }
         buttonAnimator?.start()
-        
+
         binding.btnLetsGo.setOnClickListener {
             Log.d("DEBUG_SIGNUP", "Let's Go button clicked!")
             Toast.makeText(requireContext(), "🎯 Let's Go 按钮已点击", Toast.LENGTH_SHORT).show()
-            
+
             // 停止所有动画
             buttonAnimator?.cancel()
             mascotScaleAnimator?.cancel()
             mascotRotateAnimator?.cancel()
-            
+
             // 重置按钮缩放
             binding.btnLetsGo.scaleX = 1f
             binding.btnLetsGo.scaleY = 1f
-            
+
             completeSignup(faculty)
         }
     }
-    
+
     private fun completeSignup(faculty: FacultyData) {
         Log.d("DEBUG_SIGNUP", "=== Completing Signup Wizard ===")
-        
+
         // Save remaining profile data (Preferences)
         selectedFaculty = faculty // ensured
         saveRegistrationData()
         saveFirstLoginStatus(true)
-        
+
         Toast.makeText(requireContext(), "Profile setup complete! Please login.", Toast.LENGTH_LONG).show()
-        
+
         // Navigate to Login
         binding.root.postDelayed({
             try {
@@ -718,7 +633,7 @@ class SignupWizardFragment : Fragment() {
             }
         }, 1000)
     }
-    
+
     private fun saveRegistrationData() {
         val prefs = requireContext().getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
         prefs.edit().apply {
@@ -742,13 +657,13 @@ class SignupWizardFragment : Fragment() {
         }
         Log.d("DEBUG_SIGNUP", "Registration data saved to SharedPreferences")
     }
-    
+
     private fun saveFirstLoginStatus(isFirstLogin: Boolean) {
         val prefs = requireContext().getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
         prefs.edit().putBoolean("is_first_login", isFirstLogin).apply()
         Log.d("DEBUG_SIGNUP", "First login status set to: $isFirstLogin")
     }
-    
+
     private fun getItemName(itemId: String): String {
         return when (itemId) {
             "hat_helmet" -> "Safety Helmet"
@@ -765,13 +680,13 @@ class SignupWizardFragment : Fragment() {
             else -> ""
         }
     }
-    
+
     override fun onDestroyView() {
         // 清理动画
         buttonAnimator?.cancel()
         mascotScaleAnimator?.cancel()
         mascotRotateAnimator?.cancel()
-        
+
         super.onDestroyView()
         _binding = null
     }
