@@ -266,7 +266,15 @@ public class ChallengeImplementation implements ChallengeInterface {
                 dto.setRewardClaimed(false);
             }
         } else {
-            dto.setStatus(progress.getStatus());
+            // Progress not yet reached target → always IN_PROGRESS
+            dto.setStatus("IN_PROGRESS");
+            // If DB was previously marked COMPLETED (e.g. trip data changed), revert it
+            if ("COMPLETED".equals(progress.getStatus()) && !Boolean.TRUE.equals(progress.getRewardClaimed())) {
+                progress.setStatus("IN_PROGRESS");
+                progress.setCompletedAt(null);
+                progress.setUpdatedAt(LocalDateTime.now());
+                userChallengeProgressRepository.save(progress);
+            }
         }
 
         return dto;
