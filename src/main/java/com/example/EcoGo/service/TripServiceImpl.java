@@ -120,8 +120,10 @@ public class TripServiceImpl implements TripService {
         trip.setCarbonStatus("completed");
 
         // Update user's totalCarbon
+        // Update user's totalCarbon
         if (request.carbonSaved > 0) {
-            user.setTotalCarbon(user.getTotalCarbon() + request.carbonSaved);
+            double newTotal = user.getTotalCarbon() + request.carbonSaved;
+            user.setTotalCarbon(Math.round(newTotal * 100.0) / 100.0);
             userRepository.save(user);
         }
 

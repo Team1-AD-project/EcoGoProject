@@ -67,7 +67,8 @@ public class PointsServiceImpl implements PointsService {
         boolean isTripSource = "trip".equalsIgnoreCase(source);
         if (points > 0 && isTripSource) {
             double carbonSaved = points / 10.0;
-            user.setTotalCarbon(user.getTotalCarbon() + carbonSaved);
+            double newTotal = user.getTotalCarbon() + carbonSaved;
+            user.setTotalCarbon(Math.round(newTotal * 100.0) / 100.0);
         }
 
         userRepository.save(user);

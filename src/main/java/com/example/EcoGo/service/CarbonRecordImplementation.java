@@ -106,6 +106,8 @@ public class CarbonRecordImplementation implements CarbonRecordInterface {
                 .mapToDouble(com.example.EcoGo.model.User::getTotalCarbon)
                 .sum();
 
-        return new com.example.EcoGo.dto.FacultyStatsDto.CarbonResponse(faculty, totalCarbon);
+        double roundedTotal = Math.round(totalCarbon * 100.0) / 100.0;
+
+        return new com.example.EcoGo.dto.FacultyStatsDto.CarbonResponse(faculty, roundedTotal);
     }
 }
