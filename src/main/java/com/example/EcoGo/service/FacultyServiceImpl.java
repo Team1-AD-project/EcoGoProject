@@ -1,12 +1,16 @@
 package com.example.EcoGo.service;
 
 import com.example.EcoGo.dto.FacultyStatsDto;
+import com.example.EcoGo.dto.LeaderboardEntry;
 import com.example.EcoGo.model.Faculty;
-import com.example.EcoGo.model.Trip;
 import com.example.EcoGo.model.User;
 import com.example.EcoGo.repository.FacultyRepository;
-import com.example.EcoGo.repository.TripRepository;
 import com.example.EcoGo.repository.UserRepository;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,14 +26,14 @@ import java.util.stream.Collectors;
 public class FacultyServiceImpl {
 
     private final FacultyRepository facultyRepository;
-    private final TripRepository tripRepository;
     private final UserRepository userRepository;
+    private final MongoTemplate mongoTemplate;
 
-    public FacultyServiceImpl(FacultyRepository facultyRepository, TripRepository tripRepository,
-            UserRepository userRepository) {
+    public FacultyServiceImpl(FacultyRepository facultyRepository,
+            UserRepository userRepository, MongoTemplate mongoTemplate) {
         this.facultyRepository = facultyRepository;
-        this.tripRepository = tripRepository;
         this.userRepository = userRepository;
+        this.mongoTemplate = mongoTemplate;
     }
 
     public List<String> getAllFacultyNames() {
@@ -42,76 +46,66 @@ public class FacultyServiceImpl {
         // 1. Determine current month range
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime startOfMonth = now.with(TemporalAdjusters.firstDayOfMonth()).with(LocalTime.MIN);
-        LocalDateTime endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
+        LocalDateTime endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth()).plusDays(1).with(LocalTime.MIN);
 
-        System.out.println("DEBUG: Fetching stats from " + startOfMonth + " to " + endOfMonth);
+        // 2. Use MongoTemplate aggregation to get per-user carbon totals
+        //    (same approach as LeaderboardImplementation - proven to work)
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(Criteria.where("carbon_status").is("completed")
+                        .and("start_time").gte(startOfMonth).lt(endOfMonth)),
+                Aggregation.group("user_id").sum("carbon_saved").as("totalCarbonSaved"),
+                Aggregation.sort(Sort.Direction.DESC, "totalCarbonSaved")
+        );
 
-        // 2. Fetch all COMPLETED trips in this range
-        List<Trip> trips = tripRepository.findByStartTimeBetweenAndCarbonStatus(startOfMonth, endOfMonth, "completed");
-        System.out.println("DEBUG: Found " + trips.size() + " completed trips.");
+        AggregationResults<LeaderboardEntry> results = mongoTemplate.aggregate(
+                aggregation, "trips", LeaderboardEntry.class);
+        List<LeaderboardEntry> entries = results.getMappedResults();
 
-        // 3. Collect all user IDs
-        List<String> userIds = trips.stream()
-                .map(Trip::getUserId)
-                .distinct()
+        // 3. Get user IDs and fetch users to map userId -> faculty
+        List<String> userIds = entries.stream()
+                .map(LeaderboardEntry::getUserId)
                 .collect(Collectors.toList());
-        System.out.println("DEBUG: Found " + userIds.size() + " distinct users: " + userIds);
 
-        // 4. Fetch all Users to get their Faculty
-        // Direct lookup as requested to ensure accuracy
-        List<User> users = userRepository.findByUseridIn(userIds);
-        System.out.println("DEBUG: Fetched " + users.size() + " user records.");
-
-        Map<String, String> userFacultyMap = users.stream()
-                .filter(u -> u.getFaculty() != null)
-                .collect(Collectors.toMap(User::getUserid, User::getFaculty));
-        System.out.println("DEBUG: User Faculty Map: " + userFacultyMap);
-
-        // 5. Aggregate Carbon by Faculty
-        Map<String, Double> facultyCarbonMap = new HashMap<>();
-
-        // Initialize with all faculties
-        List<String> allFaculties = getAllFacultyNames();
-        System.out.println("DEBUG: All Faculties in DB: " + allFaculties);
-
-        for (String f : allFaculties) {
-            facultyCarbonMap.put(f, 0.0);
-        }
-
-        for (Trip trip : trips) {
-            // Find faculty for this trip's user
-            String faculty = userFacultyMap.get(trip.getUserId());
-
-            if (faculty == null) {
-                System.out.println("DEBUG: Warning - No faculty found for user " + trip.getUserId() + " (Trip ID: "
-                        + trip.getId() + ")");
-            }
-
-            if (faculty != null) {
-                if (facultyCarbonMap.containsKey(faculty)) {
-                    double current = facultyCarbonMap.get(faculty);
-                    double saved = trip.getCarbonSaved();
-                    facultyCarbonMap.put(faculty, current + saved);
-                    if (saved > 0) {
-                        System.out.println(
-                                "DEBUG: Adding " + saved + " to " + faculty + " (Total: " + (current + saved) + ")");
-                    } else {
-                        System.out.println("DEBUG: Trip " + trip.getId() + " for user " + trip.getUserId()
-                                + " has 0 carbon saved. Ignoring.");
-                    }
-                } else {
-                    System.out.println("DEBUG: Warning - Faculty '" + faculty + "' from user " + trip.getUserId()
-                            + " not in faculties list.");
+        Map<String, String> userFacultyMap = new HashMap<>();
+        if (!userIds.isEmpty()) {
+            List<User> users = userRepository.findByUseridIn(userIds);
+            for (User user : users) {
+                if (user.getFaculty() != null && !user.getFaculty().isEmpty()) {
+                    userFacultyMap.put(user.getUserid(), user.getFaculty());
                 }
             }
         }
 
-        // 6. Convert to DTO
+        // 4. Aggregate carbon by faculty
+        Map<String, Double> facultyCarbonMap = new HashMap<>();
+
+        // Initialize with faculties from DB collection
+        for (String f : getAllFacultyNames()) {
+            facultyCarbonMap.put(f, 0.0);
+        }
+
+        // Also initialize faculties from user records (in case faculties collection is empty)
+        for (String faculty : userFacultyMap.values()) {
+            facultyCarbonMap.putIfAbsent(faculty, 0.0);
+        }
+
+        // Add carbon from aggregation results
+        for (LeaderboardEntry entry : entries) {
+            String faculty = userFacultyMap.get(entry.getUserId());
+            if (faculty != null) {
+                double current = facultyCarbonMap.getOrDefault(faculty, 0.0);
+                facultyCarbonMap.put(faculty, current + entry.getTotalCarbonSaved());
+            }
+        }
+
+        // 5. Convert to DTO, sorted descending
         List<FacultyStatsDto.CarbonResponse> response = new ArrayList<>();
         for (Map.Entry<String, Double> entry : facultyCarbonMap.entrySet()) {
             double roundedValue = Math.round(entry.getValue() * 100.0) / 100.0;
             response.add(new FacultyStatsDto.CarbonResponse(entry.getKey(), roundedValue));
         }
+
+        response.sort((a, b) -> Double.compare(b.totalCarbon, a.totalCarbon));
 
         return response;
     }
