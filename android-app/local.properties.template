@@ -1,9 +1,0 @@
-# 本地配置模板
-# 复制此文件为 local.properties 并填入实际值
-
-# Android SDK 路径
-sdk.dir=/path/to/android/sdk
-
-# Google Maps API Key
-# 在 Google Cloud Console 申请: https://console.cloud.google.com/apis/credentials
-MAPS_API_KEY=YOUR_GOOGLE_MAPS_API_KEY_HERE
