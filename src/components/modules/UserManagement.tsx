@@ -3,6 +3,7 @@ import { Search, Edit, UserX } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import {
   Dialog,
@@ -20,7 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from '@/components/ui/label';
-import { fetchUserList, fetchUserDetail, updateUser, updateUserStatus, type User } from '@/services/userService';
+import { fetchUserList, fetchUserDetail, updateUser, updateUserStatus, type User, type UpdateUserRequest } from '@/services/userService';
 import { toast } from 'sonner';
 
 export function UserManagement() {
@@ -93,34 +94,30 @@ export function UserManagement() {
     if (!editingUser) return;
 
     try {
-      const payload = {
+      const payload: UpdateUserRequest = {
         nickname: editingUser.nickname,
         email: editingUser.email,
         isVipActive: editingUser.vip?.active || false,
-        isDeactivated: editingUser.isDeactivated || false, // Use the flat boolean if mapped, or check how I mapped it in edit dialog
+        isDeactivated: editingUser.isDeactivated || false,
+        vipPlan: editingUser.vip?.plan || 'MONTHLY',
+        vipExpiryDate: editingUser.vip?.expiryDate
+          ? new Date(editingUser.vip.expiryDate).toISOString().split('T')[0]
+          : new Date().toISOString().split('T')[0]
       };
 
-      // Note: In the dialog Select for status, I updated editingUser.isDeactivated.
-      // In the Select for VIP, I updated editingUser.vip.active.
-      // So the values in editingUser should be current.
-
-      // Assume updateUser returns a standard response interface, checking for code 200 if possible, 
-      // or just trust it throws on error or returns data. 
-      // api.put usually returns response.data. Let's assume response structure.
       const response = await updateUser(editingUser.userid, payload);
-
-      if (response.code === 200) {
+      if (response && (response.code === 200 || (response as any).success)) {
         toast.success('User updated successfully');
         setIsEditDialogOpen(false);
         setEditingUser(null);
-        // Refresh the list
         loadUsers();
       } else {
         toast.error(response.message || 'Failed to update user');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      toast.error('Error updating user');
+      const msg = error.response?.data?.message || 'Error updating user';
+      toast.error(msg);
     }
   };
 
@@ -356,7 +353,7 @@ export function UserManagement() {
           {editingUser ? (
             <div className="space-y-4 py-4">
               <div className="space-y-2">
-                <Label htmlFor="nickname">NickName</Label>
+                <Label htmlFor="nickname">Nickname</Label>
                 <Input
                   id="nickname"
                   value={editingUser.nickname}
@@ -373,44 +370,84 @@ export function UserManagement() {
                 />
               </div>
 
+              {/* VIP Status Switch */}
               <div className="space-y-2">
-                <Label>User Type</Label>
-                <Select
-                  value={editingUser.vip?.active ? 'vip' : 'normal'}
-                  onValueChange={(value) => {
-                    setEditingUser(curr => {
-                      if (!curr) return null;
-                      const newVip = { ...curr.vip, active: value === 'vip' };
-                      return { ...curr, vip: newVip };
-                    });
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select user type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="vip">VIP User</SelectItem>
-                    <SelectItem value="normal">Normal User</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center justify-between">
+                  <Label>VIP Status</Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={editingUser.vip?.active || false}
+                      onCheckedChange={(checked) => setEditingUser(curr => {
+                        if (!curr) return null;
+                        return {
+                          ...curr,
+                          vip: {
+                            ...curr.vip!,
+                            active: checked,
+                            // Set defaults if activating and fields are missing
+                            plan: checked ? (curr.vip?.plan || 'MONTHLY') : curr.vip?.plan,
+                            expiryDate: checked ? (curr.vip?.expiryDate || new Date().toISOString()) : curr.vip?.expiryDate
+                          }
+                        };
+                      })}
+                    />
+                    <span className="text-sm text-gray-600">{editingUser.vip?.active ? 'Active' : 'Inactive'}</span>
+                  </div>
+                </div>
               </div>
 
+              {/* Conditional VIP Fields */}
+              {editingUser.vip?.active && (
+                <>
+                  <div className="space-y-2">
+                    <Label>VIP Plan</Label>
+                    <Select
+                      value={editingUser.vip?.plan || 'MONTHLY'}
+                      onValueChange={(val) => setEditingUser(curr => {
+                        if (!curr) return null;
+                        return { ...curr, vip: { ...curr.vip!, plan: val } };
+                      })}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select Plan" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="MONTHLY">Monthly</SelectItem>
+                        <SelectItem value="SEASONAL">Seasonal</SelectItem>
+                        <SelectItem value="YEARLY">Yearly</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label>Expiry Date</Label>
+                    <Input
+                      type="date"
+                      value={editingUser.vip?.expiryDate ? new Date(editingUser.vip.expiryDate).toISOString().split('T')[0] : ''}
+                      onChange={(e) => setEditingUser(curr => {
+                        if (!curr) return null;
+                        return { ...curr, vip: { ...curr.vip!, expiryDate: e.target.value } };
+                      })}
+                    />
+                  </div>
+                </>
+              )}
+
+              {/* Account Status Switch */}
               <div className="space-y-2">
-                <Label>Status</Label>
-                <Select
-                  value={!editingUser.isDeactivated ? 'active' : 'inactive'}
-                  onValueChange={(value) => {
-                    setEditingUser(curr => curr ? { ...curr, isDeactivated: value === 'inactive' } : null);
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="active">Active</SelectItem>
-                    <SelectItem value="inactive">Inactive</SelectItem>
-                  </SelectContent>
-                </Select>
+                <div className="flex items-center justify-between">
+                  <Label>Account Status</Label>
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={!editingUser.isDeactivated}
+                      onCheckedChange={(checked) => setEditingUser(curr => curr ? { ...curr, isDeactivated: !checked } : null)}
+                      className={!editingUser.isDeactivated ? "data-[state=checked]:bg-green-600" : "data-[state=unchecked]:bg-red-600"}
+                    />
+                    <span className={!editingUser.isDeactivated ? "text-sm text-green-600 font-medium" : "text-sm text-red-600 font-medium"}>
+                      {!editingUser.isDeactivated ? 'Active' : 'Deactivated'}
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           ) : (

@@ -118,17 +118,26 @@ export function VIPManagement() {
     return 'bg-gray-100 text-gray-700';
   };
 
+  const getDaysRemaining = (expiryDate: string | null | undefined) => {
+    if (!expiryDate) return 0;
+    const normalizedDate = expiryDate.replace(' ', 'T');
+    const endTimestamp = new Date(normalizedDate).getTime();
+    const nowTimestamp = new Date().getTime();
+    if (isNaN(endTimestamp)) return 0;
+    const diff = endTimestamp - nowTimestamp;
+    return Math.max(0, Math.ceil(diff / (1000 * 3600 * 24)));
+  };
+
   const getStatusBadge = (user: User) => {
     if (user.vip?.active) {
-      // Check if expiring
       if (user.vip.expiryDate) {
-        const days = Math.ceil((new Date(user.vip.expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24));
+        const days = getDaysRemaining(user.vip.expiryDate);
         if (days <= 0) return <Badge className="bg-red-100 text-red-700">Expired</Badge>;
         if (days <= 7) return <Badge className="bg-orange-100 text-orange-700">Expiring Soon</Badge>;
       }
       return <Badge className="bg-green-100 text-green-700">Active</Badge>;
     }
-    return <Badge className="bg-red-100 text-red-700">Expired</Badge>;
+    return <Badge className="bg-gray-100 text-gray-700">Inactive</Badge>;
   };
 
   return (
@@ -247,13 +256,13 @@ export function VIPManagement() {
                             <div>
                               <p className="text-xs text-gray-500">Start Date</p>
                               <p className="text-sm font-medium text-gray-900">
-                                {user.vip?.startDate ? new Date(user.vip.startDate).toLocaleDateString() : 'N/A'}
+                                {user.vip?.startDate ? new Date(user.vip.startDate).toLocaleDateString('en-SG') : 'N/A'}
                               </p>
                             </div>
                             <div>
                               <p className="text-xs text-gray-500">End Date</p>
                               <p className="text-sm font-medium text-gray-900">
-                                {user.vip?.expiryDate ? new Date(user.vip.expiryDate).toLocaleDateString() : 'N/A'}
+                                {user.vip?.expiryDate ? new Date(user.vip.expiryDate).toLocaleDateString('en-SG') : 'N/A'}
                               </p>
                             </div>
                             <div>
@@ -265,9 +274,7 @@ export function VIPManagement() {
                             <div>
                               <p className="text-xs text-gray-500">Days Remaining</p>
                               <p className="text-sm font-medium text-gray-900">
-                                {user.vip?.expiryDate
-                                  ? Math.max(0, Math.ceil((new Date(user.vip.expiryDate).getTime() - new Date().getTime()) / (1000 * 3600 * 24)))
-                                  : 0} days
+                                {getDaysRemaining(user.vip?.expiryDate)} days
                               </p>
                             </div>
                           </div>

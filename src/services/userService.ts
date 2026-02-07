@@ -86,8 +86,10 @@ export const fetchUserDetail = async (userid: string): Promise<UserDetailRespons
 export interface UpdateUserRequest {
     nickname: string;
     email: string | null;
-    isVipActive: boolean;
     isDeactivated: boolean;
+    isVipActive: boolean;
+    vipPlan?: string;
+    vipExpiryDate?: string;
 }
 
 // Update user details
