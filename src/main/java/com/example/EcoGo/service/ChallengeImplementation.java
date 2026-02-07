@@ -44,6 +44,9 @@ public class ChallengeImplementation implements ChallengeInterface {
     @Autowired
     private com.example.EcoGo.interfacemethods.PointsService pointsService;
 
+    @Autowired
+    private com.example.EcoGo.repository.UserPointsLogRepository userPointsLogRepository;
+
     @Override
     public List<Challenge> getAllChallenges() {
         List<Challenge> challenges = challengeRepository.findAll();
@@ -255,8 +258,8 @@ public class ChallengeImplementation implements ChallengeInterface {
 
         if (target != null && current >= target) {
             dto.setStatus("COMPLETED");
-            // Auto-mark as COMPLETED but do NOT award points yet (user must claim reward)
             if ("IN_PROGRESS".equals(progress.getStatus())) {
+                // First time reaching target → mark COMPLETED, reward not claimed yet
                 progress.setStatus("COMPLETED");
                 progress.setCompletedAt(LocalDateTime.now());
                 progress.setUpdatedAt(LocalDateTime.now());
@@ -264,6 +267,19 @@ public class ChallengeImplementation implements ChallengeInterface {
                 userChallengeProgressRepository.save(progress);
                 dto.setCompletedAt(progress.getCompletedAt());
                 dto.setRewardClaimed(false);
+            } else if (Boolean.TRUE.equals(progress.getRewardClaimed())) {
+                // Verify reward was actually logged to user_points_logs
+                List<com.example.EcoGo.model.UserPointsLog> logs =
+                        userPointsLogRepository.findByUserIdAndSource(progress.getUserId(), "challenge");
+                boolean hasLog = logs.stream()
+                        .anyMatch(log -> progress.getChallengeId().equals(log.getRelatedId()));
+                if (!hasLog) {
+                    // Old data: rewardClaimed=true but no points log → reset so user can claim properly
+                    progress.setRewardClaimed(false);
+                    progress.setUpdatedAt(LocalDateTime.now());
+                    userChallengeProgressRepository.save(progress);
+                    dto.setRewardClaimed(false);
+                }
             }
         } else {
             // Progress not yet reached target → always IN_PROGRESS
