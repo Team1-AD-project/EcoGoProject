@@ -197,8 +197,8 @@ public class TripServiceImpl implements TripService {
         resp.detectedMode = trip.getDetectedMode();
         resp.mlConfidence = trip.getMlConfidence();
         resp.isGreenTrip = trip.isGreenTrip();
-        resp.distance = trip.getDistance();
-        resp.carbonSaved = trip.getCarbonSaved();
+        resp.distance = trip.getDistance();                            // km
+        resp.carbonSaved = trip.getCarbonSaved() / 1000.0;             // g -> kg
         resp.pointsGained = trip.getPointsGained();
         resp.carbonStatus = trip.getCarbonStatus();
         resp.createdAt = trip.getCreatedAt();
@@ -255,8 +255,8 @@ public class TripServiceImpl implements TripService {
         resp.id = trip.getId();
         resp.userId = trip.getUserId();
         resp.detectedMode = trip.getDetectedMode();
-        resp.distance = trip.getDistance();
-        resp.carbonSaved = trip.getCarbonSaved();
+        resp.distance = trip.getDistance();                            // km
+        resp.carbonSaved = trip.getCarbonSaved() / 1000.0;             // g -> kg
         resp.pointsGained = trip.getPointsGained();
         resp.isGreenTrip = trip.isGreenTrip();
         resp.carbonStatus = trip.getCarbonStatus();

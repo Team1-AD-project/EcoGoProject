@@ -62,9 +62,9 @@ public class TripDto {
         public String detectedMode;
         public double mlConfidence;
         public boolean isGreenTrip;
-        public double distance;
+        public double distance;                 // km
         public List<GeoPointDto> polylinePoints;
-        public double carbonSaved; // Changed to double
+        public double carbonSaved;              // kg
         public long pointsGained;
         public String carbonStatus;
         public LocalDateTime createdAt;
@@ -77,8 +77,8 @@ public class TripDto {
         public String startPlaceName;
         public String endPlaceName;
         public String detectedMode;
-        public double distance;
-        public double carbonSaved; // Changed to double
+        public double distance;                 // km
+        public double carbonSaved;              // kg
         public long pointsGained;
         public boolean isGreenTrip;
         public String carbonStatus;
