@@ -198,6 +198,17 @@ class HomeFragment : Fragment() {
 
             // Load SoC Score independently
             loadSocScore()
+
+            // Update Carbon Footprint (Added)
+            val carbon = userInfo.totalCarbon
+            val trees = if (carbon > 0) carbon / 18.0 else 0.0
+            binding.textCo2Saved.text = "%.1f kg".format(carbon)
+            binding.textTreeEquivalent.text = "%.1f trees".format(trees) // User asked for 1 decimal place
+            
+            // Update Carbon Period if stats available
+            profile.stats?.let { stats ->
+                binding.textCarbonPeriod.text = "Total · ${stats.totalTrips} eco trips"
+            }
         }
     }
 
@@ -468,15 +479,8 @@ class HomeFragment : Fragment() {
     }
 
     private fun loadCarbonFootprint() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val carbon = repository.getCarbonFootprint("user123", "monthly").getOrNull()
-            if (carbon != null) {
-                binding.textCo2Saved.text = "${"%.1f".format(carbon.co2Saved)} kg"
-                binding.textTreeEquivalent.text = "${carbon.equivalentTrees} trees"
-                val totalTrips = carbon.tripsByBus + carbon.tripsByWalking + carbon.tripsByBicycle
-                binding.textCarbonPeriod.text = "This month · $totalTrips eco trips"
-            }
-        }
+        // Deprecated: Carbon footprint is now loaded from UserProfile (totalCarbon)
+        // Kept empty to avoid breaking older calls if any, but removed from loadData()
     }
 
     private fun loadWeather() {
