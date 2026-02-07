@@ -85,7 +85,7 @@ public class CarbonRecordImplementation implements CarbonRecordInterface {
     private com.example.EcoGo.repository.UserRepository userRepository;
 
     @Autowired
-    private com.example.EcoGo.repository.TripRepository tripRepository;
+    private org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
 
     @Override
     public com.example.EcoGo.dto.FacultyStatsDto.CarbonResponse getFacultyTotalCarbon(String userId) {
@@ -109,17 +109,29 @@ public class CarbonRecordImplementation implements CarbonRecordInterface {
                 .map(com.example.EcoGo.model.User::getUserid)
                 .collect(java.util.stream.Collectors.toList());
 
-        // 4. Fetch all COMPLETED trips for these users
-        List<com.example.EcoGo.model.Trip> trips = tripRepository.findByUserIdInAndCarbonStatus(userIds, "completed");
+        // 4. Use MongoTemplate aggregation (same approach as LeaderboardImplementation)
+        org.springframework.data.mongodb.core.aggregation.Aggregation aggregation =
+                org.springframework.data.mongodb.core.aggregation.Aggregation.newAggregation(
+                        org.springframework.data.mongodb.core.aggregation.Aggregation.match(
+                                org.springframework.data.mongodb.core.query.Criteria
+                                        .where("carbon_status").is("completed")
+                                        .and("user_id").in(userIds)),
+                        org.springframework.data.mongodb.core.aggregation.Aggregation
+                                .group().sum("carbon_saved").as("totalCarbonSaved")
+                );
 
-        // 5. Sum carbonSaved from Trips
-        double totalCarbonGrams = trips.stream()
-                .mapToDouble(com.example.EcoGo.model.Trip::getCarbonSaved)
-                .sum();
+        org.springframework.data.mongodb.core.aggregation.AggregationResults<java.util.Map> results =
+                mongoTemplate.aggregate(aggregation, "trips", java.util.Map.class);
 
-        // 6. Convert to kg and round to 2 decimal places
-        double totalCarbonKg = Math.round(totalCarbonGrams * 100.0) / 100.0;
+        double totalCarbon = 0.0;
+        java.util.Map result = results.getUniqueMappedResult();
+        if (result != null && result.get("totalCarbonSaved") != null) {
+            totalCarbon = ((Number) result.get("totalCarbonSaved")).doubleValue();
+        }
 
-        return new com.example.EcoGo.dto.FacultyStatsDto.CarbonResponse(faculty, totalCarbonKg);
+        // 5. Round to 2 decimal places
+        totalCarbon = Math.round(totalCarbon * 100.0) / 100.0;
+
+        return new com.example.EcoGo.dto.FacultyStatsDto.CarbonResponse(faculty, totalCarbon);
     }
 }
