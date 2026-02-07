@@ -24,10 +24,15 @@ import java.util.stream.Collectors;
 @Service
 public class BadgeServiceImpl implements BadgeService {
 
-    @Autowired private BadgeRepository badgeRepository;
-    @Autowired private UserBadgeRepository userBadgeRepository;
-    @Autowired private UserRepository userRepository;
-    @Autowired @Lazy private PointsService pointsService;
+    @Autowired
+    private BadgeRepository badgeRepository;
+    @Autowired
+    private UserBadgeRepository userBadgeRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    @Lazy
+    private PointsService pointsService;
 
     /**
      * 1. 购买徽章
@@ -37,7 +42,7 @@ public class BadgeServiceImpl implements BadgeService {
         if (userBadgeRepository.existsByUserIdAndBadgeId(userId, badgeId)) {
             throw new RuntimeException("您已拥有该徽章");
         }
-        
+
         Badge badge = badgeRepository.findByBadgeId(badgeId)
                 .orElseThrow(() -> new RuntimeException("商品不存在"));
 
@@ -48,10 +53,12 @@ public class BadgeServiceImpl implements BadgeService {
         }
 
         Integer cost = badge.getPurchaseCost();
-        if (cost == null || cost <= 0) throw new RuntimeException("该徽章不可购买");
+        if (cost == null || cost <= 0)
+            throw new RuntimeException("该徽章不可购买");
 
-       // 使用 PointsService 统一处理积分扣除和日志记录
-        String badgeName = badge.getName() != null ? badge.getName().getOrDefault("en", "Unknown Badge") : "Unknown Badge";
+        // 使用 PointsService 统一处理积分扣除和日志记录
+        String badgeName = badge.getName() != null ? badge.getName().getOrDefault("en", "Unknown Badge")
+                : "Unknown Badge";
         PointsDto.SettleResult settleResult = new PointsDto.SettleResult();
         settleResult.points = -cost;
         settleResult.source = "badge";
@@ -75,7 +82,7 @@ public class BadgeServiceImpl implements BadgeService {
      */
     @Transactional
     public UserBadge toggleBadgeDisplay(String userId, String badgeId, boolean isDisplay) {
-        
+
         UserBadge targetUserBadge = userBadgeRepository.findByUserIdAndBadgeId(userId, badgeId)
                 .orElseThrow(() -> new RuntimeException("您还没有获得这个徽章"));
 
@@ -86,11 +93,11 @@ public class BadgeServiceImpl implements BadgeService {
         }
 
         // ================= 同类互斥核心逻辑 =================
-        
+
         // A. 查当前徽章的分类
         Badge targetBadgeDef = badgeRepository.findByBadgeId(badgeId)
                 .orElseThrow(() -> new RuntimeException("徽章定义不存在"));
-        
+
         String category = targetBadgeDef.getCategory(); // ✅ 现在这里不会报错了
 
         if (category != null && !category.isEmpty()) {
@@ -122,8 +129,14 @@ public class BadgeServiceImpl implements BadgeService {
     public List<Badge> getShopList() {
         return badgeRepository.findByIsActiveAndAcquisitionMethod(true, "purchase");
     }
-    public List<UserBadge> getMyBadges(String userId) { return userBadgeRepository.findByUserId(userId); }
-    public Badge createBadge(Badge badge) { return badgeRepository.save(badge); }
+
+    public List<UserBadge> getMyBadges(String userId) {
+        return userBadgeRepository.findByUserId(userId);
+    }
+
+    public Badge createBadge(Badge badge) {
+        return badgeRepository.save(badge);
+    }
 
     /**
      * 按子分类获取徽章列表
@@ -197,7 +210,7 @@ public class BadgeServiceImpl implements BadgeService {
         User user = userRepository.findByUserid(userId)
                 .orElseThrow(() -> new RuntimeException("用户不存在"));
 
-        long userCarbon = user.getTotalCarbon();
+        double userCarbon = user.getTotalCarbon();
 
         // 查找所有已启用的、achievement 类型的、用户碳减排已达标的徽章
         List<Badge> qualifiedBadges = badgeRepository
@@ -248,6 +261,7 @@ public class BadgeServiceImpl implements BadgeService {
 
     /**
      * 6. 获取所有徽章（管理员用）
+     * 
      * @param category 可选，按大类过滤 (badge/cloth)
      */
     public List<Badge> getAllBadges(String category) {

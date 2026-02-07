@@ -21,11 +21,11 @@ public class Badge {
     @Field("badge_id")
     private String badgeId;
 
-    private Map<String, String> name; 
+    private Map<String, String> name;
     private Map<String, String> description;
-    
+
     @Field("purchase_cost")
-    private Integer purchaseCost; 
+    private Integer purchaseCost;
 
     private String category;
 
@@ -36,7 +36,7 @@ public class Badge {
     private String acquisitionMethod; // e.g. "purchase", "achievement", "reward"
 
     @Field("carbon_threshold")
-    private Long carbonThreshold; // 当用户 totalCarbon >= 此值时自动解锁（仅 achievement 类型使用）
+    private Double carbonThreshold; // 当用户 totalCarbon >= 此值时自动解锁（仅 achievement 类型使用）
 
     private BadgeIcon icon;
 

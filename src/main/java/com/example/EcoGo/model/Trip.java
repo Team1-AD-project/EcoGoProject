@@ -58,7 +58,7 @@ public class Trip {
     private List<GeoPoint> polylinePoints;
 
     @Field("carbon_saved")
-    private long carbonSaved;
+    private double carbonSaved;
 
     @Field("points_gained")
     private long pointsGained;
@@ -68,10 +68,6 @@ public class Trip {
 
     @Field("created_at")
     private LocalDateTime createdAt;
-
-    // Optimization: Store faculty directly in Trip to avoid joining User table
-    @Field("faculty")
-    private String faculty;
 
     // --- Nested Classes ---
 
@@ -300,11 +296,11 @@ public class Trip {
         this.polylinePoints = polylinePoints;
     }
 
-    public long getCarbonSaved() {
+    public double getCarbonSaved() {
         return carbonSaved;
     }
 
-    public void setCarbonSaved(long carbonSaved) {
+    public void setCarbonSaved(double carbonSaved) {
         this.carbonSaved = carbonSaved;
     }
 
@@ -332,11 +328,4 @@ public class Trip {
         this.createdAt = createdAt;
     }
 
-    public String getFaculty() {
-        return faculty;
-    }
-
-    public void setFaculty(String faculty) {
-        this.faculty = faculty;
-    }
 }

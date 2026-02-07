@@ -22,4 +22,7 @@ public interface UserRepository extends MongoRepository<User, String> {
     java.util.List<User> findByVipIsActiveTrueAndVipExpiryDateBefore(java.time.LocalDateTime time);
 
     java.util.List<User> findByFaculty(String faculty);
+
+    // Find users by a list of user IDs
+    java.util.List<User> findByUseridIn(java.util.List<String> userids);
 }

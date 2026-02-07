@@ -14,9 +14,9 @@ public class FacultyStatsDto {
 
     public static class CarbonResponse {
         public String faculty;
-        public Long totalCarbon;
+        public Double totalCarbon;
 
-        public CarbonResponse(String faculty, Long totalCarbon) {
+        public CarbonResponse(String faculty, Double totalCarbon) {
             this.faculty = faculty;
             this.totalCarbon = totalCarbon;
         }

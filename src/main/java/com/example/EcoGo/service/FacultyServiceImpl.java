@@ -44,67 +44,71 @@ public class FacultyServiceImpl {
         LocalDateTime startOfMonth = now.with(TemporalAdjusters.firstDayOfMonth()).with(LocalTime.MIN);
         LocalDateTime endOfMonth = now.with(TemporalAdjusters.lastDayOfMonth()).with(LocalTime.MAX);
 
-        // 2. Fetch all trips in this range
-        List<Trip> trips = tripRepository.findByStartTimeBetween(startOfMonth, endOfMonth);
+        System.out.println("DEBUG: Fetching stats from " + startOfMonth + " to " + endOfMonth);
 
-        // 3. Aggregate by Faculty
-        // Strategy:
-        // - If trip has 'faculty', use it.
-        // - If trip 'faculty' is null, look up user's faculty (fallback for old data).
-        // Optimization: Cache user faculties to avoid N+1 queries if possible, or just
-        // accept N+1 for fallback.
-        // Since we are creating a new feature, assuming most new trips have faculty or
-        // we accept the cost for now.
-        // Better: Fetch all users involved in these trips if needed.
+        // 2. Fetch all COMPLETED trips in this range
+        List<Trip> trips = tripRepository.findByStartTimeBetweenAndCarbonStatus(startOfMonth, endOfMonth, "completed");
+        System.out.println("DEBUG: Found " + trips.size() + " completed trips.");
 
-        Map<String, Long> facultyCarbonMap = new HashMap<>();
+        // 3. Collect all user IDs
+        List<String> userIds = trips.stream()
+                .map(Trip::getUserId)
+                .distinct()
+                .collect(Collectors.toList());
+        System.out.println("DEBUG: Found " + userIds.size() + " distinct users: " + userIds);
 
-        // Initialize map with all known faculties (so even 0 carbon faculties appear)
+        // 4. Fetch all Users to get their Faculty
+        // Direct lookup as requested to ensure accuracy
+        List<User> users = userRepository.findByUseridIn(userIds);
+        System.out.println("DEBUG: Fetched " + users.size() + " user records.");
+
+        Map<String, String> userFacultyMap = users.stream()
+                .filter(u -> u.getFaculty() != null)
+                .collect(Collectors.toMap(User::getUserid, User::getFaculty));
+        System.out.println("DEBUG: User Faculty Map: " + userFacultyMap);
+
+        // 5. Aggregate Carbon by Faculty
+        Map<String, Double> facultyCarbonMap = new HashMap<>();
+
+        // Initialize with all faculties
         List<String> allFaculties = getAllFacultyNames();
-        for (String f : allFaculties) {
-            facultyCarbonMap.put(f, 0L);
-        }
+        System.out.println("DEBUG: All Faculties in DB: " + allFaculties);
 
-        // Cache for user faculties to minimize DB hits
-        Map<String, String> userFacultyCache = new HashMap<>();
+        for (String f : allFaculties) {
+            facultyCarbonMap.put(f, 0.0);
+        }
 
         for (Trip trip : trips) {
-            String faculty = trip.getFaculty();
+            // Find faculty for this trip's user
+            String faculty = userFacultyMap.get(trip.getUserId());
 
-            // Fallback to User look up if faculty missing
             if (faculty == null) {
-                if (userFacultyCache.containsKey(trip.getUserId())) {
-                    faculty = userFacultyCache.get(trip.getUserId());
-                } else {
-                    // Fetch user
-                    // Note: This could be slow for many trips.
-                    // Optimization: We could fetch all relevant users in one go using
-                    // 'findByUserIdIn',
-                    // but for simplicity/MVP we do this.
-                    // User suggested: "trips里面也有个faculty的字段...如果你觉得能优化性能我可以加上" -> We ADDED it.
-                    // So we expect new data to have it. Old data might be missed or slow.
-                    // Let's implement fallback but be aware.
-                    try {
-                        User user = userRepository.findByUserid(trip.getUserId()).orElse(null);
-                        if (user != null) {
-                            faculty = user.getFaculty();
-                            userFacultyCache.put(trip.getUserId(), faculty);
-                        }
-                    } catch (Exception e) {
-                        // ignore
-                    }
-                }
+                System.out.println("DEBUG: Warning - No faculty found for user " + trip.getUserId() + " (Trip ID: "
+                        + trip.getId() + ")");
             }
 
-            if (faculty != null && facultyCarbonMap.containsKey(faculty)) {
-                long current = facultyCarbonMap.get(faculty);
-                facultyCarbonMap.put(faculty, current + trip.getCarbonSaved());
+            if (faculty != null) {
+                if (facultyCarbonMap.containsKey(faculty)) {
+                    double current = facultyCarbonMap.get(faculty);
+                    double saved = trip.getCarbonSaved();
+                    facultyCarbonMap.put(faculty, current + saved);
+                    if (saved > 0) {
+                        System.out.println(
+                                "DEBUG: Adding " + saved + " to " + faculty + " (Total: " + (current + saved) + ")");
+                    } else {
+                        System.out.println("DEBUG: Trip " + trip.getId() + " for user " + trip.getUserId()
+                                + " has 0 carbon saved. Ignoring.");
+                    }
+                } else {
+                    System.out.println("DEBUG: Warning - Faculty '" + faculty + "' from user " + trip.getUserId()
+                            + " not in faculties list.");
+                }
             }
         }
 
-        // 4. Convert to DTO list
+        // 6. Convert to DTO
         List<FacultyStatsDto.CarbonResponse> response = new ArrayList<>();
-        for (Map.Entry<String, Long> entry : facultyCarbonMap.entrySet()) {
+        for (Map.Entry<String, Double> entry : facultyCarbonMap.entrySet()) {
             response.add(new FacultyStatsDto.CarbonResponse(entry.getKey(), entry.getValue()));
         }
 

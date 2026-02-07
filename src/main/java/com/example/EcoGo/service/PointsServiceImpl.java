@@ -66,7 +66,7 @@ public class PointsServiceImpl implements PointsService {
         // 累计碳减排量（trip 来源时，points / 10 = 碳减排克数）
         boolean isTripSource = "trip".equalsIgnoreCase(source);
         if (points > 0 && isTripSource) {
-            long carbonSaved = points / 10;
+            double carbonSaved = points / 10.0;
             user.setTotalCarbon(user.getTotalCarbon() + carbonSaved);
         }
 

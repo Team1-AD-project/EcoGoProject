@@ -51,12 +51,6 @@ public class TripServiceImpl implements TripService {
         trip.setCarbonStatus("tracking");
         trip.setCreatedAt(LocalDateTime.now());
 
-        // Optimization: Store faculty in Trip
-        User user = userRepository.findByUserid(userId).orElse(null);
-        if (user != null) {
-            trip.setFaculty(user.getFaculty());
-        }
-
         return tripRepository.save(trip);
     }
 
@@ -127,7 +121,7 @@ public class TripServiceImpl implements TripService {
 
         // Update user's totalCarbon
         if (request.carbonSaved > 0) {
-            user.setTotalCarbon(user.getTotalCarbon() + (long) request.carbonSaved);
+            user.setTotalCarbon(user.getTotalCarbon() + request.carbonSaved);
             userRepository.save(user);
         }
 

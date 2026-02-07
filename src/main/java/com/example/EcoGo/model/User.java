@@ -29,7 +29,7 @@ public class User {
     private Preferences preferences;
 
     // Core fields
-    private long totalCarbon;
+    private double totalCarbon;
     private long totalPoints;
     private long currentPoints;
 
@@ -145,11 +145,11 @@ public class User {
         this.preferences = preferences;
     }
 
-    public long getTotalCarbon() {
+    public double getTotalCarbon() {
         return totalCarbon;
     }
 
-    public void setTotalCarbon(long totalCarbon) {
+    public void setTotalCarbon(double totalCarbon) {
         this.totalCarbon = totalCarbon;
     }
 
