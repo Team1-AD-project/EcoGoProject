@@ -43,7 +43,7 @@ class BusCardAdapter(
                 textDestination.text = "前往 ${busInfo.destination}"
                 textEta.text = "${busInfo.etaMinutes}分钟"
                 textPlate.text = busInfo.plateNumber
-                textCrowd.text = "${busInfo.crowdLevel}拥挤度"
+
                 
                 // 状态显示
                 textStatus.text = when (busInfo.status) {

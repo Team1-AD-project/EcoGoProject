@@ -32,7 +32,7 @@ class BusRouteAdapter(
         private val name: TextView = itemView.findViewById(R.id.text_name)
         private val destination: TextView = itemView.findViewById(R.id.text_destination)
         private val nextArrival: TextView = itemView.findViewById(R.id.text_next_arrival)
-        private val crowding: TextView = itemView.findViewById(R.id.text_crowding)
+
         private val status: TextView = itemView.findViewById(R.id.text_status)
         private val routeDot: View = itemView.findViewById(R.id.view_route_dot)
         
@@ -41,7 +41,6 @@ class BusRouteAdapter(
             name.text = route.from.takeIf { it.isNotEmpty() } ?: "Start"
             destination.text = route.to.takeIf { it.isNotEmpty() } ?: "End"
             nextArrival.text = route.time ?: "${route.nextArrival} min"
-            crowding.text = route.crowd ?: route.crowding
             status.text = route.status ?: if (route.operational) "On Time" else "Inactive"
             
             // Set click listener
@@ -63,26 +62,16 @@ class BusRouteAdapter(
             val statusBg = when ((route.status ?: "").lowercase()) {
                 "arriving" -> "#DCFCE7"
                 "delayed" -> "#FEE2E2"
-                "crowded" -> "#FEF3C7"
                 else -> "#E0F2FE"
             }
             val statusTextColor = when ((route.status ?: "").lowercase()) {
                 "arriving" -> "#15803D"
                 "delayed" -> "#B91C1C"
-                "crowded" -> "#B45309"
                 else -> "#0369A1"
             }
             status.setBackgroundColor(android.graphics.Color.parseColor(statusBg))
             status.setTextColor(android.graphics.Color.parseColor(statusTextColor))
-            
-            // Set crowding color
-            val crowdLevel = (route.crowd ?: route.crowding).lowercase()
-            val crowdingColor = when {
-                crowdLevel.contains("low") -> ContextCompat.getColor(itemView.context, R.color.crowding_low)
-                crowdLevel.contains("med") -> ContextCompat.getColor(itemView.context, R.color.crowding_medium)
-                else -> ContextCompat.getColor(itemView.context, R.color.crowding_high)
-            }
-            crowding.setTextColor(crowdingColor)
+
         }
     }
 }

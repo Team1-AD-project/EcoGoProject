@@ -25,6 +25,9 @@ import com.ecogo.ui.adapters.HomeStat
 import com.ecogo.repository.EcoGoRepository
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import com.ecogo.api.NextBusApiClient
+import com.ecogo.api.ShuttleServiceResponse
+
 
 class HomeFragment : Fragment() {
 
@@ -292,14 +295,52 @@ class HomeFragment : Fragment() {
     }
 
     private suspend fun loadBusInfo() {
-        val routesResult = repository.getBusRoutes().getOrElse { MockData.ROUTES }
-        val firstRoute = routesResult.firstOrNull()
-        if (firstRoute != null) {
-            binding.textBusNumber.text = firstRoute.name
-            binding.textBusTime.text = firstRoute.time ?: "${firstRoute.nextArrival} min"
-            binding.textBusRoute.text = if (firstRoute.to.isNotEmpty()) "to ${firstRoute.to}" else "to ${firstRoute.name}"
+        // 1) 默认 UTOWN；如果 Routes 选过，就用 Routes 保存的
+        val (stopCode, stopLabel) = getPreferredStopForHome()
+
+        val (routeName, etaMin, status) = runCatching {
+            val resp = NextBusApiClient.api.getShuttleService(stopCode)
+
+            val shuttles = resp.ShuttleServiceResult?.shuttles.orEmpty()
+            val first = shuttles.firstOrNull()
+
+            val name = first?.name?.trim().orEmpty().ifEmpty { "-" }
+            val eta = first?._etas?.firstOrNull()?.eta ?: -1
+            val statusText = statusFromEta(eta)
+
+            Triple(name, eta, statusText)
+        }.getOrElse { e ->
+            android.util.Log.e("NEXTBUS", "Home loadBusInfo failed", e)
+            Triple("-", -1, "On Time")
+        }
+
+        // 2) 更新 Home 卡片 UI（你现在 Home 只显示这三个字段）
+        binding.textBusNumber.text = routeName
+        binding.textBusTime.text = if (etaMin >= 0) "$etaMin min" else "-"
+        binding.textBusRoute.text = "from $stopLabel"
+
+        // 如果你 Home 还想显示状态（看你 fragment_home.xml 有没有对应 TextView）
+        // 比如：binding.textBusStatus.text = status
+    }
+
+    private fun getPreferredStopForHome(): Pair<String, String> {
+        val sp = requireContext().getSharedPreferences("nextbus_pref", android.content.Context.MODE_PRIVATE)
+        val code = sp.getString("stop_code", null) ?: "UTOWN"
+        val label = sp.getString("stop_label", null) ?: "University Town (UTown)"
+        return code to label
+    }
+
+    private fun statusFromEta(eta: Int): String {
+        if (eta < 0) return "On Time"
+        return when {
+            eta <= 2 -> "Arriving"
+            eta <= 8 -> "On Time"
+            eta <= 30 -> "Delayed"
+            else -> "Scheduled"
         }
     }
+
+
 
     private suspend fun loadMonthlyHighlightsStats() {
         val userId = com.ecogo.auth.TokenManager.getUserId() ?: "user123"
@@ -619,6 +660,10 @@ class HomeFragment : Fragment() {
         return false
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewLifecycleOwner.lifecycleScope.launch { loadBusInfo() }
+    }
 
 
     override fun onDestroyView() {
