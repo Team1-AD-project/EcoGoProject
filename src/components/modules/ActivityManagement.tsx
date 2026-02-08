@@ -72,6 +72,9 @@ interface NewActivityForm {
   maxParticipants: number;
   startTime: string;
   endTime: string;
+  latitude: string;
+  longitude: string;
+  locationName: string;
 }
 
 export function ActivityManagement() {
@@ -96,6 +99,9 @@ export function ActivityManagement() {
     maxParticipants: 50,
     startTime: '',
     endTime: '',
+    latitude: '',
+    longitude: '',
+    locationName: '',
   });
 
   // Fetch activities on mount
@@ -192,6 +198,9 @@ export function ActivityManagement() {
         maxParticipants: newActivity.maxParticipants,
         startTime: new Date(newActivity.startTime).toISOString(),
         endTime: new Date(newActivity.endTime).toISOString(),
+        latitude: newActivity.latitude ? parseFloat(newActivity.latitude) : null,
+        longitude: newActivity.longitude ? parseFloat(newActivity.longitude) : null,
+        locationName: newActivity.locationName || null,
       };
 
       const response = await createActivity(request);
@@ -221,6 +230,9 @@ export function ActivityManagement() {
         status: selectedActivity.status,
         rewardCredits: selectedActivity.rewardCredits,
         maxParticipants: selectedActivity.maxParticipants,
+        latitude: selectedActivity.latitude,
+        longitude: selectedActivity.longitude,
+        locationName: selectedActivity.locationName,
       };
 
       const response = await updateActivity(selectedActivity.id, request);
@@ -283,6 +295,9 @@ export function ActivityManagement() {
       maxParticipants: 50,
       startTime: '',
       endTime: '',
+      latitude: '',
+      longitude: '',
+      locationName: '',
     });
   };
 
@@ -422,6 +437,7 @@ export function ActivityManagement() {
                 <TableHead className="w-[50px]">Status</TableHead>
                 <TableHead>Title / Description</TableHead>
                 <TableHead>Type</TableHead>
+                <TableHead>Location</TableHead>
                 <TableHead className="text-center">Rewards</TableHead>
                 <TableHead className="text-center">Participants</TableHead>
                 <TableHead>Start Time</TableHead>
@@ -432,7 +448,7 @@ export function ActivityManagement() {
             <TableBody>
               {filteredActivities.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                  <TableCell colSpan={9} className="text-center py-8 text-gray-500">
                     No activities found
                   </TableCell>
                 </TableRow>
@@ -456,6 +472,16 @@ export function ActivityManagement() {
                     </TableCell>
                     <TableCell>
                       {getTypeBadge(activity.type)}
+                    </TableCell>
+                    <TableCell>
+                      {activity.locationName ? (
+                        <div className="flex items-center gap-1 text-sm">
+                          <MapPin className="size-3 text-red-500 shrink-0" />
+                          <span className="text-gray-700 truncate max-w-[140px]" title={activity.locationName}>{activity.locationName}</span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-gray-400">-</span>
+                      )}
                     </TableCell>
                     <TableCell className="text-center">
                       <div className="flex items-center justify-center gap-1">
@@ -632,6 +658,40 @@ export function ActivityManagement() {
                 />
               </div>
             </div>
+            {newActivity.type === 'OFFLINE' && (
+              <>
+                <div>
+                  <Label>Location Name</Label>
+                  <Input
+                    placeholder="e.g. UCD Student Centre"
+                    value={newActivity.locationName}
+                    onChange={(e) => setNewActivity({ ...newActivity, locationName: e.target.value })}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label>Latitude</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder="e.g. 53.3066"
+                      value={newActivity.latitude}
+                      onChange={(e) => setNewActivity({ ...newActivity, latitude: e.target.value })}
+                    />
+                  </div>
+                  <div>
+                    <Label>Longitude</Label>
+                    <Input
+                      type="number"
+                      step="any"
+                      placeholder="e.g. -6.2186"
+                      value={newActivity.longitude}
+                      onChange={(e) => setNewActivity({ ...newActivity, longitude: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
@@ -713,6 +773,40 @@ export function ActivityManagement() {
                   />
                 </div>
               </div>
+              {selectedActivity.type === 'OFFLINE' && (
+                <>
+                  <div>
+                    <Label>Location Name</Label>
+                    <Input
+                      placeholder="e.g. UCD Student Centre"
+                      value={selectedActivity.locationName || ''}
+                      onChange={(e) => setSelectedActivity({ ...selectedActivity, locationName: e.target.value || null })}
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <Label>Latitude</Label>
+                      <Input
+                        type="number"
+                        step="any"
+                        placeholder="e.g. 53.3066"
+                        value={selectedActivity.latitude ?? ''}
+                        onChange={(e) => setSelectedActivity({ ...selectedActivity, latitude: e.target.value ? parseFloat(e.target.value) : null })}
+                      />
+                    </div>
+                    <div>
+                      <Label>Longitude</Label>
+                      <Input
+                        type="number"
+                        step="any"
+                        placeholder="e.g. -6.2186"
+                        value={selectedActivity.longitude ?? ''}
+                        onChange={(e) => setSelectedActivity({ ...selectedActivity, longitude: e.target.value ? parseFloat(e.target.value) : null })}
+                      />
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
           <DialogFooter>

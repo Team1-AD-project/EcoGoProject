@@ -15,6 +15,9 @@ export interface Activity {
     participantIds: string[];
     startTime: string;
     endTime: string;
+    latitude: number | null;
+    longitude: number | null;
+    locationName: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -40,6 +43,9 @@ export interface CreateActivityRequest {
     maxParticipants: number;
     startTime: string;
     endTime: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    locationName?: string | null;
 }
 
 export interface UpdateActivityRequest {
@@ -51,6 +57,9 @@ export interface UpdateActivityRequest {
     maxParticipants?: number;
     startTime?: string;
     endTime?: string;
+    latitude?: number | null;
+    longitude?: number | null;
+    locationName?: string | null;
 }
 
 // auth.ts baseURL = '/api/v1/web', 所以这里不需要再加 /web 前缀
