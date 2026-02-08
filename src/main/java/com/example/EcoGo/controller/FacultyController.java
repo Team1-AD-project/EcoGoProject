@@ -56,4 +56,13 @@ public class FacultyController {
     public ResponseMessage<List<FacultyStatsDto.CarbonResponse>> getMonthlyFacultyCarbonAdmin() {
         return ResponseMessage.success(facultyService.getMonthlyFacultyCarbonStats());
     }
+
+    /**
+     * Web: Get Monthly Carbon Stats per Faculty (for web frontend with baseURL /api/v1/web)
+     * GET /api/v1/web/faculties/stats/carbon/monthly
+     */
+    @GetMapping("/web/faculties/stats/carbon/monthly")
+    public ResponseMessage<List<FacultyStatsDto.CarbonResponse>> getWebMonthlyFacultyCarbon() {
+        return ResponseMessage.success(facultyService.getMonthlyFacultyCarbonStats());
+    }
 }
