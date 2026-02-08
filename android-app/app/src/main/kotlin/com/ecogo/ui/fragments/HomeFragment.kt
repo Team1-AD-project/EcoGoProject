@@ -236,7 +236,37 @@ class HomeFragment : Fragment() {
         val scoreResult = repository.getFacultyTotalCarbon()
         val data = scoreResult.getOrNull()
         val score = data?.totalCarbon ?: 0.0
-        binding.textSocScore.text = "%.1f".format(score)
+        
+        // 1. Format Score to 2 decimal places
+        binding.textSocScore.text = "%.2f".format(score)
+
+        // 2. Dynamic Faculty Abbreviation
+        val facultyName = data?.faculty ?: "School of Computing" // Default or fallback
+        val abbreviation = getFacultyAbbreviation(facultyName)
+        binding.textSocScoreLabel.text = "$abbreviation Score"
+    }
+
+    private fun getFacultyAbbreviation(facultyName: String): String {
+        return when (facultyName) {
+            "School of Computing" -> "SoC"
+            "Faculty of Science" -> "FoS"
+            "Faculty of Engineering" -> "FoE"
+            "Business School" -> "Biz"
+            "School of Design and Environment" -> "SDE"
+            "Faculty of Arts and Social Sciences" -> "FASS"
+            "Yong Loo Lin School of Medicine" -> "YLLSoM"
+            "Saw Swee Hock School of Public Health" -> "SSHSPH"
+            "Faculty of Law" -> "Law"
+            "School of Music" -> "Music"
+            else -> {
+                // Fallback: Initials of capitalized words
+                // e.g., "College of Humanities and Sciences" -> "CHS"
+                facultyName.split(" ")
+                    .filter { it.isNotEmpty() && it[0].isUpperCase() }
+                    .map { it[0] }
+                    .joinToString("")
+            }
+        }
     }
 
     private suspend fun loadMonthlyPoints() {
