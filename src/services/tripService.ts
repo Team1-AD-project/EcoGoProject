@@ -44,6 +44,7 @@ export interface TripDetail {
     distance: number;
     polylinePoints: string | null;
     carbonSaved: number;
+    carbon_saved?: number;
     pointsGained: number;
     carbonStatus: string;
     createdAt: string;
@@ -63,11 +64,19 @@ export interface TripDetailListResponse {
 }
 
 export const fetchAllTrips = async (): Promise<TripSummary[]> => {
-    const response = await api.get<TripSummaryListResponse>('/trips/all');
-    if (response.data.code === 200) {
-        return response.data.data;
+    try {
+        console.log("[TripService] Fetching ALL trips...");
+        const response = await api.get<TripSummaryListResponse>('/trips/all');
+        console.log("[TripService] fetchAllTrips Response:", response.data);
+        if (response.data.code === 200) {
+            return response.data.data || []; // Ensure array is returned even if data is null
+        }
+        console.warn("[TripService] fetchAllTrips non-200:", response.data);
+        return [];
+    } catch (e) {
+        console.error("[TripService] fetchAllTrips failed:", e);
+        return [];
     }
-    return [];
 };
 
 export const fetchUserTrips = async (userid: string): Promise<TripDetail[]> => {

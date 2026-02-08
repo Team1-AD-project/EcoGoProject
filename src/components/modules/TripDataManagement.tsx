@@ -32,10 +32,49 @@ export function TripDataManagement() {
   const [loading, setLoading] = useState(false);
   const [searchId, setSearchId] = useState('');
 
+  // Aggregated Stats State
+  const [userStatsMap, setUserStatsMap] = useState<Record<string, { completed: number, carbon: number }>>({});
+
   // Pagination State
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const pageSize = 20;
+
+  // Load Stats for Displayed Users (Per-User Fetch Strategy)
+  useEffect(() => {
+    if (users.length === 0) return;
+
+    const loadPerUserStats = async () => {
+      const statsMap: Record<string, { completed: number, carbon: number }> = {};
+
+      // Fetch stats for each user in the current list
+      await Promise.all(users.map(async (user) => {
+        try {
+          const trips = await fetchUserTrips(user.userid);
+          let completed = 0;
+          let carbon = 0;
+
+          if (trips && trips.length > 0) {
+            trips.forEach(t => {
+              if ((t.carbonStatus || '').toLowerCase() === 'completed') {
+                completed++;
+                // Handle snake_case or camelCase
+                const saved = Number((t as any).carbon_saved ?? t.carbonSaved ?? 0);
+                carbon += saved;
+              }
+            });
+          }
+          statsMap[user.userid] = { completed, carbon };
+        } catch (e) {
+          console.error(`Failed stats for ${user.userid}`, e);
+        }
+      }));
+
+      setUserStatsMap(prev => ({ ...prev, ...statsMap }));
+    };
+
+    loadPerUserStats();
+  }, [users]);
 
   // Fetch Users with Pagination
   const loadUsers = async (pageNo: number) => {
@@ -94,6 +133,13 @@ export function TripDataManagement() {
         const trips = await fetchUserTrips(selectedUserId);
         // Handle potential null/undefined
         const tripList = trips || [];
+
+        console.log("[DEBUG] Raw Trip List:", tripList);
+        if (tripList.length > 0) {
+          console.log("[DEBUG] First Trip Sample:", tripList[0]);
+          console.log("[DEBUG] Carbon Values:", "carbonSaved:", tripList[0].carbonSaved, "carbon_saved:", (tripList[0] as any).carbon_saved);
+        }
+
         setCurrentTrips(tripList);
 
         if (tripList.length > 0) {
@@ -122,52 +168,161 @@ export function TripDataManagement() {
   // Update Map Layers - Draw ONLY Selected Trip
   useEffect(() => {
     if (mapRef.current && layerGroupRef.current) {
-      layerGroupRef.current.clearLayers();
-
       if (!selectedTripId) return;
 
       const trip = currentTrips.find(t => t.id === selectedTripId);
-      if (!trip || trip.carbonStatus !== 'completed') return;
+      if (!trip) return;
+
+      console.log("[DEBUG] Selected Trip for Map:", trip);
+
+      // Clear existing layers FIRST
+      layerGroupRef.current.clearLayers();
 
       const bounds = L.latLngBounds([]);
-      const hasStart = !!trip.startPoint;
-      const hasEnd = !!trip.endPoint;
+      const hasStart = !!trip.startPoint && (trip.startPoint.lat !== undefined && trip.startPoint.lng !== undefined);
+      const hasEnd = !!trip.endPoint && (trip.endPoint.lat !== undefined && trip.endPoint.lng !== undefined);
 
       if (hasStart && trip.startPoint) {
+        const startLat = Number(trip.startPoint.lat);
+        const startLng = Number(trip.startPoint.lng);
         const startIcon = L.divIcon({
           className: 'bg-transparent',
           html: `<div class="w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow-md"></div>`
         });
-        L.marker([trip.startPoint.lat, trip.startPoint.lng], { icon: startIcon })
+        L.marker([startLat, startLng], { icon: startIcon })
           .bindPopup(`<b>Start</b><br>${trip.startLocation?.placeName || 'Unknown'}`)
           .addTo(layerGroupRef.current!);
-        bounds.extend([trip.startPoint.lat, trip.startPoint.lng]);
+        bounds.extend([startLat, startLng]);
       }
 
       if (hasEnd && trip.endPoint) {
+        const endLat = Number(trip.endPoint.lat);
+        const endLng = Number(trip.endPoint.lng);
         const endIcon = L.divIcon({
           className: 'bg-transparent',
           html: `<div class="w-4 h-4 rounded-full bg-red-500 border-2 border-white shadow-md"></div>`
         });
-        L.marker([trip.endPoint.lat, trip.endPoint.lng], { icon: endIcon })
+        L.marker([endLat, endLng], { icon: endIcon })
           .bindPopup(`<b>End</b><br>${trip.endLocation?.placeName || 'Unknown'}`)
           .addTo(layerGroupRef.current!);
-        bounds.extend([trip.endPoint.lat, trip.endPoint.lng]);
+        bounds.extend([endLat, endLng]);
       }
 
-      if (hasStart && hasEnd && trip.startPoint && trip.endPoint) {
-        L.polyline([
-          [trip.startPoint.lat, trip.startPoint.lng],
-          [trip.endPoint.lat, trip.endPoint.lng]
-        ], {
-          color: trip.isGreenTrip ? '#22c55e' : '#3b82f6', // Green-500 or Blue-500
+      let routePoints: L.LatLngExpression[] = [];
+
+      // Try to get detailed polyline points (check both camelCase and snake_case)
+      const rawPoints = trip.polylinePoints || (trip as any).polyline_points;
+
+      if (rawPoints) {
+        try {
+          let points: any = rawPoints;
+          // If it's a string, parse it
+          if (typeof points === 'string') {
+            // Handle double encoded strings if necessary
+            try {
+              points = JSON.parse(points);
+            } catch (e) {
+              console.warn("[DEBUG] Initial JSON parse failed, it might be raw string?", points);
+            }
+          }
+
+          if (typeof points === 'string') {
+            // Second attempt if still string
+            try { points = JSON.parse(points); } catch (e) { }
+          }
+
+          if (Array.isArray(points) && points.length > 0) {
+            routePoints = points.map((p: any) => {
+              const lat = Number(p.lat);
+              const lng = Number(p.lng);
+              if (isNaN(lat) || isNaN(lng)) {
+                console.warn("[DEBUG] Invalid point:", p);
+                return null;
+              }
+              return [lat, lng] as L.LatLngExpression;
+            }).filter((p): p is L.LatLngExpression => p !== null);
+
+            console.log("[DEBUG] Parsed routePoints count:", routePoints.length);
+            if (routePoints.length > 0) {
+              console.log("[DEBUG] First Point:", routePoints[0]);
+              console.log("[DEBUG] Last Point:", routePoints[routePoints.length - 1]);
+            }
+          } else {
+            console.warn("[DEBUG] polylinePoints is not a valid array:", points);
+          }
+        } catch (e) {
+          console.warn("[DEBUG] Failed to parse polylinePoints:", e);
+        }
+      }
+
+      // Fallback to straight line if no polyline
+      if (routePoints.length === 0 && hasStart && hasEnd && trip.startPoint && trip.endPoint) {
+        console.log("[DEBUG] Using fallback straight line (RED)");
+        const startLat = Number(trip.startPoint.lat);
+        const startLng = Number(trip.startPoint.lng);
+        const endLat = Number(trip.endPoint.lat);
+        const endLng = Number(trip.endPoint.lng);
+
+        if (!isNaN(startLat) && !isNaN(startLng) && !isNaN(endLat) && !isNaN(endLng)) {
+          routePoints = [
+            [startLat, startLng],
+            [endLat, endLng]
+          ];
+        } else {
+          console.error("[DEBUG] Start/End coordinates are invalid numbers", trip.startPoint, trip.endPoint);
+        }
+      } else if (routePoints.length > 0) {
+        // Connect Start/End to Polyline if missing (Gap Filling)
+        if (hasStart && trip.startPoint) {
+          const startLat = Number(trip.startPoint.lat);
+          const startLng = Number(trip.startPoint.lng);
+          const firstPoint = routePoints[0] as [number, number];
+
+          // Check distance (epsilon) to avoid duplicates
+          if (!firstPoint || Math.abs(firstPoint[0] - startLat) > 0.0001 || Math.abs(firstPoint[1] - startLng) > 0.0001) {
+            routePoints.unshift([startLat, startLng]);
+          }
+        }
+
+        if (hasEnd && trip.endPoint) {
+          const endLat = Number(trip.endPoint.lat);
+          const endLng = Number(trip.endPoint.lng);
+          const lastPoint = routePoints[routePoints.length - 1] as [number, number];
+
+          if (!lastPoint || Math.abs(lastPoint[0] - endLat) > 0.0001 || Math.abs(lastPoint[1] - endLng) > 0.0001) {
+            routePoints.push([endLat, endLng]);
+          }
+        }
+      }
+
+      if (routePoints.length > 0) {
+        // Draw the line
+        // Use Red for straight line (fallback), Green/Blue for actual polyline path
+        const isFallback = routePoints.length === 2 && !rawPoints;
+        const lineColor = isFallback ? '#ef4444' : (trip.isGreenTrip ? '#22c55e' : '#3b82f6');
+
+        console.log("[DEBUG] Drawing Polyline with points:", routePoints.length, "Color:", lineColor);
+
+        const polyline = L.polyline(routePoints, {
+          color: lineColor,
           weight: 5,
-          opacity: 0.8
+          opacity: 0.8,
+          dashArray: isFallback ? '10, 10' : undefined // Dashed for fallback
         }).addTo(layerGroupRef.current!);
+
+        console.log("[DEBUG] Polyline added to map:", polyline);
+
+        // Extend bounds to include the route
+        routePoints.forEach((p: any) => {
+          bounds.extend(p);
+        });
+      } else {
+        console.warn("[DEBUG] No route points to draw at all.");
       }
 
       if (bounds.isValid()) {
-        mapRef.current.fitBounds(bounds, { padding: [100, 100] });
+        console.log("[DEBUG] Fitting bounds:", bounds.toBBoxString());
+        mapRef.current.fitBounds(bounds, { padding: [50, 50] });
       }
     }
   }, [selectedTripId, currentTrips]);
@@ -189,6 +344,18 @@ export function TripDataManagement() {
 
   const activeUser = getSelectedUserDetails();
   const selectedTrip = currentTrips.find(t => t.id === selectedTripId);
+
+  const getCarbon = (t: TripDetail | any) => {
+    // Check both potential field names, prefer snake_case
+    const val = t.carbon_saved ?? t.carbonSaved;
+    // Ensure number
+    return val !== undefined && val !== null ? Number(val) : 0;
+  };
+
+  const formatCarbon = (val: number) => {
+    // Always show in kg as requested
+    return { value: val.toFixed(2), unit: 'kg' };
+  };
 
   return (
     <div className="flex flex-col h-full p-6 gap-6">
@@ -224,7 +391,17 @@ export function TripDataManagement() {
                       <Badge variant="secondary" className="bg-purple-100 text-purple-700 text-[10px] px-1.5 h-5">VIP</Badge>
                     )}
                   </div>
-                  <div className="text-xs text-gray-500 font-mono truncate">ID: {activeUser.userid}</div>
+                  <div className="text-xs text-gray-500 font-mono truncate mb-1">ID: {activeUser.userid}</div>
+                  <div className="flex gap-2 text-[10px] text-gray-500">
+                    <span className="bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-medium">
+                      Completed: {currentTrips.filter(t => (t.carbonStatus || '').toLowerCase() === 'completed').length}
+                    </span>
+                    <span className="bg-green-50 px-1.5 py-0.5 rounded text-green-700 font-medium">
+                      Saved: {currentTrips
+                        .filter(t => (t.carbonStatus || '').toLowerCase() === 'completed')
+                        .reduce((sum, t) => sum + (t.carbonSaved || (t as any).carbon_saved || 0), 0).toFixed(2)} kg
+                    </span>
+                  </div>
                 </div>
               </div>
 
@@ -245,7 +422,7 @@ export function TripDataManagement() {
                           <span className="text-xs text-gray-500 flex gap-2">
                             <span>{trip.distance.toFixed(1)} km</span>
                             <span>•</span>
-                            <span>{trip.carbonSaved.toFixed(2)} kg CO₂</span>
+                            <span>{formatCarbon(getCarbon(trip)).value} {formatCarbon(getCarbon(trip)).unit} CO₂</span>
                           </span>
                         </div>
                       </SelectItem>
@@ -269,7 +446,9 @@ export function TripDataManagement() {
                     </div>
                     <div className="bg-green-50 p-3 rounded-lg border border-green-100">
                       <div className="text-xs text-green-600 mb-1">Carbon Saved</div>
-                      <div className="text-lg font-bold text-green-700">{selectedTrip.carbonSaved.toFixed(3)} <span className="text-xs font-normal text-green-600">kg</span></div>
+                      <div className="text-lg font-bold text-green-700">
+                        {formatCarbon(getCarbon(selectedTrip)).value} <span className="text-xs font-normal text-green-600">{formatCarbon(getCarbon(selectedTrip)).unit}</span>
+                      </div>
                     </div>
                   </div>
                   <div className="flex justify-between items-center text-xs text-gray-400 pt-1">
@@ -334,7 +513,10 @@ export function TripDataManagement() {
                       </div>
                       <div className="text-xs text-gray-500 space-y-1">
                         <div className="truncate" title={user.userid}>ID: {user.userid}</div>
-                        <div>Trips: {user.stats?.totalTrips || 0}</div>
+                        <div className="flex justify-between">
+                          <span className="font-semibold text-green-700">Completed: {userStatsMap[user.userid]?.completed || 0}</span>
+                          <span>{userStatsMap[user.userid]?.carbon.toFixed(1) || '0.0'} kg</span>
+                        </div>
                       </div>
                     </div>
                   </div>
