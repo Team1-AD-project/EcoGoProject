@@ -147,6 +147,9 @@ data class Activity(
     val participantIds: List<String> = emptyList(),
     val startTime: String? = null,
     val endTime: String? = null,
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val locationName: String? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null
 )

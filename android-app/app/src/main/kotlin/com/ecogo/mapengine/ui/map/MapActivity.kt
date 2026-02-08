@@ -114,6 +114,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object {
         private const val TAG = "MapActivity"
+        const val EXTRA_DEST_LAT = "extra_dest_lat"
+        const val EXTRA_DEST_LNG = "extra_dest_lng"
+        const val EXTRA_DEST_NAME = "extra_dest_name"
     }
 
     // 定位权限请求
@@ -1255,6 +1258,35 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             Log.d(TAG, "Map ready - restoring routes for ongoing trip")
             restoreRoutesOnMap()
         }
+
+        // 检查是否从活动详情跳转过来，自动设置目的地
+        handleActivityDestination()
+    }
+
+    /**
+     * 从 Intent extras 中读取活动目的地坐标，自动设置到地图
+     */
+    private fun handleActivityDestination() {
+        val lat = intent.getDoubleExtra(EXTRA_DEST_LAT, Double.NaN)
+        val lng = intent.getDoubleExtra(EXTRA_DEST_LNG, Double.NaN)
+        if (lat.isNaN() || lng.isNaN()) return
+
+        val name = intent.getStringExtra(EXTRA_DEST_NAME) ?: "活动地点"
+        val latLng = LatLng(lat, lng)
+
+        destinationLatLng = latLng
+        destinationName = name
+        binding.etDestination.setText(name)
+        updateDestinationMarker(latLng, name)
+        viewModel.setDestination(latLng)
+
+        // 显示交通方式选择卡片
+        binding.cardTransportModes.visibility = View.VISIBLE
+
+        // 移动相机到目的地
+        googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+
+        Log.d(TAG, "Activity destination set: $name ($lat, $lng)")
     }
 
     /**

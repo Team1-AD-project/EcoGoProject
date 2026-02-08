@@ -1,10 +1,12 @@
 package com.ecogo.ui.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -12,6 +14,7 @@ import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecogo.R
 import com.ecogo.databinding.FragmentActivityDetailBinding
+import com.ecogo.mapengine.ui.map.MapActivity
 import com.ecogo.repository.EcoGoRepository
 import com.ecogo.ui.adapters.FriendAdapter
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -32,6 +35,9 @@ class ActivityDetailFragment : Fragment() {
     private var activityId: String = ""
     private var isJoined = false
     private var activityStatus = "PUBLISHED"
+    private var activityLat: Double? = null
+    private var activityLng: Double? = null
+    private var activityLocationName: String? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -66,9 +72,18 @@ class ActivityDetailFragment : Fragment() {
         }
         
         binding.btnStartRoute.setOnClickListener {
-            // 导航到路线规划，设置活动地点为目的地
-            // TODO: 需要传递地点信息
-            findNavController().navigate(R.id.routePlannerFragment)
+            val lat = activityLat
+            val lng = activityLng
+            if (lat != null && lng != null) {
+                val intent = Intent(requireContext(), MapActivity::class.java).apply {
+                    putExtra(MapActivity.EXTRA_DEST_LAT, lat)
+                    putExtra(MapActivity.EXTRA_DEST_LNG, lng)
+                    putExtra(MapActivity.EXTRA_DEST_NAME, activityLocationName ?: "活动地点")
+                }
+                startActivity(intent)
+            } else {
+                Toast.makeText(requireContext(), "该活动未设置地点坐标", Toast.LENGTH_SHORT).show()
+            }
         }
         
         binding.btnCheckIn.setOnClickListener {
@@ -109,6 +124,11 @@ class ActivityDetailFragment : Fragment() {
                     else -> activity.status
                 }
                 
+                // 保存坐标信息
+                activityLat = activity.latitude
+                activityLng = activity.longitude
+                activityLocationName = activity.locationName
+
                 // 时间
                 binding.textStartTime.text = activity.startTime ?: "待定"
                 binding.textEndTime.text = activity.endTime ?: "待定"
