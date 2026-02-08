@@ -44,4 +44,15 @@
     <!-- Material Design defaults -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <!-- Map Navigation Route Colors -->
+    <color name="route_remaining">#4285F4</color>
+    <color name="route_traveled">#9E9E9E</color>
+    <color name="route_planned">#4285F4</color>
+    <color name="green_primary">#4CAF50</color>
+    <color name="green_dark">#388E3C</color>
+    <color name="green_light">#8BC34A</color>
+    <color name="gray_600">#757575</color>
+    <color name="blue_500">#2196F3</color>
+    <color name="ic_launcher_background">#4CAF50</color>
 </resources>

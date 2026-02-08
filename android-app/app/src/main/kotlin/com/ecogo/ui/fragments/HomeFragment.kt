@@ -1,5 +1,6 @@
 package com.ecogo.ui.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -13,6 +14,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecogo.R
 import com.ecogo.data.MascotSize
+import com.ecogo.mapengine.ui.map.MapActivity
 import com.ecogo.data.MockData
 import com.ecogo.data.Outfit
 import com.ecogo.data.RecommendationRequest
@@ -333,9 +335,8 @@ class HomeFragment : Fragment() {
 
     private fun setupActions() {
         binding.buttonOpenMap.setOnClickListener {
-            // 地图功能临时禁用
-            // findNavController().navigate(com.ecogo.R.id.mapFragment)
-            android.widget.Toast.makeText(requireContext(), "地图功能正在开发中", android.widget.Toast.LENGTH_SHORT).show()
+            // 跳转到地图引擎页面
+            startActivity(Intent(requireContext(), MapActivity::class.java))
         }
         binding.textViewAll.setOnClickListener {
             // 跳转到月度亮点页面
@@ -377,11 +378,9 @@ class HomeFragment : Fragment() {
             findNavController().navigate(com.ecogo.R.id.routesFragment)
         }
 
-        // 地图预览卡片 -> 地图页（整个卡片可点击）
+        // 地图预览卡片 -> 地图引擎页面（整个卡片可点击）
         binding.cardMap.setOnClickListener {
-            // 地图功能临时禁用
-            // findNavController().navigate(com.ecogo.R.id.mapFragment)
-            android.widget.Toast.makeText(requireContext(), "地图功能正在开发中", android.widget.Toast.LENGTH_SHORT).show()
+            startActivity(Intent(requireContext(), MapActivity::class.java))
         }
 
         // === 新功能点击事件 ===

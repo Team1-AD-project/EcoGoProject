@@ -1,8 +1,18 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-parcelize")
+    id("com.google.devtools.ksp")  // For Room database
+}
+
+// Load local.properties
+val localProperties = Properties()
+val localPropertiesFile = rootProject.file("local.properties")
+if (localPropertiesFile.exists()) {
+    localProperties.load(localPropertiesFile.inputStream())
 }
 
 android {
@@ -17,10 +27,14 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        
+
         vectorDrawables {
             useSupportLibrary = true
         }
+
+        // Google Maps API Key - loaded from local.properties
+        val mapsApiKey = localProperties.getProperty("MAPS_API_KEY") ?: ""
+        manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
 
     buildTypes {
@@ -104,10 +118,16 @@ dependencies {
     // Stripe Android SDK
     implementation("com.stripe:stripe-android:20.37.0")
     
-    // Google Maps & Location (临时禁用以加快启动)
-    // implementation("com.google.android.gms:play-services-maps:18.2.0")
-    // implementation("com.google.android.gms:play-services-location:21.1.0")
-    // implementation("com.google.maps.android:android-maps-utils:3.8.2")
+    // Google Maps & Location
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+    implementation("com.google.maps.android:android-maps-utils:3.8.2")
+    implementation("com.google.android.libraries.places:places:3.3.0")
+
+    // Room Database (for navigation history)
+    implementation("androidx.room:room-runtime:2.6.1")
+    implementation("androidx.room:room-ktx:2.6.1")
+    ksp("androidx.room:room-compiler:2.6.1")
     
     // Testing
     testImplementation("junit:junit:4.13.2")
