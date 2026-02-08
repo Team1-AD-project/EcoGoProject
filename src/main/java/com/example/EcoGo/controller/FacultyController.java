@@ -65,4 +65,24 @@ public class FacultyController {
     public ResponseMessage<List<FacultyStatsDto.CarbonResponse>> getWebMonthlyFacultyCarbon() {
         return ResponseMessage.success(facultyService.getMonthlyFacultyCarbonStats());
     }
+
+    // --- Mobile Endpoints ---
+
+    /**
+     * Mobile: Get All Faculties
+     * GET /api/v1/mobile/faculties
+     */
+    @GetMapping("/mobile/faculties")
+    public ResponseMessage<List<String>> getAllFacultiesMobile() {
+        return ResponseMessage.success(facultyService.getAllFacultyNames());
+    }
+
+    /**
+     * Mobile: Get Monthly Carbon Stats per Faculty
+     * GET /api/v1/mobile/faculties/stats/carbon/monthly
+     */
+    @GetMapping("/mobile/faculties/stats/carbon/monthly")
+    public ResponseMessage<List<FacultyStatsDto.CarbonResponse>> getMobileMonthlyFacultyCarbon() {
+        return ResponseMessage.success(facultyService.getMonthlyFacultyCarbonStats());
+    }
 }
