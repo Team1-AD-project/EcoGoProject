@@ -190,9 +190,9 @@ interface ApiService {
 
     /**
      * 获取学院月度碳排放统计排名
-     * GET /api/v1/faculties/stats/carbon/monthly
+     * GET /api/v1/mobile/faculties/stats/carbon/monthly
      */
-    @GET("api/v1/faculties/stats/carbon/monthly")
+    @GET("api/v1/mobile/faculties/stats/carbon/monthly")
     suspend fun getFacultyMonthlyCarbonStats(): ApiResponse<List<FacultyCarbonData>>
 
     /**
@@ -380,9 +380,9 @@ interface ApiService {
 
     /**
      * 获取学院地图数据
-     * GET /api/v1/faculties
+     * GET /api/v1/mobile/faculties
      */
-    @GET("api/v1/faculties")
+    @GET("api/v1/mobile/faculties")
     suspend fun getFaculties(): ApiResponse<List<Faculty>>
 
 
