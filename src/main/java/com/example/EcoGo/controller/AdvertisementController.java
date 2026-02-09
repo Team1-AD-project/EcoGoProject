@@ -62,11 +62,11 @@ public class AdvertisementController {
         return ResponseMessage.success(advertisementService.updateAdvertisementStatus(id, status));
     }
 
-    // === Mobile Endpoints ===
+    // === Public Endpoint (no auth required) ===
 
-    @GetMapping("/mobile/advertisements/active")
-    public ResponseMessage<List<Advertisement>> getActiveMobileAdvertisements() {
-        logger.info("[Mobile] Fetching active advertisements");
+    @GetMapping("/advertisements/active")
+    public ResponseMessage<List<Advertisement>> getActiveAdvertisements() {
+        logger.info("Fetching active advertisements (public)");
         return ResponseMessage.success(advertisementService.getActiveAdvertisements());
     }
 }

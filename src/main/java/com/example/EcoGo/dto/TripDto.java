@@ -74,6 +74,8 @@ public class TripDto {
     public static class TripSummaryResponse {
         public String id;
         public String userId;
+        public GeoPointDto startPoint;
+        public GeoPointDto endPoint;
         public String startPlaceName;
         public String endPlaceName;
         public String detectedMode;

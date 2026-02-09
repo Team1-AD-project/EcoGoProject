@@ -281,6 +281,19 @@ public class TripServiceImpl implements TripService {
         resp.startTime = trip.getStartTime();
         resp.endTime = trip.getEndTime();
 
+        if (trip.getStartPoint() != null) {
+            TripDto.GeoPointDto sp = new TripDto.GeoPointDto();
+            sp.lng = trip.getStartPoint().getLng();
+            sp.lat = trip.getStartPoint().getLat();
+            resp.startPoint = sp;
+        }
+        if (trip.getEndPoint() != null) {
+            TripDto.GeoPointDto ep = new TripDto.GeoPointDto();
+            ep.lng = trip.getEndPoint().getLng();
+            ep.lat = trip.getEndPoint().getLat();
+            resp.endPoint = ep;
+        }
+
         if (trip.getStartLocation() != null) {
             resp.startPlaceName = trip.getStartLocation().getPlaceName();
         }
