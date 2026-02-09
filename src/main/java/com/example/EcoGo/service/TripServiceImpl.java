@@ -7,8 +7,10 @@ import com.example.EcoGo.exception.errorcode.ErrorCode;
 import com.example.EcoGo.interfacemethods.PointsService;
 import com.example.EcoGo.interfacemethods.TripService;
 import com.example.EcoGo.model.Trip;
+import com.example.EcoGo.repository.TransportModeRepository;
 import com.example.EcoGo.repository.TripRepository;
 import com.example.EcoGo.repository.UserRepository;
+import com.example.EcoGo.model.TransportMode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +30,9 @@ public class TripServiceImpl implements TripService {
 
     @Autowired
     private TripRepository tripRepository;
+
+    @Autowired
+    private TransportModeRepository transportModeRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -75,15 +80,27 @@ public class TripServiceImpl implements TripService {
         trip.setDetectedMode(request.detectedMode);
         trip.setMlConfidence(request.mlConfidence);
         trip.setGreenTrip(request.isGreenTrip);
-        trip.setCarbonSaved(request.carbonSaved);
 
-        // Convert transport segments
+        // Convert transport segments and calculate carbonSaved
+        double carbonSaved = 0.0;
         if (request.transportModes != null) {
             List<Trip.TransportSegment> segments = request.transportModes.stream()
                     .map(s -> new Trip.TransportSegment(s.mode, s.subDistance, s.subDuration))
                     .collect(Collectors.toList());
             trip.setTransportModes(segments);
+
+            // carbonSaved = Σ(carbonFactor × subDistance) for each segment
+            for (TripDto.TransportSegmentDto seg : request.transportModes) {
+                TransportMode mode = transportModeRepository.findByMode(seg.mode)
+                        .orElse(null);
+                if (mode != null) {
+                    carbonSaved += mode.getCarbonFactor() * seg.subDistance;
+                }
+            }
         }
+        // Round to 2 decimal places
+        carbonSaved = Math.round(carbonSaved * 100.0) / 100.0;
+        trip.setCarbonSaved(carbonSaved);
 
         // Convert polyline points
         if (request.polylinePoints != null) {
@@ -94,7 +111,7 @@ public class TripServiceImpl implements TripService {
         }
 
         // Calculate points: carbon取整 * 10, VIP双倍
-        long basePoints = (long) Math.round(request.carbonSaved) * 10;
+        long basePoints = (long) Math.round(carbonSaved) * 10;
 
         // Check if user is VIP and double points switch is enabled
         User user = userRepository.findByUserid(userId)
@@ -120,9 +137,8 @@ public class TripServiceImpl implements TripService {
         trip.setCarbonStatus("completed");
 
         // Update user's totalCarbon
-        // Update user's totalCarbon
-        if (request.carbonSaved > 0) {
-            double newTotal = user.getTotalCarbon() + request.carbonSaved;
+        if (carbonSaved > 0) {
+            double newTotal = user.getTotalCarbon() + carbonSaved;
             user.setTotalCarbon(Math.round(newTotal * 100.0) / 100.0);
             userRepository.save(user);
         }
