@@ -46,7 +46,7 @@ public class StatisticsImplementation implements StatisticsInterface {
 
                 long totalUsersAtEndOfWeek = nonAdminUsers.stream().filter(u -> u.getCreatedAt() != null && u.getCreatedAt().isBefore(weekEnd)).count();
                 long newUsersInWeek = nonAdminUsers.stream().filter(u -> u.getCreatedAt() != null && u.getCreatedAt().isAfter(weekStart) && u.getCreatedAt().isBefore(weekEnd)).count();
-                long activeUsersInWeek = nonAdminUsers.stream().filter(u -> u.getActivityMetrics() != null && u.getActivityMetrics().getActiveDays7d() > 0 && u.getUpdatedAt().isAfter(weekStart)).count();
+                long activeUsersInWeek = nonAdminUsers.stream().filter(u -> u.getActivityMetrics() != null && u.getActivityMetrics().getActiveDays7d() > 0 && u.getUpdatedAt() != null && u.getUpdatedAt().isAfter(weekStart)).count();
 
                 // Sum carbon_saved from completed trips in this week
                 List<Trip> weekTrips = tripRepository.findByStartTimeBetweenAndCarbonStatus(weekStart, weekEnd, "completed");
@@ -64,7 +64,7 @@ public class StatisticsImplementation implements StatisticsInterface {
 
                 long totalUsersAtEndOfMonth = nonAdminUsers.stream().filter(u -> u.getCreatedAt() != null && u.getCreatedAt().isBefore(monthEnd)).count();
                 long newUsersInMonth = nonAdminUsers.stream().filter(u -> u.getCreatedAt() != null && u.getCreatedAt().isAfter(monthStart) && u.getCreatedAt().isBefore(monthEnd)).count();
-                long activeUsersInMonth = nonAdminUsers.stream().filter(u -> u.getActivityMetrics() != null && u.getActivityMetrics().getActiveDays30d() > 0 && u.getUpdatedAt().isAfter(monthStart)).count();
+                long activeUsersInMonth = nonAdminUsers.stream().filter(u -> u.getActivityMetrics() != null && u.getActivityMetrics().getActiveDays30d() > 0 && u.getUpdatedAt() != null && u.getUpdatedAt().isAfter(monthStart)).count();
 
                 // Sum carbon_saved from completed trips in this month
                 List<Trip> monthTrips = tripRepository.findByStartTimeBetweenAndCarbonStatus(monthStart, monthEnd, "completed");
@@ -101,13 +101,20 @@ public class StatisticsImplementation implements StatisticsInterface {
             summary.setAverageCarbonPerUser(new AnalyticsSummaryDto.Metric(0, 0));
         }
 
-        // --- MOCK DATA SECTION ---
-        summary.setTotalRevenue(new AnalyticsSummaryDto.Metric(1389456.0, 1267234.0));
-        summary.setVipRevenue(new AnalyticsSummaryDto.Metric(834567.0, 756789.0));
-        summary.setShopRevenue(new AnalyticsSummaryDto.Metric(554889.0, 510445.0));
-        summary.setVipDistribution(Arrays.asList(new AnalyticsSummaryDto.DistributionPoint("Monthly (Mock)", 423)));
-        summary.setCategoryRevenue(Arrays.asList(new AnalyticsSummaryDto.DistributionPoint("Electronics (Mock)", 456789)));
-        summary.setRevenueGrowthTrend(Arrays.asList(new AnalyticsSummaryDto.RevenueGrowthPoint("Jan", 834567, 554889)));
+        // --- VIP Distribution (Real Data) ---
+        long vipActive = nonAdminUsers.stream().filter(u -> u.getVip() != null && u.getVip().isActive()).count();
+        long vipInactive = nonAdminUsers.size() - vipActive;
+        summary.setVipDistribution(Arrays.asList(
+                new AnalyticsSummaryDto.DistributionPoint("VIP Active", vipActive),
+                new AnalyticsSummaryDto.DistributionPoint("Non-VIP", vipInactive)
+        ));
+
+        // --- Revenue (placeholder — points-based) ---
+        summary.setTotalRevenue(new AnalyticsSummaryDto.Metric(0, 0));
+        summary.setVipRevenue(new AnalyticsSummaryDto.Metric(0, 0));
+        summary.setShopRevenue(new AnalyticsSummaryDto.Metric(0, 0));
+        summary.setCategoryRevenue(new ArrayList<>());
+        summary.setRevenueGrowthTrend(new ArrayList<>());
 
         return summary;
     }
