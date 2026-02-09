@@ -3,18 +3,24 @@ package com.example.EcoGo.controller;
 import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.dto.TripDto;
 import com.example.EcoGo.interfacemethods.TripService;
+import com.example.EcoGo.model.TransportMode;
 import com.example.EcoGo.model.Trip;
+import com.example.EcoGo.repository.TransportModeRepository;
 import com.example.EcoGo.utils.JwtUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 public class TripController {
 
     @Autowired
     private TripService tripService;
+
+    @Autowired
+    private TransportModeRepository transportModeRepository;
 
     @Autowired
     private JwtUtils jwtUtils;
@@ -115,6 +121,18 @@ public class TripController {
     public ResponseMessage<List<TripDto.TripResponse>> getTripsByUser(
             @PathVariable String userid) {
         return ResponseMessage.success(tripService.getTripsByUser(userid));
+    }
+
+    /**
+     * Get all available transport mode strings
+     * GET /api/v1/mobile/trips/transport-modes
+     */
+    @GetMapping("/api/v1/mobile/trips/transport-modes")
+    public ResponseMessage<List<String>> getAllTransportModes() {
+        List<String> modes = transportModeRepository.findAll().stream()
+                .map(TransportMode::getMode)
+                .collect(Collectors.toList());
+        return ResponseMessage.success(modes);
     }
 
     // ========== Helper ==========
