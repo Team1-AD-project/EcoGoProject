@@ -581,7 +581,8 @@ class EcoGoRepository {
     suspend fun updateUserProfile(userId: String, request: com.ecogo.api.UpdateProfileRequest): Result<Any> =
         withContext(Dispatchers.IO) {
             try {
-                val response = api.updateProfile(userId, request)
+                // Modified: Now calls profile endpoint which infers user from token
+                val response = api.updateProfile(request)
                 if (response.success) {
                     Result.success(response.data ?: Unit)
                 } else {

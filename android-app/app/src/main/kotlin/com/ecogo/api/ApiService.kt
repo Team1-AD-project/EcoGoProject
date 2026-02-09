@@ -682,11 +682,10 @@ interface ApiService {
 
     /**
      * 更新用户资料 (Authenticated)
-     * PUT /api/v1/mobile/users/profile/{userId}
+     * PUT /api/v1/mobile/users/profile
      */
-    @PUT("api/v1/mobile/users/profile/{userId}")
+    @PUT("api/v1/mobile/users/profile")
     suspend fun updateProfile(
-        @Path("userId") userId: String,
         @Body request: UpdateProfileRequest
     ): ApiResponse<Any>
 }

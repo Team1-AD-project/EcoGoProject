@@ -61,12 +61,21 @@ class EditProfileFragment : Fragment() {
         return binding.root
     }
 
+    // Selected transport modes
+    private val selectedTransportModes = mutableSetOf<String>()
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         setupFacultyDropdown()
+        setupTransportList()
         setupActions()
         loadProfile()
+    }
+
+    private fun setupTransportList() {
+        binding.recyclerTransportModes.layoutManager = 
+            androidx.recyclerview.widget.LinearLayoutManager(requireContext())
     }
 
     private fun setupFacultyDropdown() {
@@ -83,10 +92,6 @@ class EditProfileFragment : Fragment() {
             findNavController().navigateUp()
         }
 
-        binding.btnSave.setOnClickListener {
-            saveProfile()
-        }
-
         binding.btnSaveBottom.setOnClickListener {
             saveProfile()
         }
@@ -96,14 +101,16 @@ class EditProfileFragment : Fragment() {
         val userId = com.ecogo.auth.TokenManager.getUserId() ?: return
         viewLifecycleOwner.lifecycleScope.launch {
             try {
+                // Load Transport Modes first
+                val modesResult = repository.getTransportModes()
+                val availableModes = modesResult.getOrNull() ?: listOf("walk", "bike", "bus", "subway", "car", "electric_bike")
 
                 val result = repository.getMobileUserProfile()
-
                 val profile = result.getOrNull()
 
                 if (profile != null) {
                     cachedProfile = profile
-                    populateFields(profile)
+                    populateFields(profile, availableModes)
                     Log.d(TAG, "Profile loaded: ${profile.userInfo.nickname}")
                 } else {
                     Log.w(TAG, "Failed to load profile, using defaults")
@@ -116,7 +123,7 @@ class EditProfileFragment : Fragment() {
         }
     }
 
-    private fun populateFields(profile: MobileProfileResponse) {
+    private fun populateFields(profile: MobileProfileResponse, availableModes: List<String>) {
         val userInfo = profile.userInfo
         val prefs = userInfo.preferences
 
@@ -124,37 +131,32 @@ class EditProfileFragment : Fragment() {
         binding.editNickname.setText(userInfo.nickname)
         binding.editFaculty.setText(userInfo.faculty ?: "", false)
 
-        // Campus info (read from preferences - these fields may come from extended profile)
-        // Note: The API stores these as part of the profile, we load them if available
-        // For now we populate from SharedPreferences as a fallback
+        // Campus info
         loadLocalPreferences()
-        // Populate fields from API preferences (fallback to local if null?)
-        // The API now returns these fields in `preferences` object
         binding.editDormitory.setText(prefs?.dormitoryOrResidence ?: "")
         binding.editTeachingBuilding.setText(prefs?.mainTeachingBuilding ?: "")
         binding.editStudySpot.setText(prefs?.favoriteStudySpot ?: "")
         
-        // Weekly goal from API or default
-        val goal = prefs?.weeklyGoals ?: 10000
+        // Weekly goal (default to 20 trips if not set)
+        val goal = prefs?.weeklyGoals ?: 20
         binding.editWeeklyGoals.setText(goal.toString())
 
-
         // Transport preferences
+        selectedTransportModes.clear()
         prefs?.preferredTransport?.let { transports ->
-            binding.chipBus.isChecked = transports.contains("bus")
-            binding.chipMrt.isChecked = transports.contains("mrt")
-            binding.chipBicycle.isChecked = transports.contains("bicycle")
-            binding.chipWalk.isChecked = transports.contains("walking") // API returns 'walking', chip might need mapping
+            selectedTransportModes.addAll(transports)
         }
+        
+        // Setup RecyclerView Adapter
+        val adapter = com.ecogo.ui.adapters.TransportModeAdapter(availableModes, selectedTransportModes) { selected ->
+            // Update local set just in case, though adapter modifies it directly
+        }
+        binding.recyclerTransportModes.adapter = adapter
 
         // Notification preferences
         binding.switchNewChallenges.isChecked = prefs?.newChallenges ?: true
         binding.switchActivityReminders.isChecked = prefs?.activityReminders ?: true
         binding.switchFriendActivity.isChecked = prefs?.friendActivity ?: false
-
-        // Weekly goals (保留本地兜底逻辑，API无数据时用本地值)
-        val weeklyGoals = prefs?.weeklyGoals ?: getLocalPrefInt("weeklyGoals", 10000)
-        binding.editWeeklyGoals.setText(weeklyGoals.toString())
     }
 
     // 保留本地偏好加载方法（API无数据时兜底，不直接删除）
@@ -191,7 +193,7 @@ class EditProfileFragment : Fragment() {
         val teachingBuilding = binding.editTeachingBuilding.text?.toString()?.trim()
         val studySpot = binding.editStudySpot.text?.toString()?.trim()
         val weeklyGoalsText = binding.editWeeklyGoals.text?.toString()?.trim()
-        val weeklyGoals = weeklyGoalsText?.toIntOrNull() ?: 10000
+        val weeklyGoals = weeklyGoalsText?.toIntOrNull() ?: 20
 
         // Validate nickname
         if (nickname.isEmpty()) {
@@ -201,14 +203,7 @@ class EditProfileFragment : Fragment() {
             binding.layoutNickname.error = null
         }
 
-        // Gather transport preferences
-        val transports = mutableListOf<String>()
-        if (binding.chipBus.isChecked) transports.add("bus")
-        if (binding.chipMrt.isChecked) transports.add("mrt")
-        if (binding.chipBicycle.isChecked) transports.add("bicycle")
-
-        if (binding.chipWalk.isChecked) transports.add("walking") // Use "walking" to match API
-
+        // Transport preferences are already in selectedTransportModes
 
         val newChallenges = binding.switchNewChallenges.isChecked
         val activityReminders = binding.switchActivityReminders.isChecked
@@ -219,7 +214,7 @@ class EditProfileFragment : Fragment() {
             nickname = nickname,
             faculty = faculty?.ifEmpty { null },
             preferences = com.ecogo.api.UpdatePreferencesWrapper(
-                preferredTransport = if (transports.isNotEmpty()) transports else null,
+                preferredTransport = selectedTransportModes.toList().ifEmpty { null },
                 dormitoryOrResidence = dormitory?.ifEmpty { null },
                 mainTeachingBuilding = teachingBuilding?.ifEmpty { null },
                 favoriteStudySpot = studySpot?.ifEmpty { null },
@@ -232,7 +227,6 @@ class EditProfileFragment : Fragment() {
         )
 
         // Disable save buttons during request
-        binding.btnSave.isEnabled = false
         binding.btnSaveBottom.isEnabled = false
         binding.btnSaveBottom.text = getString(R.string.edit_profile_saving)
 
@@ -264,7 +258,6 @@ class EditProfileFragment : Fragment() {
                 Log.e(TAG, "Error saving profile: ${e.message}", e)
                 Toast.makeText(context, getString(R.string.edit_profile_save_error), Toast.LENGTH_SHORT).show()
             } finally {
-                binding.btnSave.isEnabled = true
                 binding.btnSaveBottom.isEnabled = true
                 binding.btnSaveBottom.text = getString(R.string.edit_profile_save_changes)
             }
