@@ -15,9 +15,21 @@ export interface Metric {
   growthRate: number;
 }
 
-export interface UserGrowthPoint { /* ... unchanged ... */ }
-export interface RevenueGrowthPoint { /* ... unchanged ... */ }
-export interface DistributionPoint { /* ... unchanged ... */ }
+export interface UserGrowthPoint {
+  date: string;
+  users: number;
+  newUsers: number;
+  activeUsers: number;
+}
+export interface RevenueGrowthPoint {
+  date: string;
+  vipRevenue: number;
+  shopRevenue: number;
+}
+export interface DistributionPoint {
+  name: string;
+  value: number;
+}
 
 // Renamed from StepsGrowthPoint
 export interface CarbonGrowthPoint {

@@ -4,6 +4,8 @@ import { api } from './auth';
 export interface TripSummary {
     id: string;
     userId: string;
+    startPoint: Coordinate | null;
+    endPoint: Coordinate | null;
     startPlaceName: string | null;
     endPlaceName: string | null;
     detectedMode: string | null;
