@@ -27,6 +27,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.ecogo.api.NextBusApiClient
 import com.ecogo.api.ShuttleServiceResponse
+import com.ecogo.utils.NotificationUtil
 
 
 class HomeFragment : Fragment() {
@@ -210,18 +211,18 @@ class HomeFragment : Fragment() {
 
             // 登录后提示 churn toast
             // 只弹一次，避免每次刷新 home 都弹
-            if (shouldShowChurnToastToday()){
+            //if (shouldShowChurnToastToday()){
                 val userId = com.ecogo.auth.TokenManager.getUserId()
                 if (!userId.isNullOrBlank()) {
                     val level = repository.fetchMyChurnRisk(userId)
                     withContext(kotlinx.coroutines.Dispatchers.Main) {
                         kotlinx.coroutines.delay(800)
                         Log.d("CHURN", "TokenManager userId = ${com.ecogo.auth.TokenManager.getUserId()}")
-                        Toast.makeText(requireContext(), churnToastMessage(level), Toast.LENGTH_LONG).show()
+                        NotificationUtil.showChurnNotification(requireContext(), level)
                     }
                 }
 
-            }
+            //}
 
 
             // Update Carbon Footprint (Added)
