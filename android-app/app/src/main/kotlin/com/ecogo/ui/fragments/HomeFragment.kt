@@ -279,8 +279,9 @@ class HomeFragment : Fragment() {
         val currentYear = now.year
 
         val monthlyPoints = historyResult.filter { item ->
-            // Filter by source "trip"
-            if (item.source != "trip") return@filter false
+            // Filter by sources: trip, challenge, leaderboard, admin
+            val validSources = setOf("trip", "challenge", "leaderboard", "admin")
+            if (item.source !in validSources) return@filter false
 
             try {
                 // Format: "2026-01-30T06:16:29.699"
@@ -289,7 +290,18 @@ class HomeFragment : Fragment() {
             } catch (e: Exception) {
                 false
             }
-        }.sumOf { it.points }
+        }.sumOf { item ->
+            val type = item.changeType.uppercase()
+            // If points are already negative, just use them.
+            // If points are positive but type indicates deduction, negate them.
+            if (item.points < 0) {
+                item.points
+            } else if (type.contains("DEDUCT") || type.contains("DECREASE") || type.contains("SPEND") || type.contains("REMOVE")) {
+                -item.points
+            } else {
+                item.points
+            }
+        }
 
         binding.textMonthlyPoints.text = monthlyPoints.toString()
     }
