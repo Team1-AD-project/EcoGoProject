@@ -159,7 +159,8 @@ data class Achievement(
     val id: String,
     val name: String,
     val description: String,
-    val unlocked: Boolean
+    val unlocked: Boolean,
+    val howToUnlock: String = ""
 )
 
 // History Item
