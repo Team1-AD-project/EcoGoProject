@@ -270,7 +270,7 @@ public class ChallengeImplementation implements ChallengeInterface {
             } else if (Boolean.TRUE.equals(progress.getRewardClaimed())) {
                 // Verify reward was actually logged to user_points_logs
                 List<com.example.EcoGo.model.UserPointsLog> logs =
-                        userPointsLogRepository.findByUserIdAndSource(progress.getUserId(), "challenge");
+                        userPointsLogRepository.findByUserIdAndSource(progress.getUserId(), "challenges");
                 boolean hasLog = logs.stream()
                         .anyMatch(log -> progress.getChallengeId().equals(log.getRelatedId()));
                 if (!hasLog) {
@@ -320,7 +320,7 @@ public class ChallengeImplementation implements ChallengeInterface {
             pointsService.adjustPoints(
                     userId,
                     challenge.getReward().longValue(),
-                    "challenge",
+                    "challenges",
                     "Challenge reward: " + challenge.getTitle(),
                     challengeId,
                     null

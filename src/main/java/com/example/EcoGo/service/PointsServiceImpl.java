@@ -59,7 +59,7 @@ public class PointsServiceImpl implements PointsService {
                 || "task".equalsIgnoreCase(source)
                 || "admin".equalsIgnoreCase(source)
                 || "leaderboard".equalsIgnoreCase(source)
-                || "challenge".equalsIgnoreCase(source);
+                || "challenges".equalsIgnoreCase(source);
 
         if (points > 0 && isEarningSource) {
             user.setTotalPoints(user.getTotalPoints() + points);
