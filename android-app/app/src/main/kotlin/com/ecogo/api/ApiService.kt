@@ -13,6 +13,7 @@ import com.ecogo.data.DailyGoal
 import com.ecogo.data.Faculty
 import com.ecogo.data.FacultyCarbonData
 import com.ecogo.data.Friend
+import com.ecogo.data.Advertisement
 import com.ecogo.data.FriendActivity
 import com.ecogo.data.HistoryItem
 import com.ecogo.data.MobileOrderHistoryData
@@ -597,6 +598,15 @@ interface ApiService {
     @POST("api/v1/shop/redeem")
     suspend fun redeemProduct(@Body request: RedeemRequest): ApiResponse<RedeemResponse>
     
+    // ==================== 广告相关 ====================
+    
+    /**
+     * 获取活跃广告
+     * GET /api/v1/advertisements/active
+     */
+    @GET("api/v1/advertisements/active")
+    suspend fun getAdvertisements(): ApiResponse<List<Advertisement>>
+
     /**
      * 创建PaymentIntent
      * POST /api/v1/shop/payment-intent

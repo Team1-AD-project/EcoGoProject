@@ -948,10 +948,11 @@ class EcoGoRepository {
     suspend fun redeemProduct(
         userId: String,
         productId: String,
-        productType: String
+        productType: String,
+        quantity: Int = 1
     ): Result<RedeemResponse> = withContext(Dispatchers.IO) {
         try {
-            val request = RedeemRequest(userId, productId, productType)
+            val request = RedeemRequest(userId, productId, productType, quantity)
             val response = api.redeemProduct(request)
             if (response.success && response.data != null) {
                 Result.success(response.data)
@@ -962,6 +963,25 @@ class EcoGoRepository {
             Result.failure(e)
         }
     }
+
+    /**
+     * 获取活跃广告
+     */
+    suspend fun getAdvertisements(): Result<List<com.ecogo.data.Advertisement>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = api.getAdvertisements()
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+
+
 
     /**
      * 创建支付Intent

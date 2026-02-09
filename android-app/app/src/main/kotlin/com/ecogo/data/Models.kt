@@ -322,6 +322,8 @@ data class FacultyCarbonData(
     val totalCarbon: Double
 )
 
+
+
 // Friend / Social
 data class Friend(
     val userId: String,

@@ -182,6 +182,114 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // 请求通知权限 (Android 13+)
         requestNotificationPermission()
+
+        setupAdCarousel()
+    }
+
+    // ==================== 广告轮播逻辑 ====================
+    private val adHandler = Handler(Looper.getMainLooper())
+    private var adRunnable: Runnable? = null
+    private var currentAdIndex = 0
+
+    private fun setupAdCarousel() {
+        // 获取广告数据
+        lifecycleScope.launch {
+            try {
+                // 使用 Repository 获取广告
+                val repository = com.ecogo.EcoGoApplication.repository
+                val result = repository.getAdvertisements()
+                
+                val ads = result.getOrNull()?.filter { 
+                    it.position == "banner" && it.status == "Active" 
+                } ?: emptyList()
+
+                if (ads.isNotEmpty()) {
+                    setupAdViewPager(ads)
+                } else {
+                    // 没有广告时隐藏轮播区，或显示默认占位
+                    binding.layoutAdCarousel.visibility = View.GONE
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Error fetching ads", e)
+                binding.layoutAdCarousel.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun setupAdViewPager(ads: List<com.ecogo.data.Advertisement>) {
+        val adapter = AdAdapter(ads) { ad ->
+            // 点击广告跳转
+            if (ad.linkUrl.isNotEmpty()) {
+                try {
+                    val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(ad.linkUrl))
+                    startActivity(intent)
+                } catch (e: Exception) {
+                    Log.e(TAG, "Error opening ad link: ${ad.linkUrl}", e)
+                    Toast.makeText(this, "无法打开链接", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        binding.viewPagerAd.adapter = adapter
+        
+        // 绑定 TabLayout 指示器
+        com.google.android.material.tabs.TabLayoutMediator(
+            binding.tabLayoutAdIndicator, binding.viewPagerAd
+        ) { _, _ -> }.attach()
+
+        // 自动轮播逻辑
+        adRunnable = Runnable {
+            if (ads.size > 1) {
+                currentAdIndex = (currentAdIndex + 1) % ads.size
+                binding.viewPagerAd.setCurrentItem(currentAdIndex, true)
+                adHandler.postDelayed(adRunnable!!, 5000) // 5秒切换
+            }
+        }
+        
+        // 注册页面切换回调，处理手动滑动与自动轮播的冲突
+        binding.viewPagerAd.registerOnPageChangeCallback(object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                currentAdIndex = position
+                // 重置计时器，避免手动滑动后立即自动切换
+                adHandler.removeCallbacks(adRunnable!!)
+                adHandler.postDelayed(adRunnable!!, 5000)
+            }
+        })
+
+        // 开始轮播
+        adHandler.postDelayed(adRunnable!!, 5000)
+    }
+
+
+
+    class AdAdapter(
+        private val ads: List<com.ecogo.data.Advertisement>,
+        private val onItemClick: (com.ecogo.data.Advertisement) -> Unit
+    ) : androidx.recyclerview.widget.RecyclerView.Adapter<AdAdapter.AdViewHolder>() {
+
+        inner class AdViewHolder(itemView: View) : androidx.recyclerview.widget.RecyclerView.ViewHolder(itemView) {
+            val imageView: android.widget.ImageView = itemView.findViewById(R.id.ivAdImage)
+        }
+
+        override fun onCreateViewHolder(parent: android.view.ViewGroup, viewType: Int): AdViewHolder {
+            val view = android.view.LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_map_ad, parent, false)
+            return AdViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: AdViewHolder, position: Int) {
+            val ad = ads[position]
+            // 使用 Glide 加载图片 (假设项目已集成 Glide)
+            com.bumptech.glide.Glide.with(holder.itemView.context)
+                .load(ad.imageUrl)
+                .placeholder(R.drawable.placeholder_image) // 需要确保有此资源或替换为其他默认图
+                .centerCrop()
+                .into(holder.imageView)
+
+            holder.itemView.setOnClickListener { onItemClick(ad) }
+        }
+
+        override fun getItemCount(): Int = ads.size
     }
 
     /**
@@ -225,8 +333,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
      * 设置 UI 事件监听
      */
     private fun setupUI() {
-        // 初始化底部区域：显示广告占位，隐藏开始按钮
-        binding.cardAdPlaceholder.visibility = View.VISIBLE
+        // 初始化底部区域：显示广告占位(现改为轮播)，隐藏开始按钮
+        binding.layoutAdCarousel.visibility = View.VISIBLE
         binding.cardBottomPanel.visibility = View.GONE
 
         // 起点输入框点击
@@ -1129,11 +1237,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         if (hasOrigin && hasDestination) {
             // 选择了起点和终点：隐藏广告，显示按钮
-            binding.cardAdPlaceholder.visibility = View.GONE
+            binding.layoutAdCarousel.visibility = View.GONE
             binding.cardBottomPanel.visibility = View.VISIBLE
         } else {
             // 未选择完：显示广告，隐藏按钮
-            binding.cardAdPlaceholder.visibility = View.VISIBLE
+            binding.layoutAdCarousel.visibility = View.VISIBLE
             binding.cardBottomPanel.visibility = View.GONE
         }
     }
@@ -1337,7 +1445,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.cardTransportModes.visibility = View.GONE
         // 隐藏按钮，显示广告占位
         binding.cardBottomPanel.visibility = View.GONE
-        binding.cardAdPlaceholder.visibility = View.VISIBLE
+        binding.layoutAdCarousel.visibility = View.VISIBLE
         viewModel.clearDestination()
     }
 
@@ -1719,6 +1827,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         super.onDestroy()
         // 清除计时器，防止内存泄漏
         timerHandler.removeCallbacks(timerRunnable)
+        
+        // 停止广告轮播
+        adRunnable?.let { adHandler.removeCallbacks(it) }
 
         // 注意：不再自动停止追踪！
         // 前台服务会继续运行，用户需要手动停止行程
