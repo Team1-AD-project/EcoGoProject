@@ -111,9 +111,9 @@ class HomeFragment : Fragment() {
             binding.textBusTime.text = "2 min"
             binding.textBusRoute.text = "to UTown"
             binding.textMonthlyPoints.text = "880"
-            binding.textPointsChange.text = "+150 this week"
-            binding.textSocScore.text = "5,530"
-            binding.textSocRank.text = "Rank #1"
+            binding.textPointsChange.text = "" // Removed "+150 this week" per user request
+            binding.textSocScore.text = "5,530 kg" // Added kg unit
+            binding.textSocRank.text = "" // Removed "Rank #1" per user request
             binding.textLocation.text = java.time.LocalDate.now()
                 .format(java.time.format.DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", java.util.Locale.ENGLISH))
 
@@ -198,10 +198,12 @@ class HomeFragment : Fragment() {
             // Dynamic Greeting
             binding.textWelcome.text = "Hello, ${userInfo.nickname}"
 
-            // Update Rank
+            // Update Rank (Removed per user request)
+            /*
             profile.stats?.let { stats ->
                 binding.textSocRank.text = "Rank #${stats.monthlyRank}"
             }
+            */
 
             // Load SoC Score independently
             loadSocScore()
@@ -240,8 +242,8 @@ class HomeFragment : Fragment() {
         val data = scoreResult.getOrNull()
         val score = data?.totalCarbon ?: 0.0
         
-        // 1. Format Score to 2 decimal places
-        binding.textSocScore.text = "%.2f".format(score)
+        // 1. Format Score to 2 decimal places with kg unit
+        binding.textSocScore.text = "%.2f kg".format(score)
 
         // 2. Dynamic Faculty Abbreviation
         val facultyName = data?.faculty ?: "School of Computing" // Default or fallback
