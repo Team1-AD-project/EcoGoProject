@@ -607,6 +607,15 @@ interface ApiService {
     @GET("api/v1/advertisements/active")
     suspend fun getAdvertisements(): ApiResponse<List<Advertisement>>
 
+    // ==================== 行程/交通相关 ====================
+    
+    /**
+     * 获取交通方式列表
+     * GET /api/v1/trips/transport-modes
+     */
+    @GET("api/v1/trips/transport-modes")
+    suspend fun getTransportModes(): ApiResponse<List<String>>
+
     /**
      * 创建PaymentIntent
      * POST /api/v1/shop/payment-intent

@@ -1111,6 +1111,25 @@ class EcoGoRepository {
             }
         }
 
+    // ==================== 行程/交通相关 ====================
+
+    /**
+     * 获取交通方式列表
+     */
+    suspend fun getTransportModes(): Result<List<String>> =
+        withContext(Dispatchers.IO) {
+            try {
+                val response = api.getTransportModes()
+                if (response.success && response.data != null) {
+                    Result.success(response.data)
+                } else {
+                    Result.failure(Exception(response.message))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+
     // ==================== 绿色点位相关 ====================
 
     /**

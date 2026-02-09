@@ -163,7 +163,7 @@
     <string name="edit_profile_section_basic">BASIC INFO</string>
     <string name="edit_profile_section_campus">CAMPUS</string>
     <string name="edit_profile_section_transport">PREFERRED TRANSPORT</string>
-    <string name="edit_profile_section_goals">GOALS</string>
+    <string name="edit_profile_section_goals">WEEKLY GREEN TRIPS</string>
     <string name="edit_profile_section_notifications">NOTIFICATIONS</string>
     <string name="edit_profile_nickname">Nickname</string>
     <string name="edit_profile_faculty">Faculty</string>
@@ -175,7 +175,7 @@
     <string name="edit_profile_transport_mrt">MRT</string>
     <string name="edit_profile_transport_bicycle">Bicycle</string>
     <string name="edit_profile_transport_walk">Walk</string>
-    <string name="edit_profile_weekly_goals">Weekly Step Goal</string>
+    <string name="edit_profile_weekly_goals">Weekly Green Trips Goal</string>
     <string name="edit_profile_new_challenges">New Challenges</string>
     <string name="edit_profile_new_challenges_desc">Get notified about new challenges</string>
     <string name="edit_profile_activity_reminders">Activity Reminders</string>

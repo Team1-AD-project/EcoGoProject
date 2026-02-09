@@ -347,33 +347,13 @@ class SignupWizardFragment : Fragment() {
         binding.layoutMascotReveal.visibility = View.GONE
 
         Log.d("DEBUG_SIGNUP", "Showing transport preference")
-
-        // 设置交通卡片点击监听
-        val cards = mapOf(
-            binding.layoutTransportPreference.cardBus to Pair("bus", binding.layoutTransportPreference.checkBus),
-            binding.layoutTransportPreference.cardWalking to Pair("walking", binding.layoutTransportPreference.checkWalking),
-            binding.layoutTransportPreference.cardCycling to Pair("cycling", binding.layoutTransportPreference.checkCycling),
-            binding.layoutTransportPreference.cardCarpool to Pair("carpool", binding.layoutTransportPreference.checkCarpool)
-        )
-
-        cards.forEach { (card, typeAndCheck) ->
-            val (type, checkView) = typeAndCheck
-            card.setOnClickListener {
-                if (transportPrefs.contains(type)) {
-                    transportPrefs.remove(type)
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.border)
-                    checkView.visibility = View.GONE
-                } else {
-                    transportPrefs.add(type)
-                    card.strokeColor = ContextCompat.getColor(requireContext(), R.color.primary)
-                    checkView.visibility = View.VISIBLE
-                }
-
-                // 至少选择一个才能继续
-                binding.layoutTransportPreference.btnContinueTransport.isEnabled = transportPrefs.isNotEmpty()
-                binding.layoutTransportPreference.btnContinueTransport.alpha = if (transportPrefs.isNotEmpty()) 1f else 0.5f
-            }
-        }
+        
+        // 设置 RecyclerView 布局管理器
+        binding.layoutTransportPreference.recyclerTransportModes.layoutManager = 
+            androidx.recyclerview.widget.LinearLayoutManager(requireContext())
+        
+        // 加载交通方式数据
+        loadTransportModes()
 
         // Continue按钮
         binding.layoutTransportPreference.btnContinueTransport.isEnabled = false
@@ -391,8 +371,30 @@ class SignupWizardFragment : Fragment() {
             binding.layoutTransportPreference.btnContinueTransport.text = "Saving..."
 
             updateProfileStep(request) {
-                binding.layoutTransportPreference.btnContinueTransport.text = "Continue" // Reset text (though we move)
+                binding.layoutTransportPreference.btnContinueTransport.text = "Continue" 
                 showCommonLocations()
+            }
+        }
+    }
+
+    private fun loadTransportModes() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Fetch from API
+                val result = repository.getTransportModes()
+                val modes = result.getOrNull() ?: listOf("walk", "bike", "bus", "subway", "car", "electric_bike") // Fallback
+                
+                // Setup Adapter
+                val adapter = com.ecogo.ui.adapters.TransportModeAdapter(modes, transportPrefs) { selected ->
+                    // Update button state
+                    binding.layoutTransportPreference.btnContinueTransport.isEnabled = selected.isNotEmpty()
+                    binding.layoutTransportPreference.btnContinueTransport.alpha = if (selected.isNotEmpty()) 1f else 0.5f
+                }
+                binding.layoutTransportPreference.recyclerTransportModes.adapter = adapter
+                
+            } catch (e: Exception) {
+                Log.e("DEBUG_SIGNUP", "Error loading transport modes", e)
+                Toast.makeText(requireContext(), "Failed to load options", Toast.LENGTH_SHORT).show()
             }
         }
     }

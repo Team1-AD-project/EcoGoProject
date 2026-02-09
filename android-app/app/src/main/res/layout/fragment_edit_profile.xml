@@ -267,62 +267,12 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="13sp" />
 
-                <com.google.android.material.chip.ChipGroup
-                    android:id="@+id/chip_group_transport"
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recycler_transport_modes"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    app:singleSelection="false">
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chip_bus"
-                        style="@style/Widget.MaterialComponents.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/edit_profile_transport_bus"
-                        app:checkedIconTint="@color/primary"
-                        app:chipBackgroundColor="@color/surface"
-                        app:chipCornerRadius="20dp"
-                        app:chipStrokeColor="@color/primary"
-                        app:chipStrokeWidth="1dp" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chip_mrt"
-                        style="@style/Widget.MaterialComponents.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/edit_profile_transport_mrt"
-                        app:checkedIconTint="@color/primary"
-                        app:chipBackgroundColor="@color/surface"
-                        app:chipCornerRadius="20dp"
-                        app:chipStrokeColor="@color/primary"
-                        app:chipStrokeWidth="1dp" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chip_bicycle"
-                        style="@style/Widget.MaterialComponents.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/edit_profile_transport_bicycle"
-                        app:checkedIconTint="@color/primary"
-                        app:chipBackgroundColor="@color/surface"
-                        app:chipCornerRadius="20dp"
-                        app:chipStrokeColor="@color/primary"
-                        app:chipStrokeWidth="1dp" />
-
-                    <com.google.android.material.chip.Chip
-                        android:id="@+id/chip_walk"
-                        style="@style/Widget.MaterialComponents.Chip.Filter"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/edit_profile_transport_walk"
-                        app:checkedIconTint="@color/primary"
-                        app:chipBackgroundColor="@color/surface"
-                        app:chipCornerRadius="20dp"
-                        app:chipStrokeColor="@color/primary"
-                        app:chipStrokeWidth="1dp" />
-
-                </com.google.android.material.chip.ChipGroup>
+                    android:overScrollMode="never" />
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
@@ -365,7 +315,7 @@
                     app:boxCornerRadiusTopStart="12dp"
                     app:boxStrokeColor="@color/primary"
                     app:hintTextColor="@color/primary"
-                    app:suffixText="steps">
+                    app:suffixText="trips">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/edit_weekly_goals"
