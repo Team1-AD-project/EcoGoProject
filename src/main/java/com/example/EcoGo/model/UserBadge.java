@@ -23,6 +23,12 @@ public class UserBadge {
     @Field("badge_id")
     private String badgeId; // 买了哪个
 
+    @Field("category")
+    private String category;
+
+    @Field("subcategory")
+    private String subcategory;
+
     @Field("unlocked_at")
     private Date unlockedAt; // 购买时间
 
