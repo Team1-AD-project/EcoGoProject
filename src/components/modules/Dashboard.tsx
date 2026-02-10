@@ -21,13 +21,12 @@ import {
   Zap,
   Target,
   MessageSquare,
-  Server,
-  Bot
+  Server
 } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { fetchUserList, type User } from '@/services/userService';
-import { fetchAllTrips, type TripSummary } from '@/services/tripService';
-import { fetchOrders, fetchRewards, fetchVouchers, type Order } from '@/services/rewardService';
+import { AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { fetchUserList } from '@/services/userService';
+import { fetchAllTrips } from '@/services/tripService';
+import { fetchOrders, fetchRewards, fetchVouchers } from '@/services/rewardService';
 import { getAllAdvertisements } from '@/api/advertisementApi';
 import { getRankingsByType } from '@/api/leaderboardApi';
 import { getAllBadges } from '@/api/collectiblesApi';
@@ -62,10 +61,11 @@ export function Dashboard({ onModuleSelect }: DashboardProps) {
   });
 
   const [revenueStats, setRevenueStats] = useState({
-    totalRevenue: 0, // Store + VIP (Estimated)
+    totalRevenue: 0, // Keep for charts if needed
     storeRevenue: 0,
     vipRevenue: 0,
-    growthRate: 0 // Placeholder for now
+    totalPointsRedeemed: 0,
+    growthRate: 0
   });
 
   const [storeStats, setStoreStats] = useState({
@@ -221,6 +221,7 @@ export function Dashboard({ onModuleSelect }: DashboardProps) {
       // Calculate Revenue from COMPLETED or PAID orders
       const validOrders = allOrders.filter(o => o.status === 'PAID' || o.status === 'COMPLETED' || o.status === 'SHIPPED');
       const storeRevenue = validOrders.reduce((sum, o) => sum + (o.finalAmount || 0), 0);
+      const storePoints = validOrders.reduce((sum, o) => sum + (o.pointsUsed || 0), 0);
 
       // Fetch Rewards (Products)
       const rewardsResp: any = await fetchRewards(1, 100);
@@ -274,6 +275,7 @@ export function Dashboard({ onModuleSelect }: DashboardProps) {
         storeRevenue,
         vipRevenue: estimatedVipRevenue,
         totalRevenue: storeRevenue + estimatedVipRevenue + (adStats.revenue || 0),
+        totalPointsRedeemed: storePoints,
         growthRate: 0 // Need historical data
       });
 
@@ -379,16 +381,16 @@ export function Dashboard({ onModuleSelect }: DashboardProps) {
             </div>
           </Card>
 
-          {/* Total revenue */}
+          {/* Total Points Redeemed */}
           <Card className="p-5 bg-gradient-to-br from-orange-500 to-orange-600 text-white hover:shadow-lg transition-shadow cursor-pointer" onClick={() => onModuleSelect('analytics-management')}>
             <div className="flex items-center justify-between mb-3">
               <DollarSign className="size-8 opacity-80" />
-              <Badge className="bg-white/20 text-white">Total Revenue</Badge>
+              <Badge className="bg-white/20 text-white">Total Points</Badge>
             </div>
-            <p className="text-sm opacity-90 mb-1">Est. Revenue (CNY)</p>
-            <p className="text-3xl font-bold mb-2">¥{revenueStats.totalRevenue.toLocaleString()}</p>
+            <p className="text-sm opacity-90 mb-1">Total Points Redeemed</p>
+            <p className="text-3xl font-bold mb-2">{revenueStats.totalPointsRedeemed.toLocaleString()}</p>
             <div className="flex items-center gap-2 text-sm opacity-90">
-              <span className="text-xs">Store: ¥{revenueStats.storeRevenue} | VIP: ~¥{revenueStats.vipRevenue}</span>
+              <span className="text-xs">Store: {revenueStats.totalPointsRedeemed} | VIP: 0</span>
             </div>
           </Card>
         </div>
