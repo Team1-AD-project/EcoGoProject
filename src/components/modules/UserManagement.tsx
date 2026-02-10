@@ -13,13 +13,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { Label } from '@/components/ui/label';
 import { fetchUserList, fetchUserDetail, updateUser, updateUserStatus, type User, type UpdateUserRequest } from '@/services/userService';
 import { toast } from 'sonner';
@@ -99,7 +93,7 @@ export function UserManagement() {
         email: editingUser.email,
         isVipActive: editingUser.vip?.active || false,
         isDeactivated: editingUser.isDeactivated || false,
-        vipPlan: editingUser.vip?.plan || 'MONTHLY',
+        vipPlan: 'vip',
         vipExpiryDate: editingUser.vip?.expiryDate
           ? new Date(editingUser.vip.expiryDate).toISOString().split('T')[0]
           : new Date().toISOString().split('T')[0]
@@ -146,9 +140,7 @@ export function UserManagement() {
     }
   };
 
-  const normalUserCount = users.filter(u => !u.vip?.active).length; // Approximate from current page
-  const vipUserCount = users.filter(u => u.vip?.active).length;     // Approximate from current page
-  const activeUserCount = users.filter(u => !u.isDeactivated).length; // Approximate from current page
+
 
   // Helper to format date
   const formatDate = (dateStr: string | null, type: 'date' | 'datetime' = 'date') => {
@@ -399,25 +391,7 @@ export function UserManagement() {
               {/* Conditional VIP Fields */}
               {editingUser.vip?.active && (
                 <>
-                  <div className="space-y-2">
-                    <Label>VIP Plan</Label>
-                    <Select
-                      value={editingUser.vip?.plan || 'MONTHLY'}
-                      onValueChange={(val) => setEditingUser(curr => {
-                        if (!curr) return null;
-                        return { ...curr, vip: { ...curr.vip!, plan: val } };
-                      })}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select Plan" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="MONTHLY">Monthly</SelectItem>
-                        <SelectItem value="SEASONAL">Seasonal</SelectItem>
-                        <SelectItem value="YEARLY">Yearly</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
+
 
                   <div className="space-y-2">
                     <Label>Expiry Date</Label>
