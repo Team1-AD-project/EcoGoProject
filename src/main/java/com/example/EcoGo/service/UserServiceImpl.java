@@ -548,29 +548,6 @@ public class UserServiceImpl implements UserInterface {
      * 2. If Admin -> Pass.
      * 3. If User -> Check if Token UUID matches Target User's UUID.
      */
-    private void validateAccess(String token, String targetUserId) {
-        try {
-            var claims = jwtUtils.validateToken(token);
-            boolean isAdmin = (boolean) claims.get("isAdmin");
-            if (isAdmin)
-                return; // Admin can access anyone
-
-            String requesterId = claims.getSubject(); // This is now Business ID (userid)
-
-            // Mobile endpoints pass "userid" (Business ID), need to verify
-            User targetUser = userRepository.findByUserid(targetUserId)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-            if (!targetUser.getUserid().equals(requesterId)) {
-                throw new BusinessException(ErrorCode.NO_PERMISSION,
-                        "You do not have permission to operate on this account");
-            }
-        } catch (BusinessException be) {
-            throw be;
-        } catch (Exception e) {
-            throw new BusinessException(ErrorCode.NO_PERMISSION, "Token is invalid or expired");
-        }
-    }
 
     @Override
     public void activateVip(String userId, int durationDays) {
