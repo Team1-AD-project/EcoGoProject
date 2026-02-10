@@ -338,6 +338,25 @@ export function AnalyticsManagement() {
   const greenTripRate = trips.length > 0 ? Math.round((trips.filter(t => t.isGreenTrip).length / trips.length) * 100) : 0;
   const totalPointsSpent = pointsEconomy.find(p => p.name === 'Spent')?.value || 0;
 
+  // Total Goods Redemptions: 和 Reward Store 一样，从 COMPLETED 订单统计总兑换数量
+  const totalGoodsRedemptions = useMemo(() => {
+    let count = 0;
+    orders.forEach(order => {
+      if (order.status === 'COMPLETED' && order.items) {
+        order.items.forEach(item => { count += item.quantity; });
+      }
+    });
+    return count;
+  }, [orders]);
+
+  // Total Cloth Sold: 从 badgeStats 中仅统计 cloth 类别的总 purchaseCount
+  const totalClothSold = useMemo(() => {
+    const clothIds = new Set(badges.filter(b => b.category === 'cloth').map(b => b.badgeId));
+    return badgeStats
+      .filter(s => clothIds.has(s.badgeId))
+      .reduce((sum, s) => sum + s.purchaseCount, 0);
+  }, [badgeStats, badges]);
+
   const top10Users = useMemo(() =>
     (leaderboardData?.rankingsPage?.content || []).slice(0, 10).map(u => ({
       name: (u.nickname || u.userId).substring(0, 12), carbon: Math.round(u.carbonSaved * 100) / 100,
@@ -710,8 +729,8 @@ export function AnalyticsManagement() {
           <KpiCard title="Green Trip Rate" value={`${greenTripRate}%`} unit={`${trips.filter(t => t.isGreenTrip).length} / ${trips.length} trips`} icon={<TreePine className="size-6" />} color="from-emerald-500 to-emerald-600" />
           <KpiCard title="VIP Penetration" value={`${vipPenetration}%`} unit="of all users" icon={<Crown className="size-6" />} color="from-amber-500 to-amber-600" />
           <KpiCard title="Total Points Spent" value={formatNum(totalPointsSpent)} unit="points consumed" icon={<Coins className="size-6" />} color="from-orange-500 to-orange-600" />
-          <KpiCard title="Total Goods Count" value={formatNum(rewards.length)} unit="products available" icon={<ShoppingBag className="size-6" />} color="from-pink-500 to-pink-600" />
-          <KpiCard title="Total Collectible Count" value={formatNum(badges.length)} unit="badges & clothes" icon={<Award className="size-6" />} color="from-indigo-500 to-indigo-600" />
+          <KpiCard title="Total Goods Count" value={formatNum(totalGoodsRedemptions)} unit="products redeemed" icon={<ShoppingBag className="size-6" />} color="from-pink-500 to-pink-600" />
+          <KpiCard title="Total Collectible Count" value={formatNum(totalClothSold)} unit="clothes sold" icon={<Award className="size-6" />} color="from-indigo-500 to-indigo-600" />
         </div>
 
         {/* Charts: Two large charts + Right nav list */}
