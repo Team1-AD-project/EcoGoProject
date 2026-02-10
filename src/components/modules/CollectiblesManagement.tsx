@@ -124,7 +124,7 @@ const mapApiBadgeToPetAccessory = (apiBadge: ApiBadge, ownedCount: number): PetA
     id: apiBadge.badgeId,
     name: apiBadge.name?.en || apiBadge.name?.zh || 'Unknown',
     description: apiBadge.description?.en || apiBadge.description?.zh || '',
-    imageUrl: apiBadge.icon?.url || '',
+    imageUrl: apiBadge.icon?.url || `/clothes/${(apiBadge.name?.en || '').toLowerCase().replace(/ /g, '_')}.png`,
     category: apiBadge.subCategory || 'other', // 直接使用 DB 的 subCategory: "head", "body", "face"
     acquisitionMethod: (apiBadge.acquisitionMethod || 'free') as AcquisitionMethod,
     price: apiBadge.purchaseCost || 0,
