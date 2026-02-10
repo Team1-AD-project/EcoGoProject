@@ -137,6 +137,9 @@
         <action
             android:id="@+id/action_chat_to_routePlanner"
             app:destination="@id/routePlannerFragment" />
+        <action
+            android:id="@+id/action_chat_to_tripDetail"
+            app:destination="@id/tripDetailFragment" />
     </fragment>
 
     <fragment
@@ -308,10 +311,49 @@
     </fragment>
 
     <fragment
+        android:id="@+id/tripDetailFragment"
+        android:name="com.ecogo.ui.fragments.navigation.TripDetailFragment"
+        android:label="Trip Details"
+        tools:layout="@layout/fragment_trip_detail">
+        <argument
+            android:name="bookingId"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="fromName"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="toName"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="departAt"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="passengers"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="status"
+            android:defaultValue="confirmed"
+            app:argType="string" />
+    </fragment>
+
+    <fragment
         android:id="@+id/routePlannerFragment"
         android:name="com.ecogo.ui.fragments.navigation.RoutePlannerFragment"
         android:label="路线规划"
         tools:layout="@layout/fragment_route_planner">
+        <argument
+            android:name="bookingId"
+            android:defaultValue=""
+            app:argType="string" />
+        <argument
+            android:name="tripId"
+            android:defaultValue=""
+            app:argType="string" />
         <action
             android:id="@+id/action_routePlanner_to_locationSearch"
             app:destination="@id/locationSearchFragment" />

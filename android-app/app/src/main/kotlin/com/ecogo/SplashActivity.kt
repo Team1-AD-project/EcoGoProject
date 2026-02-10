@@ -17,6 +17,10 @@ class SplashActivity : AppCompatActivity() {
     private var countdownTimer: CountDownTimer? = null
     private val TAG = "SplashActivity"
 
+    // Guard flag to prevent proceedToMain from being called multiple times
+    @Volatile
+    private var hasNavigated = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -53,7 +57,8 @@ class SplashActivity : AppCompatActivity() {
             proceedToMain(isLoggedIn)
         }
 
-        val adUrl = "http://47.129.124.55:8090/api/v1/advertisements/active"
+        // Use BuildConfig base URL instead of hardcoded production URL
+        val adUrl = "${BuildConfig.ECOGO_BASE_URL}api/v1/advertisements/active"
 
         // Fetch Ad Data (Async)
         Thread {
@@ -81,21 +86,24 @@ class SplashActivity : AppCompatActivity() {
                         Log.d(TAG, "Selected Ad: ${randomAd.name}, Image: $imageUrl")
 
                         runOnUiThread {
-                            try {
-                                com.bumptech.glide.Glide.with(this)
-                                    .load(imageUrl)
-                                    .centerCrop()
-                                    .placeholder(R.drawable.bg_splash_ad_placeholder)
-                                    .error(R.drawable.bg_splash_ad_placeholder)
-                                    .into(imgAd)
+                            // Check if activity is still alive before using Glide
+                            if (!isFinishing && !isDestroyed && !hasNavigated) {
+                                try {
+                                    com.bumptech.glide.Glide.with(applicationContext)
+                                        .load(imageUrl)
+                                        .centerCrop()
+                                        .placeholder(R.drawable.bg_splash_ad_placeholder)
+                                        .error(R.drawable.bg_splash_ad_placeholder)
+                                        .into(imgAd)
 
-                                // Optional: Handle Ad Click
-                                imgAd.setOnClickListener {
-                                    Log.d(TAG, "Ad clicked: ${randomAd.linkUrl}")
-                                    // TODO: Open linkUrl in browser if needed
+                                    // Optional: Handle Ad Click
+                                    imgAd.setOnClickListener {
+                                        Log.d(TAG, "Ad clicked: ${randomAd.linkUrl}")
+                                        // TODO: Open linkUrl in browser if needed
+                                    }
+                                } catch (e: Exception) {
+                                    Log.e(TAG, "Glide Error: ${e.message}")
                                 }
-                            } catch (e: Exception) {
-                                Log.e(TAG, "Glide Error: ${e.message}")
                             }
                         }
                     } else {
@@ -160,7 +168,17 @@ class SplashActivity : AppCompatActivity() {
     }
 
     private fun proceedToMain(shouldGoToHome: Boolean) {
+        // Prevent multiple calls (race condition guard)
+        if (hasNavigated) {
+            Log.w(TAG, "proceedToMain: Already navigated, ignoring duplicate call")
+            return
+        }
+        hasNavigated = true
+
         Log.d(TAG, "proceedToMain: shouldGoToHome=$shouldGoToHome")
+        countdownTimer?.cancel()
+        countdownTimer = null
+
         val intent = Intent(this, MainActivity::class.java)
         // Clear the task stack so user cannot go back to SplashActivity
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
@@ -175,5 +193,6 @@ class SplashActivity : AppCompatActivity() {
     override fun onDestroy() {
         super.onDestroy()
         countdownTimer?.cancel()
+        countdownTimer = null
     }
 }

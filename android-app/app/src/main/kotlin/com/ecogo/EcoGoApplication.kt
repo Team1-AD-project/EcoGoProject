@@ -17,7 +17,7 @@ class EcoGoApplication : Application() {
     
     override fun onCreate() {
         super.onCreate()
-        
+
         // 初始化 Repository 单例
         repository = EcoGoRepository()
 

@@ -19,17 +19,12 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // 设置全局异常处理器
+        // 设置全局异常处理器 - 保存默认处理器作为后备
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             Log.e("CRASH_HANDLER", "Uncaught exception in thread ${thread.name}: ${throwable.message}", throwable)
-            android.os.Handler(mainLooper).post {
-                Toast.makeText(this, "应用崩溃: ${throwable.message}", Toast.LENGTH_LONG).show()
-            }
-            // 给Toast一些时间显示
-            Thread.sleep(2000)
-            // 让默认处理器处理（这会关闭应用）
-            android.os.Process.killProcess(android.os.Process.myPid())
-            System.exit(1)
+            // 让默认处理器处理（系统会负责显示崩溃对话框并关闭应用）
+            defaultHandler?.uncaughtException(thread, throwable)
         }
         
         Log.d("DEBUG_MAIN", "MainActivity onCreate started")
