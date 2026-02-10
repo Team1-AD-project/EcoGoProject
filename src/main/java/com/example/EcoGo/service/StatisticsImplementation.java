@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.util.*;
@@ -29,7 +30,6 @@ public class StatisticsImplementation implements StatisticsInterface {
     private UserRepository userRepository;
     @Autowired
     private TripRepository tripRepository;
-
     @Override
     public AnalyticsSummaryDto getManagementAnalytics(String timeRange) {
         log.info("[getManagementAnalytics] Called with timeRange={}", timeRange);
@@ -150,4 +150,5 @@ public class StatisticsImplementation implements StatisticsInterface {
     public Long getRedemptionVolume() {
         return 0L;
     }
+
 }
