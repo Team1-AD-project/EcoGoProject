@@ -8,9 +8,9 @@ export interface AdminAction {
 
 export interface PointsTransaction {
     id: string;
-    change_type: 'gain' | 'loss';
+    change_type: 'gain' | 'deduct';
     points: number;
-    source: 'trip' | 'badge' | 'admin' | 'store';
+    source: 'trip' | 'badge' | 'admin' | 'store' | 'leaderboard' | 'challenges';
     description: string | null;
     balance_after: number;
     created_at: string;
@@ -44,5 +44,11 @@ export const fetchUserTransactions = async (userId: string): Promise<Transaction
 // Fetch global points summary
 export const fetchPointsSummary = async (): Promise<PointsSummaryResponse> => {
     const response = await api.get<PointsSummaryResponse>('/points/all');
+    return response.data;
+};
+
+// Fetch all points history (all users) for analytics
+export const fetchAllPointsHistory = async (): Promise<TransactionListResponse> => {
+    const response = await api.get<TransactionListResponse>('/points/history/all');
     return response.data;
 };

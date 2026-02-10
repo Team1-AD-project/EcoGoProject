@@ -19,7 +19,7 @@ import { fetchAllTrips, type TripSummary } from '@/services/tripService';
 import { getFacultyRankings, getRankingsByType, type FacultyCarbonResponse, type LeaderboardStatsDto } from '@/api/leaderboardApi';
 import { fetchRewards, fetchOrders, type Reward, type Order } from '@/services/rewardService';
 import { getBadgePurchaseStats, getAllBadges, type BadgePurchaseStat, type Badge } from '@/api/collectiblesApi';
-import { fetchPointsSummary, type PointsSummary } from '@/services/pointsService';
+import { fetchPointsSummary, fetchAllPointsHistory, type PointsSummary, type PointsTransaction } from '@/services/pointsService';
 import { challengeApi, type Challenge } from '@/api/challengeApi';
 import { fetchUserList, type User } from '@/services/userService';
 
@@ -109,6 +109,7 @@ export function AnalyticsManagement() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [totalUserCount, setTotalUserCount] = useState(0);
+  const [pointsLogs, setPointsLogs] = useState<PointsTransaction[]>([]);
 
   useEffect(() => {
     const fetchAll = async () => {
@@ -116,7 +117,7 @@ export function AnalyticsManagement() {
         setLoading(true);
         setError(null);
         const toArr = <T,>(v: unknown): T[] => Array.isArray(v) ? v : [];
-        const [ana, trp, fac, lb, rew, bs, bg, ps, ch, ord, ul] = await Promise.all([
+        const [ana, trp, fac, lb, rew, bs, bg, ps, ch, ord, ul, pl] = await Promise.all([
           getManagementAnalytics(timeRange).catch(e => { console.warn('[Analytics] management-analytics failed:', e); return null; }),
           fetchAllTrips().catch(e => { console.warn('[Analytics] fetchAllTrips failed:', e); return [] as TripSummary[]; }),
           getFacultyRankings().catch(e => { console.warn('[Analytics] facultyRankings failed:', e); return [] as FacultyCarbonResponse[]; }),
@@ -128,8 +129,9 @@ export function AnalyticsManagement() {
           challengeApi.getAllChallenges().then(r => toArr<Challenge>(r)).catch(e => { console.warn('[Analytics] challenges failed:', e); return [] as Challenge[]; }),
           fetchOrders(1, 200).then(r => toArr<Order>(r?.data?.orders)).catch(e => { console.warn('[Analytics] orders failed:', e); return [] as Order[]; }),
           fetchUserList(1, 500).catch(e => { console.warn('[Analytics] userList failed:', e); return null; }),
+          fetchAllPointsHistory().then(r => toArr<PointsTransaction>(r?.data)).catch(e => { console.warn('[Analytics] pointsLogs failed:', e); return [] as PointsTransaction[]; }),
         ]);
-        console.log('[Analytics] Results:', { ana, trp: trp?.length, fac: fac?.length, lb, rew: rew?.length, bs: bs?.length, bg: bg?.length, ps: ps?.length, ch: ch?.length, ord: ord?.length, users: ul?.data?.total });
+        console.log('[Analytics] Results:', { ana, trp: trp?.length, fac: fac?.length, lb, rew: rew?.length, bs: bs?.length, bg: bg?.length, ps: ps?.length, ch: ch?.length, ord: ord?.length, users: ul?.data?.total, pl: pl?.length });
         setAnalyticsData(ana);
         setTrips(toArr<TripSummary>(trp));
         setFacultyRankings(toArr<FacultyCarbonResponse>(fac));
@@ -142,6 +144,7 @@ export function AnalyticsManagement() {
         setOrders(ord);
         setUsers(toArr<User>(ul?.data?.list));
         setTotalUserCount(ul?.data?.total || 0);
+        setPointsLogs(pl);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to load analytics');
       } finally {
@@ -296,14 +299,23 @@ export function AnalyticsManagement() {
   }, [challenges]);
 
   const pointsEconomy = useMemo(() => {
-    let earned = 0, remaining = 0;
-    pointsSummary.forEach(p => { earned += p.totalPoints; remaining += p.currentPoints; });
+    let earned = 0;
+    let spent = 0;
+
+    pointsLogs.forEach(log => {
+      if (log.change_type === 'gain') {
+        earned += Math.abs(log.points);
+      } else if (log.change_type === 'deduct') {
+        spent += Math.abs(log.points);
+      }
+    });
+
     return [
       { name: 'Total Earned', value: earned },
-      { name: 'Remaining', value: remaining },
-      { name: 'Spent', value: earned - remaining },
+      { name: 'Remaining', value: earned - spent },
+      { name: 'Spent', value: spent },
     ];
-  }, [pointsSummary]);
+  }, [pointsLogs]);
 
   const nonAdminUsers = useMemo(() =>
     users.filter(u => !u.admin && !u.isAdmin),
