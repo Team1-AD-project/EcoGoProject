@@ -74,8 +74,6 @@ const CHART_NAMES = [
   'Challenge Type Distribution',
   'VIP Membership Distribution',
   'Points Economy Overview',
-  'Order Status Distribution',
-  'Revenue Trends',
 ];
 
 const CHART_SECTIONS: { label: string; start: number; end: number }[] = [
@@ -85,7 +83,7 @@ const CHART_SECTIONS: { label: string; start: number; end: number }[] = [
   { label: 'Products & Collectibles', start: 8, end: 11 },
   { label: 'Distribution', start: 11, end: 13 },
   { label: 'Challenges', start: 13, end: 15 },
-  { label: 'Economy & Status', start: 15, end: 19 },
+  { label: 'Economy & Status', start: 15, end: 17 },
 ];
 
 export function AnalyticsManagement() {
@@ -98,7 +96,7 @@ export function AnalyticsManagement() {
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   });
 
-  const [analyticsData, setAnalyticsData] = useState<ManagementAnalyticsData | null>(null);
+  const [, setAnalyticsData] = useState<ManagementAnalyticsData | null>(null);
   const [trips, setTrips] = useState<TripSummary[]>([]);
   const [facultyRankings, setFacultyRankings] = useState<FacultyCarbonResponse[]>([]);
   const [leaderboardData, setLeaderboardData] = useState<LeaderboardStatsDto | null>(null);
@@ -335,12 +333,6 @@ export function AnalyticsManagement() {
       { name: 'Non-VIP', value: nonVip },
     ];
   }, [nonAdminUsers]);
-
-  const orderStatusDist = useMemo(() => {
-    const map: Record<string, number> = {};
-    orders.forEach(o => { map[o.status] = (map[o.status] || 0) + 1; });
-    return Object.entries(map).map(([name, value]) => ({ name, value }));
-  }, [orders]);
 
   const greenTripRate = trips.length > 0 ? Math.round((trips.filter(t => t.isGreenTrip).length / trips.length) * 100) : 0;
   const totalPointsSpent = pointsEconomy.find(p => p.name === 'Spent')?.value || 0;
@@ -663,30 +655,6 @@ export function AnalyticsManagement() {
               <Cell fill="#3b82f6" />
               <Cell fill="#f59e0b" />
             </Bar>
-          </BarChart>
-        </ResponsiveContainer>
-      );
-      case 17: return (
-        <ResponsiveContainer width="100%" height={H}>
-          <PieChart>
-            <Pie data={orderStatusDist} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={130} label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}>
-              {orderStatusDist.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-            </Pie>
-            <Tooltip />
-            <Legend />
-          </PieChart>
-        </ResponsiveContainer>
-      );
-      case 18: return (
-        <ResponsiveContainer width="100%" height={H}>
-          <BarChart data={analyticsData?.revenueGrowthTrend || []}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <XAxis dataKey="date" stroke="#6b7280" tick={{ fontSize: 12 }} />
-            <YAxis stroke="#6b7280" />
-            <Tooltip contentStyle={tooltipStyle} />
-            <Legend />
-            <Bar dataKey="vipRevenue" fill="#8b5cf6" name="VIP Points" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="shopRevenue" fill="#ec4899" name="Shop Points" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       );
