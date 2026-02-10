@@ -72,6 +72,8 @@ public class BadgeServiceImpl implements BadgeService {
         newBadge.setUnlockedAt(new Date());
         newBadge.setDisplay(false); // 默认不佩戴
         newBadge.setCreatedAt(new Date());
+        newBadge.setCategory(badge.getCategory());
+        newBadge.setSubcategory(badge.getSubCategory());
 
         return userBadgeRepository.save(newBadge);
     }
@@ -236,6 +238,8 @@ public class BadgeServiceImpl implements BadgeService {
                 newBadge.setUnlockedAt(new Date());
                 newBadge.setDisplay(false);
                 newBadge.setCreatedAt(new Date());
+                newBadge.setCategory(badge.getCategory());
+                newBadge.setSubcategory(badge.getSubCategory());
                 newlyUnlocked.add(userBadgeRepository.save(newBadge));
             }
         }
