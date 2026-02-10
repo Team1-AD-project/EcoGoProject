@@ -240,21 +240,7 @@ public class PointsServiceImpl implements PointsService {
         // log)
         adjustPoints(userId, points, "trip", description, request.tripId, null);
 
-        // 4. Update User.Stats cache
-        User user = userRepository.findByUserid(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        User.Stats stats = user.getStats();
-        if (stats == null) {
-            stats = new User.Stats();
-        }
-        stats.setTotalTrips(stats.getTotalTrips() + 1);
-        stats.setTotalDistance(stats.getTotalDistance() + request.distance);
-        stats.setTotalPointsFromTrips(stats.getTotalPointsFromTrips() + points);
-        if (request.isGreenTrip) {
-            stats.setGreenDays(stats.getGreenDays() + 1);
-        }
-        user.setStats(stats);
-        userRepository.save(user);
+        // 4. Update User.Stats cache (REMOVED: User.Stats is deprecated/unused object)
     }
 
     @Override
