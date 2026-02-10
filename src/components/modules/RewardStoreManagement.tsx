@@ -88,10 +88,43 @@ export function RewardStoreManagement() {
   const [activeTab, setActiveTab] = useState('products');
   const [filterCategory, setFilterCategory] = useState<string>('all');
 
+  // Real-time Sold Counts from Orders
+  const [soldCounts, setSoldCounts] = useState<Record<string, number>>({});
+  const [totalPointsRedeemed, setTotalPointsRedeemed] = useState(0);
+
   useEffect(() => {
     loadRewards();
     loadCategories();
+    loadSalesData();
   }, [page]);
+
+  const loadSalesData = async () => {
+    try {
+      // Fetch a large batch of orders to aggregate sales
+      // In a real app with thousands of orders, this should be a backend endpoint.
+      const response = await fetchOrders(1, 1000);
+      if (response && response.code === 200) {
+        const allOrders = response.data.orders || [];
+        const counts: Record<string, number> = {};
+        let totalPoints = 0;
+
+        allOrders.forEach(order => {
+          if (order.status === 'COMPLETED') {
+            totalPoints += (order.pointsUsed || 0);
+            if (order.items) {
+              order.items.forEach(item => {
+                counts[item.goodsId] = (counts[item.goodsId] || 0) + item.quantity;
+              });
+            }
+          }
+        });
+        setSoldCounts(counts);
+        setTotalPointsRedeemed(totalPoints);
+      }
+    } catch (e) {
+      console.error("Failed to load sales data", e);
+    }
+  };
 
   useEffect(() => {
     loadVouchers();
@@ -132,6 +165,9 @@ export function RewardStoreManagement() {
             setVouchersTotalPages(responseData.totalPages || 1);
           }
         }
+
+
+
         // Ensure ID mapping is robust
         const mappedList = list.map((item: any) => ({
           ...item,
@@ -176,6 +212,8 @@ export function RewardStoreManagement() {
             setTotalPages(responseData.totalPages || 1);
           }
         }
+
+
         // Ensure ID mapping is robust
         const mappedList = list.map((item: any) => ({
           ...item,
@@ -329,10 +367,9 @@ export function RewardStoreManagement() {
   };
 
   // Stats
-  const totalRedemptions = (rewards || []).reduce((sum, r) => sum + (r.totalRedemptionCount || 0), 0);
+  const totalRedemptions = Object.values(soldCounts).reduce((sum, count) => sum + count, 0);
   const lowStockCount = (rewards || []).filter(r => r.stock < 10).length;
-  // Total Revenue in Points (Approximate based on current loaded page)
-  const estimatedRevenue = (rewards || []).reduce((sum, r) => sum + ((r.totalRedemptionCount || 0) * (r.redemptionPoints || 0)), 0);
+
 
   const getOrderStatusBadge = (status: string) => {
     switch (status) {
@@ -376,9 +413,9 @@ export function RewardStoreManagement() {
             <div className="flex items-center gap-3 mb-2">
               <TrendingUp className="size-8" />
             </div>
-            <p className="text-sm opacity-90 mb-1">Est. Revenue (Page)</p>
-            <p className="text-3xl font-bold">{estimatedRevenue.toLocaleString()}</p>
-            <p className="text-xs opacity-75 mt-1">points</p>
+            <p className="text-sm opacity-90 mb-1">Total Points Redeemed</p>
+            <p className="text-3xl font-bold">{totalPointsRedeemed.toLocaleString()}</p>
+            <p className="text-xs opacity-75 mt-1">consumed by users</p>
           </Card>
 
           <Card className="p-4 bg-gradient-to-br from-orange-500 to-orange-600 text-white">
@@ -463,7 +500,7 @@ export function RewardStoreManagement() {
                         </div>
                         <div className="flex items-center justify-between text-base">
                           <span className="text-gray-600">Sold:</span>
-                          <span className="font-bold text-green-600">{reward.totalRedemptionCount}</span>
+                          <span className="font-bold text-green-600">{soldCounts[reward.id] || 0}</span>
                         </div>
                         <div className="flex items-center justify-between pt-3 mt-2 border-t text-base">
                           <span className="text-gray-600">Category:</span>
@@ -595,7 +632,7 @@ export function RewardStoreManagement() {
                         </div>
                         <div className="flex items-center justify-between text-base">
                           <span className="text-gray-600">Sold:</span>
-                          <span className="font-bold text-green-600">{voucher.totalRedemptionCount}</span>
+                          <span className="font-bold text-green-600">{soldCounts[voucher.id] || 0}</span>
                         </div>
                         <div className="flex items-center justify-between pt-3 mt-2 border-t text-base">
                           <span className="text-gray-600">Category:</span>
