@@ -32,7 +32,6 @@ import com.ecogo.ui.adapters.FacultyOutfitGridAdapter
 import com.ecogo.ui.adapters.ShopItemAdapter
 import com.ecogo.ui.adapters.ShopListItem
 import com.ecogo.utils.DataMapper
-import com.ecogo.utils.DataMapper.toOutfit
 import com.ecogo.utils.LoadingDialog
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
@@ -43,27 +42,21 @@ class ProfileFragment : Fragment() {
     private val binding get() = _binding!!
     private val repository = EcoGoRepository()
 
-    // ⭐ Badge & Cloth API Repository
     private lateinit var badgeClothRepository: BadgeClothRepository
     private lateinit var loadingDialog: LoadingDialog
     private var currentUserId: String = ""
 
-    // ⭐ 缓存服务器数据
     private var shopItems = mutableListOf<BadgeDto>()
     private var userItems = mutableListOf<UserBadgeDto>()
 
-    // 状态管理
-    private var currentPoints = 1250
-    private val inventory = mutableListOf("hat_grad", "shirt_nus")
-    private val currentOutfit = mutableMapOf(
-        "head" to "none",
-        "face" to "none",
-        "body" to "shirt_nus",
-        "badge" to "none"
-    )
+    // ✅ 所有状态都从服务器加载
+    private var currentPoints = 0
+    private val inventory = mutableListOf<String>()
+    private val currentOutfit = mutableMapOf<String, String>()
 
-    private val userFacultyId = "soc"
-    private val ownedFaculties = mutableSetOf("soc")
+    // ✅ 删除写死的 userFacultyId，从服务器获取
+    private var userFacultyId: String = ""
+    private val ownedFaculties = mutableSetOf<String>()
 
     private var closetDialog: Dialog? = null
     private var closetAdapter: ShopItemAdapter? = null
@@ -93,7 +86,6 @@ class ProfileFragment : Fragment() {
         loadingDialog = LoadingDialog(requireContext())
 
         setupUI()
-        grantUserFacultyOutfitIfNeeded()
         setupClosetEntry()
         setupBadgeEntry()
         setupBadgeRecyclerView()
@@ -102,7 +94,7 @@ class ProfileFragment : Fragment() {
         setupActions()
         loadUserProfile()
 
-        Log.d("ProfileFragment", "Profile screen initialized with ${inventory.size} owned items")
+        Log.d("ProfileFragment", "Profile screen initialized")
     }
 
     private fun loadUserProfile() {
@@ -119,14 +111,15 @@ class ProfileFragment : Fragment() {
                     binding.textPoints.text = currentPoints.toString()
                     binding.textName.text = userInfo.nickname
 
+                    // ✅ 从服务器获取 faculty
                     userInfo.faculty?.let { faculty ->
+                        userFacultyId = faculty.lowercase()  // "SOC" -> "soc"
                         binding.textFaculty.text = "$faculty • Year 2"
                     }
 
-                    Log.d("ProfileFragment", "Loaded profile: ${userInfo.nickname}, ID: $currentUserId, pts: $currentPoints")
+                    Log.d("ProfileFragment", "Loaded profile: ${userInfo.nickname}, ID: $currentUserId, Faculty: $userFacultyId, pts: $currentPoints")
 
                     loadBadgesAndCloths()
-                    loadUserOutfit()
                 }
             } catch (e: Exception) {
                 Log.e("ProfileFragment", "Error loading profile", e)
@@ -154,24 +147,39 @@ class ProfileFragment : Fragment() {
                 shopResult.onSuccess { items ->
                     shopItems.clear()
                     shopItems.addAll(items)
-                    Log.d("ProfileFragment", "Loaded ${items.size} shop items (badges: ${items.count { it.category == "badge" }}, cloths: ${items.count { it.category == "cloth" }})")
+                    Log.d("ProfileFragment", "✅ Loaded ${items.size} shop items (badges: ${items.count { it.category == "badge" }}, cloths: ${items.count { it.category == "cloth" }})")
                 }.onFailure { error ->
-                    Log.e("ProfileFragment", "Failed to load shop", error)
+                    Log.e("ProfileFragment", "❌ Failed to load shop", error)
                     shopItems.clear()
                 }
 
                 userResult.onSuccess { items ->
                     userItems.clear()
                     userItems.addAll(items)
-                    Log.d("ProfileFragment", "Loaded ${items.size} user items")
+                    Log.d("ProfileFragment", "✅ Loaded ${items.size} user items, ${items.count { it.isDisplay }} equipped")
                 }.onFailure { error ->
-                    Log.e("ProfileFragment", "Failed to load user items", error)
+                    Log.e("ProfileFragment", "❌ Failed to load user items", error)
+                    userItems.clear()
                 }
 
                 inventory.clear()
                 inventory.addAll(userItems.map { it.badgeId })
+                Log.d("ProfileFragment", "✅ Updated inventory: ${inventory.size} items")
+
+                if (currentOutfit.isEmpty()) {
+                    currentOutfit["head"] = "none"
+                    currentOutfit["face"] = "none"
+                    currentOutfit["body"] = "none"
+                    currentOutfit["badge"] = "none"
+                    Log.d("ProfileFragment", "✅ Initialized currentOutfit with defaults")
+                }
+
+                if (shopItems.isNotEmpty() && userItems.isNotEmpty()) {
+                    restoreOutfitFromServer()
+                }
 
                 updateBadgeEntry()
+                updateClosetPreview()
                 loadingDialog.dismiss()
 
             } catch (e: Exception) {
@@ -182,51 +190,61 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun loadUserOutfit() {
-        if (currentUserId.isEmpty()) return
+    private fun restoreOutfitFromServer() {
+        Log.d("ProfileFragment", "🔄 Restoring outfit from server...")
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            try {
-                val result = badgeClothRepository.getUserOutfit(currentUserId)
-                result.onSuccess { outfitDto ->
-                    val outfit = outfitDto.toOutfit()
+        val shopMap = shopItems.associateBy { it.badgeId }
+        val displayedItems = userItems.filter { it.isDisplay }
 
-                    currentOutfit["head"] = outfit.head
-                    currentOutfit["face"] = outfit.face
-                    currentOutfit["body"] = outfit.body
-                    currentOutfit["badge"] = outfit.badge
+        Log.d("ProfileFragment", "Found ${displayedItems.size} displayed items: ${displayedItems.map { it.badgeId }}")
 
-                    updateMascotOutfit()
-                    updateClosetPreview()
+        currentOutfit["head"] = "none"
+        currentOutfit["face"] = "none"
+        currentOutfit["body"] = "none"
+        currentOutfit["badge"] = "none"
 
-                    Log.d("ProfileFragment", "Loaded outfit: $outfit")
-                }.onFailure { error ->
-                    Log.e("ProfileFragment", "Failed to load outfit", error)
+        displayedItems.forEach { userItem ->
+            val shopItem = shopMap[userItem.badgeId]
+
+            if (shopItem == null) {
+                Log.w("ProfileFragment", "⚠️ Shop item not found for: ${userItem.badgeId}")
+                return@forEach
+            }
+
+            when {
+                shopItem.category == "cloth" && shopItem.subCategory == "head" -> {
+                    currentOutfit["head"] = userItem.badgeId
+                    Log.d("ProfileFragment", "✅ Restored head: ${userItem.badgeId}")
                 }
-            } catch (e: Exception) {
-                Log.e("ProfileFragment", "Error loading outfit", e)
+                shopItem.category == "cloth" && shopItem.subCategory == "face" -> {
+                    currentOutfit["face"] = userItem.badgeId
+                    Log.d("ProfileFragment", "✅ Restored face: ${userItem.badgeId}")
+                }
+                shopItem.category == "cloth" && shopItem.subCategory == "body" -> {
+                    currentOutfit["body"] = userItem.badgeId
+                    Log.d("ProfileFragment", "✅ Restored body: ${userItem.badgeId}")
+                }
+                shopItem.category == "badge" && shopItem.subCategory == "rank" -> {
+                    currentOutfit["badge"] = userItem.badgeId
+                    Log.d("ProfileFragment", "✅ Restored badge: ${userItem.badgeId}")
+                }
+                else -> {
+                    Log.w("ProfileFragment", "⚠️ Unknown item type: badgeId=${userItem.badgeId}, category=${shopItem.category}, subCategory=${shopItem.subCategory}")
+                }
             }
         }
+
+        updateMascotOutfit()
+        updateClosetPreview()
+
+        Log.d("ProfileFragment", "🎉 Final outfit: head=${currentOutfit["head"]}, face=${currentOutfit["face"]}, body=${currentOutfit["body"]}, badge=${currentOutfit["badge"]}")
     }
 
     private fun setupUI() {
-        binding.textPoints.text = currentPoints.toString()
-        binding.textName.text = "Alex Tan"
-        binding.textFaculty.text = "Computer Science • Year 2"
-        updateMascotOutfit()
-        updateBadgeEntry()
-    }
-
-    private fun grantUserFacultyOutfitIfNeeded() {
-        val faculty = MockData.FACULTY_DATA.find { it.id == userFacultyId } ?: return
-        ownedFaculties.add(faculty.id)
-        if (faculty.outfit.head != "none") inventory.add(faculty.outfit.head)
-        if (faculty.outfit.face != "none") inventory.add(faculty.outfit.face)
-        if (faculty.outfit.body != "none") inventory.add(faculty.outfit.body)
+        // ✅ 不设置任何占位符，等数据加载完成后再更新
     }
 
     private fun setupClosetEntry() {
-        updateClosetPreview()
         binding.cardCloset.setOnClickListener {
             showClosetDialog()
         }
@@ -234,16 +252,16 @@ class ProfileFragment : Fragment() {
 
     private fun updateClosetPreview() {
         binding.mascotClosetPreview.outfit = Outfit(
-            head = currentOutfit["head"] ?: "none",
-            face = currentOutfit["face"] ?: "none",
-            body = currentOutfit["body"] ?: "none",
-            badge = currentOutfit["badge"] ?: "none"
+            head = currentOutfit.getOrDefault("head", "none"),
+            face = currentOutfit.getOrDefault("face", "none"),
+            body = currentOutfit.getOrDefault("body", "none"),
+            badge = currentOutfit.getOrDefault("badge", "none")
         )
 
         val totalCloths = if (shopItems.isNotEmpty()) {
             shopItems.count { it.category == "cloth" }
         } else {
-            MockData.SHOP_ITEMS.size
+            0
         }
         binding.textClosetDesc.text = "Browse & equip $totalCloths outfits"
     }
@@ -349,15 +367,15 @@ class ProfileFragment : Fragment() {
 
     private fun updateClosetMascot() {
         closetMascot?.outfit = Outfit(
-            head = currentOutfit["head"] ?: "none",
-            face = currentOutfit["face"] ?: "none",
-            body = currentOutfit["body"] ?: "none",
-            badge = currentOutfit["badge"] ?: "none"
+            head = currentOutfit.getOrDefault("head", "none"),
+            face = currentOutfit.getOrDefault("face", "none"),
+            body = currentOutfit.getOrDefault("body", "none"),
+            badge = currentOutfit.getOrDefault("badge", "none")
         )
         val parts = mutableListOf<String>()
-        val head = currentOutfit["head"] ?: "none"
-        val face = currentOutfit["face"] ?: "none"
-        val body = currentOutfit["body"] ?: "none"
+        val head = currentOutfit.getOrDefault("head", "none")
+        val face = currentOutfit.getOrDefault("face", "none")
+        val body = currentOutfit.getOrDefault("body", "none")
         if (head != "none") parts.add(getItemShortName(head))
         if (face != "none") parts.add(getItemShortName(face))
         if (body != "none") parts.add(getItemShortName(body))
@@ -522,12 +540,8 @@ class ProfileFragment : Fragment() {
                 userItems
             )
         } else {
-            MockData.SHOP_ITEMS.map { item ->
-                item.copy(
-                    owned = inventory.contains(item.id),
-                    equipped = currentOutfit[item.type] == item.id
-                )
-            }
+            // ✅ 如果没有服务器数据，返回空列表而不是 MockData
+            emptyList()
         }
 
         val result = mutableListOf<ShopListItem>()
@@ -693,42 +707,12 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    private fun purchaseAndEquipItem(item: ShopItem) {
-        if (currentPoints < item.cost) {
-            Toast.makeText(
-                requireContext(),
-                "Not enough points! Need ${item.cost} pts",
-                Toast.LENGTH_SHORT
-            ).show()
-            Log.d("ProfileFragment", "Insufficient points for ${item.name}")
-            return
-        }
-
-        currentPoints -= item.cost
-        binding.textPoints.text = currentPoints.toString()
-        if (!inventory.contains(item.id)) inventory.add(item.id)
-        currentOutfit[item.type] = item.id
-
-        refreshShopAdapter()
-        updateMascotOutfit()
-        updateClosetPreview()
-        closetAdapter?.updateItems(getShopItemsGrouped())
-        updateClosetMascot()
-
-        showSuccessDialog("Bought & Equipped ${item.name}!", "-${item.cost} pts")
-
-        val popIn = AnimationUtils.loadAnimation(requireContext(), R.anim.pop_in)
-        binding.cardMascot.startAnimation(popIn)
-
-        Log.d("ProfileFragment", "Purchased ${item.name} for ${item.cost} pts")
-    }
-
     private fun updateMascotOutfit() {
         binding.mascotLion.outfit = Outfit(
-            head = currentOutfit["head"] ?: "none",
-            face = currentOutfit["face"] ?: "none",
-            body = currentOutfit["body"] ?: "none",
-            badge = currentOutfit["badge"] ?: "none"
+            head = currentOutfit.getOrDefault("head", "none"),
+            face = currentOutfit.getOrDefault("face", "none"),
+            body = currentOutfit.getOrDefault("body", "none"),
+            badge = currentOutfit.getOrDefault("badge", "none")
         )
     }
 
@@ -760,24 +744,23 @@ class ProfileFragment : Fragment() {
         dialog.window?.attributes?.windowAnimations = R.style.DialogAnimation
     }
 
-    // ⭐ 修改：updateBadgeEntry - 使用服务器数据
     private fun updateBadgeEntry() {
         val totalBadges = if (shopItems.isNotEmpty()) {
             shopItems.count { it.category == "badge" }
         } else {
-            MockData.ACHIEVEMENTS.size
+            0  // ✅ 改为 0，从服务器加载
         }
 
         val unlockedBadges = if (userItems.isNotEmpty()) {
             val badgeIds = shopItems.filter { it.category == "badge" }.map { it.badgeId }
             userItems.count { it.badgeId in badgeIds }
         } else {
-            MockData.ACHIEVEMENTS.count { it.unlocked }
+            0  // ✅ 改为 0，从服务器加载
         }
 
         binding.textBadgeCount.text = "$unlockedBadges / $totalBadges unlocked"
 
-        val equippedBadgeId = currentOutfit["badge"] ?: "none"
+        val equippedBadgeId = currentOutfit.getOrDefault("badge", "none")
         val previewEmoji = if (equippedBadgeId != "none") {
             getBadgeEmoji(equippedBadgeId)
         } else {
@@ -792,7 +775,6 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // ⭐ 修改：showBadgesDialog - 使用服务器数据
     private fun showBadgesDialog() {
         val dialog = Dialog(requireContext(), android.R.style.Theme_Black_NoTitleBar_Fullscreen)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
@@ -812,29 +794,28 @@ class ProfileFragment : Fragment() {
         btnClose.setOnClickListener { dialog.dismiss() }
 
         mascot.outfit = Outfit(
-            head = currentOutfit["head"] ?: "none",
-            face = currentOutfit["face"] ?: "none",
-            body = currentOutfit["body"] ?: "none",
-            badge = currentOutfit["badge"] ?: "none"
+            head = currentOutfit.getOrDefault("head", "none"),
+            face = currentOutfit.getOrDefault("face", "none"),
+            body = currentOutfit.getOrDefault("body", "none"),
+            badge = currentOutfit.getOrDefault("badge", "none")
         )
 
-        val equippedBadge = currentOutfit["badge"] ?: "none"
+        val equippedBadge = currentOutfit.getOrDefault("badge", "none")
         if (equippedBadge != "none") {
-            // ⭐ 从服务器数据获取 badge 名称
             val badge = shopItems.find { it.badgeId == equippedBadge }
             badgeLabel.text = badge?.name?.get("en") ?: "Current Badge"
         } else {
             badgeLabel.text = "No Badge Equipped"
         }
 
-        // ⭐ 使用服务器数据构建 Achievement 列表
         val achievements = if (shopItems.isNotEmpty()) {
             DataMapper.mergeBadgeData(
                 shopItems.filter { it.category == "badge" },
                 userItems
             )
         } else {
-            MockData.ACHIEVEMENTS
+            // ✅ 如果没有服务器数据，返回空列表
+            emptyList()
         }
 
         val sortedAchievements = achievements.sortedByDescending { it.unlocked }
@@ -855,19 +836,17 @@ class ProfileFragment : Fragment() {
     private fun setupBadgeRecyclerView() {
     }
 
-    // ⭐ 修改：handleBadgeClick - 使用服务器数据
     private fun handleBadgeClick(
         badgeId: String,
         parentDialog: Dialog? = null,
         mascot: com.ecogo.ui.views.MascotLionView? = null,
         badgeLabel: TextView? = null
     ) {
-        // ⭐ 从服务器数据获取 badge
         val badgeDto = shopItems.find { it.badgeId == badgeId }
         val achievement = if (badgeDto != null) {
             DataMapper.mergeBadgeData(listOf(badgeDto), userItems).firstOrNull()
         } else {
-            MockData.ACHIEVEMENTS.find { it.id == badgeId }
+            null  // ✅ 如果没找到，返回 null
         }
 
         if (achievement != null) {
@@ -875,7 +854,6 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // ⭐ 修改：showBadgeDetailDialog - 支持购买和装备
     private fun showBadgeDetailDialog(
         achievement: Achievement,
         parentDialog: Dialog? = null,
@@ -907,7 +885,6 @@ class ProfileFragment : Fragment() {
         val isEquipped = currentOutfit["badge"] == achievement.id
         val isUnlocked = achievement.unlocked
 
-        // ⭐ 获取 badge 的购买信息
         val badgeDto = shopItems.find { it.badgeId == achievement.id }
         val canPurchase = badgeDto?.acquisitionMethod == "purchase" && badgeDto.purchaseCost != null
 
@@ -964,7 +941,6 @@ class ProfileFragment : Fragment() {
         dialog.show()
     }
 
-    // ⭐ 新增：购买 Badge API
     private fun purchaseBadgeWithApi(
         badgeDto: BadgeDto,
         parentDialog: Dialog?,
@@ -995,7 +971,6 @@ class ProfileFragment : Fragment() {
 
                     loadingDialog.dismiss()
 
-                    // 购买后自动装备
                     equipBadgeWithApi(badgeDto.badgeId, parentDialog, mascot, badgeLabel, detailDialog)
 
                     showSuccessDialog("Unlocked ${badgeDto.name?.get("en")}!", "-$cost pts")
@@ -1012,7 +987,6 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // ⭐ 新增：装备 Badge API
     private fun equipBadgeWithApi(
         badgeId: String,
         parentDialog: Dialog?,
@@ -1029,7 +1003,6 @@ class ProfileFragment : Fragment() {
                 result.onSuccess { updatedUserBadge ->
                     currentOutfit["badge"] = badgeId
 
-                    // 更新用户背包（卸下其他同类徽章）
                     userItems.forEachIndexed { index, userBadge ->
                         val shopItem = shopItems.find { it.badgeId == userBadge.badgeId }
                         if (userBadge.badgeId != badgeId && shopItem?.category == "badge") {
@@ -1046,9 +1019,9 @@ class ProfileFragment : Fragment() {
                     updateBadgeEntry()
 
                     mascot?.outfit = Outfit(
-                        head = currentOutfit["head"] ?: "none",
-                        face = currentOutfit["face"] ?: "none",
-                        body = currentOutfit["body"] ?: "none",
+                        head = currentOutfit.getOrDefault("head", "none"),
+                        face = currentOutfit.getOrDefault("face", "none"),
+                        body = currentOutfit.getOrDefault("body", "none"),
                         badge = badgeId
                     )
 
@@ -1072,7 +1045,6 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // ⭐ 新增：卸下 Badge API
     private fun unequipBadgeWithApi(
         badgeId: String,
         parentDialog: Dialog?,
@@ -1098,9 +1070,9 @@ class ProfileFragment : Fragment() {
                     updateBadgeEntry()
 
                     mascot?.outfit = Outfit(
-                        head = currentOutfit["head"] ?: "none",
-                        face = currentOutfit["face"] ?: "none",
-                        body = currentOutfit["body"] ?: "none",
+                        head = currentOutfit.getOrDefault("head", "none"),
+                        face = currentOutfit.getOrDefault("face", "none"),
+                        body = currentOutfit.getOrDefault("body", "none"),
                         badge = "none"
                     )
                     badgeLabel?.text = "No Badge Equipped"
@@ -1122,21 +1094,17 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // ⭐ 修改：getBadgeEmoji - 支持数据库 ID
     private fun getBadgeEmoji(id: String): String = when (id) {
-        // 支持数据库 ID
-        "badge_c1" -> "🌱"   // Eco Starter
-        "badge_c2" -> "🚶"   // Green Walker
-        "badge_c3" -> "♻️"   // Carbon Cutter
-        "badge_c4" -> "🌳"   // Nature Friend
-        "badge_c5" -> "🚌"   // Bus Rider
-        "badge_c6" -> "🌍"   // Planet Saver
-        "badge_c7" -> "⚡"   // Eco Warrior
-        "badge_c8" -> "🦸"   // Climate Hero
-        "badge_c9" -> "👑"   // Sustainability King
-        "badge_c10" -> "🏆"  // Legend of Earth
-
-        // 兼容旧 ID
+        "badge_c1" -> "🌱"
+        "badge_c2" -> "🚶"
+        "badge_c3" -> "♻️"
+        "badge_c4" -> "🌳"
+        "badge_c5" -> "🚌"
+        "badge_c6" -> "🌍"
+        "badge_c7" -> "⚡"
+        "badge_c8" -> "🦸"
+        "badge_c9" -> "👑"
+        "badge_c10" -> "🏆"
         "a1" -> "🌱"
         "a2" -> "🚶"
         "a3" -> "♻️"
@@ -1158,10 +1126,6 @@ class ProfileFragment : Fragment() {
         "a19" -> "🎫"
         "a20" -> "🏆"
         else -> "🏅"
-    }
-
-    private fun refreshBadgeList() {
-        updateBadgeEntry()
     }
 
     private fun setupTabs() {
