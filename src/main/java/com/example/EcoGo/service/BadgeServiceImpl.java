@@ -1,5 +1,6 @@
 package com.example.EcoGo.service;
 
+import com.example.EcoGo.dto.BadgePurchaseStatDto;
 import com.example.EcoGo.dto.PointsDto;
 import com.example.EcoGo.interfacemethods.BadgeService;
 import com.example.EcoGo.interfacemethods.PointsService;
@@ -158,7 +159,7 @@ public class BadgeServiceImpl implements BadgeService {
      * 3. 获取 Badge 购买统计
      * 返回每个 badge 的购买次数，供管理员查看
      */
-    public List<Map<String, Object>> getBadgePurchaseStats() {
+    public List<BadgePurchaseStatDto> getBadgePurchaseStats() {
         return userBadgeRepository.countPurchasesByBadge();
     }
 
