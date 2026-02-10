@@ -74,8 +74,6 @@ public interface PointsService {
 
     void redeemPoints(String userId, String orderId, long points);
 
-    void refundPoints(String userId, String orderId);
-
     // --- Trip Settlement ---
 
     /**

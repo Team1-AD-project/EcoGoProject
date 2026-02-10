@@ -192,34 +192,6 @@ public class PointsServiceImpl implements PointsService {
         adjustPoints(userId, -Math.abs(points), "redeem", description, orderId, null);
     }
 
-    @Override
-    public void refundPoints(String userId, String orderId) {
-        // This is complex. Ideally we find the original deduction log.
-        // For MVP, we'll just add points back with source="refund"
-        // In a real system, we'd look up the transaction amount.
-        // Assuming the caller knows the amount, OR we just support manual admin refund
-        // now.
-        // Wait, the interface didn't pass amount. Let's find the log by
-        // relatedId=orderId?
-        // Simpler approach for now: Refund implies reversing a specific transaction.
-        // But let's assume this method is a placeholder for logical flow.
-        // Since I can't easily find the original amount without relatedId query support
-        // (which I didn't add yet for arbitrary lookup),
-        // I will throw exception or just log for now?
-        // Better: Let's assume the caller passes amount? The interface didn't have
-        // amount.
-        // Let's modify the interface or just use a dummy implementation for now.
-        // Actually, I can use a rudimentary lookup if I added relatedID lookup.
-        // Let's just implement a stub that throws "Not Implemented" for now or fix
-        // interface.
-        // User asked for "Refund Points for Order Cancellation", usually order service
-        // knows amount.
-        // I will change interface to accept amount in next step if needed, but for now
-        // let's just make it a no-op or specific error.
-        throw new BusinessException(ErrorCode.SYSTEM_ERROR,
-                "Refund logic requires amount parameter or transaction lookup");
-    }
-
     // Helper to avoid duplication
     private PointsDto.PointsLogResponse convertToDto(UserPointsLog log) {
         PointsDto.PointsLogResponse dto = new PointsDto.PointsLogResponse();
