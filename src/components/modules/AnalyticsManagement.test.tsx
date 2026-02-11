@@ -24,9 +24,9 @@ vi.mock('@/services/userService', () => ({ fetchUserList: vi.fn() }));
 
 // Mock ResizeObserver
 globalThis.ResizeObserver = class ResizeObserver {
-    observe() { }
-    unobserve() { }
-    disconnect() { }
+    observe() { /* custom implementation or empty for mock */ }
+    unobserve() { /* custom implementation or empty for mock */ }
+    disconnect() { /* custom implementation or empty for mock */ }
 };
 
 // Mock HeatMapView
@@ -327,17 +327,18 @@ describe('AnalyticsManagement Component', () => {
         // Helper to extract chart data from either the container or its children (for Pie charts)
         const getChartData = (chartIndex = 0) => {
             const charts = document.querySelectorAll('.recharts-mock-chart');
-            const chart = charts[chartIndex];
+            const chart = charts[chartIndex] as HTMLElement;
             if (!chart) return [];
 
             // Try getting data from the chart container (LineChart, BarChart, etc.)
-            const containerData = chart.getAttribute('data-chart-data');
+            const containerData = chart.dataset.chartData;
             if (containerData && containerData !== 'undefined') {
                 return JSON.parse(containerData);
             }
 
             // Try getting data from inner components (Pie)
-            const innerData = chart.querySelector('[data-chart-data]')?.getAttribute('data-chart-data');
+            const innerElement = chart.querySelector('[data-chart-data]') as HTMLElement;
+            const innerData = innerElement?.dataset.chartData;
             if (innerData && innerData !== 'undefined') {
                 return JSON.parse(innerData);
             }

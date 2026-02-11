@@ -16,9 +16,9 @@ vi.mock('@/api/advertisementApi', () => ({
 
 // Mock ResizeObserver for Recharts or other responsive components if needed, though AdManagement seems simple
 globalThis.ResizeObserver = class ResizeObserver {
-    observe() { }
-    unobserve() { }
-    disconnect() { }
+    observe() { /* custom implementation or empty for mock */ }
+    unobserve() { /* custom implementation or empty for mock */ }
+    disconnect() { /* custom implementation or empty for mock */ }
 };
 
 describe('AdManagement Component', () => {
@@ -70,7 +70,7 @@ describe('AdManagement Component', () => {
     });
 
     it('renders loading state initially', () => {
-        (advertisementApi.getAllAdvertisements as any).mockReturnValue(new Promise(() => { })); // Never resolves
+        (advertisementApi.getAllAdvertisements as any).mockReturnValue(new Promise(() => { /* intentional no-op */ })); // Never resolves
         render(<AdManagement />);
         expect(screen.getByText('Loading advertisements...')).toBeInTheDocument();
     });
