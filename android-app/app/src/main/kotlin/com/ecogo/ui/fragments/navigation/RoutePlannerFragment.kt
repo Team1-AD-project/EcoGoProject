@@ -1,14 +1,18 @@
 package com.ecogo.ui.fragments.navigation
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecogo.R
+import com.ecogo.api.RetrofitClient
+import com.ecogo.data.LocationType
 import com.ecogo.data.MockData
 import com.ecogo.data.NavLocation
 import com.ecogo.data.TransportMode
@@ -16,9 +20,13 @@ import com.ecogo.databinding.FragmentRoutePlannerBinding
 import com.ecogo.ui.adapters.RouteOptionAdapter
 import com.ecogo.viewmodel.NavigationViewModel
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
- * 路线规划Fragment
+ * Route planner Fragment.
+ * Supports receiving bookingId or tripId arguments from chatbot deeplinks.
  */
 class RoutePlannerFragment : Fragment() {
 
@@ -48,8 +56,22 @@ class RoutePlannerFragment : Fragment() {
         setupUI()
         observeViewModel()
         
-        // 设置默认地点（用于演示）
-        setDefaultLocations()
+        // Check if we have trip/booking data from chatbot card or deeplink
+        val tripId = arguments?.getString("tripId")
+        val bookingId = arguments?.getString("bookingId")
+        val fromName = arguments?.getString("fromName")
+        val toName = arguments?.getString("toName")
+        when {
+            // If fromName and toName are passed directly (from booking card), use them immediately
+            !fromName.isNullOrEmpty() && !toName.isNullOrEmpty() -> {
+                applyBookingCardData(fromName, toName,
+                    arguments?.getString("departAt"),
+                    arguments?.getInt("passengers", 0) ?: 0)
+            }
+            !tripId.isNullOrEmpty() -> loadTripData(tripId)
+            !bookingId.isNullOrEmpty() -> loadBookingData(bookingId)
+            else -> setDefaultLocations()
+        }
     }
     
     private fun setupRecyclerView() {
@@ -65,21 +87,18 @@ class RoutePlannerFragment : Fragment() {
     }
     
     private fun setupUI() {
-        // 起点容器点击
         binding.originContainer.setOnClickListener {
             val action = RoutePlannerFragmentDirections
                 .actionRoutePlannerToLocationSearch(isSelectingOrigin = true)
             findNavController().navigate(action)
         }
         
-        // 终点容器点击
         binding.destinationContainer.setOnClickListener {
             val action = RoutePlannerFragmentDirections
                 .actionRoutePlannerToLocationSearch(isSelectingOrigin = false)
             findNavController().navigate(action)
         }
         
-        // 交通方式选择
         binding.modeWalk.setOnClickListener {
             selectMode(TransportMode.WALK)
         }
@@ -92,10 +111,8 @@ class RoutePlannerFragment : Fragment() {
             selectMode(TransportMode.BUS)
         }
         
-        // 开始导航按钮
         binding.btnStartNavigation.setOnClickListener {
             viewModel.startNavigation()
-            // 导航到TripStartFragment
             val action = RoutePlannerFragmentDirections.actionRoutePlannerToTripStart()
             findNavController().navigate(action)
         }
@@ -105,7 +122,6 @@ class RoutePlannerFragment : Fragment() {
         selectedMode = mode
         viewModel.setTransportMode(mode)
         
-        // 更新UI选中状态
         val primaryColor = requireContext().getColor(R.color.primary)
         val whiteColor = requireContext().getColor(android.R.color.white)
         
@@ -121,35 +137,168 @@ class RoutePlannerFragment : Fragment() {
     }
     
     private fun observeViewModel() {
-        // 观察起点
         viewModel.selectedOrigin.observe(viewLifecycleOwner) { origin ->
             origin?.let {
                 binding.textOrigin.text = it.name
             }
         }
         
-        // 观察终点
         viewModel.selectedDestination.observe(viewLifecycleOwner) { destination ->
             destination?.let {
                 binding.textDestination.text = it.name
             }
         }
         
-        // 观察路线选项
         viewModel.routeOptions.observe(viewLifecycleOwner) { routes ->
             routeAdapter.updateRoutes(routes)
         }
     }
+
+    /**
+     * Apply booking data passed directly from the chatbot booking card.
+     * No API call needed -- the card already carries from/to/departAt/passengers.
+     */
+    private fun applyBookingCardData(fromName: String, toName: String, departAt: String?, passengers: Int) {
+        val origin = findLocationByName(fromName)
+        val destination = findLocationByName(toName)
+
+        origin?.let { viewModel.setOrigin(it) }
+        destination?.let { viewModel.setDestination(it) }
+
+        selectMode(TransportMode.BUS)
+
+        val infoMsg = buildString {
+            append("$fromName → $toName")
+            if (passengers > 0) append(" | ${passengers} pax")
+            if (!departAt.isNullOrBlank()) append(" | $departAt")
+        }
+        view?.let { Snackbar.make(it, infoMsg, Snackbar.LENGTH_LONG).show() }
+    }
+
+    /**
+     * Load trip data from the backend and pre-fill origin/destination.
+     */
+    private fun loadTripData(tripId: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitClient.apiService.getTripDetail(tripId)
+                }
+                if (response.success && response.data != null) {
+                    val trip = response.data
+
+                    // Use trip's start/end location names for origin/destination
+                    val originName = trip.startLocation?.placeName ?: trip.startLocation?.address
+                    val destName = trip.endLocation?.placeName ?: trip.endLocation?.address
+
+                    if (originName != null) {
+                        val origin = findLocationByName(originName)
+                        origin?.let { viewModel.setOrigin(it) }
+                    }
+                    if (destName != null) {
+                        val destination = findLocationByName(destName)
+                        destination?.let { viewModel.setDestination(it) }
+                    }
+
+                    // Select transport mode based on detected mode
+                    when (trip.detectedMode?.lowercase()) {
+                        "bus", "public_transport" -> selectMode(TransportMode.BUS)
+                        "cycle", "bicycle" -> selectMode(TransportMode.CYCLE)
+                        else -> selectMode(TransportMode.BUS)
+                    }
+
+                    val infoMsg = buildString {
+                        append("Trip loaded: ${originName ?: "Unknown"} → ${destName ?: "Unknown"}")
+                        if (trip.carbonStatus != null) append(" | ${trip.carbonStatus}")
+                    }
+                    view?.let { Snackbar.make(it, infoMsg, Snackbar.LENGTH_LONG).show() }
+                } else {
+                    Log.w("RoutePlanner", "Trip not found: $tripId")
+                    setDefaultLocations()
+                }
+            } catch (e: Exception) {
+                Log.e("RoutePlanner", "Failed to load trip $tripId", e)
+                setDefaultLocations()
+            }
+        }
+    }
+
+    /**
+     * Load booking data from the backend and pre-fill origin/destination.
+     */
+    private fun loadBookingData(bookingId: String) {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                val response = withContext(Dispatchers.IO) {
+                    RetrofitClient.apiService.getBookingDetail(bookingId)
+                }
+                if (response.success && response.data != null) {
+                    val booking = response.data
+
+                    // Try to match booking locations to known campus locations
+                    val origin = findLocationByName(booking.fromName)
+                    val destination = findLocationByName(booking.toName)
+
+                    origin?.let { viewModel.setOrigin(it) }
+                    destination?.let { viewModel.setDestination(it) }
+
+                    // Default to bus mode for bookings
+                    selectMode(TransportMode.BUS)
+
+                    // Show booking info
+                    val infoMsg = buildString {
+                        append("Booking loaded: ${booking.fromName} → ${booking.toName}")
+                        if (booking.passengers > 0) append(" | ${booking.passengers} pax")
+                        if (!booking.departAt.isNullOrBlank()) append(" | ${booking.departAt}")
+                    }
+                    view?.let { Snackbar.make(it, infoMsg, Snackbar.LENGTH_LONG).show() }
+                } else {
+                    Log.w("RoutePlanner", "Booking not found: $bookingId")
+                    setDefaultLocations()
+                }
+            } catch (e: Exception) {
+                Log.e("RoutePlanner", "Failed to load booking $bookingId", e)
+                setDefaultLocations()
+            }
+        }
+    }
+
+    /**
+     * Find a NavLocation by name from known campus locations.
+     * Falls back to creating a temporary NavLocation if no exact match.
+     */
+    private fun findLocationByName(name: String): NavLocation? {
+        // Try exact match first
+        val exact = MockData.CAMPUS_LOCATIONS.find {
+            it.name.equals(name, ignoreCase = true)
+        }
+        if (exact != null) return exact
+
+        // Try partial match
+        val partial = MockData.CAMPUS_LOCATIONS.find {
+            it.name.contains(name, ignoreCase = true) || name.contains(it.name, ignoreCase = true)
+        }
+        if (partial != null) return partial
+
+        // Create a temporary location with default coordinates (NUS campus center)
+        return NavLocation(
+            id = "chatbot_${name.hashCode()}",
+            name = name,
+            address = name,
+            latitude = 1.2966,
+            longitude = 103.7764,
+            type = LocationType.OTHER,
+            icon = "📍"
+        )
+    }
     
     private fun setDefaultLocations() {
-        // 设置默认起点和终点用于演示
         val origin = MockData.CAMPUS_LOCATIONS.find { it.id == "4" } // PGP
         val destination = MockData.CAMPUS_LOCATIONS.find { it.id == "1" } // COM1
         
         origin?.let { viewModel.setOrigin(it) }
         destination?.let { viewModel.setDestination(it) }
         
-        // 默认选择步行
         selectMode(TransportMode.WALK)
     }
 

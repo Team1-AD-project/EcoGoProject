@@ -38,12 +38,22 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Local backend base URL (override via local.properties: ECOGO_BASE_URL=http://10.0.2.2:8090/)
+            // - Android Emulator -> your PC: http://10.0.2.2:8090/
+            // - Physical device -> your PC: http://<your-lan-ip>:8090/
+            val baseUrl = localProperties.getProperty("ECOGO_BASE_URL") ?: "http://10.0.2.2:8090/"
+            buildConfigField("String", "ECOGO_BASE_URL", "\"$baseUrl\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+
+            // Release defaults to production backend (override if needed in CI)
+            buildConfigField("String", "ECOGO_BASE_URL", "\"http://47.129.124.55:8090/\"")
         }
     }
     
@@ -60,6 +70,7 @@ android {
     buildFeatures {
         viewBinding = true
         dataBinding = true
+        buildConfig = true
     }
     
     packaging {
@@ -98,9 +109,9 @@ dependencies {
     // ViewPager2
     implementation("androidx.viewpager2:viewpager2:1.0.0")
     
-    // Retrofit for API calls
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    // Retrofit for API calls (unified version)
+    implementation("com.squareup.retrofit2:retrofit:2.11.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     
     // Glide for image loading
@@ -139,11 +150,8 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
 
-    //nextbusapi
-    implementation("com.squareup.retrofit2:retrofit:2.11.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.11.0")
+    // OkHttp (shared by Retrofit and NextBus API)
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
-    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
 
 }

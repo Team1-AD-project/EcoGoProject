@@ -1,5 +1,4 @@
 package com.ecogo.api
-
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -23,7 +22,8 @@ object RetrofitClient {
         
         // 添加日志拦截器（开发环境）
         val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY // Changed to BODY to see full response/request details for debugging
+            // Keep BASIC for normal dev; switch to BODY temporarily when debugging
+            level = HttpLoggingInterceptor.Level.BASIC
         }
         builder.addInterceptor(loggingInterceptor)
 

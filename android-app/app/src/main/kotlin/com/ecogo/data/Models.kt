@@ -231,13 +231,81 @@ data class RecommendationResponse(
     val tag: String
 )
 
-// Chat
+// Chat - Rich chatbot API
 data class ChatRequest(
+    val conversationId: String? = null,
     val message: String
 )
 
 data class ChatResponse(
-    val reply: String
+    val conversationId: String? = null,
+    val assistant: AssistantMessage? = null,
+    val uiActions: List<UiAction>? = null,
+    val serverTimestamp: String? = null,
+    // Legacy field for backward compatibility
+    val reply: String? = null
+) {
+    /** Convenience: get the assistant text or legacy reply */
+    fun getDisplayText(): String {
+        return assistant?.text ?: reply ?: ""
+    }
+}
+
+data class AssistantMessage(
+    val text: String,
+    val citations: List<Citation>? = null
+)
+
+data class Citation(
+    val title: String,
+    val source: String,
+    val snippet: String
+)
+
+data class UiAction(
+    val type: String,  // SUGGESTIONS | SHOW_FORM | SHOW_CONFIRM | DEEPLINK
+    val payload: Map<String, Any>? = null
+)
+
+// Booking detail (from GET /api/v1/mobile/chatbot/bookings/{bookingId})
+data class BookingDetail(
+    val bookingId: String,
+    val tripId: String? = null,
+    val fromName: String,
+    val toName: String,
+    val departAt: String?,
+    val passengers: Int,
+    val status: String,
+    val createdAt: String?
+)
+
+// Trip detail (from GET /api/v1/mobile/trips/{tripId})
+data class TripDetail(
+    val id: String,
+    val userId: String? = null,
+    val startPoint: GeoPointData? = null,
+    val endPoint: GeoPointData? = null,
+    val startLocation: LocationDetailData? = null,
+    val endLocation: LocationDetailData? = null,
+    val startTime: String? = null,
+    val endTime: String? = null,
+    val detectedMode: String? = null,
+    val distance: Double = 0.0,
+    val carbonSaved: Double = 0.0,
+    val pointsGained: Long = 0,
+    val carbonStatus: String? = null,
+    val isGreenTrip: Boolean = false
+)
+
+data class GeoPointData(
+    val lng: Double = 0.0,
+    val lat: Double = 0.0
+)
+
+data class LocationDetailData(
+    val address: String? = null,
+    val placeName: String? = null,
+    val campusZone: String? = null
 )
 
 // Voucher Redeem
