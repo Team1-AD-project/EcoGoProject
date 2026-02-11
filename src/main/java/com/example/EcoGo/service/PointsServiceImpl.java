@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class PointsServiceImpl implements PointsService {
 
+    private static final String REDEEM_SOURCE = "redeem";
+
     @Autowired
     private UserRepository userRepository;
 
@@ -83,8 +85,8 @@ public class PointsServiceImpl implements PointsService {
             badgeService.checkAndUnlockCarbonBadges(userId);
         }
         // If source is REDEEM, type might be redeem
-        if ("redeem".equalsIgnoreCase(source)) {
-            changeType = "redeem";
+        if (REDEEM_SOURCE.equalsIgnoreCase(source)) {
+            changeType = REDEEM_SOURCE;
         }
 
         UserPointsLog log = new UserPointsLog();
@@ -189,7 +191,7 @@ public class PointsServiceImpl implements PointsService {
     public void redeemPoints(String userId, String orderId, long points) {
         String description = "Redemption for order: " + orderId;
         // Points should be negative for deduction
-        adjustPoints(userId, -Math.abs(points), "redeem", description, orderId, null);
+        adjustPoints(userId, -Math.abs(points), REDEEM_SOURCE, description, orderId, null);
     }
 
     // Helper to avoid duplication

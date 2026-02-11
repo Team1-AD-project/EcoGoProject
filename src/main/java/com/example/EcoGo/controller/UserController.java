@@ -33,6 +33,8 @@ import com.example.EcoGo.interfacemethods.UserInterface;
 public class UserController {
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
+    private static final String BEARER_PREFIX = "Bearer ";
+
     private final UserInterface userService;
 
     public UserController(UserInterface userService) {
@@ -55,7 +57,7 @@ public class UserController {
 
     @PostMapping("/api/v1/mobile/users/logout")
     public ResponseMessage<Void> logoutMobile(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
+        String token = authHeader.replace(BEARER_PREFIX, "");
         // Ideally we extract UserID from token here or in service
         // For keeping the service interface clean, let's pass token.
         // Service implementation will validate and extract if needed.
@@ -66,7 +68,7 @@ public class UserController {
     @GetMapping("/api/v1/mobile/users/profile")
     public ResponseMessage<UserProfileDto.UserDetailResponse> getUserProfileMobile(
             @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
+        String token = authHeader.replace(BEARER_PREFIX, "");
         return ResponseMessage.success(userService.getUserDetail(token));
     }
 
@@ -74,21 +76,21 @@ public class UserController {
     public ResponseMessage<UserProfileDto.UpdateProfileResponse> updateProfileMobile(
             @RequestHeader("Authorization") String authHeader,
             @RequestBody UserProfileDto.UpdateProfileRequest request) {
-        String token = authHeader.replace("Bearer ", "");
+        String token = authHeader.replace(BEARER_PREFIX, "");
         return ResponseMessage.success(userService.updateProfile(token, request));
     }
 
     @PutMapping("/api/v1/mobile/users/preferences/reset")
     public ResponseMessage<UserProfileDto.PreferencesResetResponse> resetPreferences(
             @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
+        String token = authHeader.replace(BEARER_PREFIX, "");
         return ResponseMessage.success(userService.resetPreferences(token));
     }
 
     @DeleteMapping("/api/v1/mobile/users")
     public ResponseMessage<Map<String, Boolean>> deleteUser(
             @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
+        String token = authHeader.replace(BEARER_PREFIX, "");
         userService.deleteUser(token);
         return ResponseMessage.success(Map.of("success", true));
     }
@@ -102,7 +104,7 @@ public class UserController {
 
     @PostMapping("/api/v1/web/users/logout")
     public ResponseMessage<Map<String, Boolean>> logoutWeb(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
+        String token = authHeader.replace(BEARER_PREFIX, "");
         userService.logoutWeb(token);
         return ResponseMessage.success(Map.of("success", true));
     }
@@ -110,7 +112,7 @@ public class UserController {
     @GetMapping("/api/v1/web/users/auth")
     public ResponseMessage<UserProfileDto.AuthCheckResponse> authenticateWeb(
             @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace("Bearer ", "");
+        String token = authHeader.replace(BEARER_PREFIX, "");
         return ResponseMessage.success(userService.authenticateUser(token));
     }
 
