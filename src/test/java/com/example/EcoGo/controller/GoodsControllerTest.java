@@ -1,6 +1,7 @@
 package com.example.EcoGo.controller;
 
 import com.example.EcoGo.dto.BatchStockUpdateRequest;
+import com.example.EcoGo.dto.GoodsRequestDto;
 import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.exception.BusinessException;
 import com.example.EcoGo.exception.errorcode.ErrorCode;
@@ -151,13 +152,13 @@ class GoodsControllerTest {
 
     @Test
     void createGoods_negativeStock_throwParamError() {
-        Goods g = new Goods();
-        g.setCategory("food");
-        g.setStock(-1);
+        GoodsRequestDto dto = new GoodsRequestDto();
+        dto.setCategory("food");
+        dto.setStock(-1);
 
         BusinessException ex = assertThrows(
                 BusinessException.class,
-                () -> controller.createGoods(g)
+                () -> controller.createGoods(dto)
         );
         assertEquals(ErrorCode.PARAM_ERROR.getCode(), ex.getCode());
         assertTrue(ex.getMessage().toLowerCase().contains("stock"));
@@ -165,13 +166,13 @@ class GoodsControllerTest {
 
     @Test
     void createGoods_invalidCategory_throwParamError() {
-        Goods g = new Goods();
-        g.setCategory("unknown");
-        g.setStock(1);
+        GoodsRequestDto dto = new GoodsRequestDto();
+        dto.setCategory("unknown");
+        dto.setStock(1);
 
         BusinessException ex = assertThrows(
                 BusinessException.class,
-                () -> controller.createGoods(g)
+                () -> controller.createGoods(dto)
         );
         assertEquals(ErrorCode.PARAM_ERROR.getCode(), ex.getCode());
         assertTrue(ex.getMessage().toLowerCase().contains("invalid category"));
@@ -179,35 +180,32 @@ class GoodsControllerTest {
 
     @Test
     void createGoods_success_shouldNormalizeCategoryToLowercase() {
-        Goods input = new Goods();
-        input.setCategory(" Food ");
-        input.setStock(1);
+        GoodsRequestDto dto = new GoodsRequestDto();
+        dto.setCategory(" Food ");
+        dto.setStock(1);
 
         Goods created = goods("g1", "Burger", null, "food", "normal", 0, true, 1, true);
         when(goodsService.createGoods(any(Goods.class))).thenReturn(created);
 
-        ResponseMessage<Goods> resp = controller.createGoods(input);
+        ResponseMessage<Goods> resp = controller.createGoods(dto);
 
         assertEquals(ErrorCode.SUCCESS.getCode(), resp.getCode());
         assertNotNull(resp.getData());
         assertEquals("g1", resp.getData().getId());
-
-        // 验证 category 被 controller 归一化
-        assertEquals("food", input.getCategory());
         verify(goodsService).createGoods(any(Goods.class));
     }
 
     @Test
     void createGoods_serviceThrowsRuntime_shouldMapToDbError() {
-        Goods input = new Goods();
-        input.setCategory("food");
-        input.setStock(1);
+        GoodsRequestDto dto = new GoodsRequestDto();
+        dto.setCategory("food");
+        dto.setStock(1);
 
         when(goodsService.createGoods(any(Goods.class))).thenThrow(new RuntimeException("db down"));
 
         BusinessException ex = assertThrows(
                 BusinessException.class,
-                () -> controller.createGoods(input)
+                () -> controller.createGoods(dto)
         );
         assertEquals(ErrorCode.DB_ERROR.getCode(), ex.getCode());
     }
@@ -217,7 +215,7 @@ class GoodsControllerTest {
     void updateGoods_idBlank_throwParamCannotBeNull() {
         BusinessException ex = assertThrows(
                 BusinessException.class,
-                () -> controller.updateGoods(" ", new Goods())
+                () -> controller.updateGoods(" ", new GoodsRequestDto())
         );
         assertEquals(ErrorCode.PARAM_CANNOT_BE_NULL.getCode(), ex.getCode());
     }
@@ -233,57 +231,56 @@ class GoodsControllerTest {
 
     @Test
     void updateGoods_negativeStock_throwParamError() {
-        Goods g = new Goods();
-        g.setStock(-2);
+        GoodsRequestDto dto = new GoodsRequestDto();
+        dto.setStock(-2);
 
         BusinessException ex = assertThrows(
                 BusinessException.class,
-                () -> controller.updateGoods("g1", g)
+                () -> controller.updateGoods("g1", dto)
         );
         assertEquals(ErrorCode.PARAM_ERROR.getCode(), ex.getCode());
     }
 
     @Test
     void updateGoods_invalidCategory_throwParamError() {
-        Goods g = new Goods();
-        g.setCategory("xxx");
-        g.setStock(1);
+        GoodsRequestDto dto = new GoodsRequestDto();
+        dto.setCategory("xxx");
+        dto.setStock(1);
 
         BusinessException ex = assertThrows(
                 BusinessException.class,
-                () -> controller.updateGoods("g1", g)
+                () -> controller.updateGoods("g1", dto)
         );
         assertEquals(ErrorCode.PARAM_ERROR.getCode(), ex.getCode());
     }
 
     @Test
     void updateGoods_success_shouldNormalizeCategoryWhenProvided() {
-        Goods g = new Goods();
-        g.setCategory(" Beverage ");
-        g.setStock(1);
+        GoodsRequestDto dto = new GoodsRequestDto();
+        dto.setCategory(" Beverage ");
+        dto.setStock(1);
 
         Goods updated = goods("g1", "Coffee", null, "beverage", "normal", 0, true, 1, true);
         when(goodsService.updateGoods(eq("g1"), any(Goods.class))).thenReturn(updated);
 
-        ResponseMessage<Goods> resp = controller.updateGoods("g1", g);
+        ResponseMessage<Goods> resp = controller.updateGoods("g1", dto);
 
         assertEquals(ErrorCode.SUCCESS.getCode(), resp.getCode());
         assertNotNull(resp.getData());
         assertEquals("g1", resp.getData().getId());
-        assertEquals("beverage", g.getCategory());
     }
 
     @Test
     void updateGoods_runtimeException_shouldMapToProductNotExist() {
-        Goods g = new Goods();
-        g.setStock(1);
+        GoodsRequestDto dto = new GoodsRequestDto();
+        dto.setStock(1);
 
         when(goodsService.updateGoods(eq("x"), any(Goods.class)))
                 .thenThrow(new RuntimeException("not found"));
 
         BusinessException ex = assertThrows(
                 BusinessException.class,
-                () -> controller.updateGoods("x", g)
+                () -> controller.updateGoods("x", dto)
         );
         assertEquals(ErrorCode.PRODUCT_NOT_EXIST.getCode(), ex.getCode());
     }
@@ -426,29 +423,28 @@ class GoodsControllerTest {
     // ---------- admin vouchers ----------
     @Test
     void createVoucher_shouldSetTypeAndIsForRedemption_andValidateRedemptionPoints() {
-        Goods input = new Goods();
-        input.setRedemptionPoints(10);
-        input.setStock(null);
+        GoodsRequestDto dto = new GoodsRequestDto();
+        dto.setRedemptionPoints(10);
+        dto.setStock(null);
 
         Goods created = goods("v1", "V", null, "service", "voucher", 0, true, 0, true);
         when(goodsService.createGoods(any(Goods.class))).thenReturn(created);
 
-        ResponseMessage<Goods> resp = controller.createVoucher(input);
+        ResponseMessage<Goods> resp = controller.createVoucher(dto);
 
         assertEquals(ErrorCode.SUCCESS.getCode(), resp.getCode());
-        assertEquals("voucher", input.getType());
-        assertEquals(Boolean.TRUE, input.getIsForRedemption());
         assertNotNull(resp.getData());
+        verify(goodsService).createGoods(argThat(g -> "voucher".equals(g.getType()) && Boolean.TRUE.equals(g.getIsForRedemption())));
     }
 
     @Test
     void createVoucher_invalidRedemptionPoints_throwParamError() {
-        Goods input = new Goods();
-        input.setRedemptionPoints(0);
+        GoodsRequestDto dto = new GoodsRequestDto();
+        dto.setRedemptionPoints(0);
 
         BusinessException ex = assertThrows(
                 BusinessException.class,
-                () -> controller.createVoucher(input)
+                () -> controller.createVoucher(dto)
         );
         assertEquals(ErrorCode.PARAM_ERROR.getCode(), ex.getCode());
     }
@@ -460,7 +456,7 @@ class GoodsControllerTest {
 
         BusinessException ex = assertThrows(
                 BusinessException.class,
-                () -> controller.updateVoucher("g1", new Goods())
+                () -> controller.updateVoucher("g1", new GoodsRequestDto())
         );
         assertEquals(ErrorCode.PARAM_ERROR.getCode(), ex.getCode());
     }
@@ -473,13 +469,12 @@ class GoodsControllerTest {
         Goods updated = goods("v1", "V2", null, "service", "voucher", 0, true, 1, true);
         when(goodsService.updateGoods(eq("v1"), any(Goods.class))).thenReturn(updated);
 
-        Goods input = new Goods();
-        ResponseMessage<Goods> resp = controller.updateVoucher("v1", input);
+        GoodsRequestDto dto = new GoodsRequestDto();
+        ResponseMessage<Goods> resp = controller.updateVoucher("v1", dto);
 
         assertEquals(ErrorCode.SUCCESS.getCode(), resp.getCode());
-        assertEquals("voucher", input.getType());
-        assertEquals(Boolean.TRUE, input.getIsForRedemption());
         assertNotNull(resp.getData());
+        verify(goodsService).updateGoods(eq("v1"), argThat(g -> "voucher".equals(g.getType()) && Boolean.TRUE.equals(g.getIsForRedemption())));
     }
 
     @Test
