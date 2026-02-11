@@ -750,7 +750,7 @@ export function CollectiblesManagement() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Categories</SelectItem>
-                      {[...new Set(accessories.map(a => a.category))].sort().map(cat => (
+                      {[...new Set(accessories.map(a => a.category))].sort((a, b) => a.localeCompare(b)).map(cat => (
                         <SelectItem key={cat} value={cat}>{cat.charAt(0).toUpperCase() + cat.slice(1)}</SelectItem>
                       ))}
                     </SelectContent>

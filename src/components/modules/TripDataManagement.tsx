@@ -20,6 +20,110 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
+function parsePolylinePoints(rawPoints: unknown): L.LatLngExpression[] {
+  try {
+    let points: unknown = rawPoints;
+    if (typeof points === 'string') {
+      try { points = JSON.parse(points); } catch { /* keep as-is */ }
+    }
+    if (typeof points === 'string') {
+      try { points = JSON.parse(points); } catch { /* keep as-is */ }
+    }
+    if (!Array.isArray(points) || points.length === 0) return [];
+    return points
+      .map((p: any) => {
+        const lat = Number(p.lat);
+        const lng = Number(p.lng);
+        if (isNaN(lat) || isNaN(lng)) return null;
+        return [lat, lng] as L.LatLngExpression;
+      })
+      .filter((p): p is L.LatLngExpression => p !== null);
+  } catch {
+    return [];
+  }
+}
+
+function buildRoutePoints(
+  trip: TripDetail,
+  hasStart: boolean,
+  hasEnd: boolean,
+  parsed: L.LatLngExpression[],
+): L.LatLngExpression[] {
+  const routePoints = [...parsed];
+
+  // Fallback to straight line if no polyline
+  if (routePoints.length === 0 && hasStart && hasEnd && trip.startPoint && trip.endPoint) {
+    const sLat = Number(trip.startPoint.lat), sLng = Number(trip.startPoint.lng);
+    const eLat = Number(trip.endPoint.lat), eLng = Number(trip.endPoint.lng);
+    if (!isNaN(sLat) && !isNaN(sLng) && !isNaN(eLat) && !isNaN(eLng)) {
+      return [[sLat, sLng], [eLat, eLng]];
+    }
+    return [];
+  }
+
+  // Connect Start/End to polyline if gap exists
+  if (routePoints.length > 0 && hasStart && trip.startPoint) {
+    const sLat = Number(trip.startPoint.lat), sLng = Number(trip.startPoint.lng);
+    const first = routePoints[0] as [number, number];
+    if (!first || Math.abs(first[0] - sLat) > 0.0001 || Math.abs(first[1] - sLng) > 0.0001) {
+      routePoints.unshift([sLat, sLng]);
+    }
+  }
+  if (routePoints.length > 0 && hasEnd && trip.endPoint) {
+    const eLat = Number(trip.endPoint.lat), eLng = Number(trip.endPoint.lng);
+    const last = routePoints[routePoints.length - 1] as [number, number];
+    if (!last || Math.abs(last[0] - eLat) > 0.0001 || Math.abs(last[1] - eLng) > 0.0001) {
+      routePoints.push([eLat, eLng]);
+    }
+  }
+  return routePoints;
+}
+
+function hasValidPoint(point: { lat?: number; lng?: number } | null | undefined): boolean {
+  return !!point && point.lat !== undefined && point.lng !== undefined;
+}
+
+function addTripMarker(
+  point: { lat: number; lng: number },
+  location: { placeName?: string } | null | undefined,
+  color: string,
+  label: string,
+  layerGroup: L.LayerGroup,
+  bounds: L.LatLngBounds,
+) {
+  const lat = Number(point.lat), lng = Number(point.lng);
+  const icon = L.divIcon({
+    className: 'bg-transparent',
+    html: `<div class="w-4 h-4 rounded-full ${color} border-2 border-white shadow-md"></div>`,
+  });
+  L.marker([lat, lng], { icon })
+    .bindPopup(`<b>${label}</b><br>${location?.placeName || 'Unknown'}`)
+    .addTo(layerGroup);
+  bounds.extend([lat, lng]);
+}
+
+function drawTripPolyline(
+  trip: TripDetail,
+  hasStart: boolean,
+  hasEnd: boolean,
+  layerGroup: L.LayerGroup,
+  bounds: L.LatLngBounds,
+) {
+  const rawPoints = trip.polylinePoints || (trip as any).polyline_points;
+  const parsed = rawPoints ? parsePolylinePoints(rawPoints) : [];
+  const routePoints = buildRoutePoints(trip, hasStart, hasEnd, parsed);
+
+  if (routePoints.length === 0) return;
+
+  const isFallback = routePoints.length === 2 && !rawPoints;
+  const lineColor = isFallback ? '#ef4444' : (trip.isGreenTrip ? '#22c55e' : '#3b82f6');
+  L.polyline(routePoints, {
+    color: lineColor, weight: 5, opacity: 0.8,
+    dashArray: isFallback ? '10, 10' : undefined,
+  }).addTo(layerGroup);
+  routePoints.forEach((p: any) => bounds.extend(p));
+}
+
 export function TripDataManagement() {
   const mapRef = useRef<L.Map | null>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
@@ -29,7 +133,6 @@ export function TripDataManagement() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [currentTrips, setCurrentTrips] = useState<TripDetail[]>([]);
   const [selectedTripId, setSelectedTripId] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
   const [searchId, setSearchId] = useState('');
 
   // Aggregated Stats State
@@ -83,7 +186,7 @@ export function TripDataManagement() {
   const loadUsers = async (pageNo: number) => {
     try {
       const res = await fetchUserList(pageNo, pageSize);
-      if (res.data && res.data.list) {
+      if (res.data?.list) {
         setUsers(res.data.list);
         setTotalPages(res.data.totalPages);
       }
@@ -131,7 +234,6 @@ export function TripDataManagement() {
     }
 
     const loadTrips = async () => {
-      setLoading(true);
       try {
         const trips = await fetchUserTrips(selectedUserId);
         // Handle potential null/undefined
@@ -161,8 +263,6 @@ export function TripDataManagement() {
       } catch (error) {
         console.error(error);
         toast.error("Failed to load user trips");
-      } finally {
-        setLoading(false);
       }
     };
     loadTrips();
@@ -170,163 +270,29 @@ export function TripDataManagement() {
 
   // Update Map Layers - Draw ONLY Selected Trip
   useEffect(() => {
-    if (mapRef.current && layerGroupRef.current) {
-      if (!selectedTripId) return;
+    const map = mapRef.current;
+    const layerGroup = layerGroupRef.current;
+    if (!map || !layerGroup || !selectedTripId) return;
 
-      const trip = currentTrips.find(t => t.id === selectedTripId);
-      if (!trip) return;
+    const trip = currentTrips.find(t => t.id === selectedTripId);
+    if (!trip) return;
 
-      console.log("[DEBUG] Selected Trip for Map:", trip);
+    layerGroup.clearLayers();
+    const bounds = L.latLngBounds([]);
+    const startValid = hasValidPoint(trip.startPoint);
+    const endValid = hasValidPoint(trip.endPoint);
 
-      // Clear existing layers FIRST
-      layerGroupRef.current.clearLayers();
+    if (startValid && trip.startPoint) {
+      addTripMarker(trip.startPoint, trip.startLocation, 'bg-green-500', 'Start', layerGroup, bounds);
+    }
+    if (endValid && trip.endPoint) {
+      addTripMarker(trip.endPoint, trip.endLocation, 'bg-red-500', 'End', layerGroup, bounds);
+    }
 
-      const bounds = L.latLngBounds([]);
-      const hasStart = !!trip.startPoint && (trip.startPoint.lat !== undefined && trip.startPoint.lng !== undefined);
-      const hasEnd = !!trip.endPoint && (trip.endPoint.lat !== undefined && trip.endPoint.lng !== undefined);
+    drawTripPolyline(trip, startValid, endValid, layerGroup, bounds);
 
-      if (hasStart && trip.startPoint) {
-        const startLat = Number(trip.startPoint.lat);
-        const startLng = Number(trip.startPoint.lng);
-        const startIcon = L.divIcon({
-          className: 'bg-transparent',
-          html: `<div class="w-4 h-4 rounded-full bg-green-500 border-2 border-white shadow-md"></div>`
-        });
-        L.marker([startLat, startLng], { icon: startIcon })
-          .bindPopup(`<b>Start</b><br>${trip.startLocation?.placeName || 'Unknown'}`)
-          .addTo(layerGroupRef.current!);
-        bounds.extend([startLat, startLng]);
-      }
-
-      if (hasEnd && trip.endPoint) {
-        const endLat = Number(trip.endPoint.lat);
-        const endLng = Number(trip.endPoint.lng);
-        const endIcon = L.divIcon({
-          className: 'bg-transparent',
-          html: `<div class="w-4 h-4 rounded-full bg-red-500 border-2 border-white shadow-md"></div>`
-        });
-        L.marker([endLat, endLng], { icon: endIcon })
-          .bindPopup(`<b>End</b><br>${trip.endLocation?.placeName || 'Unknown'}`)
-          .addTo(layerGroupRef.current!);
-        bounds.extend([endLat, endLng]);
-      }
-
-      let routePoints: L.LatLngExpression[] = [];
-
-      // Try to get detailed polyline points (check both camelCase and snake_case)
-      const rawPoints = trip.polylinePoints || (trip as any).polyline_points;
-
-      if (rawPoints) {
-        try {
-          let points: any = rawPoints;
-          // If it's a string, parse it
-          if (typeof points === 'string') {
-            // Handle double encoded strings if necessary
-            try {
-              points = JSON.parse(points);
-            } catch (e) {
-              console.warn("[DEBUG] Initial JSON parse failed, it might be raw string?", points);
-            }
-          }
-
-          if (typeof points === 'string') {
-            // Second attempt if still string
-            try { points = JSON.parse(points); } catch (e) { }
-          }
-
-          if (Array.isArray(points) && points.length > 0) {
-            routePoints = points.map((p: any) => {
-              const lat = Number(p.lat);
-              const lng = Number(p.lng);
-              if (isNaN(lat) || isNaN(lng)) {
-                console.warn("[DEBUG] Invalid point:", p);
-                return null;
-              }
-              return [lat, lng] as L.LatLngExpression;
-            }).filter((p): p is L.LatLngExpression => p !== null);
-
-            console.log("[DEBUG] Parsed routePoints count:", routePoints.length);
-            if (routePoints.length > 0) {
-              console.log("[DEBUG] First Point:", routePoints[0]);
-              console.log("[DEBUG] Last Point:", routePoints[routePoints.length - 1]);
-            }
-          } else {
-            console.warn("[DEBUG] polylinePoints is not a valid array:", points);
-          }
-        } catch (e) {
-          console.warn("[DEBUG] Failed to parse polylinePoints:", e);
-        }
-      }
-
-      // Fallback to straight line if no polyline
-      if (routePoints.length === 0 && hasStart && hasEnd && trip.startPoint && trip.endPoint) {
-        console.log("[DEBUG] Using fallback straight line (RED)");
-        const startLat = Number(trip.startPoint.lat);
-        const startLng = Number(trip.startPoint.lng);
-        const endLat = Number(trip.endPoint.lat);
-        const endLng = Number(trip.endPoint.lng);
-
-        if (!isNaN(startLat) && !isNaN(startLng) && !isNaN(endLat) && !isNaN(endLng)) {
-          routePoints = [
-            [startLat, startLng],
-            [endLat, endLng]
-          ];
-        } else {
-          console.error("[DEBUG] Start/End coordinates are invalid numbers", trip.startPoint, trip.endPoint);
-        }
-      } else if (routePoints.length > 0) {
-        // Connect Start/End to Polyline if missing (Gap Filling)
-        if (hasStart && trip.startPoint) {
-          const startLat = Number(trip.startPoint.lat);
-          const startLng = Number(trip.startPoint.lng);
-          const firstPoint = routePoints[0] as [number, number];
-
-          // Check distance (epsilon) to avoid duplicates
-          if (!firstPoint || Math.abs(firstPoint[0] - startLat) > 0.0001 || Math.abs(firstPoint[1] - startLng) > 0.0001) {
-            routePoints.unshift([startLat, startLng]);
-          }
-        }
-
-        if (hasEnd && trip.endPoint) {
-          const endLat = Number(trip.endPoint.lat);
-          const endLng = Number(trip.endPoint.lng);
-          const lastPoint = routePoints[routePoints.length - 1] as [number, number];
-
-          if (!lastPoint || Math.abs(lastPoint[0] - endLat) > 0.0001 || Math.abs(lastPoint[1] - endLng) > 0.0001) {
-            routePoints.push([endLat, endLng]);
-          }
-        }
-      }
-
-      if (routePoints.length > 0) {
-        // Draw the line
-        // Use Red for straight line (fallback), Green/Blue for actual polyline path
-        const isFallback = routePoints.length === 2 && !rawPoints;
-        const lineColor = isFallback ? '#ef4444' : (trip.isGreenTrip ? '#22c55e' : '#3b82f6');
-
-        console.log("[DEBUG] Drawing Polyline with points:", routePoints.length, "Color:", lineColor);
-
-        const polyline = L.polyline(routePoints, {
-          color: lineColor,
-          weight: 5,
-          opacity: 0.8,
-          dashArray: isFallback ? '10, 10' : undefined // Dashed for fallback
-        }).addTo(layerGroupRef.current!);
-
-        console.log("[DEBUG] Polyline added to map:", polyline);
-
-        // Extend bounds to include the route
-        routePoints.forEach((p: any) => {
-          bounds.extend(p);
-        });
-      } else {
-        console.warn("[DEBUG] No route points to draw at all.");
-      }
-
-      if (bounds.isValid()) {
-        console.log("[DEBUG] Fitting bounds:", bounds.toBBoxString());
-        mapRef.current.fitBounds(bounds, { padding: [50, 50] });
-      }
+    if (bounds.isValid()) {
+      map.fitBounds(bounds, { padding: [50, 50] });
     }
   }, [selectedTripId, currentTrips]);
 

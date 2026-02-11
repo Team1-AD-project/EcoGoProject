@@ -45,6 +45,24 @@ const FACULTY_COLORS = [
   'from-teal-400 to-teal-500',
 ];
 
+function computeNewDate(current: string, direction: number, type: LeaderboardType): string {
+  if (type === 'DAILY') {
+    const d = new Date(current);
+    d.setDate(d.getDate() + direction);
+    return d.toISOString().split('T')[0];
+  }
+  const [year, month] = current.split('-').map(Number);
+  const d = new Date(year, month - 1 + direction, 1);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function getRankBadge(rank: number) {
+  if (rank === 1) return <Crown className="size-6 text-yellow-500" />;
+  if (rank === 2) return <Medal className="size-6 text-gray-400" />;
+  if (rank === 3) return <Medal className="size-6 text-orange-400" />;
+  return <span className="text-xl font-bold text-gray-600">#{rank}</span>;
+}
+
 export function LeaderboardManagement() {
   // View mode: individual or faculty
   const [viewMode, setViewMode] = useState<ViewMode>('individual');
@@ -75,17 +93,7 @@ export function LeaderboardManagement() {
 
   const navigateDate = (direction: number) => {
     const current = selectedDate || getDateLabel();
-    let newDate: string;
-    if (selectedType === 'DAILY') {
-      const d = new Date(current);
-      d.setDate(d.getDate() + direction);
-      newDate = d.toISOString().split('T')[0];
-    } else {
-      const [year, month] = current.split('-').map(Number);
-      const d = new Date(year, month - 1 + direction, 1);
-      newDate = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-    }
-    setSelectedDate(newDate);
+    setSelectedDate(computeNewDate(current, direction, selectedType));
     setCurrentPage(0);
   };
 
@@ -121,13 +129,6 @@ export function LeaderboardManagement() {
     setSelectedType(type);
     setSelectedDate('');
     setCurrentPage(0);
-  };
-
-  const getRankBadge = (rank: number) => {
-    if (rank === 1) return <Crown className="size-6 text-yellow-500" />;
-    if (rank === 2) return <Medal className="size-6 text-gray-400" />;
-    if (rank === 3) return <Medal className="size-6 text-orange-400" />;
-    return <span className="text-xl font-bold text-gray-600">#{rank}</span>;
   };
 
   // ===================== Faculty logic =====================
@@ -166,6 +167,92 @@ export function LeaderboardManagement() {
 
   const facultyTotalCarbon = facultyData.reduce((sum, f) => sum + f.totalCarbon, 0);
   const facultyCount = facultyData.filter(f => f.totalCarbon > 0).length;
+
+  // ===================== Render helpers =====================
+
+  const renderIndividualTableBody = () => {
+    if (loading && rankings.length === 0) {
+      return <div className="h-full flex items-center justify-center"><Loader2 className="size-6 animate-spin text-blue-600" /></div>;
+    }
+    if (rankings.length === 0) {
+      return <div className="text-center py-12 text-gray-500"><Trophy className="size-12 mx-auto mb-4 opacity-50" /><p>No rankings found</p><p className="text-sm mt-1">No completed trips for this period.</p></div>;
+    }
+    return (
+      <table className="w-full text-sm">
+        <thead className="sticky top-0 bg-white border-b z-10">
+          <tr className="text-left text-gray-600">
+            <th className="p-4 font-medium w-20 text-center">Rank</th>
+            <th className="p-4 font-medium">User Info</th>
+            <th className="p-4 font-medium text-right">Carbon Saved</th>
+            <th className="p-4 font-medium text-right">Reward Points</th>
+            <th className="p-4 font-medium text-center">User Type</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y">
+          {rankings.map((user) => (
+            <tr key={user.userId} className={`hover:bg-gray-50/50 transition-colors ${user.rank <= 3 ? 'bg-yellow-50/50' : ''}`}>
+              <td className="p-4"><div className="flex items-center justify-center">{getRankBadge(user.rank)}</div></td>
+              <td className="p-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-xl shadow-inner text-white">{user.avatar}</div>
+                  <div><p className="font-semibold text-gray-900">{user.nickname}</p><p className="text-xs text-gray-500">ID: {user.userId}</p></div>
+                </div>
+              </td>
+              <td className="p-4 text-right"><p className="font-bold text-gray-900">{user.carbonSaved.toFixed(2)} kg</p></td>
+              <td className="p-4 text-right">
+                {user.rewardPoints > 0
+                  ? <p className="font-semibold text-green-600">+{user.rewardPoints.toLocaleString()}</p>
+                  : <p className="text-gray-400">—</p>}
+              </td>
+              <td className="p-4 text-center">
+                {user.isVip
+                  ? <Badge className="bg-purple-100 text-purple-700">VIP</Badge>
+                  : <Badge variant="outline">Regular</Badge>}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  };
+
+  const renderFacultyTableBody = () => {
+    if (facultyLoading) {
+      return <div className="h-full flex items-center justify-center"><Loader2 className="size-6 animate-spin text-blue-600" /></div>;
+    }
+    if (facultyData.length === 0) {
+      return <div className="text-center py-12 text-gray-500"><Building2 className="size-12 mx-auto mb-4 opacity-50" /><p>No faculty data found</p></div>;
+    }
+    return (
+      <table className="w-full text-sm">
+        <thead className="sticky top-0 bg-white border-b z-10">
+          <tr className="text-left text-gray-600">
+            <th className="p-4 font-medium w-20 text-center">Rank</th>
+            <th className="p-4 font-medium">Faculty</th>
+            <th className="p-4 font-medium text-right">Total Carbon Saved</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y">
+          {facultyData.map((faculty, index) => {
+            const rank = index + 1;
+            const colorClass = FACULTY_COLORS[index % FACULTY_COLORS.length];
+            return (
+              <tr key={faculty.faculty} className={`hover:bg-gray-50/50 transition-colors ${rank <= 3 ? 'bg-yellow-50/50' : ''}`}>
+                <td className="p-4"><div className="flex items-center justify-center">{getRankBadge(rank)}</div></td>
+                <td className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>{faculty.faculty.substring(0, 2).toUpperCase()}</div>
+                    <p className="font-semibold text-gray-900">{faculty.faculty}</p>
+                  </div>
+                </td>
+                <td className="p-4 text-right"><p className="font-bold text-gray-900">{faculty.totalCarbon.toFixed(2)} kg</p></td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    );
+  };
 
   // ===================== Loading state =====================
 
@@ -322,70 +409,7 @@ export function LeaderboardManagement() {
                 <p className="text-sm text-gray-600">{totalParticipants} users found</p>
               </div>
               <div className="flex-1 overflow-y-auto">
-                {loading && rankings.length === 0 ? (
-                  <div className="h-full flex items-center justify-center">
-                    <Loader2 className="size-6 animate-spin text-blue-600" />
-                  </div>
-                ) : rankings.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <Trophy className="size-12 mx-auto mb-4 opacity-50" />
-                    <p>No rankings found</p>
-                    <p className="text-sm mt-1">No completed trips for this period.</p>
-                  </div>
-                ) : (
-                  <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-white border-b z-10">
-                      <tr className="text-left text-gray-600">
-                        <th className="p-4 font-medium w-20 text-center">Rank</th>
-                        <th className="p-4 font-medium">User Info</th>
-                        <th className="p-4 font-medium text-right">Carbon Saved</th>
-                        <th className="p-4 font-medium text-right">Reward Points</th>
-                        <th className="p-4 font-medium text-center">User Type</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {rankings.map((user) => (
-                        <tr key={user.userId} className={`hover:bg-gray-50/50 transition-colors ${
-                          user.rank <= 3 ? 'bg-yellow-50/50' : ''
-                        }`}>
-                          <td className="p-4">
-                            <div className="flex items-center justify-center">
-                              {getRankBadge(user.rank)}
-                            </div>
-                          </td>
-                          <td className="p-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center text-xl shadow-inner text-white">
-                                {user.avatar}
-                              </div>
-                              <div>
-                                <p className="font-semibold text-gray-900">{user.nickname}</p>
-                                <p className="text-xs text-gray-500">ID: {user.userId}</p>
-                              </div>
-                            </div>
-                          </td>
-                          <td className="p-4 text-right">
-                            <p className="font-bold text-gray-900">{user.carbonSaved.toFixed(2)} kg</p>
-                          </td>
-                          <td className="p-4 text-right">
-                            {user.rewardPoints > 0 ? (
-                              <p className="font-semibold text-green-600">+{user.rewardPoints.toLocaleString()}</p>
-                            ) : (
-                              <p className="text-gray-400">—</p>
-                            )}
-                          </td>
-                          <td className="p-4 text-center">
-                            {user.isVip ? (
-                              <Badge className="bg-purple-100 text-purple-700">VIP</Badge>
-                            ) : (
-                              <Badge variant="outline">Regular</Badge>
-                            )}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
+                {renderIndividualTableBody()}
               </div>
               {rankingsPage && rankingsPage.totalPages > 1 && (
                 <div className="p-4 border-t flex items-center justify-between">
@@ -454,55 +478,7 @@ export function LeaderboardManagement() {
                 </p>
               </div>
               <div className="flex-1 overflow-y-auto">
-                {facultyLoading ? (
-                  <div className="h-full flex items-center justify-center">
-                    <Loader2 className="size-6 animate-spin text-blue-600" />
-                  </div>
-                ) : facultyData.length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <Building2 className="size-12 mx-auto mb-4 opacity-50" />
-                    <p>No faculty data found</p>
-                  </div>
-                ) : (
-                  <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-white border-b z-10">
-                      <tr className="text-left text-gray-600">
-                        <th className="p-4 font-medium w-20 text-center">Rank</th>
-                        <th className="p-4 font-medium">Faculty</th>
-                        <th className="p-4 font-medium text-right">Total Carbon Saved</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y">
-                      {facultyData.map((faculty, index) => {
-                        const rank = index + 1;
-                        const colorClass = FACULTY_COLORS[index % FACULTY_COLORS.length];
-
-                        return (
-                          <tr key={faculty.faculty} className={`hover:bg-gray-50/50 transition-colors ${
-                            rank <= 3 ? 'bg-yellow-50/50' : ''
-                          }`}>
-                            <td className="p-4">
-                              <div className="flex items-center justify-center">
-                                {getRankBadge(rank)}
-                              </div>
-                            </td>
-                            <td className="p-4">
-                              <div className="flex items-center gap-3">
-                                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${colorClass} flex items-center justify-center text-white font-bold text-sm shadow-sm`}>
-                                  {faculty.faculty.substring(0, 2).toUpperCase()}
-                                </div>
-                                <p className="font-semibold text-gray-900">{faculty.faculty}</p>
-                              </div>
-                            </td>
-                            <td className="p-4 text-right">
-                              <p className="font-bold text-gray-900">{faculty.totalCarbon.toFixed(2)} kg</p>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                )}
+                {renderFacultyTableBody()}
               </div>
             </Card>
           </div>
