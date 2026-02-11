@@ -110,7 +110,7 @@ class ChatFragment : Fragment() {
                     handleUiActions(response.uiActions)
                 } else {
                     val err = result.exceptionOrNull()
-                    if (com.ecogo.BuildConfig.DEBUG && err != null) {
+                    if (err != null) {
                         Log.e("ECOGO_CHAT", "sendChat failed. BASE_URL=${ApiConfig.BASE_URL}", err)
                         adapter.addMessage(
                             ChatMessageAdapter.ChatMessage(
@@ -124,18 +124,13 @@ class ChatFragment : Fragment() {
                     }
                 }
             } catch (e: Exception) {
-                if (com.ecogo.BuildConfig.DEBUG) {
-                    Log.e("ECOGO_CHAT", "sendMessage exception. BASE_URL=${ApiConfig.BASE_URL}", e)
-                    adapter.addMessage(
-                        ChatMessageAdapter.ChatMessage(
-                            "(Debug) Exception: ${e.javaClass.simpleName}: ${e.message}\nBASE_URL=${ApiConfig.BASE_URL}",
-                            false
-                        )
+                Log.e("ECOGO_CHAT", "sendMessage exception. BASE_URL=${ApiConfig.BASE_URL}", e)
+                adapter.addMessage(
+                    ChatMessageAdapter.ChatMessage(
+                        "(Debug) Exception: ${e.javaClass.simpleName}: ${e.message}\nBASE_URL=${ApiConfig.BASE_URL}",
+                        false
                     )
-                } else {
-                    val reply = generateSmartReply(message)
-                    adapter.addMessage(ChatMessageAdapter.ChatMessage(reply, false))
-                }
+                )
             }
             
             binding.recyclerChat.scrollToPosition(adapter.itemCount - 1)
