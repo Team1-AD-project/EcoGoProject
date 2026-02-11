@@ -98,7 +98,8 @@ data class RouteStep(
     val distance: Double,               // 距离（米）
     val duration: Int,                  // 时长（秒）
     val travel_mode: String,            // 出行方式（WALKING, TRANSIT, DRIVING等）
-    val transit_details: TransitDetails? = null  // 公交详情（仅 TRANSIT 模式有）
+    val transit_details: TransitDetails? = null,  // 公交详情（仅 TRANSIT 模式有）
+    val polyline_points: List<GeoPoint>? = null   // 该步骤的路线点（用于分段绘制不同颜色）
 )
 
 /**

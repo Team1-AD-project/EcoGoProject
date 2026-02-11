@@ -54,5 +54,14 @@
     <color name="green_light">#8BC34A</color>
     <color name="gray_600">#757575</color>
     <color name="blue_500">#2196F3</color>
+
+    <!-- Transit Mode Route Colors (分段交通方式颜色) -->
+    <color name="route_walking">#888888</color>
+    <color name="route_bus">#4CAF50</color>
+    <color name="route_subway">#F44336</color>
+    <color name="route_rail">#9C27B0</color>
+    <color name="route_tram">#FF9800</color>
+    <color name="route_driving">#4285F4</color>
+    <color name="route_cycling">#00BCD4</color>
     <color name="ic_launcher_background">#4CAF50</color>
 </resources>

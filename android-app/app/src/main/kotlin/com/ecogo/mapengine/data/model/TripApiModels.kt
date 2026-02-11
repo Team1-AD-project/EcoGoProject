@@ -162,45 +162,54 @@ data class TripListResponse(
 /**
  * 行程详情
  */
+/**
+ * 后端返回的嵌套坐标对象 {"lng": ..., "lat": ...}
+ */
+data class GeoPointObj(
+    @SerializedName("lng") val lng: Double = 0.0,
+    @SerializedName("lat") val lat: Double = 0.0
+)
+
+/**
+ * 后端返回的嵌套地点对象 {"address": ..., "placeName": ..., "campusZone": ...}
+ */
+data class LocationObj(
+    @SerializedName("address") val address: String? = null,
+    @SerializedName("placeName") val placeName: String? = null,
+    @SerializedName("campusZone") val campusZone: String? = null
+)
+
 data class TripDetail(
-    @SerializedName("tripId")
-    val tripId: String,
+    @SerializedName(value = "id", alternate = ["tripId"])
+    val tripId: String = "",
 
     @SerializedName("userId")
     val userId: String? = null,
 
     @SerializedName("startTime")
-    val startTime: String,
+    val startTime: String = "",
 
     @SerializedName("endTime")
     val endTime: String? = null,
 
-    @SerializedName("status")
-    val status: String,
+    @SerializedName(value = "carbonStatus", alternate = ["status"])
+    val status: String = "",
 
-    @SerializedName("startLng")
-    val startLng: Double,
+    // 后端返回嵌套对象 startPoint: {lng, lat}
+    @SerializedName("startPoint")
+    val startPoint: GeoPointObj? = null,
 
-    @SerializedName("startLat")
-    val startLat: Double,
+    // 后端返回嵌套对象 startLocation: {address, placeName, campusZone}
+    @SerializedName("startLocation")
+    val startLocation: LocationObj? = null,
 
-    @SerializedName("startAddress")
-    val startAddress: String,
+    // 后端返回嵌套对象 endPoint: {lng, lat}
+    @SerializedName("endPoint")
+    val endPoint: GeoPointObj? = null,
 
-    @SerializedName("startPlaceName")
-    val startPlaceName: String,
-
-    @SerializedName("endLng")
-    val endLng: Double? = null,
-
-    @SerializedName("endLat")
-    val endLat: Double? = null,
-
-    @SerializedName("endAddress")
-    val endAddress: String? = null,
-
-    @SerializedName("endPlaceName")
-    val endPlaceName: String? = null,
+    // 后端返回嵌套对象 endLocation: {address, placeName, campusZone}
+    @SerializedName("endLocation")
+    val endLocation: LocationObj? = null,
 
     @SerializedName("distance")
     val distance: Double? = null,
@@ -225,7 +234,17 @@ data class TripDetail(
 
     @SerializedName("polylinePoints")
     val polylinePoints: List<PolylinePoint>? = null
-)
+) {
+    // 兼容旧代码的便捷属性
+    val startLng: Double get() = startPoint?.lng ?: 0.0
+    val startLat: Double get() = startPoint?.lat ?: 0.0
+    val startAddress: String get() = startLocation?.address ?: ""
+    val startPlaceName: String get() = startLocation?.placeName ?: ""
+    val endLng: Double? get() = endPoint?.lng
+    val endLat: Double? get() = endPoint?.lat
+    val endAddress: String? get() = endLocation?.address
+    val endPlaceName: String? get() = endLocation?.placeName
+}
 
 // ============================================================
 // 6. 获取当前追踪行程 GET /mobile/trips/current

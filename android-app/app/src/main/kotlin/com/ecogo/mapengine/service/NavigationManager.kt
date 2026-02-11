@@ -50,6 +50,9 @@ object NavigationManager {
     // 前进检测的最小距离（米）
     private const val MIN_PROGRESS_DISTANCE = 10f
 
+    // 到达目的地的距离阈值（米）- 距终点小于此距离视为到达
+    private const val DESTINATION_ARRIVAL_THRESHOLD = 50f
+
     /**
      * 设置导航路线
      */
@@ -109,6 +112,20 @@ object NavigationManager {
 
         val currentIndex = _currentRouteIndex.value ?: 0
 
+        // 直接检查距离目的地（最后一个路线点）的距离
+        val destination = route.last()
+        val distanceToDestination = calculateDistanceBetween(userLocation, destination)
+        if (distanceToDestination < DESTINATION_ARRIVAL_THRESHOLD) {
+            // 用户已接近终点，直接标记到达
+            val lastIndex = route.size - 1
+            _currentRouteIndex.postValue(lastIndex)
+            _traveledPoints.postValue(route)
+            _remainingPoints.postValue(listOf(userLocation))
+            _traveledDistance.postValue(calculateTotalDistance(route))
+            _remainingDistance.postValue(0f)
+            return true
+        }
+
         // 找到用户位置最近的路线点（只在当前点之后搜索，防止回退）
         val matchResult = findNearestPointOnRoute(userLocation, route, currentIndex)
         val nearestIndex = matchResult.first
@@ -158,7 +175,7 @@ object NavigationManager {
         var minDistance = Float.MAX_VALUE
 
         // 只向前搜索一定范围内的点（避免跳跃太远）
-        val searchRange = min(startIndex + 20, route.size)
+        val searchRange = min(startIndex + 50, route.size)
 
         for (i in startIndex until searchRange) {
             val distance = calculateDistanceBetween(userLocation, route[i])
@@ -220,9 +237,11 @@ object NavigationManager {
 
     /**
      * 检查是否已到达目的地
+     * 使用路线索引判断（已在 updateLocation 中通过距离检查设置索引）
      */
     fun hasReachedDestination(): Boolean {
         val route = _routePoints.value ?: return false
+        if (route.isEmpty()) return false
         val currentIndex = _currentRouteIndex.value ?: 0
         return currentIndex >= route.size - 1
     }

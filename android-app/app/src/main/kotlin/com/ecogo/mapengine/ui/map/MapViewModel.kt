@@ -400,6 +400,14 @@ class MapViewModel(
     }
 
     /**
+     * 更新路线点（当用户选择了不同的路线方案时）
+     * 仅更新路线点，不触发重新绘制（绘制由 MapActivity 自行处理）
+     */
+    fun updateRoutePointsForSelectedAlternative(points: List<LatLng>) {
+        _routePoints.value = points
+    }
+
+    /**
      * 清除错误消息
      */
     fun clearError() {

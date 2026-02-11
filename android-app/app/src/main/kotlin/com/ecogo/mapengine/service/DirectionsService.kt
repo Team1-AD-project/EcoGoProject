@@ -3,6 +3,7 @@ package com.ecogo.mapengine.service
 import android.content.Context
 import android.content.pm.PackageManager
 import android.util.Log
+import com.ecogo.mapengine.data.model.GeoPoint
 import com.ecogo.mapengine.data.model.RouteStep
 import com.ecogo.mapengine.data.model.TransitDetails
 import com.google.android.gms.maps.model.LatLng
@@ -258,12 +259,21 @@ object DirectionsService {
                     null
                 }
 
+                // 提取该步骤的 polyline 路线点
+                val stepPolylinePoints = if (stepJson.has("polyline")) {
+                    val encodedPolyline = stepJson.getJSONObject("polyline").getString("points")
+                    decodePolyline(encodedPolyline).map { GeoPoint(lng = it.longitude, lat = it.latitude) }
+                } else {
+                    null
+                }
+
                 steps.add(RouteStep(
                     instruction = instruction,
                     distance = distance,
                     duration = duration,
                     travel_mode = travelMode,
-                    transit_details = transitDetails
+                    transit_details = transitDetails,
+                    polyline_points = stepPolylinePoints
                 ))
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to parse step $i: ${e.message}")

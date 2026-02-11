@@ -1,6 +1,7 @@
 package com.ecogo.mapengine.data.repository
 
 import android.util.Log
+import com.ecogo.auth.TokenManager
 import com.ecogo.mapengine.data.model.*
 import com.ecogo.mapengine.data.remote.RetrofitClient
 import com.google.android.gms.maps.model.LatLng
@@ -34,8 +35,9 @@ class TripRepository private constructor() {
     // 当前行程ID（从后端获取）
     private var currentTripId: String? = null
 
-    // Token管理（临时使用固定token，实际应该从登录系统获取）
-    private var authToken: String = "Bearer test_token_123"
+    // Token管理：优先从 TokenManager 获取登录 token（不再硬编码）
+    private fun resolveAuthToken(): String =
+        TokenManager.getAuthHeader() ?: "Bearer test_token_123"
 
     companion object {
         private const val TAG = "TripRepository"
@@ -51,16 +53,9 @@ class TripRepository private constructor() {
     }
 
     /**
-     * 设置认证Token
+     * 获取当前认证Token（从 TokenManager 动态读取）
      */
-    fun setAuthToken(token: String) {
-        this.authToken = if (token.startsWith("Bearer ")) token else "Bearer $token"
-    }
-
-    /**
-     * 获取当前认证Token
-     */
-    fun getAuthToken(): String = authToken
+    fun getAuthToken(): String = resolveAuthToken()
 
     // ============================================================
     // 1. 开始行程
@@ -89,7 +84,7 @@ class TripRepository private constructor() {
 
             Log.d(TAG, "Starting trip: $request")
 
-            val response = tripApiService.startTrip(authToken, request)
+            val response = tripApiService.startTrip(resolveAuthToken(), request)
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
@@ -181,7 +176,7 @@ class TripRepository private constructor() {
 
             Log.d(TAG, "Completing trip: tripId=$tripId, points=${polylinePoints.size}")
 
-            val response = tripApiService.completeTrip(tripId, authToken, request)
+            val response = tripApiService.completeTrip(tripId, resolveAuthToken(), request)
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
@@ -222,7 +217,7 @@ class TripRepository private constructor() {
         try {
             Log.d(TAG, "Canceling trip: tripId=$tripId")
 
-            val response = tripApiService.cancelTrip(tripId, authToken)
+            val response = tripApiService.cancelTrip(tripId, resolveAuthToken())
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
@@ -266,7 +261,7 @@ class TripRepository private constructor() {
         try {
             Log.d(TAG, "Fetching trip list from cloud")
 
-            val response = tripApiService.getTripList(authToken, page, pageSize, status)
+            val response = tripApiService.getTripList(resolveAuthToken(), page, pageSize, status)
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
@@ -313,7 +308,7 @@ class TripRepository private constructor() {
         try {
             Log.d(TAG, "Fetching trip detail: tripId=$tripId")
 
-            val response = tripApiService.getTripDetail(tripId, authToken)
+            val response = tripApiService.getTripDetail(tripId, resolveAuthToken())
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
@@ -348,7 +343,7 @@ class TripRepository private constructor() {
         try {
             Log.d(TAG, "Fetching current trip")
 
-            val response = tripApiService.getCurrentTrip(authToken)
+            val response = tripApiService.getCurrentTrip(resolveAuthToken())
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!

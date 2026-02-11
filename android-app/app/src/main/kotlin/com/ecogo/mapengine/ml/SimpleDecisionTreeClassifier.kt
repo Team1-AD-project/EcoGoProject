@@ -11,19 +11,21 @@ object SimpleDecisionTreeClassifier {
      */
     fun predict(features: FloatArray): Pair<Int, Float> {
         // 提取关键特征
-        // 特征索引参考 SensorFeatures.toFloatArray()
-        val gpsSpeedMean = features[45] * 3.6f  // m/s -> km/h
-        val gpsSpeedStd = features[46] * 3.6f
-        val gpsSpeedMax = features[47] * 3.6f
-
+        // 特征索引参考 SensorFeatures.toFloatArray():
+        // [42-44] accMagnitude(Mean/Std/Max), [45-47] gyroMagnitude(Mean/Std/Max),
+        // [48-50] gpsSpeed(Mean/Std/Max), [51-52] pressure(Mean/Std)
         val accMagnitudeMean = features[42]
         val accMagnitudeStd = features[43]
         val accMagnitudeMax = features[44]
 
-        val gyroMagnitudeMean = features[48]
-        val gyroMagnitudeStd = features[49]
+        val gyroMagnitudeMean = features[45]
+        val gyroMagnitudeStd = features[46]
 
-        val pressureStd = features[51]
+        val gpsSpeedMean = features[48] * 3.6f  // m/s -> km/h
+        val gpsSpeedStd = features[49] * 3.6f
+        val gpsSpeedMax = features[50] * 3.6f
+
+        val pressureStd = features[52]
 
         // ====================================================================
         // 这里是临时的规则分类器
