@@ -3,6 +3,9 @@ package com.ecogo.mapengine.data.repository
 import com.ecogo.mapengine.data.model.*
 import com.ecogo.mapengine.data.remote.ApiService
 import com.ecogo.mapengine.data.remote.RetrofitClient
+import com.ecogo.mapengine.service.DirectionsService
+import com.ecogo.mapengine.utils.MapUtils
+import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -217,16 +220,51 @@ class MapRepository(
     }
 
     /**
-     * 根据交通方式获取路线 - 真实 API 实现（预留）
+     * 根据交通方式获取路线
+     * 直接调用 Google Directions API，不经过后端
      */
     override suspend fun getRouteByTransportMode(
         userId: String,
         startPoint: GeoPoint,
         endPoint: GeoPoint,
         transportMode: TransportMode
-    ): Result<RouteRecommendData> {
-        // TODO: 对接后端 API
-        // 暂时返回错误
-        return Result.failure(Exception("API not implemented yet"))
+    ): Result<RouteRecommendData> = withContext(Dispatchers.IO) {
+        try {
+            val origin = LatLng(startPoint.lat, startPoint.lng)
+            val destination = LatLng(endPoint.lat, endPoint.lng)
+
+            // TransportMode → Google Directions API mode 参数
+            val googleMode = when (transportMode) {
+                TransportMode.WALKING -> "walking"
+                TransportMode.CYCLING -> "bicycling"
+                TransportMode.BUS, TransportMode.SUBWAY -> "transit"
+                TransportMode.DRIVING -> "driving"
+            }
+
+            val result = DirectionsService.getRoute(origin, destination, googleMode)
+                ?: return@withContext Result.failure(Exception("无法获取路线，请检查网络连接"))
+
+            val distanceKm = result.distanceMeters / 1000.0
+            val durationMinutes = result.durationSeconds / 60
+
+            // 碳排放计算
+            val totalCarbon = MapUtils.estimateCarbonEmission(distanceKm, transportMode.value)
+            val carbonSaved = MapUtils.calculateCarbonSaved(distanceKm, transportMode.value)
+
+            val routePoints = result.points.map { GeoPoint(lng = it.longitude, lat = it.latitude) }
+
+            Result.success(RouteRecommendData(
+                route_id = "directions_${System.currentTimeMillis()}",
+                route_type = transportMode.value,
+                total_distance = distanceKm,
+                estimated_duration = durationMinutes,
+                total_carbon = totalCarbon,
+                carbon_saved = carbonSaved,
+                route_points = routePoints,
+                route_steps = result.steps
+            ))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 }
