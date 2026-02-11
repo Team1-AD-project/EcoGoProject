@@ -1,5 +1,6 @@
 package com.example.EcoGo.controller;
 
+import com.example.EcoGo.dto.ChallengeRequestDto;
 import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.dto.UserChallengeProgressDTO;
 import com.example.EcoGo.interfacemethods.ChallengeInterface;
@@ -58,9 +59,9 @@ public class ChallengeController {
      * POST /api/v1/web/challenges
      */
     @PostMapping("/web/challenges")
-    public ResponseMessage<Challenge> createWebChallenge(@RequestBody Challenge challenge) {
-        logger.info("[WEB] Creating new challenge: {}", challenge.getTitle());
-        return ResponseMessage.success(challengeService.createChallenge(challenge));
+    public ResponseMessage<Challenge> createWebChallenge(@RequestBody ChallengeRequestDto dto) {
+        logger.info("[WEB] Creating new challenge: {}", dto.getTitle());
+        return ResponseMessage.success(challengeService.createChallenge(dto.toEntity()));
     }
 
     /**
@@ -70,9 +71,9 @@ public class ChallengeController {
     @PutMapping("/web/challenges/{id}")
     public ResponseMessage<Challenge> updateWebChallenge(
             @PathVariable String id,
-            @RequestBody Challenge challenge) {
+            @RequestBody ChallengeRequestDto dto) {
         logger.info("[WEB] Updating challenge: {}", id);
-        return ResponseMessage.success(challengeService.updateChallenge(id, challenge));
+        return ResponseMessage.success(challengeService.updateChallenge(id, dto.toEntity()));
     }
 
     /**

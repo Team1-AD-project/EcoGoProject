@@ -1,5 +1,6 @@
 package com.example.EcoGo.controller;
 
+import com.example.EcoGo.dto.ActivityRequestDto;
 import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.interfacemethods.ActivityInterface;
 import com.example.EcoGo.model.Activity;
@@ -33,15 +34,15 @@ public class ActivityController {
     }
 
     @PostMapping("/web/activities")
-    public ResponseMessage<Activity> createWebActivity(@RequestBody Activity activity) {
-        logger.info("[WEB] Creating new activity: {}", activity.getTitle());
-        return ResponseMessage.success(activityService.createActivity(activity));
+    public ResponseMessage<Activity> createWebActivity(@RequestBody ActivityRequestDto dto) {
+        logger.info("[WEB] Creating new activity: {}", dto.getTitle());
+        return ResponseMessage.success(activityService.createActivity(dto.toEntity()));
     }
 
     @PutMapping("/web/activities/{id}")
-    public ResponseMessage<Activity> updateWebActivity(@PathVariable String id, @RequestBody Activity activity) {
+    public ResponseMessage<Activity> updateWebActivity(@PathVariable String id, @RequestBody ActivityRequestDto dto) {
         logger.info("[WEB] Updating activity: {}", id);
-        return ResponseMessage.success(activityService.updateActivity(id, activity));
+        return ResponseMessage.success(activityService.updateActivity(id, dto.toEntity()));
     }
 
     @DeleteMapping("/web/activities/{id}")

@@ -1,5 +1,6 @@
 package com.example.EcoGo.controller;
 
+import com.example.EcoGo.dto.AdvertisementRequestDto;
 import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.interfacemethods.AdvertisementInterface;
 import com.example.EcoGo.model.Advertisement;
@@ -38,15 +39,15 @@ public class AdvertisementController {
     }
 
     @PostMapping("/web/advertisements")
-    public ResponseMessage<Advertisement> createWebAdvertisement(@RequestBody Advertisement advertisement) {
-        logger.info("[WEB] Creating new advertisement: {}", advertisement.getName());
-        return ResponseMessage.success(advertisementService.createAdvertisement(advertisement));
+    public ResponseMessage<Advertisement> createWebAdvertisement(@RequestBody AdvertisementRequestDto dto) {
+        logger.info("[WEB] Creating new advertisement: {}", dto.getName());
+        return ResponseMessage.success(advertisementService.createAdvertisement(dto.toEntity()));
     }
 
     @PutMapping("/web/advertisements/{id}")
-    public ResponseMessage<Advertisement> updateWebAdvertisement(@PathVariable String id, @RequestBody Advertisement advertisement) {
+    public ResponseMessage<Advertisement> updateWebAdvertisement(@PathVariable String id, @RequestBody AdvertisementRequestDto dto) {
         logger.info("[WEB] Updating advertisement: {}", id);
-        return ResponseMessage.success(advertisementService.updateAdvertisement(id, advertisement));
+        return ResponseMessage.success(advertisementService.updateAdvertisement(id, dto.toEntity()));
     }
 
     @DeleteMapping("/web/advertisements/{id}")
