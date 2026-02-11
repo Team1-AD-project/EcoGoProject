@@ -5,7 +5,12 @@ import com.ecogo.mapengine.data.model.RouteAlternative
 import com.ecogo.mapengine.data.model.RouteStep
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class RouteOptionAdapterTest {
 
     private fun makeRoute(index: Int = 0) = RouteAlternative(

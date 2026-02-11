@@ -3,7 +3,12 @@ package com.ecogo.ui.adapters
 import com.ecogo.data.Activity
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class ActivityAdapterTest {
 
     private fun makeActivity(id: String = "act1", title: String = "Beach Clean") = Activity(

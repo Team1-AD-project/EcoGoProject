@@ -4,7 +4,12 @@ import com.ecogo.data.LocationType
 import com.ecogo.data.NavLocation
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class LocationAdapterTest {
 
     private fun makeLocation(id: String = "loc1") = NavLocation(

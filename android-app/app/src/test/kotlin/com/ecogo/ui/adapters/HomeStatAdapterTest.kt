@@ -2,7 +2,12 @@ package com.ecogo.ui.adapters
 
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class HomeStatAdapterTest {
 
     private fun makeStat(title: String = "Carbon Saved") = HomeStat(

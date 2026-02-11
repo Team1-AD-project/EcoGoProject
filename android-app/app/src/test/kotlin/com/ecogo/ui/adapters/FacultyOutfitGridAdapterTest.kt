@@ -4,7 +4,12 @@ import com.ecogo.data.FacultyData
 import com.ecogo.data.Outfit
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class FacultyOutfitGridAdapterTest {
 
     private fun makeFaculty(id: String = "soc") = FacultyData(

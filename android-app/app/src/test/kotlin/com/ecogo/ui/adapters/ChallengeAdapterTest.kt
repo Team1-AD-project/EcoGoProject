@@ -3,7 +3,12 @@ package com.ecogo.ui.adapters
 import com.ecogo.data.Challenge
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class ChallengeAdapterTest {
 
     private fun makeChallenge(id: String = "c1", title: String = "Walk 5km") = Challenge(

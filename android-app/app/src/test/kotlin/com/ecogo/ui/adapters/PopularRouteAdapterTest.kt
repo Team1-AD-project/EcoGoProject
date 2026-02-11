@@ -3,7 +3,12 @@ package com.ecogo.ui.adapters
 import com.ecogo.data.BusRoute
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class PopularRouteAdapterTest {
 
     private fun makeRoute(name: String = "A1") = BusRoute(

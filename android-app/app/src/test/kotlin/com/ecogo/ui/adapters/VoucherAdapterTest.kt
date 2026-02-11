@@ -3,7 +3,12 @@ package com.ecogo.ui.adapters
 import com.ecogo.data.Voucher
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class VoucherAdapterTest {
 
     private fun makeVoucher(id: String = "v1", available: Boolean = true) = Voucher(

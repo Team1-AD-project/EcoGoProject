@@ -4,7 +4,12 @@ import com.ecogo.data.RouteStep
 import com.ecogo.data.TransportMode
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class RouteStepAdapterTest {
 
     private fun makeStep(instruction: String = "Walk north") = RouteStep(

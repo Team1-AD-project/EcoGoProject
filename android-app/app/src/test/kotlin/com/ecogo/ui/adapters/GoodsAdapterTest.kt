@@ -3,7 +3,12 @@ package com.ecogo.ui.adapters
 import com.ecogo.data.ShopItem
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class GoodsAdapterTest {
 
     private fun makeShopItem(id: String = "item1", owned: Boolean = false) = ShopItem(

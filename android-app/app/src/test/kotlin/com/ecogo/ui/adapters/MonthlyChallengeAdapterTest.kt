@@ -4,7 +4,12 @@ import com.ecogo.data.Challenge
 import com.ecogo.data.UserChallengeProgress
 import org.junit.Assert.*
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
 class MonthlyChallengeAdapterTest {
 
     private fun makeChallenge(id: String = "c1") = Challenge(
