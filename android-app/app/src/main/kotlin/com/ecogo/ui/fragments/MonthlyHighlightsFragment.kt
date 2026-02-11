@@ -17,7 +17,7 @@ import com.ecogo.ui.adapters.MonthlyActivityAdapter
 import com.ecogo.ui.adapters.MonthlyChallengeAdapter
 import com.ecogo.ui.adapters.ChallengeWithProgress
 import com.ecogo.ui.adapters.MonthStatAdapter
-import com.ecogo.ui.adapters.MilestoneAdapter
+
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -105,11 +105,6 @@ class MonthlyHighlightsFragment : Fragment() {
             }
         }
 
-        // 里程碑时间线
-        binding.recyclerMilestones.apply {
-            layoutManager = LinearLayoutManager(context)
-            adapter = MilestoneAdapter(emptyList())
-        }
     }
     
     private fun loadData() {
@@ -129,8 +124,6 @@ class MonthlyHighlightsFragment : Fragment() {
             // 加载排行榜前三
             loadLeaderboardTop3()
 
-            // 加载里程碑
-            loadMilestones()
         }
     }
     
@@ -305,56 +298,6 @@ class MonthlyHighlightsFragment : Fragment() {
         }
     }
 
-    private fun loadMilestones() {
-        // TODO: 从后端加载实际里程碑数据
-        // 这里使用模拟数据
-        val milestones = listOf(
-            com.ecogo.ui.adapters.Milestone(
-                icon = "🎉",
-                title = "First Trip of the Month",
-                description = "Started the month strong! Earned +10 bonus points.",
-                date = "Feb 1",
-                reward = "🎁 +10 pts"
-            ),
-            com.ecogo.ui.adapters.Milestone(
-                icon = "🌟",
-                title = "10 Eco Trips Milestone",
-                description = "Completed 10 eco-friendly trips. You're making a difference!",
-                date = "Feb 5",
-                reward = "🎁 +50 pts"
-            ),
-            com.ecogo.ui.adapters.Milestone(
-                icon = "🏆",
-                title = "New Badge Unlocked",
-                description = "Unlocked the 'Green Commuter' badge for consistent eco travel.",
-                date = "Feb 8",
-                reward = "🏅 Badge"
-            ),
-            com.ecogo.ui.adapters.Milestone(
-                icon = "🔥",
-                title = "7-Day Streak",
-                description = "Checked in for 7 consecutive days. Keep it up!",
-                date = "Feb 12",
-                reward = "🎁 +100 pts"
-            ),
-            com.ecogo.ui.adapters.Milestone(
-                icon = "🚌",
-                title = "Tried New Route",
-                description = "Explored a new bus route. Adventure awaits!",
-                date = "Feb 15"
-            ),
-            com.ecogo.ui.adapters.Milestone(
-                icon = "💚",
-                title = "Joined Campus Clean-Up",
-                description = "Participated in the monthly campus clean-up activity.",
-                date = "Feb 18",
-                reward = "🎁 +150 pts"
-            )
-        )
-        
-        (binding.recyclerMilestones.adapter as? com.ecogo.ui.adapters.MilestoneAdapter)?.updateData(milestones)
-    }
-    
     private fun setupAnimations() {
         val slideUp = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_up)
         val popIn = AnimationUtils.loadAnimation(requireContext(), R.anim.pop_in)

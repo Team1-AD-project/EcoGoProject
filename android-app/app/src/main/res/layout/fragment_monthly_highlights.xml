@@ -508,32 +508,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Monthly Milestones Timeline -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="📅 This Month's Journey"
-                android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Your eco milestones"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_milestones"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:nestedScrollingEnabled="false"
-                android:overScrollMode="never" />
-
             <!-- Footer Spacing -->
             <View
                 android:layout_width="match_parent"
