@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<coverage generated="1770779788386" clover="3.2.0">
+  <project timestamp="1770779788386" name="All files">
+    <metrics statements="73" coveredstatements="73" conditionals="17" coveredconditionals="17" methods="35" coveredmethods="35" elements="125" coveredelements="125" complexity="0" loc="73" ncloc="73" packages="2" files="6" classes="6"/>
+    <package name="api">
+      <metrics statements="53" coveredstatements="53" conditionals="17" coveredconditionals="17" methods="28" coveredmethods="28"/>
+      <file name="advertisementApi.ts" path="C:\Users\25293\Desktop\CA_project\AD_Web\EcoGoManagementSystem\src\api\advertisementApi.ts">
+        <metrics statements="13" coveredstatements="13" conditionals="3" coveredconditionals="3" methods="7" coveredmethods="7"/>
+        <line num="39" count="3" type="stmt"/>
+        <line num="42" count="2" type="stmt"/>
+        <line num="46" count="2" type="stmt"/>
+        <line num="47" count="1" type="stmt"/>
+        <line num="51" count="1" type="stmt"/>
+        <line num="52" count="1" type="stmt"/>
+        <line num="56" count="1" type="stmt"/>
+        <line num="57" count="1" type="stmt"/>
+        <line num="61" count="2" type="stmt"/>
+        <line num="65" count="1" type="stmt"/>
+        <line num="66" count="1" type="stmt"/>
+        <line num="71" count="1" type="stmt"/>
+        <line num="72" count="1" type="stmt"/>
+      </file>
+      <file name="challengeApi.ts" path="C:\Users\25293\Desktop\CA_project\AD_Web\EcoGoManagementSystem\src\api\challengeApi.ts">
+        <metrics statements="16" coveredstatements="16" conditionals="0" coveredconditionals="0" methods="8" coveredmethods="8"/>
+        <line num="47" count="1" type="stmt"/>
+        <line num="50" count="2" type="stmt"/>
+        <line num="51" count="2" type="stmt"/>
+        <line num="56" count="2" type="stmt"/>
+        <line num="57" count="1" type="stmt"/>
+        <line num="62" count="1" type="stmt"/>
+        <line num="63" count="1" type="stmt"/>
+        <line num="68" count="1" type="stmt"/>
+        <line num="69" count="1" type="stmt"/>
+        <line num="74" count="2" type="stmt"/>
+        <line num="79" count="2" type="stmt"/>
+        <line num="80" count="2" type="stmt"/>
+        <line num="85" count="2" type="stmt"/>
+        <line num="86" count="2" type="stmt"/>
+        <line num="91" count="2" type="stmt"/>
+        <line num="92" count="2" type="stmt"/>
+      </file>
+      <file name="collectiblesApi.ts" path="C:\Users\25293\Desktop\CA_project\AD_Web\EcoGoManagementSystem\src\api\collectiblesApi.ts">
+        <metrics statements="16" coveredstatements="16" conditionals="10" coveredconditionals="10" methods="9" coveredmethods="9"/>
+        <line num="40" count="6" type="cond" truecount="2" falsecount="0"/>
+        <line num="41" count="6" type="stmt"/>
+        <line num="42" count="5" type="cond" truecount="2" falsecount="0"/>
+        <line num="47" count="1" type="stmt"/>
+        <line num="52" count="1" type="stmt"/>
+        <line num="57" count="1" type="stmt"/>
+        <line num="58" count="1" type="stmt"/>
+        <line num="63" count="1" type="stmt"/>
+        <line num="64" count="1" type="stmt"/>
+        <line num="69" count="2" type="stmt"/>
+        <line num="74" count="2" type="stmt"/>
+        <line num="75" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="80" count="2" type="stmt"/>
+        <line num="81" count="2" type="cond" truecount="2" falsecount="0"/>
+        <line num="86" count="3" type="stmt"/>
+        <line num="87" count="3" type="cond" truecount="2" falsecount="0"/>
+      </file>
+      <file name="leaderboardApi.ts" path="C:\Users\25293\Desktop\CA_project\AD_Web\EcoGoManagementSystem\src\api\leaderboardApi.ts">
+        <metrics statements="4" coveredstatements="4" conditionals="4" coveredconditionals="4" methods="2" coveredmethods="2"/>
+        <line num="52" count="4" type="stmt"/>
+        <line num="55" count="3" type="stmt"/>
+        <line num="62" count="3" type="stmt"/>
+        <line num="63" count="2" type="stmt"/>
+      </file>
+      <file name="statisticsApi.ts" path="C:\Users\25293\Desktop\CA_project\AD_Web\EcoGoManagementSystem\src\api\statisticsApi.ts">
+        <metrics statements="4" coveredstatements="4" conditionals="0" coveredconditionals="0" methods="2" coveredmethods="2"/>
+        <line num="58" count="4" type="stmt"/>
+        <line num="61" count="3" type="stmt"/>
+        <line num="65" count="3" type="stmt"/>
+        <line num="66" count="2" type="stmt"/>
+      </file>
+    </package>
+    <package name="services">
+      <metrics statements="20" coveredstatements="20" conditionals="0" coveredconditionals="0" methods="7" coveredmethods="7"/>
+      <file name="activityService.ts" path="C:\Users\25293\Desktop\CA_project\AD_Web\EcoGoManagementSystem\src\services\activityService.ts">
+        <metrics statements="20" coveredstatements="20" conditionals="0" coveredconditionals="0" methods="7" coveredmethods="7"/>
+        <line num="67" count="1" type="stmt"/>
+        <line num="68" count="2" type="stmt"/>
+        <line num="69" count="1" type="stmt"/>
+        <line num="72" count="1" type="stmt"/>
+        <line num="73" count="2" type="stmt"/>
+        <line num="74" count="2" type="stmt"/>
+        <line num="77" count="1" type="stmt"/>
+        <line num="78" count="2" type="stmt"/>
+        <line num="79" count="1" type="stmt"/>
+        <line num="82" count="1" type="stmt"/>
+        <line num="83" count="2" type="stmt"/>
+        <line num="84" count="1" type="stmt"/>
+        <line num="87" count="1" type="stmt"/>
+        <line num="88" count="1" type="stmt"/>
+        <line num="89" count="1" type="stmt"/>
+        <line num="92" count="1" type="stmt"/>
+        <line num="93" count="2" type="stmt"/>
+        <line num="96" count="1" type="stmt"/>
+        <line num="97" count="2" type="stmt"/>
+        <line num="98" count="1" type="stmt"/>
+      </file>
+    </package>
+  </project>
+</coverage>
