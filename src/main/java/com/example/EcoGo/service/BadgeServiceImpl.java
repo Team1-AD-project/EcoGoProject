@@ -35,6 +35,10 @@ public class BadgeServiceImpl implements BadgeService {
     @Lazy
     private PointsService pointsService;
 
+    @Autowired
+    @Lazy
+    private BadgeService self;
+
     /**
      * 1. 购买徽章
      */
@@ -135,7 +139,7 @@ public class BadgeServiceImpl implements BadgeService {
     }
 
     public List<UserBadge> getMyBadges(String userId) {
-        checkAndUnlockCarbonBadges(userId);
+        self.checkAndUnlockCarbonBadges(userId);
         return userBadgeRepository.findByUserId(userId);
     }
 

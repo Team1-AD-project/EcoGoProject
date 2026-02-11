@@ -14,7 +14,9 @@ public class BadgePurchaseStatDto {
 
     private int purchaseCount;
 
-    public BadgePurchaseStatDto() {}
+    public BadgePurchaseStatDto() {
+        // Required empty constructor for MongoDB aggregation result deserialization
+    }
 
     public String getBadgeId() {
         return badgeId;
