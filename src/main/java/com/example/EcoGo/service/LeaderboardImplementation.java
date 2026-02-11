@@ -33,6 +33,7 @@ import java.util.stream.Collectors;
 public class LeaderboardImplementation implements LeaderboardInterface {
 
     private static final Logger logger = LoggerFactory.getLogger(LeaderboardImplementation.class);
+    private static final String TOTAL_CARBON_SAVED_FIELD = "totalCarbonSaved";
 
     @Autowired
     private MongoTemplate mongoTemplate;
@@ -131,16 +132,16 @@ public class LeaderboardImplementation implements LeaderboardInterface {
             aggregation = Aggregation.newAggregation(
                     Aggregation.match(Criteria.where("carbon_status").is("completed")
                             .and("start_time").gte(start).lt(end)),
-                    Aggregation.group("user_id").sum("carbon_saved").as("totalCarbonSaved"),
-                    Aggregation.sort(Sort.Direction.DESC, "totalCarbonSaved"),
+                    Aggregation.group("user_id").sum("carbon_saved").as(TOTAL_CARBON_SAVED_FIELD),
+                    Aggregation.sort(Sort.Direction.DESC, TOTAL_CARBON_SAVED_FIELD),
                     Aggregation.limit(limit)
             );
         } else {
             aggregation = Aggregation.newAggregation(
                     Aggregation.match(Criteria.where("carbon_status").is("completed")
                             .and("start_time").gte(start).lt(end)),
-                    Aggregation.group("user_id").sum("carbon_saved").as("totalCarbonSaved"),
-                    Aggregation.sort(Sort.Direction.DESC, "totalCarbonSaved")
+                    Aggregation.group("user_id").sum("carbon_saved").as(TOTAL_CARBON_SAVED_FIELD),
+                    Aggregation.sort(Sort.Direction.DESC, TOTAL_CARBON_SAVED_FIELD)
             );
         }
 

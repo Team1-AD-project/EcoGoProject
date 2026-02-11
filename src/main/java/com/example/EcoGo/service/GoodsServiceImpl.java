@@ -23,6 +23,8 @@ import java.util.Date;
 @Service
 public class GoodsServiceImpl implements GoodsService {
 
+    private static final String INVENTORY_QUANTITY_FIELD = "quantity";
+
     @Autowired
     private InventoryRepository inventoryRepository;
 
@@ -35,11 +37,11 @@ public class GoodsServiceImpl implements GoodsService {
 
     Query query = new Query(
             Criteria.where("goodsId").is(goodsId)
-                    .and("quantity").gte(quantity)
+                    .and(INVENTORY_QUANTITY_FIELD).gte(quantity)
     );
 
     Update update = new Update()
-            .inc("quantity", -quantity)
+            .inc(INVENTORY_QUANTITY_FIELD, -quantity)
             .set("updatedAt", new Date());
 
     FindAndModifyOptions options = FindAndModifyOptions.options().returnNew(true);
@@ -64,7 +66,7 @@ public class GoodsServiceImpl implements GoodsService {
         Query query = new Query(Criteria.where("goodsId").is(goodsId));
 
         Update update = new Update()
-                .inc("quantity", quantity)
+                .inc(INVENTORY_QUANTITY_FIELD, quantity)
                 .set("updatedAt", new Date());
 
         FindAndModifyOptions options = FindAndModifyOptions.options().returnNew(true);

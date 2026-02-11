@@ -32,6 +32,9 @@ public class ChallengeImplementation implements ChallengeInterface {
     private static final String FIELD_CHALLENGE_ID = "challenge_id";
     private static final String FIELD_USER_ID = "user_id";
     private static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
+    private static final String STATUS_COMPLETED = "COMPLETED";
+    private static final String TRIPS_COLLECTION = "trips";
+    private static final String AGGREGATION_TOTAL_KEY = "total";
 
     @Autowired
     private ChallengeRepository challengeRepository;
@@ -224,6 +227,24 @@ public class ChallengeImplementation implements ChallengeInterface {
      */
     private UserChallengeProgressDTO buildProgressDTO(UserChallengeProgress progress, Challenge challenge) {
         UserChallengeProgressDTO dto = new UserChallengeProgressDTO();
+        
+        populateBasicFields(dto, progress, challenge);
+        populateUserInfo(dto, progress);
+        calculateAndSetProgress(dto, progress, challenge);
+        
+        Double target = challenge.getTarget();
+        Double current = dto.getCurrent();
+        
+        if (target != null && current >= target) {
+            handleCompletedStatus(dto, progress, challenge);
+        } else {
+            handleInProgressStatus(dto, progress);
+        }
+
+        return dto;
+    }
+
+    private void populateBasicFields(UserChallengeProgressDTO dto, UserChallengeProgress progress, Challenge challenge) {
         dto.setId(progress.getId());
         dto.setChallengeId(progress.getChallengeId());
         dto.setUserId(progress.getUserId());
@@ -231,7 +252,9 @@ public class ChallengeImplementation implements ChallengeInterface {
         dto.setCompletedAt(progress.getCompletedAt());
         dto.setRewardClaimed(progress.getRewardClaimed());
         dto.setTarget(challenge.getTarget());
+    }
 
+    private void populateUserInfo(UserChallengeProgressDTO dto, UserChallengeProgress progress) {
         User user = userRepository.findByUserid(progress.getUserId()).orElse(null);
         if (user != null) {
             dto.setUserNickname(user.getNickname());
@@ -242,7 +265,9 @@ public class ChallengeImplementation implements ChallengeInterface {
             dto.setUserEmail(null);
             dto.setUserAvatar(null);
         }
+    }
 
+    private void calculateAndSetProgress(UserChallengeProgressDTO dto, UserChallengeProgress progress, Challenge challenge) {
         LocalDateTime monthStart = LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0);
         LocalDateTime monthEnd = monthStart.plusMonths(1).minusNanos(1);
         Double current = calculateProgressFromTrips(
@@ -259,45 +284,50 @@ public class ChallengeImplementation implements ChallengeInterface {
         } else {
             dto.setProgressPercent(0.0);
         }
+    }
 
-        if (target != null && current >= target) {
-            dto.setStatus("COMPLETED");
-            if (STATUS_IN_PROGRESS.equals(progress.getStatus())) {
-                // First time reaching target → mark COMPLETED, reward not claimed yet
-                progress.setStatus("COMPLETED");
-                progress.setCompletedAt(LocalDateTime.now());
-                progress.setUpdatedAt(LocalDateTime.now());
-                progress.setRewardClaimed(false);
-                userChallengeProgressRepository.save(progress);
-                dto.setCompletedAt(progress.getCompletedAt());
-                dto.setRewardClaimed(false);
-            } else if (Boolean.TRUE.equals(progress.getRewardClaimed())) {
-                // Verify reward was actually logged to user_points_logs
-                List<com.example.EcoGo.model.UserPointsLog> logs =
-                        userPointsLogRepository.findByUserIdAndSource(progress.getUserId(), "challenges");
-                boolean hasLog = logs.stream()
-                        .anyMatch(log -> progress.getChallengeId().equals(log.getRelatedId()));
-                if (!hasLog) {
-                    // Old data: rewardClaimed=true but no points log → reset so user can claim properly
-                    progress.setRewardClaimed(false);
-                    progress.setUpdatedAt(LocalDateTime.now());
-                    userChallengeProgressRepository.save(progress);
-                    dto.setRewardClaimed(false);
-                }
-            }
-        } else {
-            // Progress not yet reached target → always IN_PROGRESS
-            dto.setStatus(STATUS_IN_PROGRESS);
-            // If DB was previously marked COMPLETED (e.g. trip data changed), revert it
-            if ("COMPLETED".equals(progress.getStatus()) && !Boolean.TRUE.equals(progress.getRewardClaimed())) {
-                progress.setStatus(STATUS_IN_PROGRESS);
-                progress.setCompletedAt(null);
-                progress.setUpdatedAt(LocalDateTime.now());
-                userChallengeProgressRepository.save(progress);
-            }
+    private void handleCompletedStatus(UserChallengeProgressDTO dto, UserChallengeProgress progress, Challenge challenge) {
+        dto.setStatus(STATUS_COMPLETED);
+        
+        if (STATUS_IN_PROGRESS.equals(progress.getStatus())) {
+            markChallengeAsCompletedFirstTime(dto, progress);
+        } else if (Boolean.TRUE.equals(progress.getRewardClaimed())) {
+            verifyAndFixRewardLog(dto, progress);
         }
+    }
 
-        return dto;
+    private void markChallengeAsCompletedFirstTime(UserChallengeProgressDTO dto, UserChallengeProgress progress) {
+        progress.setStatus(STATUS_COMPLETED);
+        progress.setCompletedAt(LocalDateTime.now());
+        progress.setUpdatedAt(LocalDateTime.now());
+        progress.setRewardClaimed(false);
+        userChallengeProgressRepository.save(progress);
+        dto.setCompletedAt(progress.getCompletedAt());
+        dto.setRewardClaimed(false);
+    }
+
+    private void verifyAndFixRewardLog(UserChallengeProgressDTO dto, UserChallengeProgress progress) {
+        List<com.example.EcoGo.model.UserPointsLog> logs =
+                userPointsLogRepository.findByUserIdAndSource(progress.getUserId(), "challenges");
+        boolean hasLog = logs.stream()
+                .anyMatch(log -> progress.getChallengeId().equals(log.getRelatedId()));
+        if (!hasLog) {
+            progress.setRewardClaimed(false);
+            progress.setUpdatedAt(LocalDateTime.now());
+            userChallengeProgressRepository.save(progress);
+            dto.setRewardClaimed(false);
+        }
+    }
+
+    private void handleInProgressStatus(UserChallengeProgressDTO dto, UserChallengeProgress progress) {
+        dto.setStatus(STATUS_IN_PROGRESS);
+        
+        if (STATUS_COMPLETED.equals(progress.getStatus()) && !Boolean.TRUE.equals(progress.getRewardClaimed())) {
+            progress.setStatus(STATUS_IN_PROGRESS);
+            progress.setCompletedAt(null);
+            progress.setUpdatedAt(LocalDateTime.now());
+            userChallengeProgressRepository.save(progress);
+        }
     }
 
     @Override
@@ -311,7 +341,7 @@ public class ChallengeImplementation implements ChallengeInterface {
             throw new BusinessException(ErrorCode.CHALLENGE_NOT_FOUND);
         }
 
-        if (!"COMPLETED".equals(progress.getStatus())) {
+        if (!STATUS_COMPLETED.equals(progress.getStatus())) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "Challenge not completed yet");
         }
 
@@ -352,19 +382,19 @@ public class ChallengeImplementation implements ChallengeInterface {
         switch (type) {
             case "GREEN_TRIPS_COUNT": {
                 Query query = new Query(criteria);
-                long count = mongoTemplate.count(query, "trips");
+                long count = mongoTemplate.count(query, TRIPS_COLLECTION);
                 return (double) count;
             }
 
             case "GREEN_TRIPS_DISTANCE": {
                 Aggregation aggregation = Aggregation.newAggregation(
                         Aggregation.match(criteria),
-                        Aggregation.group().sum("distance").as("total")
+                        Aggregation.group().sum("distance").as(AGGREGATION_TOTAL_KEY)
                 );
-                AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, "trips", Map.class);
+                AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, TRIPS_COLLECTION, Map.class);
                 Map result = results.getUniqueMappedResult();
-                if (result != null && result.get("total") != null) {
-                    return ((Number) result.get("total")).doubleValue();
+                if (result != null && result.get(AGGREGATION_TOTAL_KEY) != null) {
+                    return ((Number) result.get(AGGREGATION_TOTAL_KEY)).doubleValue();
                 }
                 return 0.0;
             }
@@ -372,12 +402,12 @@ public class ChallengeImplementation implements ChallengeInterface {
             case "CARBON_SAVED": {
                 Aggregation aggregation = Aggregation.newAggregation(
                         Aggregation.match(criteria),
-                        Aggregation.group().sum("carbon_saved").as("total")
+                        Aggregation.group().sum("carbon_saved").as(AGGREGATION_TOTAL_KEY)
                 );
-                AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, "trips", Map.class);
+                AggregationResults<Map> results = mongoTemplate.aggregate(aggregation, TRIPS_COLLECTION, Map.class);
                 Map result = results.getUniqueMappedResult();
-                if (result != null && result.get("total") != null) {
-                    return ((Number) result.get("total")).doubleValue();
+                if (result != null && result.get(AGGREGATION_TOTAL_KEY) != null) {
+                    return ((Number) result.get(AGGREGATION_TOTAL_KEY)).doubleValue();
                 }
                 return 0.0;
             }

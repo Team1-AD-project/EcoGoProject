@@ -20,6 +20,10 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = "*")
 public class GoodsController {
 
+    private static final String VOUCHER_TYPE = "voucher";
+    private static final String ALL_ITEMS_FILTER = "all items";
+    private static final List<String> VALID_CATEGORIES = List.of("food", "beverage", "merchandise", "service");
+
     @Autowired
     private GoodsService goodsService;
 
@@ -34,52 +38,78 @@ public class GoodsController {
             @RequestParam(required = false, defaultValue = "false") Boolean isVipActive) {
 
         List<Goods> goodsList = goodsService.getAllGoods();
+        
+        // Apply filters
+        goodsList = filterNonVouchers(goodsList);
+        goodsList = filterByVipStatus(goodsList, isVipActive);
+        goodsList = filterByCategory(goodsList, category);
+        goodsList = filterByKeyword(goodsList, keyword);
+        goodsList = filterByRedemptionStatus(goodsList, isForRedemption);
 
-        goodsList = goodsList.stream()
-                .filter(g -> g.getType() == null ||
-                        !g.getType().trim().equalsIgnoreCase("voucher"))
+        // Build paginated response
+        Map<String, Object> data = buildPaginatedResponse(goodsList, page, size);
+        return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), data);
+    }
+
+    private List<Goods> filterNonVouchers(List<Goods> goods) {
+        return goods.stream()
+                .filter(g -> g.getType() == null || !g.getType().trim().equalsIgnoreCase(VOUCHER_TYPE))
                 .collect(Collectors.toList());
+    }
 
-        // ✅ VIP 过滤：非 VIP 只能看到 vipLevelRequired=0（或字段缺失）
+    private List<Goods> filterByVipStatus(List<Goods> goods, Boolean isVipActive) {
         if (Boolean.FALSE.equals(isVipActive)) {
-            goodsList = goodsList.stream()
+            return goods.stream()
                     .filter(g -> g.getVipLevelRequired() == null || g.getVipLevelRequired() == 0)
                     .collect(Collectors.toList());
         }
+        return goods;
+    }
 
-        // 筛选逻辑
-        if (category != null && !category.isEmpty()) {
-            String c = category.trim().toLowerCase();
-
-            // ✅ all items / all：表示不过滤
-            if (!c.equals("all") && !c.equals("all items")) {
-                goodsList = goodsList.stream()
-                        .filter(g -> g.getCategory() != null && c.equals(g.getCategory().trim().toLowerCase()))
-                        .collect(Collectors.toList());
-            }
+    private List<Goods> filterByCategory(List<Goods> goods, String category) {
+        if (category == null || category.isEmpty()) {
+            return goods;
         }
-
-        if (keyword != null && !keyword.isEmpty()) {
-            String kw = keyword.toLowerCase();
-            goodsList = goodsList.stream()
-                    .filter(goods -> goods.getName() != null && goods.getName().toLowerCase().contains(kw)
-                            || (goods.getDescription() != null && goods.getDescription().toLowerCase().contains(kw)))
-                    .collect(Collectors.toList());
+        
+        String c = category.trim().toLowerCase();
+        if ("all".equals(c) || ALL_ITEMS_FILTER.equals(c)) {
+            return goods;
         }
+        
+        return goods.stream()
+                .filter(g -> g.getCategory() != null && c.equals(g.getCategory().trim().toLowerCase()))
+                .collect(Collectors.toList());
+    }
 
-        if (isForRedemption != null) {
-            goodsList = goodsList.stream()
-                    .filter(goods -> isForRedemption.equals(goods.getIsForRedemption()))
-                    .collect(Collectors.toList());
+    private List<Goods> filterByKeyword(List<Goods> goods, String keyword) {
+        if (keyword == null || keyword.isEmpty()) {
+            return goods;
         }
+        
+        String kw = keyword.toLowerCase();
+        return goods.stream()
+                .filter(good -> (good.getName() != null && good.getName().toLowerCase().contains(kw))
+                        || (good.getDescription() != null && good.getDescription().toLowerCase().contains(kw)))
+                .collect(Collectors.toList());
+    }
 
-        // 分页逻辑
+    private List<Goods> filterByRedemptionStatus(List<Goods> goods, Boolean isForRedemption) {
+        if (isForRedemption == null) {
+            return goods;
+        }
+        
+        return goods.stream()
+                .filter(good -> isForRedemption.equals(good.getIsForRedemption()))
+                .collect(Collectors.toList());
+    }
+
+    private Map<String, Object> buildPaginatedResponse(List<Goods> goodsList, int page, int size) {
         int total = goodsList.size();
         int fromIndex = Math.max(0, (page - 1) * size);
         int toIndex = Math.min(fromIndex + size, total);
-
+        
         List<Goods> pageItems = (fromIndex < total) ? goodsList.subList(fromIndex, toIndex) : List.of();
-
+        
         Map<String, Object> data = new HashMap<>();
         data.put("items", pageItems);
         data.put("pagination", Map.of(
@@ -87,8 +117,8 @@ public class GoodsController {
                 "size", size,
                 "total", total,
                 "totalPages", (int) Math.ceil((double) total / size)));
-
-        return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), data);
+        
+        return data;
     }
 
     // 2. 获取单个商品详情
@@ -127,7 +157,7 @@ public class GoodsController {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "category cannot be empty");
         }
         String c = goods.getCategory().trim().toLowerCase();
-        if (!List.of("food", "beverage", "merchandise", "service").contains(c)) {
+        if (!VALID_CATEGORIES.contains(c)) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "invalid category: " + goods.getCategory());
         }
         goods.setCategory(c); // 统一存小写，避免大小写导致前端过滤不到
@@ -161,7 +191,7 @@ public class GoodsController {
         // ✅ category（如果前端更新时不一定传 category，可把这一段改成 "传了才校验"）
         if (goods.getCategory() != null && !goods.getCategory().isBlank()) {
             String c = goods.getCategory().trim().toLowerCase();
-            if (!List.of("food", "beverage", "merchandise", "service").contains(c)) {
+            if (!VALID_CATEGORIES.contains(c)) {
                 throw new BusinessException(ErrorCode.PARAM_ERROR, "invalid category: " + goods.getCategory());
             }
             goods.setCategory(c);
@@ -257,16 +287,14 @@ public ResponseMessage<Void> batchUpdateStock(
     @GetMapping("/categories")
     public ResponseMessage<Map<String, Object>> getGoodsCategories() {
 
-        List<String> categories = List.of("food", "beverage", "merchandise", "service");
-
         Map<String, Object> data = new HashMap<>();
-        data.put("categories", categories);
+        data.put("categories", VALID_CATEGORIES);
 
         // ✅ 这个不是分类，是“不过滤”的特殊 key
-        data.put("allItemsKey", "all items");
+        data.put("allItemsKey", ALL_ITEMS_FILTER);
 
         // 可选：默认 tab
-        data.put("default", "all items");
+        data.put("default", ALL_ITEMS_FILTER);
 
         return new ResponseMessage<>(
                 ErrorCode.SUCCESS.getCode(),
@@ -281,7 +309,7 @@ public ResponseMessage<Void> batchUpdateStock(
             List<Goods> goodsList = goodsService.getAllGoods();
 
             goodsList = goodsList.stream()
-                    .filter(g -> g.getType() != null && g.getType().equalsIgnoreCase("voucher"))
+                    .filter(g -> g.getType() != null && g.getType().equalsIgnoreCase(VOUCHER_TYPE))
                     .filter(g -> Boolean.TRUE.equals(g.getIsActive()))
                     .filter(g -> Boolean.TRUE.equals(g.getIsForRedemption()))
                     .toList();
@@ -302,7 +330,7 @@ public ResponseMessage<Void> batchUpdateStock(
     @PostMapping("/admin/vouchers")
     public ResponseMessage<Goods> createVoucher(@RequestBody GoodsRequestDto dto) {
         Goods goods = dto.toEntity();
-        goods.setType("voucher");
+        goods.setType(VOUCHER_TYPE);
         goods.setIsForRedemption(true);
 
         if (goods.getRedemptionPoints() == null || goods.getRedemptionPoints() <= 0) {
@@ -318,12 +346,12 @@ public ResponseMessage<Void> batchUpdateStock(
     @PutMapping("/admin/vouchers/{id}")
     public ResponseMessage<Goods> updateVoucher(@PathVariable String id, @RequestBody GoodsRequestDto dto) {
         Goods existing = goodsService.getGoodsById(id);
-        if (existing.getType() == null || !"voucher".equalsIgnoreCase(existing.getType())) {
+        if (existing.getType() == null || !VOUCHER_TYPE.equalsIgnoreCase(existing.getType())) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "NOT_A_VOUCHER");
         }
 
         Goods goods = dto.toEntity();
-        goods.setType("voucher");
+        goods.setType(VOUCHER_TYPE);
         goods.setIsForRedemption(true);
 
         Goods updated = goodsService.updateGoods(id, goods);
@@ -333,7 +361,7 @@ public ResponseMessage<Void> batchUpdateStock(
     @DeleteMapping("/admin/vouchers/{id}")
     public ResponseMessage<Void> deleteVoucher(@PathVariable String id) {
         Goods existing = goodsService.getGoodsById(id);
-        if (existing.getType() == null || !"voucher".equalsIgnoreCase(existing.getType())) {
+        if (existing.getType() == null || !VOUCHER_TYPE.equalsIgnoreCase(existing.getType())) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "NOT_A_VOUCHER");
         }
 
@@ -347,7 +375,7 @@ public ResponseMessage<Void> batchUpdateStock(
             List<Goods> goodsList = goodsService.getAllGoods();
 
             goodsList = goodsList.stream()
-                    .filter(g -> g.getType() != null && g.getType().equalsIgnoreCase("voucher"))
+                    .filter(g -> g.getType() != null && g.getType().equalsIgnoreCase(VOUCHER_TYPE))
                     .toList();
 
             return new ResponseMessage<>(

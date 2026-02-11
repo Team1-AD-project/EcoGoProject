@@ -75,7 +75,11 @@ public class UserVoucher {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
-    public UserVoucher() {}
+    public UserVoucher() {
+        // Empty constructor intentionally left blank.
+        // Required by Spring Data MongoDB for deserialization of documents from the database.
+        // Fields are populated via setters or reflection during document instantiation.
+    }
 
     // ---------- getters / setters ----------
 

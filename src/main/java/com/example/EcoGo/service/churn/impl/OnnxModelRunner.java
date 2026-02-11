@@ -56,28 +56,54 @@ public class OnnxModelRunner implements ModelRunner {
 
         try {
             long[] shape = new long[]{1, features.length};
-            FloatBuffer fb = FloatBuffer.wrap(features);
+            try (OnnxTensor inputTensor = createInputTensor(features, shape);
+                 OrtSession.Result result = runSession(inputTensor)) {
 
-            try (OnnxTensor inputTensor = OnnxTensor.createTensor(env, fb, shape);
-                 OrtSession.Result result = session.run(Map.of(inputName, inputTensor))) {
-
-                double p = tryParseProbability(result.get(outputName).get().getValue());
-                if (!Double.isNaN(p)) return p;
-
-                for (Map.Entry<String, OnnxValue> e : result) {
-                    double p2 = tryParseProbability(e.getValue().getValue());
-                    if (!Double.isNaN(p2)) {
-                        System.out.println(">>> OnnxModelRunner fallback output used: " + e.getKey());
-                        return p2;
-                    }
-                }
-
-                return Double.NaN;
+                return extractProbabilityFromResult(result);
             }
         } catch (Exception e) {
             System.out.println(">>> OnnxModelRunner exception: " + e.getMessage());
             return Double.NaN;
         }
+    }
+
+    private OnnxTensor createInputTensor(float[] features, long[] shape) throws OrtException {
+        FloatBuffer fb = FloatBuffer.wrap(features);
+        return OnnxTensor.createTensor(env, fb, shape);
+    }
+
+    private OrtSession.Result runSession(OnnxTensor inputTensor) throws OrtException {
+        return session.run(Map.of(inputName, inputTensor));
+    }
+
+    private double extractProbabilityFromResult(OrtSession.Result result) throws OrtException {
+        // 1) Try preferred output name first
+        double p = tryParseNamedOutput(result, outputName);
+        if (!Double.isNaN(p)) return p;
+
+        // 2) Fallback: scan all outputs
+        return tryParseAnyOutput(result);
+    }
+
+    private static double tryParseNamedOutput(OrtSession.Result result, String name) throws OrtException {
+        if (name == null || name.isBlank()) return Double.NaN;
+
+        var opt = result.get(name);
+        if (opt.isEmpty()) return Double.NaN;
+
+        Object value = opt.get().getValue();
+        return tryParseProbability(value);
+    }
+
+    private static double tryParseAnyOutput(OrtSession.Result result) throws OrtException {
+        for (Map.Entry<String, OnnxValue> e : result) {
+            double p = tryParseProbability(e.getValue().getValue());
+            if (!Double.isNaN(p)) {
+                System.out.println(">>> OnnxModelRunner fallback output used: " + e.getKey());
+                return p;
+            }
+        }
+        return Double.NaN;
     }
 
     private static double tryParseProbability(Object out) {
@@ -86,25 +112,21 @@ public class OnnxModelRunner implements ModelRunner {
         // float[][] probs = [[p0, p1]] / [[p]]
         if (out instanceof float[][] probs && probs.length > 0) {
             float[] row = probs[0];
-            if (row.length == 1) return clamp01(row[0]);
-            return clamp01(row[Math.min(1, row.length - 1)]);
+            return pickPositiveClass(row);
         }
 
         // float[] probs = [p0, p1] / [p]
         if (out instanceof float[] arr) {
-            if (arr.length == 1) return clamp01(arr[0]);
-            return clamp01(arr[Math.min(1, arr.length - 1)]);
+            return pickPositiveClass(arr);
         }
 
         // double[][] / double[]
         if (out instanceof double[][] dprobs && dprobs.length > 0) {
             double[] row = dprobs[0];
-            if (row.length == 1) return clamp01(row[0]);
-            return clamp01(row[Math.min(1, row.length - 1)]);
+            return pickPositiveClass(row);
         }
         if (out instanceof double[] darr) {
-            if (darr.length == 1) return clamp01(darr[0]);
-            return clamp01(darr[Math.min(1, darr.length - 1)]);
+            return pickPositiveClass(darr);
         }
 
         // Map 输出（zipmap=True）
@@ -115,6 +137,18 @@ public class OnnxModelRunner implements ModelRunner {
         }
 
         return Double.NaN;
+    }
+
+    private static double pickPositiveClass(float[] row) {
+        if (row == null || row.length == 0) return Double.NaN;
+        if (row.length == 1) return clamp01(row[0]);
+        return clamp01(row[Math.min(1, row.length - 1)]);
+    }
+
+    private static double pickPositiveClass(double[] row) {
+        if (row == null || row.length == 0) return Double.NaN;
+        if (row.length == 1) return clamp01(row[0]);
+        return clamp01(row[Math.min(1, row.length - 1)]);
     }
 
     private static double clamp01(double x) {

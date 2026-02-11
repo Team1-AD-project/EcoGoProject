@@ -20,7 +20,11 @@ public class AuditLog {
     private Map<String, Object> details = new HashMap<>();
     private Instant createdAt;
 
-    public AuditLog() {}
+    public AuditLog() {
+        // Empty constructor intentionally left blank.
+        // Required by Spring Data MongoDB for deserialization of documents from the database.
+        // Fields are populated via setters or reflection during document instantiation.
+    }
 
     // --- Getters/Setters ---
 

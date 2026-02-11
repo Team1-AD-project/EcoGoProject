@@ -2,6 +2,7 @@ package com.example.EcoGo.service;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.slf4j.Logger;
@@ -38,9 +39,7 @@ public class UserServiceImpl implements UserInterface {
     public UserResponseDto getUserByUserid(String userid) {
         // Keeping existing method for compatibility
         return userRepository.findByUserid(userid)
-                .map(u -> new UserResponseDto(u.getEmail(), u.getUserid(), u.getNickname(), u.getPhone())) // Adapt to
-                                                                                                           // existing
-                                                                                                           // DTO
+                .map(u -> new UserResponseDto(u.getEmail(), u.getUserid(), u.getNickname(), u.getPhone()))
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
@@ -74,9 +73,9 @@ public class UserServiceImpl implements UserInterface {
 
         // Set Default Preferences (User doesn't provide them at registration)
         User.Preferences preferences = new User.Preferences();
-        preferences.setPreferredTransport(new java.util.ArrayList<>(java.util.List.of("bus"))); // Default List
+        preferences.setPreferredTransport(new java.util.ArrayList<>(java.util.List.of("bus")));
         preferences.setEnablePush(true);
-        preferences.setEnableEmail(true); // Default to true since they registered with email
+        preferences.setEnableEmail(true);
         preferences.setEnableBusReminder(true);
         preferences.setLanguage("zh");
         preferences.setTheme("light");
@@ -109,7 +108,6 @@ public class UserServiceImpl implements UserInterface {
         user.setVip(vip);
 
         User.Stats stats = new User.Stats();
-        // Initialize stats with defaults (0)
         stats.setTotalTrips(0);
         stats.setTotalDistance(0.0);
         stats.setGreenDays(0);
@@ -170,17 +168,7 @@ public class UserServiceImpl implements UserInterface {
         metrics.setActiveDays7d((int) active7d);
         metrics.setActiveDays30d((int) active30d);
 
-        // Simple increment for frequency (total login counts in rolling window not
-        // supported by simple list,
-        // effectively this field acts as a counter now, or we can reset it daily.
-        // Requirement said "login frequency 7d", assuming total login COUNT.
-        // To support strict "frequency count" we need timestamp history.
-        // For now, let's keep it as an incrementing counter or stick to days.)
-        // Refined decision: The user requirement "Login Frequency 7d" usually means
-        // COUNT of logins.
-        // But our List<LocalDate> only tracks UNIQUE DAYS.
-        // Let's stick to simple increment for now as it matches "frequency" better than
-        // "days".
+        // Note: our List<LocalDate> stores unique days; this counter approximates frequency.
         metrics.setLoginFrequency7d(metrics.getLoginFrequency7d() + 1);
 
         userRepository.save(user);
@@ -201,12 +189,9 @@ public class UserServiceImpl implements UserInterface {
                 return;
             }
         }
-        // Implementation depends on Token blacklist strategy (Redis)
-        // For now, stateless JWT, client side discard
+        // Stateless JWT, client side discard
         logger.info("User logout: {}", userId);
     }
-
-    // --- Mobile Profile ---
 
     // --- Helper ---
     private User getUserFromToken(String token) {
@@ -239,7 +224,6 @@ public class UserServiceImpl implements UserInterface {
     public UserProfileDto.PreferencesResetResponse resetPreferences(String token) {
         User user = getUserFromToken(token);
 
-        // Reset to default logic here
         User.Preferences defaultPref = new User.Preferences();
         defaultPref.setLanguage("zh");
         defaultPref.setTheme("light");
@@ -285,7 +269,7 @@ public class UserServiceImpl implements UserInterface {
     @Override
     public UserProfileDto.UserDetailResponse getUserDetailAdmin(String userId) {
         User user = userRepository.findById(userId)
-                .or(() -> userRepository.findByUserid(userId)) // Support search by business ID for admin
+                .or(() -> userRepository.findByUserid(userId))
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         return new UserProfileDto.UserDetailResponse(user);
     }
@@ -306,9 +290,8 @@ public class UserServiceImpl implements UserInterface {
 
     @Override
     public com.example.EcoGo.dto.PageResponse<User> getAllUsers(int page, int size) {
-        // PageRequest is 0-indexed, so we subtract 1
-        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page - 1,
-                size);
+        org.springframework.data.domain.Pageable pageable =
+                org.springframework.data.domain.PageRequest.of(page - 1, size);
         org.springframework.data.domain.Page<User> userPage = userRepository.findByIsAdminFalse(pageable);
         return new com.example.EcoGo.dto.PageResponse<>(userPage.getContent(), userPage.getTotalElements(), page, size);
     }
@@ -317,7 +300,6 @@ public class UserServiceImpl implements UserInterface {
 
     @Override
     public AuthDto.LoginResponse loginWeb(AuthDto.WebLoginRequest request) {
-        // Allow login by Username or Phone
         User user = userRepository.findByUserid(request.userid)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
@@ -325,12 +307,10 @@ public class UserServiceImpl implements UserInterface {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "Invalid password");
         }
 
-        // Check Deactivation
         if (user.isDeactivated()) {
             throw new BusinessException(ErrorCode.ACCOUNT_DISABLED, "Your account has been deactivated.");
         }
 
-        // Check Admin
         if (!user.isAdmin()) {
             throw new BusinessException(ErrorCode.NO_PERMISSION, "Not an admin account");
         }
@@ -353,12 +333,9 @@ public class UserServiceImpl implements UserInterface {
 
     @Override
     public UserProfileDto.AuthCheckResponse authenticateUser(String token) {
-        // In real filter chain, this is done before controller
-        // Here just simulating extraction
         try {
             var claims = jwtUtils.validateToken(token);
             boolean isAdmin = (boolean) claims.get("isAdmin");
-            // Mock permissions
             return new UserProfileDto.AuthCheckResponse(isAdmin, Collections.singletonList("ALL"));
         } catch (Exception e) {
             throw new BusinessException(ErrorCode.NO_PERMISSION, "Invalid Token");
@@ -368,16 +345,14 @@ public class UserServiceImpl implements UserInterface {
     @Override
     public UserProfileDto.UpdateProfileResponse manageUser(String userId,
             UserProfileDto.AdminManageUserRequest request) {
-        User user = userRepository.findByUserid(userId) // Use Business ID
+        User user = userRepository.findByUserid(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
         user.setAdmin(request.isAdmin);
-        user.setDeactivated(request.isDeactivated); // Update Deactivation
+        user.setDeactivated(request.isDeactivated);
 
-        if (user.getVip() == null)
-            user.setVip(new User.Vip());
+        if (user.getVip() == null) user.setVip(new User.Vip());
         user.getVip().setActive(request.vip_status);
-        // Remark not in model yet, ignoring
 
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
@@ -388,7 +363,6 @@ public class UserServiceImpl implements UserInterface {
     @Override
     public UserProfileDto.UpdateProfileResponse updateProfileAdmin(String userId,
             UserProfileDto.UpdateProfileRequest request) {
-        // Admin uses UUID
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
         return performUpdate(user, request);
@@ -413,68 +387,47 @@ public class UserServiceImpl implements UserInterface {
     }
 
     private void updateUserBasicInfo(User user, UserProfileDto.UpdateProfileRequest request) {
-        if (request.nickname != null)
-            user.setNickname(request.nickname);
-        if (request.avatar != null)
-            user.setAvatar(request.avatar);
-        if (request.phone != null)
-            user.setPhone(request.phone);
-        if (request.faculty != null)
-            user.setFaculty(request.faculty);
+        if (request.nickname != null) user.setNickname(request.nickname);
+        if (request.avatar != null) user.setAvatar(request.avatar);
+        if (request.phone != null) user.setPhone(request.phone);
+        if (request.faculty != null) user.setFaculty(request.faculty);
     }
 
     private void updateUserPreferences(User user, UserProfileDto.UpdateProfileRequest request) {
-        if (request.preferences != null) {
-            User.Preferences userPref = user.getPreferences();
-            if (userPref == null) {
-                userPref = new User.Preferences();
-                user.setPreferences(userPref);
-            }
-            UserProfileDto.PreferencesDto reqPref = request.preferences;
+        if (request.preferences == null) return;
 
-            updateGeneralPreferences(userPref, reqPref);
-            updateNewPreferences(userPref, reqPref);
+        User.Preferences userPref = user.getPreferences();
+        if (userPref == null) {
+            userPref = new User.Preferences();
+            user.setPreferences(userPref);
         }
+        UserProfileDto.PreferencesDto reqPref = request.preferences;
+
+        updateGeneralPreferences(userPref, reqPref);
+        updateNewPreferences(userPref, reqPref);
     }
 
     private void updateGeneralPreferences(User.Preferences userPref, UserProfileDto.PreferencesDto reqPref) {
-        if (reqPref.preferredTransport != null)
-            userPref.setPreferredTransport(reqPref.preferredTransport);
-        if (reqPref.enablePush != null)
-            userPref.setEnablePush(reqPref.enablePush);
-        if (reqPref.enableEmail != null)
-            userPref.setEnableEmail(reqPref.enableEmail);
-        if (reqPref.enableBusReminder != null)
-            userPref.setEnableBusReminder(reqPref.enableBusReminder);
-        if (reqPref.language != null)
-            userPref.setLanguage(reqPref.language);
-        if (reqPref.theme != null)
-            userPref.setTheme(reqPref.theme);
-        if (reqPref.shareLocation != null)
-            userPref.setShareLocation(reqPref.shareLocation);
-        if (reqPref.showOnLeaderboard != null)
-            userPref.setShowOnLeaderboard(reqPref.showOnLeaderboard);
-        if (reqPref.shareAchievements != null)
-            userPref.setShareAchievements(reqPref.shareAchievements);
+        if (reqPref.preferredTransport != null) userPref.setPreferredTransport(reqPref.preferredTransport);
+        if (reqPref.enablePush != null) userPref.setEnablePush(reqPref.enablePush);
+        if (reqPref.enableEmail != null) userPref.setEnableEmail(reqPref.enableEmail);
+        if (reqPref.enableBusReminder != null) userPref.setEnableBusReminder(reqPref.enableBusReminder);
+        if (reqPref.language != null) userPref.setLanguage(reqPref.language);
+        if (reqPref.theme != null) userPref.setTheme(reqPref.theme);
+        if (reqPref.shareLocation != null) userPref.setShareLocation(reqPref.shareLocation);
+        if (reqPref.showOnLeaderboard != null) userPref.setShowOnLeaderboard(reqPref.showOnLeaderboard);
+        if (reqPref.shareAchievements != null) userPref.setShareAchievements(reqPref.shareAchievements);
     }
 
     private void updateNewPreferences(User.Preferences userPref, UserProfileDto.PreferencesDto reqPref) {
-        if (reqPref.dormitoryOrResidence != null)
-            userPref.setDormitoryOrResidence(reqPref.dormitoryOrResidence);
-        if (reqPref.mainTeachingBuilding != null)
-            userPref.setMainTeachingBuilding(reqPref.mainTeachingBuilding);
-        if (reqPref.favoriteStudySpot != null)
-            userPref.setFavoriteStudySpot(reqPref.favoriteStudySpot);
-        if (reqPref.interests != null)
-            userPref.setInterests(reqPref.interests);
-        if (reqPref.weeklyGoals != null)
-            userPref.setWeeklyGoals(reqPref.weeklyGoals);
-        if (reqPref.newChallenges != null)
-            userPref.setNewChallenges(reqPref.newChallenges);
-        if (reqPref.activityReminders != null)
-            userPref.setActivityReminders(reqPref.activityReminders);
-        if (reqPref.friendActivity != null)
-            userPref.setFriendActivity(reqPref.friendActivity);
+        if (reqPref.dormitoryOrResidence != null) userPref.setDormitoryOrResidence(reqPref.dormitoryOrResidence);
+        if (reqPref.mainTeachingBuilding != null) userPref.setMainTeachingBuilding(reqPref.mainTeachingBuilding);
+        if (reqPref.favoriteStudySpot != null) userPref.setFavoriteStudySpot(reqPref.favoriteStudySpot);
+        if (reqPref.interests != null) userPref.setInterests(reqPref.interests);
+        if (reqPref.weeklyGoals != null) userPref.setWeeklyGoals(reqPref.weeklyGoals);
+        if (reqPref.newChallenges != null) userPref.setNewChallenges(reqPref.newChallenges);
+        if (reqPref.activityReminders != null) userPref.setActivityReminders(reqPref.activityReminders);
+        if (reqPref.friendActivity != null) userPref.setFriendActivity(reqPref.friendActivity);
     }
 
     @Override
@@ -483,76 +436,120 @@ public class UserServiceImpl implements UserInterface {
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }
 
+    /**
+     * ✅ SonarQube Cognitive Complexity fix (line ~487):
+     * Refactor updateUserInfoAdmin() into small helpers.
+     */
     @Override
     public UserProfileDto.UpdateProfileResponse updateUserInfoAdmin(String userid,
             UserProfileDto.AdminUpdateUserInfoRequest request) {
-        if (userid == null || userid.trim().isEmpty()) {
-            throw new BusinessException(ErrorCode.PARAM_ERROR, "Target UserID cannot be empty");
-        }
+
+        validateTargetUserid(userid);
 
         User user = userRepository.findByUserid(userid)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        if (request.nickname != null) {
-            user.setNickname(request.nickname);
-        }
-        if (request.email != null) {
-            user.setEmail(request.email);
-        }
-        if (request.isVipActive != null) {
-            if (user.getVip() == null) {
-                user.setVip(new User.Vip());
-            }
-
-            boolean wasActive = user.getVip().isActive();
-            // Check if effectively expired even if flag was true (sanity check)
-            boolean isExpired = user.getVip().getExpiryDate() != null
-                    && user.getVip().getExpiryDate().isBefore(LocalDateTime.now());
-
-            user.getVip().setActive(request.isVipActive);
-
-            // If activating and (was not active OR was expired), reset Start Date to now
-            if (request.isVipActive && (!wasActive || isExpired)) {
-                user.getVip().setStartDate(LocalDateTime.now());
-            }
-            // If disabling, we just set active=false (logic above), dates remain as history
-        }
-
-        // Update VIP Plan
-        if (request.vipPlan != null && !request.vipPlan.isEmpty()) {
-            if (user.getVip() == null) {
-                user.setVip(new User.Vip());
-            }
-            user.getVip().setPlan(request.vipPlan);
-        }
-
-        // Update VIP Expiry
-        if (request.vipExpiryDate != null && !request.vipExpiryDate.isEmpty()) {
-            if (user.getVip() == null) {
-                user.setVip(new User.Vip());
-            }
-            try {
-                // Support "yyyy-MM-dd"
-                java.time.LocalDate date = java.time.LocalDate.parse(request.vipExpiryDate);
-                user.getVip().setExpiryDate(date.atTime(23, 59, 59));
-            } catch (Exception e) {
-                // Fallback for full ISO format
-                try {
-                    user.getVip().setExpiryDate(LocalDateTime.parse(request.vipExpiryDate));
-                } catch (Exception ex) {
-                    logger.warn("Invalid date format for vipExpiryDate: {}", request.vipExpiryDate);
-                }
-            }
-        }
-
-        if (request.isDeactivated != null) {
-            user.setDeactivated(request.isDeactivated);
-        }
+        applyBasicAdminUpdates(user, request);
+        applyVipStatusUpdate(user, request);
+        applyVipPlanUpdate(user, request);
+        applyVipExpiryUpdate(user, request);
+        applyDeactivationUpdate(user, request);
 
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
 
         return new UserProfileDto.UpdateProfileResponse(user.getId(), user.getUpdatedAt());
+    }
+
+    // =========================
+    // updateUserInfoAdmin helpers
+    // =========================
+    private void validateTargetUserid(String userid) {
+        if (userid == null || userid.trim().isEmpty()) {
+            throw new BusinessException(ErrorCode.PARAM_ERROR, "Target UserID cannot be empty");
+        }
+    }
+
+    private void applyBasicAdminUpdates(User user, UserProfileDto.AdminUpdateUserInfoRequest request) {
+        if (request.nickname != null) user.setNickname(request.nickname);
+        if (request.email != null) user.setEmail(request.email);
+    }
+
+    private void applyVipStatusUpdate(User user, UserProfileDto.AdminUpdateUserInfoRequest request) {
+        if (request.isVipActive == null) return;
+
+        ensureVipObject(user);
+
+        boolean wasActive = user.getVip().isActive();
+        boolean expired = isVipExpired(user);
+
+        user.getVip().setActive(request.isVipActive);
+
+        // If activating and (was not active OR was expired), reset Start Date to now
+        if (Boolean.TRUE.equals(request.isVipActive) && (!wasActive || expired)) {
+            user.getVip().setStartDate(LocalDateTime.now());
+        }
+    }
+
+    private void applyVipPlanUpdate(User user, UserProfileDto.AdminUpdateUserInfoRequest request) {
+        if (request.vipPlan == null || request.vipPlan.isEmpty()) return;
+
+        ensureVipObject(user);
+        user.getVip().setPlan(request.vipPlan);
+    }
+
+    private void applyVipExpiryUpdate(User user, UserProfileDto.AdminUpdateUserInfoRequest request) {
+        if (request.vipExpiryDate == null || request.vipExpiryDate.isEmpty()) return;
+
+        ensureVipObject(user);
+
+        Optional<LocalDateTime> parsed = parseVipExpiryDate(request.vipExpiryDate);
+        if (parsed.isPresent()) {
+            user.getVip().setExpiryDate(parsed.get());
+            return;
+        }
+
+        logger.warn("Invalid date format for vipExpiryDate: {}", request.vipExpiryDate);
+    }
+
+    private void applyDeactivationUpdate(User user, UserProfileDto.AdminUpdateUserInfoRequest request) {
+        if (request.isDeactivated != null) {
+            user.setDeactivated(request.isDeactivated);
+        }
+    }
+
+    private void ensureVipObject(User user) {
+        if (user.getVip() == null) {
+            user.setVip(new User.Vip());
+        }
+    }
+
+    private boolean isVipExpired(User user) {
+        if (user.getVip() == null) return true;
+        LocalDateTime expiry = user.getVip().getExpiryDate();
+        return expiry != null && expiry.isBefore(LocalDateTime.now());
+    }
+
+    /**
+     * Accepts:
+     * - yyyy-MM-dd  -> set to 23:59:59
+     * - ISO LocalDateTime (e.g. 2026-02-12T10:15:30)
+     */
+    private Optional<LocalDateTime> parseVipExpiryDate(String raw) {
+        // Try yyyy-MM-dd
+        try {
+            java.time.LocalDate date = java.time.LocalDate.parse(raw);
+            return Optional.of(date.atTime(23, 59, 59));
+        } catch (Exception ignore) {
+            // continue
+        }
+
+        // Try LocalDateTime ISO
+        try {
+            return Optional.of(LocalDateTime.parse(raw));
+        } catch (Exception ignore) {
+            return Optional.empty();
+        }
     }
 
     /**
@@ -561,7 +558,6 @@ public class UserServiceImpl implements UserInterface {
      * 2. If Admin -> Pass.
      * 3. If User -> Check if Token UUID matches Target User's UUID.
      */
-
     @Override
     public void activateVip(String userId, int durationDays) {
         User user = userRepository.findByUserid(userId)
@@ -577,8 +573,6 @@ public class UserServiceImpl implements UserInterface {
 
         // Extend if already active, otherwise start new
         if (vip.isActive() && vip.getExpiryDate() != null && vip.getExpiryDate().isAfter(now)) {
-            // User requested startDate to update even on extension (acting as "Last Renewal
-            // Date")
             vip.setStartDate(now);
             vip.setExpiryDate(vip.getExpiryDate().plusDays(durationDays));
         } else {
@@ -587,7 +581,7 @@ public class UserServiceImpl implements UserInterface {
             vip.setExpiryDate(now.plusDays(durationDays));
             vip.setPlan("MONTHLY"); // Default from redemption
             vip.setPointsMultiplier(2);
-            vip.setAutoRenew(false); // No auto-renew for redemption
+            vip.setAutoRenew(false);
         }
 
         userRepository.save(user);

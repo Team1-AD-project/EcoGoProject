@@ -19,7 +19,11 @@ public class ChatNotification {
     private boolean read;
     private Instant createdAt;
 
-    public ChatNotification() {}
+    public ChatNotification() {
+        // Empty constructor intentionally left blank.
+        // Required by Spring Data MongoDB for deserialization of documents from the database.
+        // Fields are populated via setters or reflection during document instantiation.
+    }
 
     // --- Getters/Setters ---
 

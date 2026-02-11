@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Profile;
 @Component
 public class DatabaseSeeder implements CommandLineRunner {
 
+    private static final String ADMIN_USERID = "admin";
     private final UserRepository userRepository;
     private final PasswordUtils passwordUtils;
     private final com.example.EcoGo.repository.TransportModeRepository transportModeRepository;
@@ -33,11 +34,10 @@ public class DatabaseSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        if (userRepository.findByUserid("admin").isEmpty()) {
+        if (userRepository.findByUserid(ADMIN_USERID).isEmpty()) {
             User admin = new User();
             admin.setId(UUID.randomUUID().toString());
-            admin.setUserid("admin");
-            admin.setUserid("admin");
+            admin.setUserid(ADMIN_USERID);
             // admin.setUsername("Super Admin"); // Removed
             admin.setEmail("admin@eco.go");
             admin.setEmail("admin@eco.go");

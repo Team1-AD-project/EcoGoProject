@@ -161,50 +161,63 @@ public class RagService {
 
     // --- Utilities ---
 
+    /**
+     * Tokenizer:
+     * - English words: group contiguous letters/digits, keep if length>=2
+     * - Chinese: unigram per char, plus bigram for adjacent Chinese chars
+     *
+     * Refactored to reduce Cognitive Complexity:
+     * - Extract repeated flush logic
+     * - Use continue to reduce nesting
+     */
     private List<String> tokenize(String text) {
-        // Simple tokenizer: lowercase, split on non-word characters, filter short tokens
-        // Supports both Chinese characters and English words
         List<String> tokens = new ArrayList<>();
+        if (text == null || text.isBlank()) return tokens;
 
-        // Extract Chinese characters (each character as a token for unigram)
-        // and English words
-        String lower = text.toLowerCase();
-
-        // Split into segments: Chinese chars individually, English words as groups
+        String lower = text.toLowerCase(Locale.ROOT);
         StringBuilder current = new StringBuilder();
+
         for (int i = 0; i < lower.length(); i++) {
             char c = lower.charAt(i);
+
+            // Chinese char: flush English word, add c, add bigram if next is Chinese
             if (isChinese(c)) {
-                // Flush any English word
-                if (current.length() > 0) {
-                    String word = current.toString().trim();
-                    if (word.length() >= 2) tokens.add(word);
-                    current.setLength(0);
-                }
-                // Add Chinese char as token
+                flushWord(tokens, current);
                 tokens.add(String.valueOf(c));
 
-                // Also add bigrams for Chinese
-                if (i + 1 < lower.length() && isChinese(lower.charAt(i + 1))) {
-                    tokens.add("" + c + lower.charAt(i + 1));
+                if (i + 1 < lower.length()) {
+                    char next = lower.charAt(i + 1);
+                    if (isChinese(next)) {
+                        tokens.add("" + c + next);
+                    }
                 }
-            } else if (Character.isLetterOrDigit(c)) {
-                current.append(c);
-            } else {
-                if (current.length() > 0) {
-                    String word = current.toString().trim();
-                    if (word.length() >= 2) tokens.add(word);
-                    current.setLength(0);
-                }
+                continue;
             }
+
+            // English / digits: accumulate
+            if (Character.isLetterOrDigit(c)) {
+                current.append(c);
+                continue;
+            }
+
+            // Separator/punctuation: flush word if any
+            flushWord(tokens, current);
         }
 
-        if (current.length() > 0) {
-            String word = current.toString().trim();
-            if (word.length() >= 2) tokens.add(word);
-        }
+        // End of input: flush remaining
+        flushWord(tokens, current);
 
         return tokens;
+    }
+
+    private static void flushWord(List<String> tokens, StringBuilder current) {
+        if (current.length() == 0) return;
+
+        String word = current.toString().trim();
+        if (word.length() >= 2) {
+            tokens.add(word);
+        }
+        current.setLength(0);
     }
 
     private boolean isChinese(char c) {

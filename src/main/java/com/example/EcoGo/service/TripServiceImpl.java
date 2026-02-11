@@ -6,24 +6,25 @@ import com.example.EcoGo.exception.BusinessException;
 import com.example.EcoGo.exception.errorcode.ErrorCode;
 import com.example.EcoGo.interfacemethods.PointsService;
 import com.example.EcoGo.interfacemethods.TripService;
+import com.example.EcoGo.interfacemethods.VipSwitchService;
+import com.example.EcoGo.model.TransportMode;
 import com.example.EcoGo.model.Trip;
+import com.example.EcoGo.model.User;
 import com.example.EcoGo.repository.TransportModeRepository;
 import com.example.EcoGo.repository.TripRepository;
 import com.example.EcoGo.repository.UserRepository;
-import com.example.EcoGo.model.TransportMode;
+import com.example.EcoGo.utils.LogSanitizer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import com.example.EcoGo.interfacemethods.VipSwitchService;
-import com.example.EcoGo.model.User;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-import com.example.EcoGo.utils.LogSanitizer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Service
 @Transactional
@@ -32,6 +33,9 @@ public class TripServiceImpl implements TripService {
     private static final Logger log = LoggerFactory.getLogger(TripServiceImpl.class);
 
     private static final String STATUS_TRACKING = "tracking";
+    private static final String STATUS_COMPLETED = "completed";
+    private static final String STATUS_CANCELED = "canceled";
+    private static final String VIP_SWITCH_DOUBLE_POINTS = "Double_points";
 
     @Autowired
     private VipSwitchService vipSwitchService;
@@ -67,19 +71,49 @@ public class TripServiceImpl implements TripService {
         return tripRepository.save(trip);
     }
 
+    /**
+     * SonarQube Cognitive Complexity fix: split completeTrip into small helpers.
+     * (Problem line around "Convert transport segments and calculate carbonSaved")
+     */
     @Override
     public Trip completeTrip(String userId, String tripId, TripDto.CompleteTripRequest request) {
-        Trip trip = tripRepository.findById(tripId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.TRIP_NOT_FOUND));
+        Trip trip = loadTripOrThrow(tripId);
+        validateTripOwnershipAndStatus(trip, userId);
 
+        fillTripEndData(trip, request);
+
+        double carbonSaved = calculateAndSetSegmentsAndCarbon(trip, request);
+
+        setPolylinePointsIfPresent(trip, request);
+
+        long pointsGained = settleTripPoints(userId, trip, request, carbonSaved);
+
+        trip.setPointsGained(pointsGained);
+        trip.setCarbonStatus(STATUS_COMPLETED);
+
+        updateUserTotalCarbonIfNeeded(userId, carbonSaved);
+
+        return tripRepository.save(trip);
+    }
+
+    // =========================
+    // completeTrip helpers
+    // =========================
+    private Trip loadTripOrThrow(String tripId) {
+        return tripRepository.findById(tripId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.TRIP_NOT_FOUND));
+    }
+
+    private void validateTripOwnershipAndStatus(Trip trip, String userId) {
         if (!trip.getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.NO_PERMISSION);
         }
         if (!STATUS_TRACKING.equals(trip.getCarbonStatus())) {
             throw new BusinessException(ErrorCode.TRIP_STATUS_ERROR, trip.getCarbonStatus());
         }
+    }
 
-        // Fill end data
+    private void fillTripEndData(Trip trip, TripDto.CompleteTripRequest request) {
         trip.setEndPoint(new Trip.GeoPoint(request.endLng, request.endLat));
         trip.setEndLocation(new Trip.LocationDetail(
                 request.endAddress, request.endPlaceName, request.endCampusZone));
@@ -88,87 +122,107 @@ public class TripServiceImpl implements TripService {
         trip.setDetectedMode(request.detectedMode);
         trip.setMlConfidence(request.mlConfidence);
         trip.setGreenTrip(request.isGreenTrip);
+    }
 
-        // Convert transport segments and calculate carbonSaved
-        double carbonSaved = 0.0;
-        double carCarbon = 100.0; // g/km — benchmark: driving a car
+    /**
+     * Convert segments, set them into trip, and compute carbonSaved (kg, 2 decimals).
+     */
+    private double calculateAndSetSegmentsAndCarbon(Trip trip, TripDto.CompleteTripRequest request) {
+        double carbonSaved = calculateCarbonSavedFromSegments(request);
+        trip.setCarbonSaved(carbonSaved);
+
+        // Set segments on trip (keep original behavior)
         if (request.transportModes != null) {
             List<Trip.TransportSegment> segments = request.transportModes.stream()
                     .map(s -> new Trip.TransportSegment(s.mode, s.subDistance, s.subDuration))
                     .collect(Collectors.toList());
             trip.setTransportModes(segments);
+        }
+        return carbonSaved;
+    }
 
-            // carbonSaved = Σ((carCarbon - modeCarbonFactor) × subDistance) for each segment
-            for (TripDto.TransportSegmentDto seg : request.transportModes) {
-                TransportMode mode = transportModeRepository.findByMode(seg.mode)
-                        .orElse(null);
-                if (mode != null) {
-                    double savingPerKm = carCarbon - mode.getCarbonFactor();
-                    if (savingPerKm > 0) {
-                        carbonSaved += savingPerKm * seg.subDistance;
-                    }
-                }
+    /**
+     * carbonSaved = Σ((carCarbon - modeCarbonFactor) × subDistance) for each segment
+     * Convert g -> kg-like display unit (/100 in your original code) and round to 2 decimals.
+     */
+    private double calculateCarbonSavedFromSegments(TripDto.CompleteTripRequest request) {
+        double carCarbon = 100.0; // g/km benchmark
+        double carbonSavedG = 0.0;
+
+        if (request.transportModes == null) {
+            return 0.0;
+        }
+
+        for (TripDto.TransportSegmentDto seg : request.transportModes) {
+            double savingPerKm = calculateSavingPerKm(seg, carCarbon);
+            if (savingPerKm > 0) {
+                carbonSavedG += savingPerKm * seg.subDistance;
             }
         }
-        // Convert g → display unit (/100), round to 2 decimal places
-        carbonSaved = carbonSaved / 100.0;
-        carbonSaved = Math.round(carbonSaved * 100.0) / 100.0;
-        trip.setCarbonSaved(carbonSaved);
 
-        // Convert polyline points
-        if (request.polylinePoints != null) {
-            List<Trip.GeoPoint> points = request.polylinePoints.stream()
-                    .map(p -> new Trip.GeoPoint(p.lng, p.lat))
-                    .collect(Collectors.toList());
-            trip.setPolylinePoints(points);
-        }
+        double display = carbonSavedG / 100.0;
+        return round2(display);
+    }
 
-        // Points = round(carbonSaved * 100), VIP双倍
+    private double calculateSavingPerKm(TripDto.TransportSegmentDto seg, double carCarbon) {
+        TransportMode mode = transportModeRepository.findByMode(seg.mode).orElse(null);
+        if (mode == null) return 0.0;
+        return carCarbon - mode.getCarbonFactor();
+    }
+
+    private double round2(double value) {
+        return Math.round(value * 100.0) / 100.0;
+    }
+
+    private void setPolylinePointsIfPresent(Trip trip, TripDto.CompleteTripRequest request) {
+        if (request.polylinePoints == null) return;
+
+        List<Trip.GeoPoint> points = request.polylinePoints.stream()
+                .map(p -> new Trip.GeoPoint(p.lng, p.lat))
+                .collect(Collectors.toList());
+        trip.setPolylinePoints(points);
+    }
+
+    /**
+     * Points = round(carbonSaved * 100), VIP double if switch enabled, and then settle().
+     * Returns pointsGained.
+     */
+    private long settleTripPoints(String userId, Trip trip, TripDto.CompleteTripRequest request, double carbonSaved) {
         long basePoints = Math.round(carbonSaved * 100);
 
-        // Check if user is VIP and double points switch is enabled
         User user = userRepository.findByUserid(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+
         boolean isVip = user.getVip() != null && user.getVip().isActive();
-        boolean isEnabled = vipSwitchService.isSwitchEnabled("Double_points");
+        boolean isEnabled = vipSwitchService.isSwitchEnabled(VIP_SWITCH_DOUBLE_POINTS);
 
         long pointsGained = (isVip && isEnabled) ? basePoints * 2 : basePoints;
 
         String description = pointsService.formatTripDescription(
                 trip.getStartLocation() != null ? trip.getStartLocation().getPlaceName() : null,
                 request.endPlaceName,
-                request.distance);
+                request.distance
+        );
 
-        // Use settle to handle points settlement
         PointsDto.SettleResult settleResult = new PointsDto.SettleResult();
         settleResult.points = pointsGained;
         settleResult.source = "trip";
         settleResult.description = description;
         settleResult.relatedId = trip.getId();
+
         pointsService.settle(userId, settleResult);
-        trip.setPointsGained(pointsGained);
-        trip.setCarbonStatus("completed");
+        return pointsGained;
+    }
 
-        // Update user's totalCarbon
-        // Update user's totalCarbon
-        if (carbonSaved > 0) {
-            // Refetch user to ensure we have the latest points updated by pointsService
-            // FORCE REFRESH: By using a new transaction or simply forcing a reload?
-            // Since we are in the same transaction, finding by ID should return the managed
-            // entity with latest changes IF PointsService saved it.
-            // If PointsService saved it, the entity manager caches the update.
-            user = userRepository.findByUserid(userId)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
+    private void updateUserTotalCarbonIfNeeded(String userId, double carbonSaved) {
+        if (carbonSaved <= 0) return;
 
-            // Log to debug if needed (removed for production)
-            // log.info("User points before carbon update: " + user.getCurrentPoints());
+        User user = userRepository.findByUserid(userId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-            double newTotal = user.getTotalCarbon() + carbonSaved;
-            user.setTotalCarbon(Math.round(newTotal * 100.0) / 100.0);
-            userRepository.save(user);
-        }
-
-        return tripRepository.save(trip);
+        double newTotal = user.getTotalCarbon() + carbonSaved;
+        user.setTotalCarbon(round2(newTotal));
+        userRepository.save(user);
     }
 
     @Override
@@ -183,7 +237,7 @@ public class TripServiceImpl implements TripService {
             throw new BusinessException(ErrorCode.TRIP_STATUS_ERROR, trip.getCarbonStatus());
         }
 
-        trip.setCarbonStatus("canceled");
+        trip.setCarbonStatus(STATUS_CANCELED);
         trip.setEndTime(LocalDateTime.now());
         tripRepository.save(trip);
     }

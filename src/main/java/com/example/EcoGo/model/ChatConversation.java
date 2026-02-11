@@ -52,7 +52,11 @@ public class ChatConversation {
         private String intent; // booking | bus | user_update | null
         private Map<String, Object> partialData = new HashMap<>();
 
-        public ConversationState() {}
+        public ConversationState() {
+            // Empty constructor intentionally left blank.
+            // Required by Spring Data MongoDB for deserialization of nested documents.
+            // Fields are initialized with default values (intent=null, partialData=HashMap).
+        }
 
         public String getIntent() { return intent; }
         public void setIntent(String intent) { this.intent = intent; }

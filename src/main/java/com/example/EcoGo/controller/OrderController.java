@@ -29,12 +29,24 @@ public class OrderController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "20") int size) {
 
+        validatePagination(page, size);
+
+        List<Order> orders = fetchOrdersByFilter(userId, status);
+        orders = filterByRedemption(orders, isRedemption);
+        sortOrdersByCreatedAt(orders);
+
+        Map<String, Object> data = buildPaginatedResponse(orders, page, size);
+        return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), "获取订单列表成功", data);
+    }
+
+    private void validatePagination(int page, int size) {
         if (page <= 0) throw new BusinessException(ErrorCode.PARAM_ERROR, "page must be >= 1");
         if (size <= 0) throw new BusinessException(ErrorCode.PARAM_ERROR, "size must be >= 1");
+    }
 
+    private List<Order> fetchOrdersByFilter(String userId, String status) {
         List<Order> orders;
 
-        // 根据参数筛选
         if (userId != null && !userId.isEmpty()) {
             orders = orderService.getOrdersByUserId(userId);
         } else if (status != null && !status.isEmpty()) {
@@ -43,36 +55,34 @@ public class OrderController {
             orders = orderService.getAllOrders();
         }
 
-        if (orders == null) {
-            orders = Collections.emptyList();
+        return orders != null ? orders : Collections.emptyList();
+    }
+
+    private List<Order> filterByRedemption(List<Order> orders, Boolean isRedemption) {
+        if (isRedemption == null) {
+            return orders;
         }
 
-        // 兑换订单筛选
-        if (isRedemption != null) {
-            orders = orders.stream()
-                    .filter(order -> isRedemption.equals(order.getIsRedemptionOrder()))
-                    .collect(Collectors.toList());
-        }
+        return orders.stream()
+                .filter(order -> isRedemption.equals(order.getIsRedemptionOrder()))
+                .collect(Collectors.toList());
+    }
 
-        // 按创建时间倒序排序（避免 createdAt 为空时 NPE）
+    private void sortOrdersByCreatedAt(List<Order> orders) {
         orders.sort((a, b) -> {
             if (a.getCreatedAt() == null && b.getCreatedAt() == null) return 0;
             if (a.getCreatedAt() == null) return 1;
             if (b.getCreatedAt() == null) return -1;
             return b.getCreatedAt().compareTo(a.getCreatedAt());
         });
+    }
 
-        // 分页逻辑
+    private Map<String, Object> buildPaginatedResponse(List<Order> orders, int page, int size) {
         int total = orders.size();
         int fromIndex = (page - 1) * size;
         int toIndex = Math.min(fromIndex + size, total);
 
-        List<Order> pageOrders;
-        if (fromIndex < total) {
-            pageOrders = orders.subList(fromIndex, toIndex);
-        } else {
-            pageOrders = Collections.emptyList();
-        }
+        List<Order> pageOrders = (fromIndex < total) ? orders.subList(fromIndex, toIndex) : Collections.emptyList();
 
         Map<String, Object> pagination = Map.of(
                 "page", page,
@@ -85,7 +95,7 @@ public class OrderController {
         data.put("orders", pageOrders);
         data.put("pagination", pagination);
 
-        return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), "获取订单列表成功", data);
+        return data;
     }
 
     // 获取订单详情
@@ -165,57 +175,59 @@ public class OrderController {
             @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size) {
 
+        validateUserAndPagination(userId, page, size);
+
+        List<Order> userOrders = orderService.getOrdersByUserId(userId);
+        userOrders = userOrders != null ? userOrders : Collections.emptyList();
+        
+        userOrders = filterOrdersByStatus(userOrders, status);
+        sortOrdersByCreatedAt(userOrders);
+
+        Map<String, Object> data = buildPaginatedMobileResponse(userOrders, page, size);
+        return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), "获取用户订单历史成功", data);
+    }
+
+    private void validateUserAndPagination(String userId, int page, int size) {
         if (userId == null || userId.isBlank()) {
             throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "userId");
         }
         if (page <= 0) throw new BusinessException(ErrorCode.PARAM_ERROR, "page must be >= 1");
         if (size <= 0) throw new BusinessException(ErrorCode.PARAM_ERROR, "size must be >= 1");
+    }
 
-        List<Order> userOrders = orderService.getOrdersByUserId(userId);
-        if (userOrders == null) userOrders = Collections.emptyList();
-
-        // 状态筛选
-        if (status != null && !status.isEmpty()) {
-            userOrders = userOrders.stream()
-                    .filter(order -> status.equals(order.getStatus()))
-                    .collect(Collectors.toList());
+    private List<Order> filterOrdersByStatus(List<Order> orders, String status) {
+        if (status == null || status.isEmpty()) {
+            return orders;
         }
 
-        // 按创建时间倒序排序（避免 createdAt 为空时 NPE）
-        userOrders.sort((a, b) -> {
-            if (a.getCreatedAt() == null && b.getCreatedAt() == null) return 0;
-            if (a.getCreatedAt() == null) return 1;
-            if (b.getCreatedAt() == null) return -1;
-            return b.getCreatedAt().compareTo(a.getCreatedAt());
-        });
+        return orders.stream()
+                .filter(order -> status.equals(order.getStatus()))
+                .collect(Collectors.toList());
+    }
 
-        // 分页
-        int total = userOrders.size();
+    private Map<String, Object> buildSimplifiedOrder(Order order) {
+        Map<String, Object> item = new HashMap<>();
+        item.put("id", order.getId());
+        item.put("orderNumber", order.getOrderNumber());
+        item.put("status", order.getStatus());
+        item.put("finalAmount", order.getFinalAmount());
+        item.put("createdAt", order.getCreatedAt());
+        item.put("itemCount", order.getItems() != null ? order.getItems().size() : 0);
+        item.put("isRedemption", order.getIsRedemptionOrder());
+        item.put("trackingNumber", order.getTrackingNumber());
+        item.put("carrier", order.getCarrier());
+        return item;
+    }
+
+    private Map<String, Object> buildPaginatedMobileResponse(List<Order> orders, int page, int size) {
+        int total = orders.size();
         int fromIndex = (page - 1) * size;
         int toIndex = Math.min(fromIndex + size, total);
 
-        List<Order> pageOrders;
-        if (fromIndex < total) {
-            pageOrders = userOrders.subList(fromIndex, toIndex);
-        } else {
-            pageOrders = Collections.emptyList();
-        }
+        List<Order> pageOrders = (fromIndex < total) ? orders.subList(fromIndex, toIndex) : Collections.emptyList();
 
-        // 简化返回数据
         List<Map<String, Object>> simplifiedOrders = pageOrders.stream()
-                .map(order -> {
-                    Map<String, Object> item = new HashMap<>();
-                    item.put("id", order.getId());
-                    item.put("orderNumber", order.getOrderNumber());
-                    item.put("status", order.getStatus());
-                    item.put("finalAmount", order.getFinalAmount());
-                    item.put("createdAt", order.getCreatedAt());
-                    item.put("itemCount", order.getItems() != null ? order.getItems().size() : 0);
-                    item.put("isRedemption", order.getIsRedemptionOrder());
-                    item.put("trackingNumber", order.getTrackingNumber());
-                    item.put("carrier", order.getCarrier());
-                    return item;
-                })
+                .map(this::buildSimplifiedOrder)
                 .collect(Collectors.toList());
 
         Map<String, Object> pagination = Map.of(
@@ -229,7 +241,7 @@ public class OrderController {
         data.put("orders", simplifiedOrders);
         data.put("pagination", pagination);
 
-        return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), "获取用户订单历史成功", data);
+        return data;
     }
 
     // 更新订单状态（单独接口）

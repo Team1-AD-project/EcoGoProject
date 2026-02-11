@@ -24,7 +24,11 @@ public class UserChallengeProgressDTO {
     private String userAvatar; // 用户头像
 
     // Default constructor used by service layer to build progress response
-    public UserChallengeProgressDTO() {}
+    public UserChallengeProgressDTO() {
+        // Empty constructor intentionally left blank.
+        // Used by service layer for dynamic construction of DTO objects.
+        // Fields are populated via setter methods after instantiation.
+    }
 
     // Getters and Setters
     public String getId() {

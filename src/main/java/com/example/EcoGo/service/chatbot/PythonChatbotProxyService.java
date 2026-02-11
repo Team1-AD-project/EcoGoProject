@@ -32,6 +32,8 @@ public class PythonChatbotProxyService {
     private static final Logger log = LoggerFactory.getLogger(PythonChatbotProxyService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient;
+    private static final String KEY_CONVERSATION_ID = "conversationId";
+
 
     @Value("${chatbot.python-backend.base-url:http://localhost:8000}")
     private String pythonBaseUrl;
@@ -72,7 +74,7 @@ public class PythonChatbotProxyService {
         try {
             // Build request payload matching Python ChatRequest schema
             Map<String, Object> payload = new HashMap<>();
-            payload.put("conversationId", conversationId);
+            payload.put(KEY_CONVERSATION_ID, conversationId);
             payload.put("user", Map.of(
                     "userId", userId,
                     "role", role
@@ -120,8 +122,8 @@ public class PythonChatbotProxyService {
         try {
             JsonNode root = objectMapper.readTree(responseBody);
 
-            String convId = root.has("conversationId")
-                    ? root.get("conversationId").asText(fallbackConvId)
+            String convId = root.has(KEY_CONVERSATION_ID)
+                    ? root.get(KEY_CONVERSATION_ID).asText(fallbackConvId)
                     : fallbackConvId;
 
             // Parse assistant message

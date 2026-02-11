@@ -14,78 +14,83 @@ public class MockBusProvider {
     /** Known NUS / Singapore bus stops with realistic multi-route data. */
     private static final Map<String, List<StopRoute>> STOP_DATA = new LinkedHashMap<>();
 
+        // Status constants to avoid duplicated literals
+        private static final String STATUS_ON_TIME = "on_time";
+        private static final String STATUS_DELAYED = "delayed";
+        private static final String STATUS_ARRIVING = "arriving";
+
     static {
         // NUS campus stops
         STOP_DATA.put("COM2", List.of(
-                new StopRoute("A1", "up", 2, "on_time"),
-                new StopRoute("A1", "up", 10, "on_time"),
-                new StopRoute("D2", "down", 5, "on_time")
+                new StopRoute("A1", "up", 2, STATUS_ON_TIME),
+                new StopRoute("A1", "up", 10, STATUS_ON_TIME),
+                new StopRoute("D2", "down", 5, STATUS_ON_TIME)
         ));
         STOP_DATA.put("PGP", List.of(
-                new StopRoute("A1", "down", 4, "on_time"),
-                new StopRoute("A2", "up", 7, "on_time"),
-                new StopRoute("D2", "up", 3, "on_time")
+                new StopRoute("A1", "down", 4, STATUS_ON_TIME),
+                new StopRoute("A2", "up", 7, STATUS_ON_TIME),
+                new StopRoute("D2", "up", 3, STATUS_ON_TIME)
         ));
         STOP_DATA.put("UTown", List.of(
-                new StopRoute("D1", "up", 3, "on_time"),
-                new StopRoute("D1", "down", 15, "delayed"),
-                new StopRoute("D2", "up", 6, "on_time")
+                new StopRoute("D1", "up", 3, STATUS_ON_TIME),
+                new StopRoute("D1", "down", 15, STATUS_DELAYED),
+                new StopRoute("D2", "up", 6, STATUS_ON_TIME)
         ));
         STOP_DATA.put("KR MRT", List.of(
-                new StopRoute("A1", "up", 1, "arriving"),
-                new StopRoute("A2", "down", 8, "on_time"),
-                new StopRoute("D1", "up", 12, "on_time")
+                new StopRoute("A1", "up", 1, STATUS_ARRIVING),
+                new StopRoute("A2", "down", 8, STATUS_ON_TIME),
+                new StopRoute("D1", "up", 12, STATUS_ON_TIME)
         ));
         STOP_DATA.put("BIZ2", List.of(
-                new StopRoute("A1", "up", 6, "on_time"),
-                new StopRoute("A2", "up", 9, "on_time")
+                new StopRoute("A1", "up", 6, STATUS_ON_TIME),
+                new StopRoute("A2", "up", 9, STATUS_ON_TIME)
         ));
         STOP_DATA.put("TCOMS", List.of(
-                new StopRoute("A2", "down", 4, "on_time"),
-                new StopRoute("D2", "down", 11, "delayed")
+                new StopRoute("A2", "down", 4, STATUS_ON_TIME),
+                new StopRoute("D2", "down", 11, STATUS_DELAYED)
         ));
 
         // Singapore city stops
         STOP_DATA.put("乌节路", List.of(
-                new StopRoute("7", "up", 3, "on_time"),
-                new StopRoute("14", "up", 5, "on_time"),
-                new StopRoute("36", "down", 8, "on_time"),
-                new StopRoute("77", "up", 12, "delayed")
+                new StopRoute("7", "up", 3, STATUS_ON_TIME),
+                new StopRoute("14", "up", 5, STATUS_ON_TIME),
+                new StopRoute("36", "down", 8, STATUS_ON_TIME),
+                new StopRoute("77", "up", 12, STATUS_DELAYED)
         ));
         STOP_DATA.put("滨海湾", List.of(
-                new StopRoute("36", "up", 2, "arriving"),
-                new StopRoute("97", "down", 6, "on_time"),
-                new StopRoute("106", "up", 10, "on_time")
+                new StopRoute("36", "up", 2, STATUS_ARRIVING),
+                new StopRoute("97", "down", 6, STATUS_ON_TIME),
+                new StopRoute("106", "up", 10, STATUS_ON_TIME)
         ));
         STOP_DATA.put("莱佛士坊", List.of(
-                new StopRoute("10", "up", 4, "on_time"),
-                new StopRoute("75", "down", 7, "on_time"),
-                new StopRoute("100", "up", 15, "delayed")
+                new StopRoute("10", "up", 4, STATUS_ON_TIME),
+                new StopRoute("75", "down", 7, STATUS_ON_TIME),
+                new StopRoute("100", "up", 15, STATUS_DELAYED)
         ));
         STOP_DATA.put("牛车水", List.of(
-                new StopRoute("2", "up", 5, "on_time"),
-                new StopRoute("12", "down", 8, "on_time"),
-                new StopRoute("33", "up", 3, "arriving")
+                new StopRoute("2", "up", 5, STATUS_ON_TIME),
+                new StopRoute("12", "down", 8, STATUS_ON_TIME),
+                new StopRoute("33", "up", 3, STATUS_ARRIVING)
         ));
         STOP_DATA.put("人民广场", List.of(
-                new StopRoute("20", "up", 3, "on_time"),
-                new StopRoute("20", "up", 12, "on_time"),
-                new StopRoute("51", "down", 6, "on_time")
+                new StopRoute("20", "up", 3, STATUS_ON_TIME),
+                new StopRoute("20", "up", 12, STATUS_ON_TIME),
+                new StopRoute("51", "down", 6, STATUS_ON_TIME)
         ));
         STOP_DATA.put("Orchard", List.of(
-                new StopRoute("7", "up", 3, "on_time"),
-                new StopRoute("14", "up", 5, "on_time"),
-                new StopRoute("36", "down", 8, "on_time")
+                new StopRoute("7", "up", 3, STATUS_ON_TIME),
+                new StopRoute("14", "up", 5, STATUS_ON_TIME),
+                new StopRoute("36", "down", 8, STATUS_ON_TIME)
         ));
         STOP_DATA.put("Marina Bay", List.of(
-                new StopRoute("36", "up", 2, "arriving"),
-                new StopRoute("97", "down", 6, "on_time"),
-                new StopRoute("106", "up", 10, "on_time")
+                new StopRoute("36", "up", 2, STATUS_ARRIVING),
+                new StopRoute("97", "down", 6, STATUS_ON_TIME),
+                new StopRoute("106", "up", 10, STATUS_ON_TIME)
         ));
         STOP_DATA.put("Clementi", List.of(
-                new StopRoute("96", "up", 4, "on_time"),
-                new StopRoute("165", "down", 9, "on_time"),
-                new StopRoute("7", "up", 13, "on_time")
+                new StopRoute("96", "up", 4, STATUS_ON_TIME),
+                new StopRoute("165", "down", 9, STATUS_ON_TIME),
+                new StopRoute("7", "up", 13, STATUS_ON_TIME)
         ));
     }
 
@@ -138,8 +143,8 @@ public class MockBusProvider {
         }
         // Default fallback: generate generic arrivals
         return List.of(
-                new StopRoute("A1", "up", 5, "on_time"),
-                new StopRoute("A2", "down", 10, "on_time")
+                new StopRoute("A1", "up", 5, STATUS_ON_TIME),
+                new StopRoute("A2", "down", 10, STATUS_ON_TIME)
         );
     }
 
