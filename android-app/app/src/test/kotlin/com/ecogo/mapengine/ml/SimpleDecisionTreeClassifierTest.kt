@@ -64,9 +64,9 @@ class SimpleDecisionTreeClassifierTest {
 
     @Test
     fun `predict bus - medium speed high speed variance`() {
-        // Bus: 10-60 km/h, speedStd > 4 km/h (>1.11 m/s), accMag < 1.0
+        // Bus: 20-60 km/h, speedStd > 4 km/h (>1.11 m/s), accMag < 0.5
         val features = makeFeatures(
-            accMagMean = 0.5f,
+            accMagMean = 0.4f,       // must be < 0.5 for BUS rule
             gpsSpeedMeanMs = 8.0f,   // ~28.8 km/h
             gpsSpeedStdMs = 2.0f     // ~7.2 km/h
         )
