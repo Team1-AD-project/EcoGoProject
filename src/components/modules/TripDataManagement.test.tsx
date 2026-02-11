@@ -79,9 +79,9 @@ vi.mock('leaflet', () => {
 
 // Mock ResizeObserver
 globalThis.ResizeObserver = class ResizeObserver {
-    observe() { }
-    unobserve() { }
-    disconnect() { }
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
 };
 
 const mockUsers = [
