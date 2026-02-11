@@ -20,11 +20,12 @@ import java.util.*
  * @param useMockData 是否使用 Mock 数据（默认 true 用于测试）
  */
 class MapViewModel(
-    useMockData: Boolean = true  // 开关：true = Mock数据，false = 真实API
+    useMockData: Boolean = true,  // 开关：true = Mock数据，false = 真实API
+    repositoryOverride: IMapRepository? = null  // 用于单元测试注入
 ) : ViewModel() {
 
-    // 根据开关选择 Repository
-    private val repository: IMapRepository = if (useMockData) {
+    // 根据开关选择 Repository (测试时可通过 repositoryOverride 注入)
+    private val repository: IMapRepository = repositoryOverride ?: if (useMockData) {
         MockMapRepository()
     } else {
         MapRepository()

@@ -6,6 +6,7 @@ plugins {
     id("androidx.navigation.safeargs.kotlin")
     id("kotlin-parcelize")
     id("com.google.devtools.ksp")  // For Room database
+    id("jacoco")
 }
 
 // Load local.properties
@@ -136,6 +137,10 @@ dependencies {
     
     // Testing
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.mockito:mockito-core:5.11.0")
+    testImplementation("org.mockito.kotlin:mockito-kotlin:5.2.1")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3")
+    testImplementation("androidx.arch.core:core-testing:2.2.0")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
@@ -147,4 +152,51 @@ dependencies {
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
 
 
+}
+
+// ==================== JaCoCo Coverage Report ====================
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+tasks.withType<Test> {
+    configure<JacocoTaskExtension> {
+        isIncludeNoLocationClasses = true
+        excludes = listOf("jdk.internal.*")
+    }
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn("testDebugUnitTest")
+    group = "verification"
+    description = "Generate JaCoCo coverage report for debug unit tests"
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/jacoco/html"))
+    }
+
+    val debugTree = fileTree(layout.buildDirectory.dir("tmp/kotlin-classes/debug")) {
+        exclude(
+            "**/R.class", "**/R\$*.class",
+            "**/BuildConfig.*",
+            "**/Manifest*.*",
+            "**/*_MembersInjector.class",
+            "**/Dagger*Component*.class",
+            "**/*Module_*Factory.class",
+            "**/*_Factory.class",
+            "**/*_Impl*.class",
+            "**/databinding/**",
+            "**/android/databinding/**",
+            "**/BR.class"
+        )
+    }
+
+    classDirectories.setFrom(debugTree)
+    sourceDirectories.setFrom(files("src/main/kotlin"))
+    executionData.setFrom(fileTree(layout.buildDirectory) {
+        include("jacoco/testDebugUnitTest.exec")
+    })
 }

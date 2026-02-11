@@ -40,9 +40,9 @@ import com.ecogo.data.TripDto
  * EcoGo 数据仓库
  * 统一管理所有数据访问（API 调用）
  */
-class EcoGoRepository {
-    
-    private val api = RetrofitClient.apiService
+class EcoGoRepository(
+    private val api: ApiService = RetrofitClient.apiService
+) {
     
     // ==================== 活动相关 ====================
     
