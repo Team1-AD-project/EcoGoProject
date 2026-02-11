@@ -33,8 +33,8 @@ android {
             useSupportLibrary = true
         }
 
-        // Google Maps API Key - loaded from local.properties
-        val mapsApiKey = localProperties.getProperty("MAPS_API_KEY") ?: ""
+        // Google Maps API Key - loaded from local.properties, fallback to default
+        val mapsApiKey = localProperties.getProperty("MAPS_API_KEY") ?: "AIzaSyBJxOyrElp5EMiq6eY_q7WlXfjziPxfqdo"
         manifestPlaceholders["MAPS_API_KEY"] = mapsApiKey
     }
 
