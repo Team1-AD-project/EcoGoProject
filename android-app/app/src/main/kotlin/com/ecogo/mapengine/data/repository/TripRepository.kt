@@ -30,7 +30,7 @@ import kotlinx.coroutines.withContext
 class TripRepository private constructor() {
 
     private val tripApiService = RetrofitClient.tripApiService
-    private val historyRepo = NavigationHistoryRepository.getInstance()
+    private val historyRepo by lazy { NavigationHistoryRepository.getInstance() }
 
     // 当前行程ID（从后端获取）
     private var currentTripId: String? = null
@@ -88,7 +88,7 @@ class TripRepository private constructor() {
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
-                if (apiResponse.success && apiResponse.data != null) {
+                if (apiResponse.isSuccess && apiResponse.data != null) {
                     val tripId = apiResponse.data.tripId
                     currentTripId = tripId
                     Log.d(TAG, "Trip started successfully: tripId=$tripId")
@@ -186,7 +186,7 @@ class TripRepository private constructor() {
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
-                if (apiResponse.success && apiResponse.data != null) {
+                if (apiResponse.isSuccess && apiResponse.data != null) {
                     val result = apiResponse.data
                     Log.d(TAG, "Trip completed successfully: $result")
 
@@ -227,7 +227,7 @@ class TripRepository private constructor() {
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
-                if (apiResponse.success && apiResponse.data != null) {
+                if (apiResponse.isSuccess && apiResponse.data != null) {
                     Log.d(TAG, "Trip canceled successfully: ${apiResponse.data}")
 
                     // 清除当前行程ID
@@ -271,7 +271,7 @@ class TripRepository private constructor() {
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
-                if (apiResponse.success && apiResponse.data != null) {
+                if (apiResponse.isSuccess && apiResponse.data != null) {
                     val trips = apiResponse.data
                     Log.d(TAG, "Fetched ${trips.size} trips from cloud")
                     Result.success(trips)
@@ -318,7 +318,7 @@ class TripRepository private constructor() {
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
-                if (apiResponse.success && apiResponse.data != null) {
+                if (apiResponse.isSuccess && apiResponse.data != null) {
                     val trip = apiResponse.data
                     Log.d(TAG, "Fetched trip detail successfully")
                     Result.success(trip)
@@ -353,7 +353,7 @@ class TripRepository private constructor() {
 
             if (response.isSuccessful && response.body() != null) {
                 val apiResponse = response.body()!!
-                if (apiResponse.success) {
+                if (apiResponse.isSuccess) {
                     val trip = apiResponse.data
                     if (trip != null) {
                         currentTripId = trip.tripId

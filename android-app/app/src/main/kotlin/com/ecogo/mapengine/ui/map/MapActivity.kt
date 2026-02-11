@@ -838,15 +838,30 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val startLocation = viewModel.currentLocation.value
         if (startLocation == null) {
             Log.w(TAG, "No current location, skipping startTrip API call")
+            Toast.makeText(this, "GPS定位中，行程将在获取位置后创建...", Toast.LENGTH_SHORT).show()
+            // 延迟重试：等待GPS定位后再创建行程
+            lifecycleScope.launch {
+                kotlinx.coroutines.delay(3000)
+                val retryLocation = viewModel.currentLocation.value
+                if (retryLocation != null && backendTripId == null) {
+                    Log.d(TAG, "Retrying startTrip after GPS fix")
+                    doStartTripApi(retryLocation.latitude, retryLocation.longitude)
+                }
+            }
             return
         }
 
+        doStartTripApi(startLocation.latitude, startLocation.longitude)
+    }
+
+    private fun doStartTripApi(lat: Double, lng: Double) {
         lifecycleScope.launch {
             try {
                 val tripRepo = TripRepository.getInstance()
+                Log.d(TAG, "Calling startTrip API: lat=$lat, lng=$lng, token=${tripRepo.getAuthToken().take(20)}...")
                 val result = tripRepo.startTrip(
-                    startLat = startLocation.latitude,
-                    startLng = startLocation.longitude,
+                    startLat = lat,
+                    startLng = lng,
                     startPlaceName = originName.ifEmpty { "起点" },
                     startAddress = originName.ifEmpty { "未知地址" }
                 )
@@ -855,14 +870,22 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     onSuccess = { tripId ->
                         backendTripId = tripId
                         Log.d(TAG, "Trip started on backend: tripId=$tripId")
+                        runOnUiThread {
+                            Toast.makeText(this@MapActivity, "行程已创建: $tripId", Toast.LENGTH_SHORT).show()
+                        }
                     },
                     onFailure = { error ->
                         Log.e(TAG, "Failed to start trip on backend: ${error.message}", error)
-                        // 后端失败不影响本地追踪
+                        runOnUiThread {
+                            Toast.makeText(this@MapActivity, "行程创建失败: ${error.message}", Toast.LENGTH_LONG).show()
+                        }
                     }
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "Error starting trip on backend", e)
+                runOnUiThread {
+                    Toast.makeText(this@MapActivity, "行程创建异常: ${e.message}", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -876,12 +899,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val tripId = backendTripId ?: viewModel.currentTripId.value
         if (tripId == null || tripId.startsWith("MOCK_") || tripId == "restored-trip") {
             Log.w(TAG, "No valid backend tripId ($tripId), skipping completeTrip API call")
+            Toast.makeText(this, "行程ID无效，无法同步到服务器", Toast.LENGTH_SHORT).show()
             return
         }
 
         val endLocation = viewModel.currentLocation.value
         if (endLocation == null) {
             Log.w(TAG, "No current location, skipping completeTrip API call")
+            Toast.makeText(this, "无法获取当前位置，行程未同步", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -894,6 +919,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         if (trackPoints.isEmpty()) {
             Log.w(TAG, "No track points, skipping completeTrip API call")
+            Toast.makeText(this, "未收集到轨迹点，行程未同步", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -968,10 +994,16 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     },
                     onFailure = { error ->
                         Log.e(TAG, "Failed to complete trip on backend: ${error.message}", error)
+                        runOnUiThread {
+                            Toast.makeText(this@MapActivity, "行程同步失败: ${error.message}", Toast.LENGTH_LONG).show()
+                        }
                     }
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "Error completing trip on backend", e)
+                runOnUiThread {
+                    Toast.makeText(this@MapActivity, "行程同步异常: ${e.message}", Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
@@ -1256,16 +1288,18 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val distanceKm = distanceMeters / 1000.0
         val mode = viewModel.selectedTransportMode.value
 
-        // 碳排放因子 (kg CO2 / km)
-        val emissionFactor = when (mode) {
-            TransportMode.WALKING, TransportMode.CYCLING -> 0.0
-            TransportMode.BUS, TransportMode.SUBWAY -> 0.05
-            else -> 0.15  // DRIVING 或其他
+        // 碳排放因子 (g/km) — 与后端 transport_modes_dict 保持一致
+        val carCarbon = 100.0  // 驾车基准: 100 g/km
+        val modeCarbonFactor = when (mode) {
+            TransportMode.WALKING -> 0.0
+            TransportMode.CYCLING -> 0.0
+            TransportMode.BUS -> 20.0
+            TransportMode.SUBWAY -> 10.0
+            TransportMode.DRIVING -> 100.0
+            else -> 0.0
         }
 
-        val currentModeCarbon = distanceKm * emissionFactor
-        val drivingCarbon = distanceKm * 0.15  // 与驾车对比
-        val carbonSaved = (drivingCarbon - currentModeCarbon) * 1000  // 转为克
+        val carbonSaved = (carCarbon - modeCarbonFactor) * distanceKm  // 单位: g
 
         return carbonSaved.coerceAtLeast(0.0)
     }

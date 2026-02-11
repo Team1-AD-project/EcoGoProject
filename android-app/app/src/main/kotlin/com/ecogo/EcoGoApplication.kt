@@ -1,6 +1,7 @@
 package com.ecogo
 
 import android.app.Application
+import com.ecogo.mapengine.data.repository.NavigationHistoryRepository
 import com.ecogo.repository.EcoGoRepository
 
 /**
@@ -23,6 +24,9 @@ class EcoGoApplication : Application() {
 
         // Initialize TokenManager globally
         com.ecogo.auth.TokenManager.init(this)
+
+        // Initialize NavigationHistoryRepository (requires Context)
+        NavigationHistoryRepository.initialize(this)
         
         // 预加载关键数据（可选，在后台线程执行）
         // Thread {

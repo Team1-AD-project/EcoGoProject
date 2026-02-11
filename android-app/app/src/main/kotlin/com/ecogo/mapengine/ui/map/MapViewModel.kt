@@ -184,49 +184,9 @@ class MapViewModel(
      * 停止行程追踪并保存
      */
     fun stopTracking() {
-        val tripId = _currentTripId.value ?: run {
-            _errorMessage.value = "没有正在进行的行程"
-            return
-        }
-        val endLocation = _currentLocation.value ?: run {
-            _errorMessage.value = "无法获取当前位置"
-            return
-        }
-
-        viewModelScope.launch {
-            _isLoading.value = true
-            _tripState.value = TripState.Stopping
-
-            val endPoint = GeoPoint.fromLatLng(endLocation)
-            val endTime = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
-                .format(Date())
-
-            // TODO: 计算实际距离
-            val distance = 1.5 // 示例距离 (km)
-
-            val result = repository.saveTrip(
-                tripId = tripId,
-                userId = userId,
-                endPoint = endPoint,
-                distance = distance,
-                endTime = endTime
-            )
-
-            result.fold(
-                onSuccess = { data ->
-                    // 保存成功后计算碳足迹
-                    calculateCarbon(tripId, listOf(TransportMode.WALKING.value))
-                    _tripState.value = TripState.Completed
-                    _currentTripId.value = null
-                    _successMessage.value = data.message ?: "行程已保存"
-                },
-                onFailure = { error ->
-                    _tripState.value = TripState.Tracking(tripId)
-                    _errorMessage.value = error.message
-                }
-            )
-            _isLoading.value = false
-        }
+        // 只负责更新 UI 状态，实际保存由 MapActivity.completeTripOnBackend() 完成
+        _tripState.value = TripState.Completed
+        _currentTripId.value = null
     }
 
     /**
