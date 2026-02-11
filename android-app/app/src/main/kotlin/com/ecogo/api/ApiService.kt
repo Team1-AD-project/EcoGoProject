@@ -425,11 +425,32 @@ interface ApiService {
     suspend fun getRecommendation(@Body request: RecommendationRequest): ApiResponse<RecommendationResponse>
 
     /**
-     * 发送聊天消息
-     * POST /api/v1/chat/send
+     * 发送聊天消息 (智能助手)
+     * POST /api/v1/mobile/chatbot/chat
      */
-    @POST("api/v1/chat/send")
+    @POST("api/v1/mobile/chatbot/chat")
     suspend fun sendChat(@Body request: ChatRequest): ApiResponse<ChatResponse>
+
+    /**
+     * 获取聊天预订详情
+     * GET /api/v1/mobile/chatbot/bookings/{bookingId}
+     */
+    @GET("api/v1/mobile/chatbot/bookings/{bookingId}")
+    suspend fun getBookingDetail(@Path("bookingId") bookingId: String): ApiResponse<com.ecogo.data.BookingDetail>
+
+    /**
+     * 获取用户的聊天预订列表
+     * GET /api/v1/mobile/chatbot/bookings
+     */
+    @GET("api/v1/mobile/chatbot/bookings")
+    suspend fun getUserBookings(): ApiResponse<List<com.ecogo.data.BookingDetail>>
+
+    /**
+     * 获取行程详情
+     * GET /api/v1/mobile/trips/{tripId}
+     */
+    @GET("api/v1/mobile/trips/{tripId}")
+    suspend fun getTripDetail(@Path("tripId") tripId: String): ApiResponse<com.ecogo.data.TripDetail>
     
     // ==================== 签到相关 ====================
     
