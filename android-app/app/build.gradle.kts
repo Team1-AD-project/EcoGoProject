@@ -153,6 +153,7 @@ dependencies {
     testImplementation("androidx.test.ext:junit:1.1.5")
     testImplementation("androidx.recyclerview:recyclerview:1.3.2")
     testImplementation("androidx.fragment:fragment-testing:1.6.2")
+    testImplementation("androidx.navigation:navigation-testing:2.7.6")
     debugImplementation("androidx.fragment:fragment-testing-manifest:1.6.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
@@ -174,6 +175,12 @@ jacoco {
 }
 
 tasks.withType<Test> {
+    jvmArgs(
+        "-XX:+EnableDynamicAgentLoading",
+        "--add-opens", "java.base/java.lang=ALL-UNNAMED",
+        "--add-opens", "java.base/java.lang.reflect=ALL-UNNAMED",
+        "--add-opens", "java.base/java.util=ALL-UNNAMED"
+    )
     configure<JacocoTaskExtension> {
         isIncludeNoLocationClasses = true
         excludes = listOf("jdk.internal.*")

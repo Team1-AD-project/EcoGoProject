@@ -3,16 +3,15 @@ package com.ecogo.ui.fragments
 import android.view.View
 import android.widget.TextView
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.navigation.NavController
 import androidx.navigation.Navigation
+import androidx.navigation.testing.TestNavHostController
 import androidx.recyclerview.widget.RecyclerView
+import androidx.test.core.app.ApplicationProvider
 import com.ecogo.R
 import com.ecogo.mapengine.ui.map.MapActivity
 import org.junit.Assert.*
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
@@ -22,17 +21,20 @@ import org.robolectric.annotation.Config
 class HomeFragmentTest {
 
     /**
-     * Helper: launch HomeFragment and attach a mock NavController
+     * Helper: launch HomeFragment and attach a TestNavHostController (no Mockito needed)
      */
-    private fun launchWithNav(): Pair<androidx.fragment.app.testing.FragmentScenario<HomeFragment>, NavController> {
-        val mockNav = mock<NavController>()
+    private fun launchWithNav(): Pair<androidx.fragment.app.testing.FragmentScenario<HomeFragment>, TestNavHostController> {
+        val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
+        navController.setGraph(R.navigation.nav_graph)
+        navController.setCurrentDestination(R.id.homeFragment)
+
         val scenario = launchFragmentInContainer<HomeFragment>(
             themeResId = R.style.Theme_EcoGo
         )
         scenario.onFragment { fragment ->
-            Navigation.setViewNavController(fragment.requireView(), mockNav)
+            Navigation.setViewNavController(fragment.requireView(), navController)
         }
-        return scenario to mockNav
+        return scenario to navController
     }
 
     // ==================== Lifecycle ====================
@@ -152,92 +154,92 @@ class HomeFragmentTest {
 
     @Test
     fun `cardNextBus click navigates to routesFragment`() {
-        val (scenario, mockNav) = launchWithNav()
+        val (scenario, navController) = launchWithNav()
         scenario.onFragment { fragment ->
             fragment.requireView().findViewById<View>(R.id.card_next_bus).performClick()
         }
-        verify(mockNav).navigate(R.id.routesFragment)
+        assertEquals(R.id.routesFragment, navController.currentDestination?.id)
     }
 
     @Test
     fun `cardMonthlyPoints click navigates to profileFragment`() {
-        val (scenario, mockNav) = launchWithNav()
+        val (scenario, navController) = launchWithNav()
         scenario.onFragment { fragment ->
             fragment.requireView().findViewById<View>(R.id.card_monthly_points).performClick()
         }
-        verify(mockNav).navigate(R.id.profileFragment)
+        assertEquals(R.id.profileFragment, navController.currentDestination?.id)
     }
 
     @Test
     fun `cardCommunityScore click navigates to communityFragment`() {
-        val (scenario, mockNav) = launchWithNav()
+        val (scenario, navController) = launchWithNav()
         scenario.onFragment { fragment ->
             fragment.requireView().findViewById<View>(R.id.card_community_score).performClick()
         }
-        verify(mockNav).navigate(R.id.communityFragment)
+        assertEquals(R.id.communityFragment, navController.currentDestination?.id)
     }
 
     @Test
     fun `cardCarbonFootprint click navigates to profileFragment`() {
-        val (scenario, mockNav) = launchWithNav()
+        val (scenario, navController) = launchWithNav()
         scenario.onFragment { fragment ->
             fragment.requireView().findViewById<View>(R.id.card_carbon_footprint).performClick()
         }
-        verify(mockNav).navigate(R.id.profileFragment)
+        assertEquals(R.id.profileFragment, navController.currentDestination?.id)
     }
 
     @Test
     fun `cardDailyGoal click navigates to profileFragment`() {
-        val (scenario, mockNav) = launchWithNav()
+        val (scenario, navController) = launchWithNav()
         scenario.onFragment { fragment ->
             fragment.requireView().findViewById<View>(R.id.card_daily_goal).performClick()
         }
-        verify(mockNav).navigate(R.id.profileFragment)
+        assertEquals(R.id.profileFragment, navController.currentDestination?.id)
     }
 
     @Test
     fun `cardVoucherShortcut click navigates to voucher`() {
-        val (scenario, mockNav) = launchWithNav()
+        val (scenario, navController) = launchWithNav()
         scenario.onFragment { fragment ->
             fragment.requireView().findViewById<View>(R.id.card_voucher_shortcut).performClick()
         }
-        verify(mockNav).navigate(R.id.action_home_to_voucher)
+        assertEquals(R.id.voucherFragment, navController.currentDestination?.id)
     }
 
     @Test
     fun `cardChallengesShortcut click navigates to challenges`() {
-        val (scenario, mockNav) = launchWithNav()
+        val (scenario, navController) = launchWithNav()
         scenario.onFragment { fragment ->
             fragment.requireView().findViewById<View>(R.id.card_challenges_shortcut).performClick()
         }
-        verify(mockNav).navigate(R.id.action_home_to_challenges)
+        assertEquals(R.id.challengesFragment, navController.currentDestination?.id)
     }
 
     @Test
     fun `textViewAll click navigates to monthlyHighlights`() {
-        val (scenario, mockNav) = launchWithNav()
+        val (scenario, navController) = launchWithNav()
         scenario.onFragment { fragment ->
             fragment.requireView().findViewById<View>(R.id.text_view_all).performClick()
         }
-        verify(mockNav).navigate(R.id.action_home_to_monthlyHighlights)
+        assertEquals(R.id.monthlyHighlightsFragment, navController.currentDestination?.id)
     }
 
     @Test
     fun `textViewAllActivities click navigates to activities`() {
-        val (scenario, mockNav) = launchWithNav()
+        val (scenario, navController) = launchWithNav()
         scenario.onFragment { fragment ->
             fragment.requireView().findViewById<View>(R.id.text_view_all_activities).performClick()
         }
-        verify(mockNav).navigate(R.id.action_home_to_activities)
+        assertEquals(R.id.activitiesFragment, navController.currentDestination?.id)
     }
 
     @Test
     fun `mascotAvatar click navigates to profileFragment`() {
-        val (scenario, mockNav) = launchWithNav()
+        val (scenario, navController) = launchWithNav()
         scenario.onFragment { fragment ->
             fragment.requireView().findViewById<View>(R.id.mascot_avatar).performClick()
         }
-        verify(mockNav).navigate(R.id.profileFragment)
+        assertEquals(R.id.profileFragment, navController.currentDestination?.id)
     }
 
     // ==================== MapActivity Intent ====================
