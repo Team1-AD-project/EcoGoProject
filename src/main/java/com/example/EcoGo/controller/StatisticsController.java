@@ -3,9 +3,9 @@ package com.example.EcoGo.controller;
 import com.example.EcoGo.dto.AnalyticsSummaryDto;
 import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.interfacemethods.StatisticsInterface;
+import com.example.EcoGo.utils.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,15 +13,18 @@ import org.springframework.web.bind.annotation.*;
 public class StatisticsController {
     private static final Logger logger = LoggerFactory.getLogger(StatisticsController.class);
 
-    @Autowired
-    private StatisticsInterface statisticsService;
+    private final StatisticsInterface statisticsService;
+
+    public StatisticsController(StatisticsInterface statisticsService) {
+        this.statisticsService = statisticsService;
+    }
 
     // === Web Endpoints (Admin) ===
 
     @GetMapping("/web/statistics/management-analytics")
     public ResponseMessage<AnalyticsSummaryDto> getWebManagementAnalytics(
             @RequestParam(defaultValue = "monthly") String timeRange) {
-        logger.info("[WEB] Fetching management analytics for time range: {}", timeRange);
+        logger.info("[WEB] Fetching management analytics for time range: {}", LogSanitizer.sanitize(timeRange));
         AnalyticsSummaryDto summary = statisticsService.getManagementAnalytics(timeRange);
         return ResponseMessage.success(summary);
     }
@@ -38,7 +41,7 @@ public class StatisticsController {
     @GetMapping("/mobile/statistics/management-analytics")
     public ResponseMessage<AnalyticsSummaryDto> getMobileManagementAnalytics(
             @RequestParam(defaultValue = "monthly") String timeRange) {
-        logger.info("[Mobile] Fetching management analytics for time range: {}", timeRange);
+        logger.info("[Mobile] Fetching management analytics for time range: {}", LogSanitizer.sanitize(timeRange));
         AnalyticsSummaryDto summary = statisticsService.getManagementAnalytics(timeRange);
         return ResponseMessage.success(summary);
     }

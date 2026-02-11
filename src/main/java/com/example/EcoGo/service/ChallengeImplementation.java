@@ -29,6 +29,10 @@ import java.util.stream.Collectors;
 @Transactional
 public class ChallengeImplementation implements ChallengeInterface {
 
+    private static final String FIELD_CHALLENGE_ID = "challenge_id";
+    private static final String FIELD_USER_ID = "user_id";
+    private static final String STATUS_IN_PROGRESS = "IN_PROGRESS";
+
     @Autowired
     private ChallengeRepository challengeRepository;
 
@@ -51,7 +55,7 @@ public class ChallengeImplementation implements ChallengeInterface {
     public List<Challenge> getAllChallenges() {
         List<Challenge> challenges = challengeRepository.findAll();
         for (Challenge challenge : challenges) {
-            Query countQuery = new Query(Criteria.where("challenge_id").is(challenge.getId()));
+            Query countQuery = new Query(Criteria.where(FIELD_CHALLENGE_ID).is(challenge.getId()));
             long participantCount = mongoTemplate.count(countQuery, UserChallengeProgress.class);
             challenge.setParticipants((int) participantCount);
         }
@@ -99,7 +103,7 @@ public class ChallengeImplementation implements ChallengeInterface {
         if (!challengeRepository.existsById(id)) {
             throw new BusinessException(ErrorCode.CHALLENGE_NOT_FOUND);
         }
-        Query deleteQuery = new Query(Criteria.where("challenge_id").is(id));
+        Query deleteQuery = new Query(Criteria.where(FIELD_CHALLENGE_ID).is(id));
         mongoTemplate.remove(deleteQuery, UserChallengeProgress.class);
         challengeRepository.deleteById(id);
     }
@@ -116,7 +120,7 @@ public class ChallengeImplementation implements ChallengeInterface {
 
     @Override
     public List<Challenge> getChallengesByUserId(String userId) {
-        Query query = new Query(Criteria.where("user_id").is(userId));
+        Query query = new Query(Criteria.where(FIELD_USER_ID).is(userId));
         List<UserChallengeProgress> userProgress = mongoTemplate.find(query, UserChallengeProgress.class);
         List<String> challengeIds = userProgress.stream()
                 .map(UserChallengeProgress::getChallengeId)
@@ -144,7 +148,7 @@ public class ChallengeImplementation implements ChallengeInterface {
         }
 
         // Use MongoTemplate to check if user already joined
-        Query existsQuery = new Query(Criteria.where("challenge_id").is(challengeId).and("user_id").is(userId));
+        Query existsQuery = new Query(Criteria.where(FIELD_CHALLENGE_ID).is(challengeId).and(FIELD_USER_ID).is(userId));
         boolean alreadyJoined = mongoTemplate.exists(existsQuery, UserChallengeProgress.class);
         if (alreadyJoined) {
             throw new BusinessException(ErrorCode.CHALLENGE_ALREADY_JOINED);
@@ -153,7 +157,7 @@ public class ChallengeImplementation implements ChallengeInterface {
         UserChallengeProgress progress = new UserChallengeProgress();
         progress.setChallengeId(challengeId);
         progress.setUserId(userId);
-        progress.setStatus("IN_PROGRESS");
+        progress.setStatus(STATUS_IN_PROGRESS);
         progress.setJoinedAt(LocalDateTime.now());
         progress.setUpdatedAt(LocalDateTime.now());
 
@@ -171,7 +175,7 @@ public class ChallengeImplementation implements ChallengeInterface {
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-        Query query = new Query(Criteria.where("challenge_id").is(challengeId).and("user_id").is(userId));
+        Query query = new Query(Criteria.where(FIELD_CHALLENGE_ID).is(challengeId).and(FIELD_USER_ID).is(userId));
         UserChallengeProgress progress = mongoTemplate.findOne(query, UserChallengeProgress.class);
 
         if (progress != null) {
@@ -188,7 +192,7 @@ public class ChallengeImplementation implements ChallengeInterface {
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-        Query query = new Query(Criteria.where("challenge_id").is(challengeId));
+        Query query = new Query(Criteria.where(FIELD_CHALLENGE_ID).is(challengeId));
         List<UserChallengeProgress> participants = mongoTemplate.find(query, UserChallengeProgress.class);
         List<UserChallengeProgressDTO> result = new ArrayList<>();
 
@@ -206,7 +210,7 @@ public class ChallengeImplementation implements ChallengeInterface {
                 .orElseThrow(() -> new BusinessException(ErrorCode.CHALLENGE_NOT_FOUND));
 
         // Use MongoTemplate with raw field names to find user progress
-        Query query = new Query(Criteria.where("challenge_id").is(challengeId).and("user_id").is(userId));
+        Query query = new Query(Criteria.where(FIELD_CHALLENGE_ID).is(challengeId).and(FIELD_USER_ID).is(userId));
         UserChallengeProgress progress = mongoTemplate.findOne(query, UserChallengeProgress.class);
         if (progress == null) {
             throw new BusinessException(ErrorCode.CHALLENGE_NOT_FOUND);
@@ -258,7 +262,7 @@ public class ChallengeImplementation implements ChallengeInterface {
 
         if (target != null && current >= target) {
             dto.setStatus("COMPLETED");
-            if ("IN_PROGRESS".equals(progress.getStatus())) {
+            if (STATUS_IN_PROGRESS.equals(progress.getStatus())) {
                 // First time reaching target → mark COMPLETED, reward not claimed yet
                 progress.setStatus("COMPLETED");
                 progress.setCompletedAt(LocalDateTime.now());
@@ -283,10 +287,10 @@ public class ChallengeImplementation implements ChallengeInterface {
             }
         } else {
             // Progress not yet reached target → always IN_PROGRESS
-            dto.setStatus("IN_PROGRESS");
+            dto.setStatus(STATUS_IN_PROGRESS);
             // If DB was previously marked COMPLETED (e.g. trip data changed), revert it
             if ("COMPLETED".equals(progress.getStatus()) && !Boolean.TRUE.equals(progress.getRewardClaimed())) {
-                progress.setStatus("IN_PROGRESS");
+                progress.setStatus(STATUS_IN_PROGRESS);
                 progress.setCompletedAt(null);
                 progress.setUpdatedAt(LocalDateTime.now());
                 userChallengeProgressRepository.save(progress);
@@ -301,7 +305,7 @@ public class ChallengeImplementation implements ChallengeInterface {
         Challenge challenge = challengeRepository.findById(challengeId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.CHALLENGE_NOT_FOUND));
 
-        Query query = new Query(Criteria.where("challenge_id").is(challengeId).and("user_id").is(userId));
+        Query query = new Query(Criteria.where(FIELD_CHALLENGE_ID).is(challengeId).and(FIELD_USER_ID).is(userId));
         UserChallengeProgress progress = mongoTemplate.findOne(query, UserChallengeProgress.class);
         if (progress == null) {
             throw new BusinessException(ErrorCode.CHALLENGE_NOT_FOUND);
@@ -340,7 +344,7 @@ public class ChallengeImplementation implements ChallengeInterface {
      * Uses raw MongoDB field names to avoid @Field annotation mapping issues.
      */
     private Double calculateProgressFromTrips(String userId, String type, LocalDateTime startTime, LocalDateTime endTime) {
-        Criteria criteria = Criteria.where("user_id").is(userId)
+        Criteria criteria = Criteria.where(FIELD_USER_ID).is(userId)
                 .and("is_green_trip").is(true)
                 .and("carbon_status").is("completed")
                 .and("start_time").gte(startTime).lt(endTime);

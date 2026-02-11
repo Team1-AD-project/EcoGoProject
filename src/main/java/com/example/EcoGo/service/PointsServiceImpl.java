@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 @Transactional
 public class PointsServiceImpl implements PointsService {
 
+    private static final String REDEEM_SOURCE = "redeem";
+
     @Autowired
     private UserRepository userRepository;
 
@@ -75,16 +77,16 @@ public class PointsServiceImpl implements PointsService {
 
         userRepository.save(user);
 
+        // 4. Create Log
+        String changeType = points > 0 ? "gain" : (points < 0 ? "deduct" : "info");
+
         // 检查是否有碳减排成就徽章可以自动解锁
         if (isTripSource && points > 0) {
             badgeService.checkAndUnlockCarbonBadges(userId);
         }
-
-        // 4. Create Log
-        String changeType = points > 0 ? "gain" : (points < 0 ? "deduct" : "info");
         // If source is REDEEM, type might be redeem
-        if ("redeem".equalsIgnoreCase(source)) {
-            changeType = "redeem";
+        if (REDEEM_SOURCE.equalsIgnoreCase(source)) {
+            changeType = REDEEM_SOURCE;
         }
 
         UserPointsLog log = new UserPointsLog();
@@ -189,35 +191,7 @@ public class PointsServiceImpl implements PointsService {
     public void redeemPoints(String userId, String orderId, long points) {
         String description = "Redemption for order: " + orderId;
         // Points should be negative for deduction
-        adjustPoints(userId, -Math.abs(points), "redeem", description, orderId, null);
-    }
-
-    @Override
-    public void refundPoints(String userId, String orderId) {
-        // This is complex. Ideally we find the original deduction log.
-        // For MVP, we'll just add points back with source="refund"
-        // In a real system, we'd look up the transaction amount.
-        // Assuming the caller knows the amount, OR we just support manual admin refund
-        // now.
-        // Wait, the interface didn't pass amount. Let's find the log by
-        // relatedId=orderId?
-        // Simpler approach for now: Refund implies reversing a specific transaction.
-        // But let's assume this method is a placeholder for logical flow.
-        // Since I can't easily find the original amount without relatedId query support
-        // (which I didn't add yet for arbitrary lookup),
-        // I will throw exception or just log for now?
-        // Better: Let's assume the caller passes amount? The interface didn't have
-        // amount.
-        // Let's modify the interface or just use a dummy implementation for now.
-        // Actually, I can use a rudimentary lookup if I added relatedID lookup.
-        // Let's just implement a stub that throws "Not Implemented" for now or fix
-        // interface.
-        // User asked for "Refund Points for Order Cancellation", usually order service
-        // knows amount.
-        // I will change interface to accept amount in next step if needed, but for now
-        // let's just make it a no-op or specific error.
-        throw new BusinessException(ErrorCode.SYSTEM_ERROR,
-                "Refund logic requires amount parameter or transaction lookup");
+        adjustPoints(userId, -Math.abs(points), REDEEM_SOURCE, description, orderId, null);
     }
 
     // Helper to avoid duplication
@@ -254,35 +228,6 @@ public class PointsServiceImpl implements PointsService {
         // Format: "Start -> End (2.5km)"
         // Using String.format for cleaner output
         return String.format("%s -> %s (%.1fkm)", startName, endName, totalDistance);
-    }
-
-    @Override
-    public void settleTrip(String userId, PointsDto.SettleTripRequest request) {
-        // 1. Calculate points based on detected mode and distance
-        long points = calculatePoints(request.detectedMode, request.distance);
-
-        // 2. Generate description from LocationInfo
-        String description = formatTripDescription(request.startLocation, request.endLocation, request.distance);
-
-        // 3. Adjust points (handles balance, totalPoints, totalCarbon, badge check,
-        // log)
-        adjustPoints(userId, points, "trip", description, request.tripId, null);
-
-        // 4. Update User.Stats cache
-        User user = userRepository.findByUserid(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        User.Stats stats = user.getStats();
-        if (stats == null) {
-            stats = new User.Stats();
-        }
-        stats.setTotalTrips(stats.getTotalTrips() + 1);
-        stats.setTotalDistance(stats.getTotalDistance() + request.distance);
-        stats.setTotalPointsFromTrips(stats.getTotalPointsFromTrips() + points);
-        if (request.isGreenTrip) {
-            stats.setGreenDays(stats.getGreenDays() + 1);
-        }
-        user.setStats(stats);
-        userRepository.save(user);
     }
 
     @Override

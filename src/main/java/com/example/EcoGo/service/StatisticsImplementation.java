@@ -9,12 +9,14 @@ import com.example.EcoGo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.EcoGo.utils.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
 import java.util.*;
@@ -29,10 +31,9 @@ public class StatisticsImplementation implements StatisticsInterface {
     private UserRepository userRepository;
     @Autowired
     private TripRepository tripRepository;
-
     @Override
     public AnalyticsSummaryDto getManagementAnalytics(String timeRange) {
-        log.info("[getManagementAnalytics] Called with timeRange={}", timeRange);
+        log.info("[getManagementAnalytics] Called with timeRange={}", LogSanitizer.sanitize(timeRange));
         List<User> allUsers;
         try {
             allUsers = userRepository.findAll();
@@ -150,4 +151,5 @@ public class StatisticsImplementation implements StatisticsInterface {
     public Long getRedemptionVolume() {
         return 0L;
     }
+
 }

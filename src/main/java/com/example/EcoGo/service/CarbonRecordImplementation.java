@@ -16,6 +16,8 @@ import java.util.List;
 @Transactional
 public class CarbonRecordImplementation implements CarbonRecordInterface {
 
+    private static final String FIELD_TOTAL_CARBON_SAVED = "totalCarbonSaved";
+
     @Autowired
     private CarbonRecordRepository carbonRecordRepository;
 
@@ -117,7 +119,7 @@ public class CarbonRecordImplementation implements CarbonRecordInterface {
                                         .where("carbon_status").is("completed")
                                         .and("user_id").in(userIds)),
                         org.springframework.data.mongodb.core.aggregation.Aggregation
-                                .group().sum("carbon_saved").as("totalCarbonSaved")
+                                .group().sum("carbon_saved").as(FIELD_TOTAL_CARBON_SAVED)
                 );
 
         org.springframework.data.mongodb.core.aggregation.AggregationResults<java.util.Map> results =
@@ -125,8 +127,8 @@ public class CarbonRecordImplementation implements CarbonRecordInterface {
 
         double totalCarbon = 0.0;
         java.util.Map result = results.getUniqueMappedResult();
-        if (result != null && result.get("totalCarbonSaved") != null) {
-            totalCarbon = ((Number) result.get("totalCarbonSaved")).doubleValue();
+        if (result != null && result.get(FIELD_TOTAL_CARBON_SAVED) != null) {
+            totalCarbon = ((Number) result.get(FIELD_TOTAL_CARBON_SAVED)).doubleValue();
         }
 
         // 5. Round to 2 decimal places

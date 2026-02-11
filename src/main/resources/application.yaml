@@ -42,24 +42,6 @@ management:
     tags:
       application: ${spring.application.name:EcoGo}
 
-# Chatbot configuration
-chatbot:
-  model:
-    base-url: ${CHATBOT_MODEL_URL:http://localhost:9000}
-    api-key: ${CHATBOT_MODEL_KEY:dev-model-key}
-    name: ${CHATBOT_MODEL_NAME:greentravel-local}
-    enabled: ${CHATBOT_MODEL_ENABLED:true}
-  # Python FastAPI chatbot backend proxy (fallback when model server is unavailable)
-  python-backend:
-    base-url: ${CHATBOT_PYTHON_URL:http://localhost:8000}
-    enabled: ${CHATBOT_PYTHON_ENABLED:true}
-    timeout-seconds: ${CHATBOT_PYTHON_TIMEOUT:5}
-  # NUS NextBus API credentials (https://nnextbus.nus.edu.sg)
-  # Override via env vars: CHATBOT_NUS_BUS_USERNAME / CHATBOT_NUS_BUS_PASSWORD
-  nus-bus:
-    username: NUSnextbus
-    password: '13dL?zY,3feWR^"T'
-
 # Application info
 info:
   app:

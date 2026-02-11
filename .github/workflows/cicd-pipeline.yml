@@ -737,6 +737,8 @@ jobs:
             justb4/jmeter \
             -n -t /tests/load-test.jmx \
             -l /tests/results.jtl \
+            -j /tests/jmeter.log \
+            -Jthreads=100 -Jrampup=10 -Jduration=60 \
             -e -o /tests/report || echo "JMeter tests completed"
         continue-on-error: true
       

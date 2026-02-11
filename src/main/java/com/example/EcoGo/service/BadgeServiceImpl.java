@@ -1,5 +1,6 @@
 package com.example.EcoGo.service;
 
+import com.example.EcoGo.dto.BadgePurchaseStatDto;
 import com.example.EcoGo.dto.PointsDto;
 import com.example.EcoGo.interfacemethods.BadgeService;
 import com.example.EcoGo.interfacemethods.PointsService;
@@ -33,6 +34,10 @@ public class BadgeServiceImpl implements BadgeService {
     @Autowired
     @Lazy
     private PointsService pointsService;
+
+    @Autowired
+    @Lazy
+    private BadgeService self;
 
     /**
      * 1. 购买徽章
@@ -72,6 +77,8 @@ public class BadgeServiceImpl implements BadgeService {
         newBadge.setUnlockedAt(new Date());
         newBadge.setDisplay(false); // 默认不佩戴
         newBadge.setCreatedAt(new Date());
+        newBadge.setCategory(badge.getCategory());
+        newBadge.setSubcategory(badge.getSubCategory());
 
         return userBadgeRepository.save(newBadge);
     }
@@ -127,10 +134,12 @@ public class BadgeServiceImpl implements BadgeService {
 
     // ... 其他 getter 方法 (getShopList, getMyBadges) 保持不变 ...
     public List<Badge> getShopList() {
-        return badgeRepository.findByIsActiveAndAcquisitionMethod(true, "purchase");
+
+        return badgeRepository.findByIsActive(true);
     }
 
     public List<UserBadge> getMyBadges(String userId) {
+        self.checkAndUnlockCarbonBadges(userId);
         return userBadgeRepository.findByUserId(userId);
     }
 
@@ -156,7 +165,7 @@ public class BadgeServiceImpl implements BadgeService {
      * 3. 获取 Badge 购买统计
      * 返回每个 badge 的购买次数，供管理员查看
      */
-    public List<Map<String, Object>> getBadgePurchaseStats() {
+    public List<BadgePurchaseStatDto> getBadgePurchaseStats() {
         return userBadgeRepository.countPurchasesByBadge();
     }
 
@@ -236,6 +245,8 @@ public class BadgeServiceImpl implements BadgeService {
                 newBadge.setUnlockedAt(new Date());
                 newBadge.setDisplay(false);
                 newBadge.setCreatedAt(new Date());
+                newBadge.setCategory(badge.getCategory());
+                newBadge.setSubcategory(badge.getSubCategory());
                 newlyUnlocked.add(userBadgeRepository.save(newBadge));
             }
         }

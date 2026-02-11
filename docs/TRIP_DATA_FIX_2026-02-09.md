@@ -20,6 +20,13 @@ MongoDB 数据库中部分 Trip 记录存在两种数据格式错误：
 - **错误格式**：JSON 字符串数组 `["{"lng":114.18,"lat":22.34}", ...]`
 - **正确格式**：对象数组 `[{lng:114.18,lat:22.34}, ...]`
 
+#### 第三次修复（2026-02-09 22:45）
+发现遗漏的 `transport_modes` 字段存储格式错误：
+- **Trip ID**: `266b7bf8-8f32-4b1e-b1f4-cdbfaca6ba43`
+- **User ID**: `e1553256`
+- **错误格式**：JSON 字符串数组（数组元素为字符串）
+- **正确格式**：对象数组
+
 ### 错误堆栈
 
 **错误 1 - transport_modes：**
@@ -84,10 +91,38 @@ db.trips.find({polyline_points: {$type: "string"}}).forEach(function(doc) {
 print("Fixed " + count + " trip records with string polyline_points");
 ```
 
+#### 脚本 3：修复遗漏的 transport_modes（已完成）
+```javascript
+// 使用 $elemMatch 可以检测到数组元素为字符串的情况
+var count = 0;
+db.trips.find({transport_modes: {$elemMatch: {$type: "string"}}}).forEach(function(doc) {
+  if (doc.transport_modes && Array.isArray(doc.transport_modes)) {
+    var fixed = doc.transport_modes.map(function(item) {
+      if (typeof item === "string") {
+        try {
+          return JSON.parse(item);
+        } catch(e) {
+          return item;
+        }
+      }
+      return item;
+    });
+    db.trips.updateOne({_id: doc._id}, {$set: {transport_modes: fixed}});
+    count++;
+  }
+});
+print("Fixed " + count + " trip records with string transport_modes elements");
+```
+
 ### 修复结果
 - **第一次修复**：修复了 **2 条** transport_modes 字段损坏的记录
 - **第二次修复**：修复了 **3 条** polyline_points 字段损坏的记录
+- **第三次修复**：修复了 **1 条** 遗漏的 transport_modes 字段损坏的记录（Trip ID: 266b7bf8）
+- **总计修复**：6 条记录
 - 所有 Trip 记录的字段现在格式统一
+
+### 问题分析
+第三次修复时发现，之前的查询 `{transport_modes: {$type: "string"}}` 无法正确检测到数组元素为字符串的情况。应该使用 `{transport_modes: {$elemMatch: {$type: "string"}}}` 来检测数组元素的类型。
 
 ## 预防措施
 
@@ -99,11 +134,17 @@ print("Fixed " + count + " trip records with string polyline_points");
 ### 监控
 定期检查是否有新的格式错误数据：
 ```javascript
-// 检查 transport_modes
-db.trips.find({transport_modes: {$type: "string"}}).count()
+// 检查 transport_modes 字段本身是否为字符串
+db.trips.countDocuments({transport_modes: {$type: "string"}})
 
-// 检查 polyline_points
-db.trips.find({polyline_points: {$type: "string"}}).count()
+// 检查 transport_modes 数组元素是否为字符串
+db.trips.countDocuments({transport_modes: {$elemMatch: {$type: "string"}}})
+
+// 检查 polyline_points 字段本身是否为字符串
+db.trips.countDocuments({polyline_points: {$type: "string"}})
+
+// 检查 polyline_points 数组元素是否为字符串
+db.trips.countDocuments({polyline_points: {$elemMatch: {$type: "string"}}})
 
 // 一键检查所有字段
 db.trips.aggregate([

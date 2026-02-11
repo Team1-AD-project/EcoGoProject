@@ -403,6 +403,16 @@ public class UserServiceImpl implements UserInterface {
     }
 
     private UserProfileDto.UpdateProfileResponse performUpdate(User user, UserProfileDto.UpdateProfileRequest request) {
+        updateUserBasicInfo(user, request);
+        updateUserPreferences(user, request);
+
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+
+        return new UserProfileDto.UpdateProfileResponse(user.getId(), user.getUpdatedAt());
+    }
+
+    private void updateUserBasicInfo(User user, UserProfileDto.UpdateProfileRequest request) {
         if (request.nickname != null)
             user.setNickname(request.nickname);
         if (request.avatar != null)
@@ -411,7 +421,9 @@ public class UserServiceImpl implements UserInterface {
             user.setPhone(request.phone);
         if (request.faculty != null)
             user.setFaculty(request.faculty);
+    }
 
+    private void updateUserPreferences(User user, UserProfileDto.UpdateProfileRequest request) {
         if (request.preferences != null) {
             User.Preferences userPref = user.getPreferences();
             if (userPref == null) {
@@ -420,48 +432,49 @@ public class UserServiceImpl implements UserInterface {
             }
             UserProfileDto.PreferencesDto reqPref = request.preferences;
 
-            if (reqPref.preferredTransport != null)
-                userPref.setPreferredTransport(reqPref.preferredTransport);
-            if (reqPref.enablePush != null)
-                userPref.setEnablePush(reqPref.enablePush);
-            if (reqPref.enableEmail != null)
-                userPref.setEnableEmail(reqPref.enableEmail);
-            if (reqPref.enableBusReminder != null)
-                userPref.setEnableBusReminder(reqPref.enableBusReminder);
-            if (reqPref.language != null)
-                userPref.setLanguage(reqPref.language);
-            if (reqPref.theme != null)
-                userPref.setTheme(reqPref.theme);
-            if (reqPref.shareLocation != null)
-                userPref.setShareLocation(reqPref.shareLocation);
-            if (reqPref.showOnLeaderboard != null)
-                userPref.setShowOnLeaderboard(reqPref.showOnLeaderboard);
-            if (reqPref.shareAchievements != null)
-                userPref.setShareAchievements(reqPref.shareAchievements);
-
-            // New Fields Update
-            if (reqPref.dormitoryOrResidence != null)
-                userPref.setDormitoryOrResidence(reqPref.dormitoryOrResidence);
-            if (reqPref.mainTeachingBuilding != null)
-                userPref.setMainTeachingBuilding(reqPref.mainTeachingBuilding);
-            if (reqPref.favoriteStudySpot != null)
-                userPref.setFavoriteStudySpot(reqPref.favoriteStudySpot);
-            if (reqPref.interests != null)
-                userPref.setInterests(reqPref.interests);
-            if (reqPref.weeklyGoals != null)
-                userPref.setWeeklyGoals(reqPref.weeklyGoals);
-            if (reqPref.newChallenges != null)
-                userPref.setNewChallenges(reqPref.newChallenges);
-            if (reqPref.activityReminders != null)
-                userPref.setActivityReminders(reqPref.activityReminders);
-            if (reqPref.friendActivity != null)
-                userPref.setFriendActivity(reqPref.friendActivity);
+            updateGeneralPreferences(userPref, reqPref);
+            updateNewPreferences(userPref, reqPref);
         }
+    }
 
-        user.setUpdatedAt(LocalDateTime.now());
-        userRepository.save(user);
+    private void updateGeneralPreferences(User.Preferences userPref, UserProfileDto.PreferencesDto reqPref) {
+        if (reqPref.preferredTransport != null)
+            userPref.setPreferredTransport(reqPref.preferredTransport);
+        if (reqPref.enablePush != null)
+            userPref.setEnablePush(reqPref.enablePush);
+        if (reqPref.enableEmail != null)
+            userPref.setEnableEmail(reqPref.enableEmail);
+        if (reqPref.enableBusReminder != null)
+            userPref.setEnableBusReminder(reqPref.enableBusReminder);
+        if (reqPref.language != null)
+            userPref.setLanguage(reqPref.language);
+        if (reqPref.theme != null)
+            userPref.setTheme(reqPref.theme);
+        if (reqPref.shareLocation != null)
+            userPref.setShareLocation(reqPref.shareLocation);
+        if (reqPref.showOnLeaderboard != null)
+            userPref.setShowOnLeaderboard(reqPref.showOnLeaderboard);
+        if (reqPref.shareAchievements != null)
+            userPref.setShareAchievements(reqPref.shareAchievements);
+    }
 
-        return new UserProfileDto.UpdateProfileResponse(user.getId(), user.getUpdatedAt());
+    private void updateNewPreferences(User.Preferences userPref, UserProfileDto.PreferencesDto reqPref) {
+        if (reqPref.dormitoryOrResidence != null)
+            userPref.setDormitoryOrResidence(reqPref.dormitoryOrResidence);
+        if (reqPref.mainTeachingBuilding != null)
+            userPref.setMainTeachingBuilding(reqPref.mainTeachingBuilding);
+        if (reqPref.favoriteStudySpot != null)
+            userPref.setFavoriteStudySpot(reqPref.favoriteStudySpot);
+        if (reqPref.interests != null)
+            userPref.setInterests(reqPref.interests);
+        if (reqPref.weeklyGoals != null)
+            userPref.setWeeklyGoals(reqPref.weeklyGoals);
+        if (reqPref.newChallenges != null)
+            userPref.setNewChallenges(reqPref.newChallenges);
+        if (reqPref.activityReminders != null)
+            userPref.setActivityReminders(reqPref.activityReminders);
+        if (reqPref.friendActivity != null)
+            userPref.setFriendActivity(reqPref.friendActivity);
     }
 
     @Override
@@ -548,29 +561,6 @@ public class UserServiceImpl implements UserInterface {
      * 2. If Admin -> Pass.
      * 3. If User -> Check if Token UUID matches Target User's UUID.
      */
-    private void validateAccess(String token, String targetUserId) {
-        try {
-            var claims = jwtUtils.validateToken(token);
-            boolean isAdmin = (boolean) claims.get("isAdmin");
-            if (isAdmin)
-                return; // Admin can access anyone
-
-            String requesterId = claims.getSubject(); // This is now Business ID (userid)
-
-            // Mobile endpoints pass "userid" (Business ID), need to verify
-            User targetUser = userRepository.findByUserid(targetUserId)
-                    .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-
-            if (!targetUser.getUserid().equals(requesterId)) {
-                throw new BusinessException(ErrorCode.NO_PERMISSION,
-                        "You do not have permission to operate on this account");
-            }
-        } catch (BusinessException be) {
-            throw be;
-        } catch (Exception e) {
-            throw new BusinessException(ErrorCode.NO_PERMISSION, "Token is invalid or expired");
-        }
-    }
 
     @Override
     public void activateVip(String userId, int durationDays) {

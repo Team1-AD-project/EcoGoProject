@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.interfacemethods.CarbonRecordInterface;
 import com.example.EcoGo.model.CarbonRecord;
+import com.example.EcoGo.utils.LogSanitizer;
 
 /**
  * 碳积分记录接口控制器
@@ -45,7 +46,7 @@ public class CarbonRecordController {
      */
     @GetMapping("/carbon-records/user/{userId}")
     public ResponseMessage<List<CarbonRecord>> getRecordsByUserId(@PathVariable String userId) {
-        logger.info("获取用户碳积分记录，用户ID：{}", userId);
+        logger.info("获取用户碳积分记录，用户ID：{}", LogSanitizer.sanitize(userId));
         List<CarbonRecord> records = carbonRecordService.getRecordsByUserId(userId);
         return ResponseMessage.success(records);
     }
@@ -60,7 +61,7 @@ public class CarbonRecordController {
             @RequestParam Integer credits,
             @RequestParam String source,
             @RequestParam(required = false, defaultValue = "") String description) {
-        logger.info("用户 {} 获取积分：{}", userId, credits);
+        logger.info("用户 {} 获取积分：{}", LogSanitizer.sanitize(userId), credits);
         CarbonRecord record = carbonRecordService.earnCredits(userId, credits, source, description);
         return ResponseMessage.success(record);
     }
@@ -75,7 +76,7 @@ public class CarbonRecordController {
             @RequestParam Integer credits,
             @RequestParam String source,
             @RequestParam(required = false, defaultValue = "") String description) {
-        logger.info("用户 {} 消耗积分：{}", userId, credits);
+        logger.info("用户 {} 消耗积分：{}", LogSanitizer.sanitize(userId), credits);
         CarbonRecord record = carbonRecordService.spendCredits(userId, credits, source, description);
         return ResponseMessage.success(record);
     }
@@ -86,7 +87,7 @@ public class CarbonRecordController {
      */
     @GetMapping("/carbon-records/user/{userId}/total")
     public ResponseMessage<Integer> getTotalCredits(@PathVariable String userId) {
-        logger.info("获取用户总积分，用户ID：{}", userId);
+        logger.info("获取用户总积分，用户ID：{}", LogSanitizer.sanitize(userId));
         Integer total = carbonRecordService.getTotalCreditsByUserId(userId);
         return ResponseMessage.success(total);
     }

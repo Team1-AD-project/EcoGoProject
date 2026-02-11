@@ -1,8 +1,10 @@
 package com.example.EcoGo.controller;
 
+import com.example.EcoGo.dto.AdvertisementRequestDto;
 import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.interfacemethods.AdvertisementInterface;
 import com.example.EcoGo.model.Advertisement;
+import com.example.EcoGo.utils.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,32 +35,32 @@ public class AdvertisementController {
 
     @GetMapping("/web/advertisements/{id}")
     public ResponseMessage<Advertisement> getWebAdvertisementById(@PathVariable String id) {
-        logger.info("[WEB] Fetching advertisement by ID: {}", id);
+        logger.info("[WEB] Fetching advertisement by ID: {}", LogSanitizer.sanitize(id));
         return ResponseMessage.success(advertisementService.getAdvertisementById(id));
     }
 
     @PostMapping("/web/advertisements")
-    public ResponseMessage<Advertisement> createWebAdvertisement(@RequestBody Advertisement advertisement) {
-        logger.info("[WEB] Creating new advertisement: {}", advertisement.getName());
-        return ResponseMessage.success(advertisementService.createAdvertisement(advertisement));
+    public ResponseMessage<Advertisement> createWebAdvertisement(@RequestBody AdvertisementRequestDto dto) {
+        logger.info("[WEB] Creating new advertisement: {}", LogSanitizer.sanitize(dto.getName()));
+        return ResponseMessage.success(advertisementService.createAdvertisement(dto.toEntity()));
     }
 
     @PutMapping("/web/advertisements/{id}")
-    public ResponseMessage<Advertisement> updateWebAdvertisement(@PathVariable String id, @RequestBody Advertisement advertisement) {
-        logger.info("[WEB] Updating advertisement: {}", id);
-        return ResponseMessage.success(advertisementService.updateAdvertisement(id, advertisement));
+    public ResponseMessage<Advertisement> updateWebAdvertisement(@PathVariable String id, @RequestBody AdvertisementRequestDto dto) {
+        logger.info("[WEB] Updating advertisement: {}", LogSanitizer.sanitize(id));
+        return ResponseMessage.success(advertisementService.updateAdvertisement(id, dto.toEntity()));
     }
 
     @DeleteMapping("/web/advertisements/{id}")
     public ResponseMessage<Void> deleteWebAdvertisement(@PathVariable String id) {
-        logger.info("[WEB] Deleting advertisement: {}", id);
+        logger.info("[WEB] Deleting advertisement: {}", LogSanitizer.sanitize(id));
         advertisementService.deleteAdvertisement(id);
         return ResponseMessage.success(null);
     }
 
     @PatchMapping("/web/advertisements/{id}/status")
     public ResponseMessage<Advertisement> updateWebAdvertisementStatus(@PathVariable String id, @RequestParam String status) {
-        logger.info("[WEB] Updating advertisement status: {}, new status: {}", id, status);
+        logger.info("[WEB] Updating advertisement status: {}, new status: {}", LogSanitizer.sanitize(id), LogSanitizer.sanitize(status));
         return ResponseMessage.success(advertisementService.updateAdvertisementStatus(id, status));
     }
 
