@@ -128,7 +128,8 @@ class TripServiceImplTest {
 
     @Test
     void completeTrip_success_nonVip() {
-        TransportMode walkMode = new TransportMode("1", "walk", "Walking", 0.2, "icon", 1, true);
+        // carbonFactor=0 means walk emits 0 g/km, so savings = (100-0)*distance
+        TransportMode walkMode = new TransportMode("1", "walk", "Walking", 0, "icon", 1, true);
 
         when(tripRepository.findById("trip1")).thenReturn(Optional.of(testTrip));
         when(transportModeRepository.findByMode("walk")).thenReturn(Optional.of(walkMode));
@@ -142,10 +143,10 @@ class TripServiceImplTest {
         assertEquals("completed", result.getCarbonStatus());
         assertNotNull(result.getEndPoint());
         assertNotNull(result.getEndLocation());
-        // carbonSaved = 0.2 * 2.5 = 0.5
-        assertEquals(0.5, result.getCarbonSaved(), 0.01);
-        // basePoints = round(0.5) * 10 = 10, not VIP so no doubling
-        assertEquals(10, result.getPointsGained());
+        // carbonSaved = (100 - 0) * 2.5 = 250.0
+        assertEquals(250.0, result.getCarbonSaved(), 0.01);
+        // basePoints = round(250) * 10 = 2500, not VIP so no doubling
+        assertEquals(2500, result.getPointsGained());
         verify(pointsService).settle(eq("user1"), any(PointsDto.SettleResult.class));
         verify(userRepository).save(testUser);
     }
@@ -156,7 +157,7 @@ class TripServiceImplTest {
         vip.setActive(true);
         testUser.setVip(vip);
 
-        TransportMode walkMode = new TransportMode("1", "walk", "Walking", 0.2, "icon", 1, true);
+        TransportMode walkMode = new TransportMode("1", "walk", "Walking", 0, "icon", 1, true);
 
         when(tripRepository.findById("trip1")).thenReturn(Optional.of(testTrip));
         when(transportModeRepository.findByMode("walk")).thenReturn(Optional.of(walkMode));
@@ -167,8 +168,8 @@ class TripServiceImplTest {
 
         Trip result = tripService.completeTrip("user1", "trip1", buildCompleteRequest());
 
-        // basePoints = 10, VIP with double enabled = 20
-        assertEquals(20, result.getPointsGained());
+        // basePoints = 2500, VIP with double enabled = 5000
+        assertEquals(5000, result.getPointsGained());
     }
 
     @Test
@@ -219,7 +220,7 @@ class TripServiceImplTest {
 
     @Test
     void completeTrip_updatesTotalCarbon() {
-        TransportMode walkMode = new TransportMode("1", "walk", "Walking", 0.2, "icon", 1, true);
+        TransportMode walkMode = new TransportMode("1", "walk", "Walking", 0, "icon", 1, true);
 
         when(tripRepository.findById("trip1")).thenReturn(Optional.of(testTrip));
         when(transportModeRepository.findByMode("walk")).thenReturn(Optional.of(walkMode));
@@ -230,8 +231,8 @@ class TripServiceImplTest {
 
         tripService.completeTrip("user1", "trip1", buildCompleteRequest());
 
-        // totalCarbon was 50.0, now should be 50.0 + 0.5 = 50.5
-        assertEquals(50.5, testUser.getTotalCarbon(), 0.01);
+        // totalCarbon was 50.0, now should be 50.0 + 250.0 = 300.0
+        assertEquals(300.0, testUser.getTotalCarbon(), 0.01);
         verify(userRepository).save(testUser);
     }
 

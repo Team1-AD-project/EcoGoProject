@@ -91,18 +91,22 @@ public class TripServiceImpl implements TripService {
 
         // Convert transport segments and calculate carbonSaved
         double carbonSaved = 0.0;
+        double carCarbon = 100.0; // g/km — benchmark: driving a car
         if (request.transportModes != null) {
             List<Trip.TransportSegment> segments = request.transportModes.stream()
                     .map(s -> new Trip.TransportSegment(s.mode, s.subDistance, s.subDuration))
                     .collect(Collectors.toList());
             trip.setTransportModes(segments);
 
-            // carbonSaved = Σ(carbonFactor × subDistance) for each segment
+            // carbonSaved = Σ((carCarbon - modeCarbonFactor) × subDistance) for each segment
             for (TripDto.TransportSegmentDto seg : request.transportModes) {
                 TransportMode mode = transportModeRepository.findByMode(seg.mode)
                         .orElse(null);
                 if (mode != null) {
-                    carbonSaved += mode.getCarbonFactor() * seg.subDistance;
+                    double savingPerKm = carCarbon - mode.getCarbonFactor();
+                    if (savingPerKm > 0) {
+                        carbonSaved += savingPerKm * seg.subDistance;
+                    }
                 }
             }
         }
