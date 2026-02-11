@@ -1,6 +1,7 @@
 package com.example.EcoGo.controller;
 
 import com.example.EcoGo.dto.BatchStockUpdateRequest;
+import com.example.EcoGo.dto.GoodsRequestDto;
 import com.example.EcoGo.exception.BusinessException;
 import com.example.EcoGo.exception.errorcode.ErrorCode;
 import com.example.EcoGo.model.Goods;
@@ -109,10 +110,12 @@ public class GoodsController {
     }
 
     @PostMapping
-    public ResponseMessage<Goods> createGoods(@RequestBody Goods goods) {
-        if (goods == null) {
+    public ResponseMessage<Goods> createGoods(@RequestBody GoodsRequestDto dto) {
+        if (dto == null) {
             throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "goods");
         }
+
+        Goods goods = dto.toEntity();
 
         // ✅ 库存不能为负数
         if (goods.getStock() != null && goods.getStock() < 0) {
@@ -140,20 +143,22 @@ public class GoodsController {
     }
 
     @PutMapping("/{id}")
-    public ResponseMessage<Goods> updateGoods(@PathVariable String id, @RequestBody Goods goods) {
+    public ResponseMessage<Goods> updateGoods(@PathVariable String id, @RequestBody GoodsRequestDto dto) {
         if (id == null || id.isBlank()) {
             throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "id");
         }
-        if (goods == null) {
+        if (dto == null) {
             throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "goods");
         }
+
+        Goods goods = dto.toEntity();
 
         // ✅ 库存不能为负数
         if (goods.getStock() != null && goods.getStock() < 0) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "stock cannot be negative");
         }
 
-        // ✅ category（如果前端更新时不一定传 category，可把这一段改成 “传了才校验”）
+        // ✅ category（如果前端更新时不一定传 category，可把这一段改成 "传了才校验"）
         if (goods.getCategory() != null && !goods.getCategory().isBlank()) {
             String c = goods.getCategory().trim().toLowerCase();
             if (!List.of("food", "beverage", "merchandise", "service").contains(c)) {
@@ -295,7 +300,8 @@ public ResponseMessage<Void> batchUpdateStock(
     }
 
     @PostMapping("/admin/vouchers")
-    public ResponseMessage<Goods> createVoucher(@RequestBody Goods goods) {
+    public ResponseMessage<Goods> createVoucher(@RequestBody GoodsRequestDto dto) {
+        Goods goods = dto.toEntity();
         goods.setType("voucher");
         goods.setIsForRedemption(true);
 
@@ -310,12 +316,13 @@ public ResponseMessage<Void> batchUpdateStock(
     }
 
     @PutMapping("/admin/vouchers/{id}")
-    public ResponseMessage<Goods> updateVoucher(@PathVariable String id, @RequestBody Goods goods) {
+    public ResponseMessage<Goods> updateVoucher(@PathVariable String id, @RequestBody GoodsRequestDto dto) {
         Goods existing = goodsService.getGoodsById(id);
         if (existing.getType() == null || !"voucher".equalsIgnoreCase(existing.getType())) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "NOT_A_VOUCHER");
         }
 
+        Goods goods = dto.toEntity();
         goods.setType("voucher");
         goods.setIsForRedemption(true);
 

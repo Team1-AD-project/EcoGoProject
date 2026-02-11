@@ -1,5 +1,6 @@
 package com.example.EcoGo.controller;
 
+import com.example.EcoGo.dto.OrderRequestDto;
 import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.exception.BusinessException;
 import com.example.EcoGo.exception.errorcode.ErrorCode;
@@ -204,28 +205,27 @@ class OrderControllerTest {
 
     @Test
     void createRedemptionOrder_shouldForceIsRedemption_true_andReturnSuccess() {
-        Order input = new Order();
+        OrderRequestDto dto = new OrderRequestDto();
+        dto.setUserId("u1");
         // service 返回
         Order created = order("o1", "u1", "CREATED", true, LocalDateTime.now());
         when(orderService.createRedemptionOrder(any(Order.class))).thenReturn(created);
 
-        ResponseMessage<Order> resp = controller.createRedemptionOrder(input);
+        ResponseMessage<Order> resp = controller.createRedemptionOrder(dto);
 
         assertEquals(ErrorCode.SUCCESS.getCode(), resp.getCode());
         assertNotNull(resp.getData());
-        // controller 侧强制设置
-        assertEquals(Boolean.TRUE, input.getIsRedemptionOrder());
-        verify(orderService).createRedemptionOrder(any(Order.class));
+        verify(orderService).createRedemptionOrder(argThat(o -> Boolean.TRUE.equals(o.getIsRedemptionOrder())));
     }
 
     @Test
     void createRedemptionOrder_serviceReturnsNull_throwDbError() {
-        Order input = new Order();
+        OrderRequestDto dto = new OrderRequestDto();
         when(orderService.createRedemptionOrder(any(Order.class))).thenReturn(null);
 
         BusinessException ex = assertThrows(
                 BusinessException.class,
-                () -> controller.createRedemptionOrder(input)
+                () -> controller.createRedemptionOrder(dto)
         );
         assertEquals(ErrorCode.DB_ERROR.getCode(), ex.getCode());
     }
@@ -235,7 +235,7 @@ class OrderControllerTest {
     void updateOrder_idBlank_throwParamCannotBeNull() {
         BusinessException ex = assertThrows(
                 BusinessException.class,
-                () -> controller.updateOrder(" ", new Order())
+                () -> controller.updateOrder(" ", new OrderRequestDto())
         );
         assertEquals(ErrorCode.PARAM_CANNOT_BE_NULL.getCode(), ex.getCode());
     }
@@ -255,7 +255,7 @@ class OrderControllerTest {
 
         BusinessException ex = assertThrows(
                 BusinessException.class,
-                () -> controller.updateOrder("x", new Order())
+                () -> controller.updateOrder("x", new OrderRequestDto())
         );
         assertEquals(ErrorCode.ORDER_NOT_FOUND.getCode(), ex.getCode());
     }
@@ -265,7 +265,9 @@ class OrderControllerTest {
         Order updated = order("x", "u1", "PAID", false, LocalDateTime.now());
         when(orderService.updateOrder(eq("x"), any(Order.class))).thenReturn(updated);
 
-        ResponseMessage<Order> resp = controller.updateOrder("x", new Order());
+        OrderRequestDto dto = new OrderRequestDto();
+        dto.setStatus("PAID");
+        ResponseMessage<Order> resp = controller.updateOrder("x", dto);
         assertEquals(ErrorCode.SUCCESS.getCode(), resp.getCode());
         assertNotNull(resp.getData());
         assertEquals("x", resp.getData().getId());
