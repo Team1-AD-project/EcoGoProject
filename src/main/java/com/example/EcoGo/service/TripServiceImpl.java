@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import com.example.EcoGo.utils.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +30,8 @@ import org.slf4j.LoggerFactory;
 public class TripServiceImpl implements TripService {
 
     private static final Logger log = LoggerFactory.getLogger(TripServiceImpl.class);
+
+    private static final String STATUS_TRACKING = "tracking";
 
     @Autowired
     private VipSwitchService vipSwitchService;
@@ -58,7 +61,7 @@ public class TripServiceImpl implements TripService {
         trip.setStartLocation(new Trip.LocationDetail(
                 request.startAddress, request.startPlaceName, request.startCampusZone));
         trip.setStartTime(LocalDateTime.now());
-        trip.setCarbonStatus("tracking");
+        trip.setCarbonStatus(STATUS_TRACKING);
         trip.setCreatedAt(LocalDateTime.now());
 
         return tripRepository.save(trip);
@@ -72,7 +75,7 @@ public class TripServiceImpl implements TripService {
         if (!trip.getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.NO_PERMISSION);
         }
-        if (!"tracking".equals(trip.getCarbonStatus())) {
+        if (!STATUS_TRACKING.equals(trip.getCarbonStatus())) {
             throw new BusinessException(ErrorCode.TRIP_STATUS_ERROR, trip.getCarbonStatus());
         }
 
@@ -171,7 +174,7 @@ public class TripServiceImpl implements TripService {
         if (!trip.getUserId().equals(userId)) {
             throw new BusinessException(ErrorCode.NO_PERMISSION);
         }
-        if (!"tracking".equals(trip.getCarbonStatus())) {
+        if (!STATUS_TRACKING.equals(trip.getCarbonStatus())) {
             throw new BusinessException(ErrorCode.TRIP_STATUS_ERROR, trip.getCarbonStatus());
         }
 
@@ -200,7 +203,7 @@ public class TripServiceImpl implements TripService {
 
     @Override
     public TripDto.TripResponse getCurrentTrip(String userId) {
-        List<Trip> trackingTrips = tripRepository.findByUserIdAndCarbonStatus(userId, "tracking");
+        List<Trip> trackingTrips = tripRepository.findByUserIdAndCarbonStatus(userId, STATUS_TRACKING);
         if (trackingTrips.isEmpty()) {
             return null;
         }
@@ -239,7 +242,7 @@ public class TripServiceImpl implements TripService {
             log.error("[getTripsByUser] Failed to fetch trips for userId={}: {}", userId, e.getMessage(), e);
             return new ArrayList<>();
         }
-        log.info("[getTripsByUser] Found {} trips for userId={}", userTrips.size(), userId);
+        log.info("[getTripsByUser] Found {} trips for userId={}", userTrips.size(), LogSanitizer.sanitize(userId));
         List<TripDto.TripResponse> result = new ArrayList<>();
         for (Trip trip : userTrips) {
             try {

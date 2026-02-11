@@ -7,7 +7,6 @@ import com.example.EcoGo.interfacemethods.StatisticsInterface;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -20,13 +19,9 @@ class StatisticsControllerTest {
     private StatisticsController controller;
 
     @BeforeEach
-    void setUp() throws Exception {
+    void setUp() {
         statisticsService = mock(StatisticsInterface.class);
-        controller = new StatisticsController();
-
-        Field f = StatisticsController.class.getDeclaredField("statisticsService");
-        f.setAccessible(true);
-        f.set(controller, statisticsService);
+        controller = new StatisticsController(statisticsService);
     }
 
     // ---------- helper ----------

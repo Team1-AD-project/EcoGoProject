@@ -9,6 +9,7 @@ import com.example.EcoGo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.EcoGo.utils.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +33,7 @@ public class StatisticsImplementation implements StatisticsInterface {
     private TripRepository tripRepository;
     @Override
     public AnalyticsSummaryDto getManagementAnalytics(String timeRange) {
-        log.info("[getManagementAnalytics] Called with timeRange={}", timeRange);
+        log.info("[getManagementAnalytics] Called with timeRange={}", LogSanitizer.sanitize(timeRange));
         List<User> allUsers;
         try {
             allUsers = userRepository.findAll();

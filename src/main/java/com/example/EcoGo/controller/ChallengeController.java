@@ -6,6 +6,7 @@ import com.example.EcoGo.dto.UserChallengeProgressDTO;
 import com.example.EcoGo.interfacemethods.ChallengeInterface;
 import com.example.EcoGo.model.Challenge;
 import com.example.EcoGo.model.UserChallengeProgress;
+import com.example.EcoGo.utils.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,7 +51,7 @@ public class ChallengeController {
      */
     @GetMapping("/web/challenges/{id}")
     public ResponseMessage<Challenge> getWebChallengeById(@PathVariable String id) {
-        logger.info("[WEB] Fetching challenge by ID: {}", id);
+        logger.info("[WEB] Fetching challenge by ID: {}", LogSanitizer.sanitize(id));
         return ResponseMessage.success(challengeService.getChallengeById(id));
     }
 
@@ -60,7 +61,7 @@ public class ChallengeController {
      */
     @PostMapping("/web/challenges")
     public ResponseMessage<Challenge> createWebChallenge(@RequestBody ChallengeRequestDto dto) {
-        logger.info("[WEB] Creating new challenge: {}", dto.getTitle());
+        logger.info("[WEB] Creating new challenge: {}", LogSanitizer.sanitize(dto.getTitle()));
         return ResponseMessage.success(challengeService.createChallenge(dto.toEntity()));
     }
 
@@ -72,7 +73,7 @@ public class ChallengeController {
     public ResponseMessage<Challenge> updateWebChallenge(
             @PathVariable String id,
             @RequestBody ChallengeRequestDto dto) {
-        logger.info("[WEB] Updating challenge: {}", id);
+        logger.info("[WEB] Updating challenge: {}", LogSanitizer.sanitize(id));
         return ResponseMessage.success(challengeService.updateChallenge(id, dto.toEntity()));
     }
 
@@ -82,7 +83,7 @@ public class ChallengeController {
      */
     @DeleteMapping("/web/challenges/{id}")
     public ResponseMessage<Void> deleteWebChallenge(@PathVariable String id) {
-        logger.info("[WEB] Deleting challenge: {}", id);
+        logger.info("[WEB] Deleting challenge: {}", LogSanitizer.sanitize(id));
         challengeService.deleteChallenge(id);
         return ResponseMessage.success(null);
     }
@@ -93,7 +94,7 @@ public class ChallengeController {
      */
     @GetMapping("/web/challenges/status/{status}")
     public ResponseMessage<List<Challenge>> getWebChallengesByStatus(@PathVariable String status) {
-        logger.info("[WEB] Fetching challenges by status: {}", status);
+        logger.info("[WEB] Fetching challenges by status: {}", LogSanitizer.sanitize(status));
         return ResponseMessage.success(challengeService.getChallengesByStatus(status));
     }
 
@@ -103,7 +104,7 @@ public class ChallengeController {
      */
     @GetMapping("/web/challenges/type/{type}")
     public ResponseMessage<List<Challenge>> getWebChallengesByType(@PathVariable String type) {
-        logger.info("[WEB] Fetching challenges by type: {}", type);
+        logger.info("[WEB] Fetching challenges by type: {}", LogSanitizer.sanitize(type));
         return ResponseMessage.success(challengeService.getChallengesByType(type));
     }
 
@@ -113,7 +114,7 @@ public class ChallengeController {
      */
     @GetMapping("/web/challenges/{id}/participants")
     public ResponseMessage<List<UserChallengeProgressDTO>> getWebChallengeParticipants(@PathVariable String id) {
-        logger.info("[WEB] Fetching participants for challenge: {}", id);
+        logger.info("[WEB] Fetching participants for challenge: {}", LogSanitizer.sanitize(id));
         return ResponseMessage.success(challengeService.getChallengeParticipantsWithProgress(id));
     }
 
@@ -135,7 +136,7 @@ public class ChallengeController {
      */
     @GetMapping("/mobile/challenges/{id}")
     public ResponseMessage<Challenge> getMobileChallengeById(@PathVariable String id) {
-        logger.info("[Mobile] Fetching challenge by ID: {}", id);
+        logger.info("[Mobile] Fetching challenge by ID: {}", LogSanitizer.sanitize(id));
         return ResponseMessage.success(challengeService.getChallengeById(id));
     }
 
@@ -145,7 +146,7 @@ public class ChallengeController {
      */
     @GetMapping("/mobile/challenges/status/{status}")
     public ResponseMessage<List<Challenge>> getMobileChallengesByStatus(@PathVariable String status) {
-        logger.info("[Mobile] Fetching challenges by status: {}", status);
+        logger.info("[Mobile] Fetching challenges by status: {}", LogSanitizer.sanitize(status));
         return ResponseMessage.success(challengeService.getChallengesByStatus(status));
     }
 
@@ -155,7 +156,7 @@ public class ChallengeController {
      */
     @GetMapping("/mobile/challenges/type/{type}")
     public ResponseMessage<List<Challenge>> getMobileChallengesByType(@PathVariable String type) {
-        logger.info("[Mobile] Fetching challenges by type: {}", type);
+        logger.info("[Mobile] Fetching challenges by type: {}", LogSanitizer.sanitize(type));
         return ResponseMessage.success(challengeService.getChallengesByType(type));
     }
 
@@ -165,7 +166,7 @@ public class ChallengeController {
      */
     @GetMapping("/mobile/challenges/user/{userId}")
     public ResponseMessage<List<Challenge>> getMobileChallengesByUserId(@PathVariable String userId) {
-        logger.info("[Mobile] Fetching challenges for user: {}", userId);
+        logger.info("[Mobile] Fetching challenges for user: {}", LogSanitizer.sanitize(userId));
         return ResponseMessage.success(challengeService.getChallengesByUserId(userId));
     }
 
@@ -177,7 +178,7 @@ public class ChallengeController {
     public ResponseMessage<UserChallengeProgress> joinMobileChallenge(
             @PathVariable String id,
             @RequestParam String userId) {
-        logger.info("[Mobile] User {} joining challenge {}", userId, id);
+        logger.info("[Mobile] User {} joining challenge {}", LogSanitizer.sanitize(userId), LogSanitizer.sanitize(id));
         return ResponseMessage.success(challengeService.joinChallenge(id, userId));
     }
 
@@ -189,7 +190,7 @@ public class ChallengeController {
     public ResponseMessage<Void> leaveMobileChallenge(
             @PathVariable String id,
             @RequestParam String userId) {
-        logger.info("[Mobile] User {} leaving challenge {}", userId, id);
+        logger.info("[Mobile] User {} leaving challenge {}", LogSanitizer.sanitize(userId), LogSanitizer.sanitize(id));
         challengeService.leaveChallenge(id, userId);
         return ResponseMessage.success(null);
     }
@@ -202,7 +203,7 @@ public class ChallengeController {
     public ResponseMessage<UserChallengeProgressDTO> getMobileChallengeProgress(
             @PathVariable String id,
             @RequestParam String userId) {
-        logger.info("[Mobile] Getting challenge {} progress for user {}", id, userId);
+        logger.info("[Mobile] Getting challenge {} progress for user {}", LogSanitizer.sanitize(id), LogSanitizer.sanitize(userId));
         return ResponseMessage.success(challengeService.getUserChallengeProgress(id, userId));
     }
 
@@ -214,7 +215,7 @@ public class ChallengeController {
     public ResponseMessage<UserChallengeProgressDTO> claimMobileChallengeReward(
             @PathVariable String id,
             @RequestParam String userId) {
-        logger.info("[Mobile] User {} claiming reward for challenge {}", userId, id);
+        logger.info("[Mobile] User {} claiming reward for challenge {}", LogSanitizer.sanitize(userId), LogSanitizer.sanitize(id));
         return ResponseMessage.success(challengeService.claimChallengeReward(id, userId));
     }
 }
