@@ -51,30 +51,18 @@ class LoginFragment : Fragment() {
             if (inputNusnetId == "123" && inputPassword == "123") {
                 Log.d("DEBUG_LOGIN", "Test account login successful")
                 
-                // Save token to TokenManager so isLoggedIn() returns true on next launch
-                TokenManager.init(requireContext())
-                TokenManager.saveToken(
-                    token = "test_token_123",
-                    userId = "test_user_123",
-                    username = "TestUser"
-                )
-                
                 val prefs = requireContext().getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
-                prefs.edit().apply {
-                    putBoolean("is_logged_in", true)
-                    putBoolean("is_vip", false)
-                    putString("nusnet_id", "123")
-                    apply()
-                }
+                // 标记用户已登录
+                prefs.edit().putBoolean("is_logged_in", true).apply()
                 
-                Toast.makeText(requireContext(), "Test Account Login Successful!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Test Account Login Successful! 🎉", Toast.LENGTH_SHORT).show()
                 
                 try {
                     Log.d("DEBUG_LOGIN", "Test account, going to home")
                     findNavController().navigate(R.id.action_login_to_home)
                 } catch (e: Exception) {
                     Log.e("DEBUG_LOGIN", "Navigation FAILED: ${e.message}", e)
-                    Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), "❌ Navigation error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
                 return@setOnClickListener
             }

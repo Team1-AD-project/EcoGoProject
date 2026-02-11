@@ -5,21 +5,6 @@ package com.ecogo.api
  * 后端服务器配置
  */
 object ApiConfig {
-    private fun isEmulator(): Boolean {
-        // Common emulator fingerprints/props (avoid network guesswork).
-        val fp = android.os.Build.FINGERPRINT ?: ""
-        val model = android.os.Build.MODEL ?: ""
-        val brand = android.os.Build.BRAND ?: ""
-        val device = android.os.Build.DEVICE ?: ""
-        val product = android.os.Build.PRODUCT ?: ""
-        return fp.contains("generic", ignoreCase = true) ||
-            fp.contains("emulator", ignoreCase = true) ||
-            model.contains("Emulator", ignoreCase = true) ||
-            model.contains("Android SDK built for", ignoreCase = true) ||
-            (brand.startsWith("generic") && device.startsWith("generic")) ||
-            product.contains("sdk", ignoreCase = true)
-    }
-
     /**
      * 基础 URL
      * 
@@ -28,11 +13,7 @@ object ApiConfig {
      * - 真实设备访问本机: http://192.168.x.x:8090/ (替换为你的电脑IP)
      * - 生产环境: https://your-domain.com/
      */
-    val BASE_URL: String by lazy {
-        // If we're on emulator, always use the special host alias 10.0.2.2 to reach the PC.
-        // This prevents common timeouts when a LAN IP is configured by mistake.
-        if (isEmulator()) "http://10.0.2.2:8090/" else com.ecogo.BuildConfig.ECOGO_BASE_URL
-    }
+    const val BASE_URL = "http://47.129.124.55:8090/"
     
     /**
      * API 版本
