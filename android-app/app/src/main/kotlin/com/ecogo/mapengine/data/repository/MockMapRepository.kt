@@ -163,11 +163,11 @@ class MockMapRepository : IMapRepository {
 
         // 模拟不同交通方式的碳排放（单位：g/km）
         val carbonFactors = mapOf(
-            "walking" to 0.0,
-            "cycling" to 0.0,
+            "walk" to 0.0,
+            "bike" to 0.0,
             "bus" to 50.0,
             "subway" to 30.0,
-            "driving" to 150.0
+            "car" to 150.0
         )
 
         // 模拟 5 公里行程
@@ -246,7 +246,7 @@ class MockMapRepository : IMapRepository {
             carbon_saved = distance * 0.13, // 比驾车节省约 130g/km
             route_segments = listOf(
                 RouteSegment(
-                    transport_mode = "walking",
+                    transport_mode = "walk",
                     distance = distance * 0.3,
                     duration = (duration * 0.3).toInt(),
                     carbon_emission = 0.0,
@@ -260,7 +260,7 @@ class MockMapRepository : IMapRepository {
                     instructions = "乘坐公交车"
                 ),
                 RouteSegment(
-                    transport_mode = "walking",
+                    transport_mode = "walk",
                     distance = distance * 0.1,
                     duration = (duration * 0.2).toInt(),
                     carbon_emission = 0.0,
@@ -321,7 +321,7 @@ class MockMapRepository : IMapRepository {
             carbon_saved = distance * 0.09, // 比驾车节省约 90g/km
             route_segments = listOf(
                 RouteSegment(
-                    transport_mode = "walking",
+                    transport_mode = "walk",
                     distance = distance * 0.1,
                     duration = (duration * 0.1).toInt(),
                     carbon_emission = 0.0,
@@ -335,7 +335,7 @@ class MockMapRepository : IMapRepository {
                     instructions = "乘坐地铁"
                 ),
                 RouteSegment(
-                    transport_mode = "driving",
+                    transport_mode = "car",
                     distance = distance * 0.2,
                     duration = (duration * 0.3).toInt(),
                     carbon_emission = distance * 0.2 * 0.15,

@@ -83,11 +83,11 @@ data class RouteCacheData(
  * 交通方式
  */
 enum class TransportMode(val value: String, val displayName: String) {
-    WALKING("walking", "步行"),
-    CYCLING("cycling", "骑行"),
+    WALKING("walk", "步行"),
+    CYCLING("bike", "骑行"),
     BUS("bus", "公交"),
     SUBWAY("subway", "地铁"),
-    DRIVING("driving", "驾车")
+    DRIVING("car", "驾车")
 }
 
 /**

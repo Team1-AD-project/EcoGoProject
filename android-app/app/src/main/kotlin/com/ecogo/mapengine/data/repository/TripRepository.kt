@@ -123,11 +123,12 @@ class TripRepository private constructor() {
      * @param endAddress 终点地址
      * @param distance 总距离（米）
      * @param trackPoints 实际轨迹点
-     * @param transportMode 主要交通方式
-     * @param detectedMode AI检测的交通方式
+     * @param transportMode 主要交通方式（用户选择）
+     * @param detectedMode AI检测的主要交通方式
      * @param mlConfidence ML置信度
      * @param carbonSaved 减碳量（克）
      * @param isGreenTrip 是否为绿色出行
+     * @param transportModeSegments ML检测的交通方式段列表（UI显示什么就传什么）
      *
      * @return Result<TripCompleteResponse>
      */
@@ -143,7 +144,8 @@ class TripRepository private constructor() {
         detectedMode: String? = null,
         mlConfidence: Double? = null,
         carbonSaved: Long = 0L,
-        isGreenTrip: Boolean = false
+        isGreenTrip: Boolean = false,
+        transportModeSegments: List<TransportModeSegment>? = null
     ): Result<TripCompleteResponse> = withContext(Dispatchers.IO) {
         try {
             // 转换轨迹点格式
@@ -151,14 +153,18 @@ class TripRepository private constructor() {
                 PolylinePoint(lng = it.longitude, lat = it.latitude)
             }
 
-            // 构建交通方式段列表
-            val transportModes = listOf(
-                TransportModeSegment(
-                    mode = transportMode,
-                    subDistance = distance / 1000.0, // 转为公里
-                    subDuration = 0 // 如果有时长信息可以传入
+            // 优先使用传入的段列表，否则用单段兜底
+            val transportModes = if (!transportModeSegments.isNullOrEmpty()) {
+                transportModeSegments
+            } else {
+                listOf(
+                    TransportModeSegment(
+                        mode = transportMode,
+                        subDistance = distance / 1000.0,
+                        subDuration = 0
+                    )
                 )
-            )
+            }
 
             val request = TripCompleteRequest(
                 endLng = endLng,

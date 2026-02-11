@@ -78,8 +78,8 @@ public class CarbonFootprintImplementation implements CarbonFootprintInterface {
         switch (tripType.toLowerCase()) {
             case "bus":
                 return distance * carEmission * 0.5f; // 巴士节省50%
-            case "walking":
-            case "bicycle":
+            case "walk":
+            case "bike":
                 return distance * carEmission; // 步行/骑行节省100%
             default:
                 return 0f;

@@ -38,14 +38,18 @@ object SimpleDecisionTreeClassifier {
                 0 to calculateConfidence(gpsSpeedMean, 0f, 7f, accMagnitudeMean, 1.0f, 3.0f)
             }
 
-            // 骑行：中低速 + 中等震动 + 速度相对稳定
-            gpsSpeedMean in 7f..25f && accMagnitudeMean in 0.3f..1.2f && gpsSpeedStd < 4f -> {
+            // 骑行：中低速 + 中等以上震动（骑车身体颠簸比坐车大）
+            // 去掉 gpsSpeedStd < 4 的限制：骑车遇红灯也会频繁停启导致速度波动
+            // 关键区分点：骑车 accMagnitudeMean > 0.3（身体颠簸），公交 < 0.5（车内平稳）
+            gpsSpeedMean in 7f..25f && accMagnitudeMean > 0.3f -> {
                 1 to calculateConfidence(gpsSpeedMean, 7f, 25f, accMagnitudeMean, 0.3f, 1.2f)
             }
 
-            // 公交：中速 + 频繁停启动（速度波动大）
-            gpsSpeedMean in 10f..60f && gpsSpeedStd > 4f && accMagnitudeMean < 1.0f -> {
-                2 to calculateConfidence(gpsSpeedStd, 4f, 15f, gpsSpeedMean, 10f, 60f)
+            // 公交：中高速 + 频繁停启动 + 低震动（乘客坐在车内，身体平稳）
+            // 提高速度下限到 20 km/h，降低 accMagnitudeMean 阈值到 0.5
+            // 避免把骑行误判为公交
+            gpsSpeedMean in 20f..60f && gpsSpeedStd > 4f && accMagnitudeMean < 0.5f -> {
+                2 to calculateConfidence(gpsSpeedStd, 4f, 15f, gpsSpeedMean, 20f, 60f)
             }
 
             // 地铁：高速 + 气压变化明显 + 平稳
@@ -54,8 +58,8 @@ object SimpleDecisionTreeClassifier {
             }
 
             // 驾车：中高速 + 平稳 + 速度相对稳定
-            gpsSpeedMean > 15f && accMagnitudeMean < 0.7f && gpsSpeedStd < 10f -> {
-                4 to calculateConfidence(gpsSpeedMean, 15f, 100f, accMagnitudeMean, 0f, 0.7f)
+            gpsSpeedMean > 25f && accMagnitudeMean < 0.7f && gpsSpeedStd < 10f -> {
+                4 to calculateConfidence(gpsSpeedMean, 25f, 100f, accMagnitudeMean, 0f, 0.7f)
             }
 
             // 默认：根据速度判断最可能的类别

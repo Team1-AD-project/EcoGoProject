@@ -66,11 +66,11 @@ object MapUtils {
     fun estimateCarbonEmission(distanceKm: Double, transportMode: String): Double {
         // 碳排放因子 (kg CO2/km)
         val carbonFactor = when (transportMode) {
-            "walking" -> 0.0
-            "cycling" -> 0.0
+            "walk" -> 0.0
+            "bike" -> 0.0
             "bus" -> 0.089
             "subway" -> 0.041
-            "driving" -> 0.21
+            "car" -> 0.21
             else -> 0.0
         }
         return distanceKm * carbonFactor
@@ -80,7 +80,7 @@ object MapUtils {
      * 计算碳减排 (相比驾车)
      */
     fun calculateCarbonSaved(distanceKm: Double, transportMode: String): Double {
-        val drivingEmission = estimateCarbonEmission(distanceKm, "driving")
+        val drivingEmission = estimateCarbonEmission(distanceKm, "car")
         val actualEmission = estimateCarbonEmission(distanceKm, transportMode)
         return drivingEmission - actualEmission
     }

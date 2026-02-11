@@ -110,8 +110,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private var detectedTransportMode: String? = null  // AI检测到的交通方式（主要方式）
     private var backendTripId: String? = null  // 后端真实 tripId（由 TripRepository.startTrip 返回）
 
-    // 交通方式检测历史（累计整段行程所有检测结果，用于统计主要方式）
-    private val modeDetectionHistory = mutableListOf<com.ecogo.mapengine.ml.TransportModeLabel>()
+    // 交通方式段记录（UI 显示什么就记什么，直接传给数据库）
+    private data class ModeSegment(
+        val mode: com.ecogo.mapengine.ml.TransportModeLabel,
+        val startTime: Long,
+        var endTime: Long = startTime
+    )
+    private val modeSegments = mutableListOf<ModeSegment>()
     private var lastMlConfidence: Float = 0f  // 最近一次 ML 置信度
 
     // 行程计时器
@@ -169,15 +174,37 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 获取整段行程的主要交通方式（频率最高的 ML 标签）
+     * 获取行程中持续时间最长的交通方式
      */
     private fun getDominantMode(): com.ecogo.mapengine.ml.TransportModeLabel {
-        if (modeDetectionHistory.isEmpty()) {
+        if (modeSegments.isEmpty()) {
             return com.ecogo.mapengine.ml.TransportModeLabel.WALKING
         }
-        return modeDetectionHistory.groupingBy { it }.eachCount()
+        // 按每个段的持续时间求和，取最长的交通方式
+        return modeSegments.groupBy { it.mode }
+            .mapValues { (_, segs) -> segs.sumOf { (it.endTime - it.startTime) } }
             .maxByOrNull { it.value }?.key
             ?: com.ecogo.mapengine.ml.TransportModeLabel.WALKING
+    }
+
+    /**
+     * 将记录的交通方式段转换为 API 所需的 TransportModeSegment 列表
+     * UI 显示什么就传什么
+     */
+    private fun buildTransportModeSegments(totalDistanceMeters: Double): List<com.ecogo.mapengine.data.model.TransportModeSegment> {
+        if (modeSegments.isEmpty()) return emptyList()
+
+        val totalDurationMs = modeSegments.sumOf { it.endTime - it.startTime }.coerceAtLeast(1L)
+
+        return modeSegments.map { seg ->
+            val segDurationMs = (seg.endTime - seg.startTime).coerceAtLeast(0L)
+            val ratio = segDurationMs.toDouble() / totalDurationMs
+            com.ecogo.mapengine.data.model.TransportModeSegment(
+                mode = mlLabelToDictMode(seg.mode),
+                subDistance = (totalDistanceMeters / 1000.0) * ratio, // 按时间比例分配距离（公里）
+                subDuration = (segDurationMs / 1000).toInt() // 秒
+            )
+        }
     }
 
     // 定位权限请求
@@ -602,7 +629,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         navigationStartTime = System.currentTimeMillis()
         detectedTransportMode = null
         backendTripId = null
-        modeDetectionHistory.clear()
+        modeSegments.clear()
         lastMlConfidence = 0f
         hasTriggeredArrival = false
 
@@ -751,7 +778,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
 
         // 获取交通方式
-        val transportMode = viewModel.selectedTransportMode.value?.value ?: "walking"
+        val transportMode = viewModel.selectedTransportMode.value?.value ?: "walk"
 
         // 获取环保数据（优先使用本地检测结果）
         val dominantLabel = getDominantMode()
@@ -877,20 +904,38 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             LocationManager.totalDistance.value?.toDouble() ?: 0.0
         }
 
-        // 获取主要交通方式（频率最高，映射到 dict 值）
-        val dominantLabel = getDominantMode()
-        val dominantDictMode = mlLabelToDictMode(dominantLabel)
+        // 结束最后一段的时间
+        modeSegments.lastOrNull()?.endTime = System.currentTimeMillis()
 
-        // 基于 transport_modes_dict 判断是否绿色出行
-        val greenTrip = isGreenMode(dominantDictMode)
+        // 构建交通方式段列表（UI 显示什么就传什么）
+        val segments = buildTransportModeSegments(distanceMeters)
+
+        // detectedMode = ML 检测的主要交通方式（持续时间最长的段）
+        val detectedMode = if (modeSegments.isNotEmpty()) {
+            mlLabelToDictMode(getDominantMode())
+        } else {
+            null
+        }
+
+        // 用户选择的交通方式
+        val userSelectedMode = viewModel.selectedTransportMode.value?.value ?: "walk"
+
+        // 基于用户选择的交通方式判断是否绿色出行
+        val greenTrip = isGreenMode(userSelectedMode)
 
         // 碳排放减少量（克）
         val carbonSavedGrams = calculateRealTimeCarbonSaved(distanceMeters.toFloat()).toLong()
 
-        // ML 置信度
-        val confidence = if (lastMlConfidence > 0f) lastMlConfidence.toDouble() else null
+        // ML 置信度（仅在有检测记录时才设置）
+        val confidence = if (modeSegments.isNotEmpty() && lastMlConfidence > 0f) {
+            lastMlConfidence.toDouble()
+        } else {
+            null
+        }
 
-        Log.d(TAG, "Completing trip on backend: tripId=$tripId, mode=$dominantDictMode, " +
+        Log.d(TAG, "Completing trip on backend: tripId=$tripId, " +
+                "segments=${segments.map { "${it.mode}(${it.subDuration}s)" }}, " +
+                "detectedMode=$detectedMode, userMode=$userSelectedMode, " +
                 "isGreen=$greenTrip, points=${trackPoints.size}, distance=${distanceMeters}m, " +
                 "carbonSaved=${carbonSavedGrams}g, confidence=$confidence")
 
@@ -905,11 +950,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     endAddress = destinationName.ifEmpty { "未知地址" },
                     distance = distanceMeters,
                     trackPoints = trackPoints,
-                    transportMode = dominantDictMode,
-                    detectedMode = dominantDictMode,
+                    transportMode = userSelectedMode,
+                    detectedMode = detectedMode,
                     mlConfidence = confidence,
                     carbonSaved = carbonSavedGrams,
-                    isGreenTrip = greenTrip
+                    isGreenTrip = greenTrip,
+                    transportModeSegments = segments
                 )
 
                 result.fold(
@@ -1077,13 +1123,22 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun onTransportModeDetected(prediction: com.ecogo.mapengine.ml.TransportModePrediction) {
         if (!LocationManager.isTracking.value!!) return
 
-        // 累积检测历史（用于统计主要交通方式）
-        modeDetectionHistory.add(prediction.mode)
+        val now = System.currentTimeMillis()
         lastMlConfidence = prediction.confidence
 
-        // 使用频率最高的交通方式作为 detected_mode（映射到 dict 值）
-        val dominantLabel = getDominantMode()
-        detectedTransportMode = mlLabelToDictMode(dominantLabel)
+        // 按段记录：UI 显示什么就记什么
+        val lastSegment = modeSegments.lastOrNull()
+        if (lastSegment == null || lastSegment.mode != prediction.mode) {
+            // 交通方式变了（或第一次检测），结束上一段，开始新段
+            lastSegment?.endTime = now
+            modeSegments.add(ModeSegment(mode = prediction.mode, startTime = now))
+        } else {
+            // 同一交通方式，更新当前段结束时间
+            lastSegment.endTime = now
+        }
+
+        // detectedTransportMode 跟随 UI 当前显示的模式
+        detectedTransportMode = mlLabelToDictMode(prediction.mode)
 
         val modeIcon = when (prediction.mode) {
             com.ecogo.mapengine.ml.TransportModeLabel.WALKING -> "🚶"

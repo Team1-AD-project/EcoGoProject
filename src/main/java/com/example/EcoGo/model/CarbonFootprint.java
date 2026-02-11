@@ -60,10 +60,10 @@ public class CarbonFootprint {
             case "bus":
                 this.tripsByBus++;
                 break;
-            case "walking":
+            case "walk":
                 this.tripsByWalking++;
                 break;
-            case "bicycle":
+            case "bike":
                 this.tripsByBicycle++;
                 break;
         }
