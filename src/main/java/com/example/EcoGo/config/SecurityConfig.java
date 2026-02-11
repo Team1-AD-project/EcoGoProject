@@ -42,6 +42,9 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/v1/mobile/users/login",
                                                                 "/api/v1/mobile/users/register")
                                                 .permitAll()
+                                                // Chatbot endpoints are allowed for dev/test flows that don't have JWT
+                                                .requestMatchers("/api/v1/mobile/chatbot/**")
+                                                .permitAll()
                                                 .requestMatchers("/api/v1/web/users/login").permitAll()
                                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger
 
