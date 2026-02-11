@@ -175,6 +175,7 @@ jacoco {
 }
 
 tasks.withType<Test> {
+    maxHeapSize = "4g"
     jvmArgs(
         "-XX:+EnableDynamicAgentLoading",
         "--add-opens", "java.base/java.lang=ALL-UNNAMED",
