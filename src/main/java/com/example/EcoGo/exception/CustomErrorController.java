@@ -4,6 +4,7 @@ import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.exception.errorcode.ErrorCode;
 import org.springframework.boot.web.servlet.error.ErrorController;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -14,7 +15,8 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestController
 public class CustomErrorController implements ErrorController {
 
-    @RequestMapping("/error")
+    @RequestMapping(value = "/error", method = {RequestMethod.GET, RequestMethod.POST,
+            RequestMethod.PUT, RequestMethod.DELETE, RequestMethod.PATCH})
     public ResponseMessage<Void> handleError(HttpServletRequest request) {
         Integer statusCode = (Integer) request.getAttribute("jakarta.servlet.error.status_code");
         String message = "Unknown Error";

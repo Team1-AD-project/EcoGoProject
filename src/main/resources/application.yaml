@@ -59,6 +59,10 @@ chatbot:
   nus-bus:
     username: NUSnextbus
     password: '13dL?zY,3feWR^"T'
+# Admin seeder
+app:
+  admin:
+    default-password: ${ADMIN_DEFAULT_PASSWORD:admin123}
 
 # Application info
 info:

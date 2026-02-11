@@ -3,6 +3,7 @@ package com.example.EcoGo.config;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +20,9 @@ public class DatabaseSeeder implements CommandLineRunner {
     private final UserRepository userRepository;
     private final PasswordUtils passwordUtils;
     private final com.example.EcoGo.repository.TransportModeRepository transportModeRepository;
+
+    @Value("${app.admin.default-password}")
+    private String adminDefaultPassword;
 
     public DatabaseSeeder(UserRepository userRepository, PasswordUtils passwordUtils,
             com.example.EcoGo.repository.TransportModeRepository transportModeRepository) {
@@ -37,7 +41,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             // admin.setUsername("Super Admin"); // Removed
             admin.setEmail("admin@eco.go");
             admin.setEmail("admin@eco.go");
-            admin.setPassword(passwordUtils.encode("admin123")); // Default password
+            admin.setPassword(passwordUtils.encode(adminDefaultPassword));
             admin.setNickname("System Admin");
             admin.setAdmin(true);
 
@@ -70,7 +74,7 @@ public class DatabaseSeeder implements CommandLineRunner {
 
             userRepository.save(admin);
             System.out.println("---------------------------------------------");
-            System.out.println("Admin user created: userid=admin, password=admin123");
+            System.out.println("Admin user created: userid=admin");
             System.out.println("---------------------------------------------");
         }
 

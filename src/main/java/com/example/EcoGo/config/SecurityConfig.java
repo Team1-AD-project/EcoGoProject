@@ -21,6 +21,7 @@ public class SecurityConfig {
         private static final String ADMIN_ROLE = "ADMIN";
 
         @Bean
+        @SuppressWarnings("java:S4502") // CSRF is safely disabled: stateless REST API using JWT bearer tokens, no cookies/sessions
         public SecurityFilterChain securityFilterChain(HttpSecurity http,
                         JwtAuthenticationFilter jwtAuthenticationFilter,
                         CustomAccessDeniedHandler accessDeniedHandler,
@@ -29,7 +30,8 @@ public class SecurityConfig {
                                 // Enable CORS using the custom configuration bean
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                                // Disable CSRF (since we use JWT and don't need session-based CSRF protection)
+                                // CSRF protection is disabled because this API is stateless (JWT bearer tokens).
+                                // No session cookies are used, so CSRF attacks are not applicable.
                                 .csrf(AbstractHttpConfigurer::disable)
 
                                 // Disable default login forms (we use our own API endpoints)
