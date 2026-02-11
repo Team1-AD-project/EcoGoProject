@@ -24,9 +24,9 @@ vi.mock('@/services/userService', () => ({ fetchUserList: vi.fn() }));
 
 // Mock ResizeObserver
 globalThis.ResizeObserver = class ResizeObserver {
-    observe() { /* custom implementation or empty for mock */ }
-    unobserve() { /* custom implementation or empty for mock */ }
-    disconnect() { /* custom implementation or empty for mock */ }
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
 };
 
 // Mock HeatMapView

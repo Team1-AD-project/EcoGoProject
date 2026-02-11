@@ -16,9 +16,9 @@ vi.mock('@/api/advertisementApi', () => ({
 
 // Mock ResizeObserver for Recharts or other responsive components if needed, though AdManagement seems simple
 globalThis.ResizeObserver = class ResizeObserver {
-    observe() { /* custom implementation or empty for mock */ }
-    unobserve() { /* custom implementation or empty for mock */ }
-    disconnect() { /* custom implementation or empty for mock */ }
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
 };
 
 describe('AdManagement Component', () => {
