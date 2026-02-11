@@ -37,6 +37,19 @@ class HomeFragmentTest {
         return scenario to navController
     }
 
+    private fun invokePrivate(fragment: HomeFragment, methodName: String, vararg args: Any?): Any? {
+        val paramTypes = args.map {
+            when (it) {
+                is Int -> Int::class.java
+                is String -> String::class.java
+                else -> it?.javaClass ?: Any::class.java
+            }
+        }.toTypedArray()
+        val method = HomeFragment::class.java.getDeclaredMethod(methodName, *paramTypes)
+        method.isAccessible = true
+        return method.invoke(fragment, *args)
+    }
+
     // ==================== Lifecycle ====================
 
     @Test
@@ -69,7 +82,6 @@ class HomeFragmentTest {
         )
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
-            // Bus info is set by setupUI() then may be overwritten by loadBusInfo() coroutine
             val busNumber = view.findViewById<TextView>(R.id.text_bus_number).text.toString()
             val busTime = view.findViewById<TextView>(R.id.text_bus_time).text.toString()
             val busRoute = view.findViewById<TextView>(R.id.text_bus_route).text.toString()
@@ -86,7 +98,6 @@ class HomeFragmentTest {
         )
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
-            // Values may be overwritten by loadMonthlyPoints() / loadSocScore() coroutines
             val monthlyPoints = view.findViewById<TextView>(R.id.text_monthly_points).text.toString()
             val socScore = view.findViewById<TextView>(R.id.text_soc_score).text.toString()
             assertTrue("Monthly points should not be empty", monthlyPoints.isNotEmpty())
@@ -102,7 +113,6 @@ class HomeFragmentTest {
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
             val locationText = view.findViewById<TextView>(R.id.text_location).text.toString()
-            // Should contain current year
             assertTrue(locationText.contains(java.time.LocalDate.now().year.toString()))
         }
     }
@@ -274,6 +284,394 @@ class HomeFragmentTest {
         }
     }
 
+    // ==================== getFacultyAbbreviation ====================
+
+    @Test
+    fun `getFacultyAbbreviation - School of Computing returns SoC`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("SoC", invokePrivate(fragment, "getFacultyAbbreviation", "School of Computing"))
+        }
+    }
+
+    @Test
+    fun `getFacultyAbbreviation - Faculty of Science returns FoS`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("FoS", invokePrivate(fragment, "getFacultyAbbreviation", "Faculty of Science"))
+        }
+    }
+
+    @Test
+    fun `getFacultyAbbreviation - Faculty of Engineering returns FoE`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("FoE", invokePrivate(fragment, "getFacultyAbbreviation", "Faculty of Engineering"))
+        }
+    }
+
+    @Test
+    fun `getFacultyAbbreviation - Business School returns Biz`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("Biz", invokePrivate(fragment, "getFacultyAbbreviation", "Business School"))
+        }
+    }
+
+    @Test
+    fun `getFacultyAbbreviation - SDE returns SDE`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("SDE", invokePrivate(fragment, "getFacultyAbbreviation", "School of Design and Environment"))
+        }
+    }
+
+    @Test
+    fun `getFacultyAbbreviation - FASS returns FASS`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("FASS", invokePrivate(fragment, "getFacultyAbbreviation", "Faculty of Arts and Social Sciences"))
+        }
+    }
+
+    @Test
+    fun `getFacultyAbbreviation - YLLSoM returns YLLSoM`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("YLLSoM", invokePrivate(fragment, "getFacultyAbbreviation", "Yong Loo Lin School of Medicine"))
+        }
+    }
+
+    @Test
+    fun `getFacultyAbbreviation - SSHSPH returns SSHSPH`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("SSHSPH", invokePrivate(fragment, "getFacultyAbbreviation", "Saw Swee Hock School of Public Health"))
+        }
+    }
+
+    @Test
+    fun `getFacultyAbbreviation - Faculty of Law returns Law`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("Law", invokePrivate(fragment, "getFacultyAbbreviation", "Faculty of Law"))
+        }
+    }
+
+    @Test
+    fun `getFacultyAbbreviation - School of Music returns Music`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("Music", invokePrivate(fragment, "getFacultyAbbreviation", "School of Music"))
+        }
+    }
+
+    @Test
+    fun `getFacultyAbbreviation - unknown uses initials fallback`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            val result = invokePrivate(fragment, "getFacultyAbbreviation", "College of Humanities and Sciences") as String
+            assertEquals("CHS", result)
+        }
+    }
+
+    // ==================== statusFromEta ====================
+
+    @Test
+    fun `statusFromEta - negative eta returns On Time`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("On Time", invokePrivate(fragment, "statusFromEta", -1))
+        }
+    }
+
+    @Test
+    fun `statusFromEta - eta 0 returns Arriving`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("Arriving", invokePrivate(fragment, "statusFromEta", 0))
+        }
+    }
+
+    @Test
+    fun `statusFromEta - eta 2 returns Arriving`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("Arriving", invokePrivate(fragment, "statusFromEta", 2))
+        }
+    }
+
+    @Test
+    fun `statusFromEta - eta 5 returns On Time`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("On Time", invokePrivate(fragment, "statusFromEta", 5))
+        }
+    }
+
+    @Test
+    fun `statusFromEta - eta 8 returns On Time`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("On Time", invokePrivate(fragment, "statusFromEta", 8))
+        }
+    }
+
+    @Test
+    fun `statusFromEta - eta 15 returns Delayed`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("Delayed", invokePrivate(fragment, "statusFromEta", 15))
+        }
+    }
+
+    @Test
+    fun `statusFromEta - eta 30 returns Delayed`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("Delayed", invokePrivate(fragment, "statusFromEta", 30))
+        }
+    }
+
+    @Test
+    fun `statusFromEta - eta 31 returns Scheduled`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals("Scheduled", invokePrivate(fragment, "statusFromEta", 31))
+        }
+    }
+
+    // ==================== getWeatherIcon ====================
+
+    @Test
+    fun `getWeatherIcon - rain returns rain icon`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_rain, invokePrivate(fragment, "getWeatherIcon", "Heavy Rain"))
+        }
+    }
+
+    @Test
+    fun `getWeatherIcon - shower returns rain icon`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_rain, invokePrivate(fragment, "getWeatherIcon", "Light Shower"))
+        }
+    }
+
+    @Test
+    fun `getWeatherIcon - drizzle returns rain icon`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_rain, invokePrivate(fragment, "getWeatherIcon", "Drizzle"))
+        }
+    }
+
+    @Test
+    fun `getWeatherIcon - thunder returns rain icon`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_rain, invokePrivate(fragment, "getWeatherIcon", "Thunderstorm"))
+        }
+    }
+
+    @Test
+    fun `getWeatherIcon - storm returns rain icon`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_rain, invokePrivate(fragment, "getWeatherIcon", "Tropical Storm"))
+        }
+    }
+
+    @Test
+    fun `getWeatherIcon - cloud returns cloudy icon`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_cloudy, invokePrivate(fragment, "getWeatherIcon", "Partly Cloudy"))
+        }
+    }
+
+    @Test
+    fun `getWeatherIcon - overcast returns cloudy icon`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_cloudy, invokePrivate(fragment, "getWeatherIcon", "Overcast"))
+        }
+    }
+
+    @Test
+    fun `getWeatherIcon - fog returns cloudy icon`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_cloudy, invokePrivate(fragment, "getWeatherIcon", "Dense Fog"))
+        }
+    }
+
+    @Test
+    fun `getWeatherIcon - mist returns cloudy icon`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_cloudy, invokePrivate(fragment, "getWeatherIcon", "Light Mist"))
+        }
+    }
+
+    @Test
+    fun `getWeatherIcon - haze returns cloudy icon`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_cloudy, invokePrivate(fragment, "getWeatherIcon", "Haze"))
+        }
+    }
+
+    @Test
+    fun `getWeatherIcon - sunny returns sunny icon`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_sunny, invokePrivate(fragment, "getWeatherIcon", "Sunny"))
+        }
+    }
+
+    @Test
+    fun `getWeatherIcon - clear returns sunny icon`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_sunny, invokePrivate(fragment, "getWeatherIcon", "Clear sky"))
+        }
+    }
+
+    @Test
+    fun `getWeatherIcon - unknown returns cloudy default`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            assertEquals(R.drawable.ic_weather_cloudy, invokePrivate(fragment, "getWeatherIcon", "Something Unknown"))
+        }
+    }
+
+    // ==================== churnToastMessage ====================
+
+    @Test
+    fun `churnToastMessage - LOW returns stable message`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            val msg = invokePrivate(fragment, "churnToastMessage", "LOW") as String
+            assertTrue(msg.contains("状态稳定"))
+        }
+    }
+
+    @Test
+    fun `churnToastMessage - MEDIUM returns challenge message`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            val msg = invokePrivate(fragment, "churnToastMessage", "MEDIUM") as String
+            assertTrue(msg.contains("小挑战"))
+        }
+    }
+
+    @Test
+    fun `churnToastMessage - HIGH returns comeback message`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            val msg = invokePrivate(fragment, "churnToastMessage", "HIGH") as String
+            assertTrue(msg.contains("不太活跃"))
+        }
+    }
+
+    @Test
+    fun `churnToastMessage - INSUFFICIENT_DATA returns info message`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            val msg = invokePrivate(fragment, "churnToastMessage", "INSUFFICIENT_DATA") as String
+            assertTrue(msg.contains("更精准"))
+        }
+    }
+
+    @Test
+    fun `churnToastMessage - null returns welcome message`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            val method = HomeFragment::class.java.getDeclaredMethod("churnToastMessage", String::class.java)
+            method.isAccessible = true
+            val msg = method.invoke(fragment, null as String?) as String
+            assertTrue(msg.contains("欢迎回来"))
+        }
+    }
+
+    @Test
+    fun `churnToastMessage - unknown returns welcome message`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            val msg = invokePrivate(fragment, "churnToastMessage", "UNKNOWN") as String
+            assertTrue(msg.contains("欢迎回来"))
+        }
+    }
+
+    // ==================== shouldShowChurnToastToday ====================
+
+    @Test
+    fun `shouldShowChurnToastToday - returns true first time`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            // Clear the pref first
+            val sp = fragment.requireContext().getSharedPreferences("ecogo_pref", android.content.Context.MODE_PRIVATE)
+            sp.edit().remove("churn_toast_last_date").apply()
+            val result = invokePrivate(fragment, "shouldShowChurnToastToday") as Boolean
+            assertTrue(result)
+        }
+    }
+
+    @Test
+    fun `shouldShowChurnToastToday - returns false on second call same day`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            // Clear the pref and call once
+            val sp = fragment.requireContext().getSharedPreferences("ecogo_pref", android.content.Context.MODE_PRIVATE)
+            sp.edit().remove("churn_toast_last_date").apply()
+            invokePrivate(fragment, "shouldShowChurnToastToday")
+            // Second call should return false
+            val result = invokePrivate(fragment, "shouldShowChurnToastToday") as Boolean
+            assertFalse(result)
+        }
+    }
+
+    // ==================== loadCarbonFootprint ====================
+
+    @Test
+    fun `loadCarbonFootprint - does nothing without crash`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            // This method is empty (deprecated), just ensure no crash
+            invokePrivate(fragment, "loadCarbonFootprint")
+        }
+    }
+
+    // ==================== getPreferredStopForHome ====================
+
+    @Test
+    fun `getPreferredStopForHome - returns defaults when no prefs set`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            val sp = fragment.requireContext().getSharedPreferences("nextbus_pref", android.content.Context.MODE_PRIVATE)
+            sp.edit().clear().apply()
+            @Suppress("UNCHECKED_CAST")
+            val result = invokePrivate(fragment, "getPreferredStopForHome") as Pair<String, String>
+            assertEquals("UTOWN", result.first)
+            assertEquals("University Town (UTown)", result.second)
+        }
+    }
+
+    @Test
+    fun `getPreferredStopForHome - returns saved prefs`() {
+        val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
+        scenario.onFragment { fragment ->
+            val sp = fragment.requireContext().getSharedPreferences("nextbus_pref", android.content.Context.MODE_PRIVATE)
+            sp.edit().putString("stop_code", "KENT").putString("stop_label", "Kent Ridge").apply()
+            @Suppress("UNCHECKED_CAST")
+            val result = invokePrivate(fragment, "getPreferredStopForHome") as Pair<String, String>
+            assertEquals("KENT", result.first)
+            assertEquals("Kent Ridge", result.second)
+        }
+    }
+
     // ==================== Fragment Destroy ====================
 
     @Test
@@ -281,7 +679,6 @@ class HomeFragmentTest {
         val scenario = launchFragmentInContainer<HomeFragment>(
             themeResId = R.style.Theme_EcoGo
         )
-        // Moving to DESTROYED should not crash
         scenario.moveToState(androidx.lifecycle.Lifecycle.State.DESTROYED)
     }
 }

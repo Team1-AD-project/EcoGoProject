@@ -190,9 +190,11 @@ class MapViewModelTest {
     }
 
     @Test
-    fun `stopTracking without tripId sets error`() {
+    fun `stopTracking without tripId sets Completed state`() {
+        // stopTracking() simply transitions to Completed and clears tripId
         viewModel.stopTracking()
-        assertEquals("没有正在进行的行程", viewModel.errorMessage.value)
+        assertEquals(TripState.Completed, viewModel.tripState.value)
+        assertNull(viewModel.currentTripId.value)
     }
 
     @Test
@@ -228,7 +230,7 @@ class MapViewModelTest {
     }
 
     @Test
-    fun `stopTracking failure reverts to Tracking state`() = runTest {
+    fun `stopTracking after startTracking sets Completed state`() = runTest {
         viewModel.updateCurrentLocation(testOrigin)
         whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
             Result.success(TripTrackData(trip_id = "trip-789", start_time = "2026-02-11T10:00:00"))
@@ -236,19 +238,11 @@ class MapViewModelTest {
         viewModel.startTracking()
         advanceUntilIdle()
 
-        whenever(mockRepository.saveTrip(
-            eq("trip-789"), any(), any(), anyOrNull(), any(), any()
-        )).thenReturn(
-            Result.failure(RuntimeException("Network error"))
-        )
-
+        // stopTracking() is a simple UI state transition; actual saving is handled by MapActivity
         viewModel.stopTracking()
-        advanceUntilIdle()
 
-        val state = viewModel.tripState.value
-        assertTrue(state is TripState.Tracking)
-        assertEquals("trip-789", (state as TripState.Tracking).tripId)
-        assertNotNull(viewModel.errorMessage.value)
+        assertEquals(TripState.Completed, viewModel.tripState.value)
+        assertNull(viewModel.currentTripId.value)
     }
 
     @Test
