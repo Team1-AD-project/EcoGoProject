@@ -1,6 +1,5 @@
 package com.example.EcoGo.controller;
 
-import com.example.EcoGo.dto.OrderRequestDto;
 import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.exception.BusinessException;
 import com.example.EcoGo.exception.errorcode.ErrorCode;
@@ -106,19 +105,18 @@ public class OrderController {
 
     // 创建兑换订单
     @PostMapping("/redemption")
-    public ResponseMessage<Order> createRedemptionOrder(@RequestBody OrderRequestDto dto) {
-        if (dto == null) {
+    public ResponseMessage<Order> createRedemptionOrder(@RequestBody Order order) {
+        if (order == null) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "request body is empty");
         }
 
-        Order order = dto.toEntity();
         // 设置为兑换订单
         order.setIsRedemptionOrder(true);
 
         Order createdOrder = orderService.createRedemptionOrder(order);
 
         if (createdOrder == null) {
-            // 这里按"系统/数据库失败"处理更合理（业务失败应由 service 抛 BusinessException）
+            // 这里按“系统/数据库失败”处理更合理（业务失败应由 service 抛 BusinessException）
             throw new BusinessException(ErrorCode.DB_ERROR);
         }
 
@@ -127,15 +125,14 @@ public class OrderController {
 
     // 更新订单（含状态等字段）
     @PutMapping("/{id}")
-    public ResponseMessage<Order> updateOrder(@PathVariable String id, @RequestBody OrderRequestDto dto) {
+    public ResponseMessage<Order> updateOrder(@PathVariable String id, @RequestBody Order order) {
         if (id == null || id.isBlank()) {
             throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "id");
         }
-        if (dto == null) {
+        if (order == null) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "request body is empty");
         }
 
-        Order order = dto.toEntity();
         Order updatedOrder = orderService.updateOrder(id, order);
 
         if (updatedOrder == null) {

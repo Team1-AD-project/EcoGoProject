@@ -1,10 +1,8 @@
 package com.example.EcoGo.controller;
 
-import com.example.EcoGo.dto.ActivityRequestDto;
 import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.interfacemethods.ActivityInterface;
 import com.example.EcoGo.model.Activity;
-import com.example.EcoGo.utils.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,38 +28,38 @@ public class ActivityController {
 
     @GetMapping("/web/activities/{id}")
     public ResponseMessage<Activity> getWebActivityById(@PathVariable String id) {
-        logger.info("[WEB] Fetching activity by ID: {}", LogSanitizer.sanitize(id));
+        logger.info("[WEB] Fetching activity by ID: {}", id);
         return ResponseMessage.success(activityService.getActivityById(id));
     }
 
     @PostMapping("/web/activities")
-    public ResponseMessage<Activity> createWebActivity(@RequestBody ActivityRequestDto dto) {
-        logger.info("[WEB] Creating new activity: {}", LogSanitizer.sanitize(dto.getTitle()));
-        return ResponseMessage.success(activityService.createActivity(dto.toEntity()));
+    public ResponseMessage<Activity> createWebActivity(@RequestBody Activity activity) {
+        logger.info("[WEB] Creating new activity: {}", activity.getTitle());
+        return ResponseMessage.success(activityService.createActivity(activity));
     }
 
     @PutMapping("/web/activities/{id}")
-    public ResponseMessage<Activity> updateWebActivity(@PathVariable String id, @RequestBody ActivityRequestDto dto) {
-        logger.info("[WEB] Updating activity: {}", LogSanitizer.sanitize(id));
-        return ResponseMessage.success(activityService.updateActivity(id, dto.toEntity()));
+    public ResponseMessage<Activity> updateWebActivity(@PathVariable String id, @RequestBody Activity activity) {
+        logger.info("[WEB] Updating activity: {}", id);
+        return ResponseMessage.success(activityService.updateActivity(id, activity));
     }
 
     @DeleteMapping("/web/activities/{id}")
     public ResponseMessage<Void> deleteWebActivity(@PathVariable String id) {
-        logger.info("[WEB] Deleting activity: {}", LogSanitizer.sanitize(id));
+        logger.info("[WEB] Deleting activity: {}", id);
         activityService.deleteActivity(id);
         return ResponseMessage.success(null);
     }
 
     @GetMapping("/web/activities/status/{status}")
     public ResponseMessage<List<Activity>> getWebActivitiesByStatus(@PathVariable String status) {
-        logger.info("[WEB] Fetching activities by status: {}", LogSanitizer.sanitize(status));
+        logger.info("[WEB] Fetching activities by status: {}", status);
         return ResponseMessage.success(activityService.getActivitiesByStatus(status));
     }
 
     @PostMapping("/web/activities/{id}/publish")
     public ResponseMessage<Activity> publishWebActivity(@PathVariable String id) {
-        logger.info("[WEB] Publishing activity: {}", LogSanitizer.sanitize(id));
+        logger.info("[WEB] Publishing activity: {}", id);
         return ResponseMessage.success(activityService.publishActivity(id));
     }
 
@@ -75,19 +73,19 @@ public class ActivityController {
 
     @GetMapping("/mobile/activities/{id}")
     public ResponseMessage<Activity> getMobileActivityById(@PathVariable String id) {
-        logger.info("[Mobile] Fetching activity by ID: {}", LogSanitizer.sanitize(id));
+        logger.info("[Mobile] Fetching activity by ID: {}", id);
         return ResponseMessage.success(activityService.getActivityById(id));
     }
 
     @PostMapping("/mobile/activities/{id}/join")
     public ResponseMessage<Activity> joinMobileActivity(@PathVariable String id, @RequestParam String userId) {
-        logger.info("[Mobile] User {} joining activity {}", LogSanitizer.sanitize(userId), LogSanitizer.sanitize(id));
+        logger.info("[Mobile] User {} joining activity {}", userId, id);
         return ResponseMessage.success(activityService.joinActivity(id, userId));
     }
 
     @PostMapping("/mobile/activities/{id}/leave")
     public ResponseMessage<Activity> leaveMobileActivity(@PathVariable String id, @RequestParam String userId) {
-        logger.info("[Mobile] User {} leaving activity {}", LogSanitizer.sanitize(userId), LogSanitizer.sanitize(id));
+        logger.info("[Mobile] User {} leaving activity {}", userId, id);
         return ResponseMessage.success(activityService.leaveActivity(id, userId));
     }
 }

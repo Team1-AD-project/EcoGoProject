@@ -23,7 +23,6 @@ public class UserChallengeProgressDTO {
     private String userEmail; // 用户邮箱
     private String userAvatar; // 用户头像
 
-    // Default constructor used by service layer to build progress response
     public UserChallengeProgressDTO() {}
 
     // Getters and Setters

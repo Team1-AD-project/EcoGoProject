@@ -3,7 +3,6 @@ package com.example.EcoGo.controller;
 import com.example.EcoGo.dto.LeaderboardStatsDto;
 import com.example.EcoGo.dto.ResponseMessage;
 import com.example.EcoGo.interfacemethods.LeaderboardInterface;
-import com.example.EcoGo.utils.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +25,7 @@ public class LeaderboardController {
             @RequestParam(defaultValue = "") String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        logger.info("[WEB] Fetching {} leaderboard, date: {}, search: '{}'", LogSanitizer.sanitize(type), LogSanitizer.sanitize(date), LogSanitizer.sanitize(name));
+        logger.info("[WEB] Fetching {} leaderboard, date: {}, search: '{}'", type, date, name);
         LeaderboardStatsDto statsDto = leaderboardService.getRankings(type, date, name, page, size);
         return ResponseMessage.success(statsDto);
     }
@@ -39,7 +38,7 @@ public class LeaderboardController {
             @RequestParam(defaultValue = "") String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
-        logger.info("[Mobile] Fetching {} leaderboard, search: '{}'", LogSanitizer.sanitize(type), LogSanitizer.sanitize(name));
+        logger.info("[Mobile] Fetching {} leaderboard, search: '{}'", type, name);
         LeaderboardStatsDto statsDto = leaderboardService.getRankings(type, "", name, page, size);
         return ResponseMessage.success(statsDto);
     }

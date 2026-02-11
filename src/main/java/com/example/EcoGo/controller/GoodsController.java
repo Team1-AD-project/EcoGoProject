@@ -1,7 +1,6 @@
 package com.example.EcoGo.controller;
 
 import com.example.EcoGo.dto.BatchStockUpdateRequest;
-import com.example.EcoGo.dto.GoodsRequestDto;
 import com.example.EcoGo.exception.BusinessException;
 import com.example.EcoGo.exception.errorcode.ErrorCode;
 import com.example.EcoGo.model.Goods;
@@ -110,12 +109,10 @@ public class GoodsController {
     }
 
     @PostMapping
-    public ResponseMessage<Goods> createGoods(@RequestBody GoodsRequestDto dto) {
-        if (dto == null) {
+    public ResponseMessage<Goods> createGoods(@RequestBody Goods goods) {
+        if (goods == null) {
             throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "goods");
         }
-
-        Goods goods = dto.toEntity();
 
         // ✅ 库存不能为负数
         if (goods.getStock() != null && goods.getStock() < 0) {
@@ -143,22 +140,20 @@ public class GoodsController {
     }
 
     @PutMapping("/{id}")
-    public ResponseMessage<Goods> updateGoods(@PathVariable String id, @RequestBody GoodsRequestDto dto) {
+    public ResponseMessage<Goods> updateGoods(@PathVariable String id, @RequestBody Goods goods) {
         if (id == null || id.isBlank()) {
             throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "id");
         }
-        if (dto == null) {
+        if (goods == null) {
             throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "goods");
         }
-
-        Goods goods = dto.toEntity();
 
         // ✅ 库存不能为负数
         if (goods.getStock() != null && goods.getStock() < 0) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "stock cannot be negative");
         }
 
-        // ✅ category（如果前端更新时不一定传 category，可把这一段改成 "传了才校验"）
+        // ✅ category（如果前端更新时不一定传 category，可把这一段改成 “传了才校验”）
         if (goods.getCategory() != null && !goods.getCategory().isBlank()) {
             String c = goods.getCategory().trim().toLowerCase();
             if (!List.of("food", "beverage", "merchandise", "service").contains(c)) {
@@ -214,16 +209,23 @@ public class GoodsController {
 
     // 8. 批量更新商品库存
     @PutMapping("/batch-stock")
-public ResponseMessage<Void> batchUpdateStock(
-        @RequestBody(required = false) BatchStockUpdateRequest request) {
+    public ResponseMessage<Void> batchUpdateStock(@RequestBody BatchStockUpdateRequest request) {
+        if (request == null) {
+            throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "request");
+        }
 
-    if (request == null || request.getUpdates() == null || request.getUpdates().isEmpty()) {
-        throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, "request body/updates");
+        try {
+            goodsService.batchUpdateStock(request);
+            return new ResponseMessage<>(ErrorCode.SUCCESS.getCode(), ErrorCode.SUCCESS.getMessage(), null);
+        } catch (BusinessException be) {
+            throw be;
+        } catch (RuntimeException re) {
+            // 你原逻辑：RuntimeException => 400
+            throw new BusinessException(ErrorCode.PARAM_CANNOT_BE_NULL, re.getMessage());
+        } catch (Exception e) {
+            throw new BusinessException(ErrorCode.DB_ERROR);
+        }
     }
-
-    goodsService.batchUpdateStock(request);
-    return ResponseMessage.success(null);
-}
 
     // 9. Mobile端专用 - 获取可兑换商品
     @GetMapping("/mobile/redemption")
@@ -300,8 +302,7 @@ public ResponseMessage<Void> batchUpdateStock(
     }
 
     @PostMapping("/admin/vouchers")
-    public ResponseMessage<Goods> createVoucher(@RequestBody GoodsRequestDto dto) {
-        Goods goods = dto.toEntity();
+    public ResponseMessage<Goods> createVoucher(@RequestBody Goods goods) {
         goods.setType("voucher");
         goods.setIsForRedemption(true);
 
@@ -316,13 +317,12 @@ public ResponseMessage<Void> batchUpdateStock(
     }
 
     @PutMapping("/admin/vouchers/{id}")
-    public ResponseMessage<Goods> updateVoucher(@PathVariable String id, @RequestBody GoodsRequestDto dto) {
+    public ResponseMessage<Goods> updateVoucher(@PathVariable String id, @RequestBody Goods goods) {
         Goods existing = goodsService.getGoodsById(id);
         if (existing.getType() == null || !"voucher".equalsIgnoreCase(existing.getType())) {
             throw new BusinessException(ErrorCode.PARAM_ERROR, "NOT_A_VOUCHER");
         }
 
-        Goods goods = dto.toEntity();
         goods.setType("voucher");
         goods.setIsForRedemption(true);
 

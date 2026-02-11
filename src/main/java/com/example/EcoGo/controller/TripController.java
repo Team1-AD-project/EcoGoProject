@@ -135,18 +135,6 @@ public class TripController {
         return ResponseMessage.success(modes);
     }
 
-    /**
-    * Mobile: Get my trip history (full details)
-    * GET /api/v1/mobile/trips/history
-    */
-    @GetMapping("/api/v1/mobile/trips/history")
-    public ResponseMessage<List<TripDto.TripResponse>> getMyTripHistory(
-            @RequestHeader("Authorization") String authHeader) {
-        String userId = extractUserId(authHeader); // sub = userid
-        return ResponseMessage.success(tripService.getTripsByUser(userId));
-    }
-
-
     // ========== Helper ==========
 
     private String extractUserId(String authHeader) {

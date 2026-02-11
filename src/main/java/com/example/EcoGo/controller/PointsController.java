@@ -17,8 +17,6 @@ import java.util.List;
 @RestController
 public class PointsController {
 
-    private static final String BEARER_PREFIX = "Bearer ";
-
     @Autowired
     private PointsService pointsService;
 
@@ -36,7 +34,7 @@ public class PointsController {
     @GetMapping("/api/v1/mobile/points/current")
     public ResponseMessage<PointsDto.CurrentPointsResponse> getCurrentPoints(
             @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace(BEARER_PREFIX, "");
+        String token = authHeader.replace("Bearer ", "");
         String userId = jwtUtils.getUserIdFromToken(token); // UUID
         return ResponseMessage.success(pointsService.getCurrentPoints(userId));
     }
@@ -48,7 +46,7 @@ public class PointsController {
     @GetMapping("/api/v1/mobile/points/history")
     public ResponseMessage<List<PointsDto.PointsLogResponse>> getHistory(
             @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace(BEARER_PREFIX, "");
+        String token = authHeader.replace("Bearer ", "");
         String userId = jwtUtils.getUserIdFromToken(token); // UUID
         return ResponseMessage.success(pointsService.getPointsHistory(userId));
     }
@@ -69,7 +67,7 @@ public class PointsController {
     @GetMapping("/api/v1/mobile/points/stats/trip")
     public ResponseMessage<PointsDto.TripStatsResponse> getMyTripStats(
             @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace(BEARER_PREFIX, "");
+        String token = authHeader.replace("Bearer ", "");
         String userId = jwtUtils.getUserIdFromToken(token);
         return ResponseMessage.success(pointsService.getTripStats(userId));
     }
@@ -81,7 +79,7 @@ public class PointsController {
     @GetMapping("/api/v1/mobile/points/stats/faculty")
     public ResponseMessage<com.example.EcoGo.dto.FacultyStatsDto.PointsResponse> getFacultyPoints(
             @RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.replace(BEARER_PREFIX, "");
+        String token = authHeader.replace("Bearer ", "");
         String userId = jwtUtils.getUserIdFromToken(token);
         return ResponseMessage.success(pointsService.getFacultyTotalPoints(userId));
     }
@@ -160,7 +158,7 @@ public class PointsController {
         // 1. Prepare Admin Action Info
         UserPointsLog.AdminAction adminAction = new UserPointsLog.AdminAction();
         // Extract operator ID from token (Now it IS Business ID)
-        String token = authHeader.replace(BEARER_PREFIX, "");
+        String token = authHeader.replace("Bearer ", "");
         String operatorId = jwtUtils.getUserIdFromToken(token);
 
         adminAction.setOperatorId(operatorId);

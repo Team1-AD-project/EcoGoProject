@@ -14,14 +14,14 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     @ResponseBody
-    public ResponseMessage<Object> handlerBusinessException(BusinessException e) {
+    public ResponseMessage<?> handlerBusinessException(BusinessException e) {
         return new ResponseMessage<>(e.getCode(), e.getMessage(), null);
     }
 
     // Handle parameter validation exceptions (ConstraintViolationException)
     @ExceptionHandler(jakarta.validation.ConstraintViolationException.class)
     @ResponseBody
-    public ResponseMessage<Object> handlerConstraintViolationException(
+    public ResponseMessage<?> handlerConstraintViolationException(
             jakarta.validation.ConstraintViolationException e) {
         // Extract the first error message
         String message = e.getConstraintViolations().stream()
@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
     // (MethodArgumentNotValidException)
     @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
     @ResponseBody
-    public ResponseMessage<Object> handlerMethodArgumentNotValidException(
+    public ResponseMessage<?> handlerMethodArgumentNotValidException(
             org.springframework.web.bind.MethodArgumentNotValidException e) {
         String message = e.getBindingResult().getAllErrors().stream()
                 .map(org.springframework.validation.ObjectError::getDefaultMessage)
@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
     // Handle system exceptions (e.g., NullPointerException, DB connection failure)
     @ExceptionHandler(Exception.class)
     @ResponseBody
-    public ResponseMessage<Object> handlerSystemException(Exception e) {
+    public ResponseMessage<?> handlerSystemException(Exception e) {
         log.error("System exception", e); // Log detailed error
         return new ResponseMessage<>(ErrorCode.SYSTEM_ERROR.getCode(), ErrorCode.SYSTEM_ERROR.getMessage(), null);
     }
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
     // Handle Spring Security AccessDeniedException
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
     @ResponseBody
-    public ResponseMessage<Object> handlerAccessDeniedException(
+    public ResponseMessage<?> handlerAccessDeniedException(
             org.springframework.security.access.AccessDeniedException e) {
         // This is a fallback if the CustomAccessDeniedHandler doesn't catch it
         return new ResponseMessage<>(ErrorCode.NO_PERMISSION.getCode(), e.getMessage(), null);

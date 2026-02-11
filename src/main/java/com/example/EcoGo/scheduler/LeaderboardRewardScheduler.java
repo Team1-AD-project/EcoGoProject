@@ -26,7 +26,6 @@ import java.util.Optional;
 public class LeaderboardRewardScheduler {
 
     private static final Logger logger = LoggerFactory.getLogger(LeaderboardRewardScheduler.class);
-    private static final String TYPE_DAILY = "DAILY";
 
     @Autowired
     private LeaderboardInterface leaderboardService;
@@ -49,7 +48,7 @@ public class LeaderboardRewardScheduler {
         String periodKey = yesterday.toString();
 
         // Use MongoTemplate to check duplicates (avoids @Field annotation issue on period_key)
-        if (rewardAlreadyDistributed(TYPE_DAILY, periodKey)) {
+        if (rewardAlreadyDistributed("DAILY", periodKey)) {
             logger.info("Daily rewards for {} already distributed. Skipping.", periodKey);
             return;
         }
@@ -59,7 +58,7 @@ public class LeaderboardRewardScheduler {
         LocalDateTime end = yesterday.plusDays(1).atStartOfDay();
 
         List<LeaderboardEntry> topUsers = leaderboardService.getTopUsers(start, end, 10);
-        distributeRewards(topUsers, TYPE_DAILY, periodKey);
+        distributeRewards(topUsers, "DAILY", periodKey);
     }
 
     /**
@@ -95,7 +94,7 @@ public class LeaderboardRewardScheduler {
     private void distributeRewards(List<LeaderboardEntry> topUsers, String type, String periodKey) {
         for (int i = 0; i < topUsers.size(); i++) {
             int rank = i + 1;
-            long multiplier = TYPE_DAILY.equals(type) ? 10L : 100L;
+            long multiplier = "DAILY".equals(type) ? 10L : 100L;
             long points = (11 - rank) * multiplier;
             LeaderboardEntry entry = topUsers.get(i);
 

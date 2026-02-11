@@ -18,8 +18,6 @@ import java.util.Arrays;
 @EnableWebSecurity
 public class SecurityConfig {
 
-        private static final String ADMIN_ROLE = "ADMIN";
-
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http,
                         JwtAuthenticationFilter jwtAuthenticationFilter,
@@ -42,35 +40,35 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/v1/mobile/users/login",
                                                                 "/api/v1/mobile/users/register")
                                                 .permitAll()
+                                                // Chatbot endpoints are allowed for dev/test flows that don't have JWT
+                                                .requestMatchers("/api/v1/mobile/chatbot/**")
+                                                .permitAll()
                                                 .requestMatchers("/api/v1/web/users/login").permitAll()
                                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll() // Swagger
 
-                                                .requestMatchers(HttpMethod.GET, "/api/v1/orders").hasRole(ADMIN_ROLE)
-                                                .requestMatchers(HttpMethod.POST, "/api/v1/goods").hasRole(ADMIN_ROLE)
-                                                .requestMatchers(HttpMethod.PUT, "/api/v1/goods/{id}")
-                                                .hasRole(ADMIN_ROLE)
-                                                .requestMatchers(HttpMethod.DELETE, "/api/v1/goods/{id}")
-                                                .hasRole(ADMIN_ROLE)
-                                                .requestMatchers(HttpMethod.GET, "/api/v1/support/churn/admin/**")
-                                                .hasRole(ADMIN_ROLE)
-
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/orders").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.POST, "/api/v1/goods").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.PUT, "/api/v1/goods/{id}").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/v1/goods/{id}").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.GET, "/api/v1/support/churn/admin/**").hasRole("ADMIN")
+                                                
                                                 .requestMatchers(HttpMethod.PUT, "/api/v1/goods/batch-stock")
-                                                .hasRole(ADMIN_ROLE)
+                                                .hasRole("ADMIN")
                                                 .requestMatchers(HttpMethod.GET, "/api/v1/goods/categories")
-                                                .hasRole(ADMIN_ROLE)
+                                                .hasRole("ADMIN")
                                                 .requestMatchers(HttpMethod.GET, "/api/v1/goods/admin/vouchers")
-                                                .hasRole(ADMIN_ROLE)
+                                                .hasRole("ADMIN")
                                                 .requestMatchers(HttpMethod.POST, "/api/v1/goods/admin/vouchers")
-                                                .hasRole(ADMIN_ROLE)
+                                                .hasRole("ADMIN")
                                                 .requestMatchers(HttpMethod.PUT, "/api/v1/goods/admin/vouchers/**")
-                                                .hasRole(ADMIN_ROLE)
+                                                .hasRole("ADMIN")
                                                 .requestMatchers(HttpMethod.DELETE, "/api/v1/goods/admin/vouchers/**")
-                                                .hasRole(ADMIN_ROLE)
+                                                .hasRole("ADMIN")
 
                                                 // Secured Endpoints
-                                                .requestMatchers("/api/v1/admin/**").hasRole(ADMIN_ROLE)
+                                                .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                                                 .requestMatchers("/api/v1/mobile/**").authenticated()
-                                                .requestMatchers("/api/v1/web/**").hasRole(ADMIN_ROLE)
+                                                .requestMatchers("/api/v1/web/**").hasRole("ADMIN")
 
                                                 // Default
                                                 .anyRequest().permitAll() // Keep other paths open for development

@@ -5,6 +5,7 @@ import com.example.EcoGo.interfacemethods.VipSwitchService;
 import com.example.EcoGo.model.Goods;
 import com.example.EcoGo.model.Order;
 import com.example.EcoGo.model.User;
+import com.example.EcoGo.repository.GoodsRepository;
 import com.example.EcoGo.repository.OrderRepository;
 import com.example.EcoGo.repository.UserRepository;
 import com.example.EcoGo.repository.UserVoucherRepository;
@@ -29,10 +30,13 @@ import java.util.UUID;
 public class OrderServiceImpl implements OrderService {
 
     @Autowired
-    private VipSwitchService vipSwitchService;
+    private VipSwitchServiceImpl vipSwitchService;
 
     @Autowired
     private UserVoucherRepository userVoucherRepository;
+
+    @Autowired
+    private GoodsRepository goodsRepository;
 
     @Autowired
     private OrderRepository orderRepository;
@@ -66,7 +70,7 @@ public class OrderServiceImpl implements OrderService {
 
                 if (goods.getVipLevelRequired() != null && goods.getVipLevelRequired() == 1) {
                     if (!vipActive) {
-                        throw new BusinessException(ErrorCode.PARAM_ERROR, "VIP_REQUIRED: " + item.getGoodsId());
+                        throw new RuntimeException("VIP_REQUIRED: " + item.getGoodsId());
                     }
                 }
             }
@@ -95,10 +99,10 @@ public class OrderServiceImpl implements OrderService {
 
         // 设置默认状态
         if (order.getStatus() == null || order.getStatus().isEmpty()) {
-            order.setStatus("COMPLETED");
+            order.setStatus("PENDING");
         }
         if (order.getPaymentStatus() == null || order.getPaymentStatus().isEmpty()) {
-            order.setPaymentStatus("COMPLETED");
+            order.setPaymentStatus("PENDING");
         }
 
         return orderRepository.save(order);
@@ -332,9 +336,9 @@ public class OrderServiceImpl implements OrderService {
             order.setPointsUsed((int) totalPointsCost);
 
             order.setPaymentStatus("PAID");
-           
-            order.setStatus("COMPLETED");
-            
+            if (order.getStatus() == null || order.getStatus().isEmpty()) {
+                order.setStatus("PENDING");
+            }
             order.setPaymentMethod("POINTS");
 
             if (order.getOrderNumber() == null || order.getOrderNumber().isEmpty()) {

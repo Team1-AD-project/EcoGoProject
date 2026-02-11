@@ -1,9 +1,9 @@
 package com.example.EcoGo.interfacemethods;
 
-import com.example.EcoGo.dto.BadgePurchaseStatDto;
 import com.example.EcoGo.model.Badge;
 import com.example.EcoGo.model.UserBadge;
 import java.util.List;
+import java.util.Map;
 
 public interface BadgeService {
 
@@ -56,7 +56,7 @@ public interface BadgeService {
      * 获取 Badge 购买统计（管理员用）
      * 返回每个 badge 的购买次数
      */
-    List<BadgePurchaseStatDto> getBadgePurchaseStats();
+    List<Map<String, Object>> getBadgePurchaseStats();
 
     /**
      * 检查并自动解锁碳减排成就徽章
