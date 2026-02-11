@@ -76,12 +76,6 @@ public interface PointsService {
 
     // --- Trip Settlement ---
 
-    /**
-     * Settle a completed trip: calculate points, update user stats, create points
-     * log
-     */
-    void settleTrip(String userId, PointsDto.SettleTripRequest request);
-
     // --- Helper Methods for Complex Trips ---
 
     /**

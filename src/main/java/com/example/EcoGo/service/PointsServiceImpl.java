@@ -229,35 +229,6 @@ public class PointsServiceImpl implements PointsService {
     }
 
     @Override
-    public void settleTrip(String userId, PointsDto.SettleTripRequest request) {
-        // 1. Calculate points based on detected mode and distance
-        long points = calculatePoints(request.detectedMode, request.distance);
-
-        // 2. Generate description from LocationInfo
-        String description = formatTripDescription(request.startLocation, request.endLocation, request.distance);
-
-        // 3. Adjust points (handles balance, totalPoints, totalCarbon, badge check,
-        // log)
-        adjustPoints(userId, points, "trip", description, request.tripId, null);
-
-        // 4. Update User.Stats cache
-        User user = userRepository.findByUserid(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
-        User.Stats stats = user.getStats();
-        if (stats == null) {
-            stats = new User.Stats();
-        }
-        stats.setTotalTrips(stats.getTotalTrips() + 1);
-        stats.setTotalDistance(stats.getTotalDistance() + request.distance);
-        stats.setTotalPointsFromTrips(stats.getTotalPointsFromTrips() + points);
-        if (request.isGreenTrip) {
-            stats.setGreenDays(stats.getGreenDays() + 1);
-        }
-        user.setStats(stats);
-        userRepository.save(user);
-    }
-
-    @Override
     public String formatTripDescription(PointsDto.LocationInfo start, PointsDto.LocationInfo end,
             double totalDistance) {
         String startName = (start != null && start.placeName != null && !start.placeName.isEmpty())
