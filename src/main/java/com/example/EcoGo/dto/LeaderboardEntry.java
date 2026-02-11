@@ -13,6 +13,7 @@ public class LeaderboardEntry {
 
     private double totalCarbonSaved;
 
+    // Required by Spring Data MongoDB for deserialization of aggregation results
     public LeaderboardEntry() {}
 
     public String getUserId() { return userId; }
