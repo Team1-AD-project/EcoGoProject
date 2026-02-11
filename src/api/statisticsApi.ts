@@ -65,3 +65,22 @@ export async function getRedemptionVolume(): Promise<number> {
   const response = await api.get<ApiResponse<number>>('/statistics/redemption-volume');
   return response.data.data;
 }
+
+export interface AnalyticsSummary {
+  activeUsers7d: number;
+  activeUsers30d: number;
+  totalTrips: number;
+  totalCarbonSaved: number;
+  totalRedemptions: number;
+  transportDistribution: Record<string, number>;
+  topUsers: {
+    nickname: string;
+    trips: number;
+    carbonSaved: number;
+  }[];
+}
+
+export async function getAnalyticsSummary(): Promise<AnalyticsSummary> {
+  const response = await api.get<ApiResponse<AnalyticsSummary>>('/statistics/summary');
+  return response.data.data;
+}

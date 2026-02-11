@@ -17,10 +17,10 @@ vi.mock('@/api/challengeApi', () => ({
 }));
 
 // Mock ResizeObserver
-global.ResizeObserver = class ResizeObserver {
-    observe() { }
-    unobserve() { }
-    disconnect() { }
+globalThis.ResizeObserver = class ResizeObserver {
+    observe = vi.fn();
+    unobserve = vi.fn();
+    disconnect = vi.fn();
 };
 
 describe('ChallengeManagement', () => {
@@ -52,7 +52,7 @@ describe('ChallengeManagement', () => {
         vi.mocked(challengeApi.getChallengeParticipants).mockResolvedValue([]);
 
         // Mock confirm
-        global.confirm = vi.fn(() => true);
+        globalThis.confirm = vi.fn(() => true);
     });
 
     afterEach(() => {
@@ -184,7 +184,7 @@ describe('ChallengeManagement', () => {
         const deleteBtn = within(screen.getAllByRole('row')[1]).getAllByRole('button')[2];
         await user.click(deleteBtn);
 
-        expect(global.confirm).toHaveBeenCalled();
+        expect(globalThis.confirm).toHaveBeenCalled();
         await waitFor(() => expect(challengeApi.deleteChallenge).toHaveBeenCalledWith('1'));
     });
 

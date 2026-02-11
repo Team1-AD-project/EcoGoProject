@@ -57,10 +57,10 @@ describe('CollectiblesManagement Component', () => {
         window.HTMLElement.prototype.releasePointerCapture = vi.fn();
         window.HTMLElement.prototype.scrollIntoView = vi.fn();
 
-        global.ResizeObserver = class ResizeObserver {
-            observe() { }
-            unobserve() { }
-            disconnect() { }
+        globalThis.ResizeObserver = class ResizeObserver {
+            observe = vi.fn();
+            unobserve = vi.fn();
+            disconnect = vi.fn();
         };
     });
 
