@@ -412,6 +412,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         // binding.layoutAdCarousel.visibility = View.GONE // Handled by XML
         binding.cardBottomPanel.visibility = View.GONE
 
+        // Back button click - return to main interface
+        binding.fabBack.setOnClickListener {
+            finish()
+        }
+
         // Origin input field click
         binding.etOrigin.setOnClickListener {
             isSearchingOrigin = true
