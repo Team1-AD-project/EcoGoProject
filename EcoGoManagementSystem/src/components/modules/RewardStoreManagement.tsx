@@ -77,6 +77,7 @@ export function RewardStoreManagement() {
   const [isLoadingVouchers, setIsLoadingVouchers] = useState(false);
   const [vouchersPage, setVouchersPage] = useState(1);
   const [vouchersTotalPages, setVouchersTotalPages] = useState(1);
+  const [totalVouchers, setTotalVouchers] = useState(0);
 
 
   const [categories, setCategories] = useState<string[]>([]);
@@ -153,8 +154,10 @@ export function RewardStoreManagement() {
           list = responseData.list || responseData.goods || responseData.records || responseData.items || [];
           if (responseData.pagination) {
             setVouchersTotalPages(responseData.pagination.totalPages || 1);
+            setTotalVouchers(responseData.pagination.total || 0);
           } else if (responseData.total) {
             setVouchersTotalPages(responseData.totalPages || 1);
+            setTotalVouchers(responseData.total || 0);
           }
         }
 
@@ -360,7 +363,7 @@ export function RewardStoreManagement() {
 
   // Stats
   const totalRedemptions = Object.values(soldCounts).reduce((sum, count) => sum + count, 0);
-  const lowStockCount = (rewards || []).filter(r => r.stock < 10).length;
+  const lowStockCount = [...(rewards || []), ...(vouchers || [])].filter(r => r.stock < 10 && r.stock >= 0).length;
 
 
   const getOrderStatusBadge = (status: string) => {
@@ -389,8 +392,8 @@ export function RewardStoreManagement() {
             <div className="flex items-center gap-3 mb-2">
               <Package className="size-8" />
             </div>
-            <p className="text-sm opacity-90 mb-1">Total Products</p>
-            <p className="text-3xl font-bold">{totalItems}</p>
+            <p className="text-sm opacity-90 mb-1">Total Goods</p>
+            <p className="text-3xl font-bold">{totalItems + totalVouchers}</p>
           </Card>
 
           <Card className="p-4 bg-gradient-to-br from-green-500 to-green-600 text-white">
