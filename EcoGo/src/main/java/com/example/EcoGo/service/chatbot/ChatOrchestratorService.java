@@ -346,7 +346,9 @@ public class ChatOrchestratorService {
     }
 
     private boolean isBackToMenu(String text) {
-        return text.equalsIgnoreCase(BTN_BACK_TO_MENU) || text.equals("返回主菜单") || text.equals("主菜单");
+        return text.equalsIgnoreCase(BTN_BACK_TO_MENU) || text.equals("返回主菜单") || text.equals("主菜单")
+                || text.equalsIgnoreCase("menu") || text.equalsIgnoreCase("help")
+                || text.equalsIgnoreCase("start") || text.equals("帮助") || text.equals("菜单");
     }
 
     private ChatResponseDto tryHandleFollowUpButtons(String convId, ConversationState state, String text) {
@@ -568,6 +570,13 @@ public class ChatOrchestratorService {
 
     private boolean isBusQueryIntent(String text) {
         String lower = text.toLowerCase(Locale.ROOT);
+
+        // Exclude informational queries about routes/stops (should go to RAG)
+        if (containsAny(lower, "what stop", "which stop", "what route", "which route",
+                "tell me about", "what does", "where does", "go to", "goes to",
+                "stops at", "route info", "route detail", "about the")) {
+            return false;
+        }
 
         if (containsArrivalKeywords(lower)) return true;
         if (containsBusPhrases(lower)) return true;
@@ -1314,7 +1323,8 @@ public class ChatOrchestratorService {
 
         if (ragService.isAvailable()) {
             try {
-                citations = ragService.retrieve(text, 1);
+                // Retrieve top-3 for better matching quality
+                citations = ragService.retrieve(text, 3);
             } catch (Exception e) {
                 log.warn("[RAG] Retrieval failed: {}", e.getMessage());
                 citations = Collections.emptyList();
@@ -1323,7 +1333,14 @@ public class ChatOrchestratorService {
             citations = Collections.emptyList();
         }
 
-        String answer = buildShortAnswerFromCitations(citations);
+        String answer;
+        if (!citations.isEmpty()) {
+            Citation top = citations.get(0);
+            // Return the full snippet from the best match (up to 600 chars from RagService)
+            answer = top.getSnippet() != null ? top.getSnippet() : "I found something but couldn't render it.";
+        } else {
+            answer = "I'm not sure about that. Try rephrasing or explore the options below:";
+        }
 
         ChatResponseDto response = new ChatResponseDto();
         response.setConversationId(convId);
@@ -1331,17 +1348,6 @@ public class ChatOrchestratorService {
         response.setServerTimestamp(Instant.now());
         response.withSuggestions(MAIN_MENU);
         return response;
-    }
-
-    private String buildShortAnswerFromCitations(List<Citation> citations) {
-        if (citations == null || citations.isEmpty()) {
-            return "I'm not sure about that. Try rephrasing or explore the options below:";
-        }
-        Citation top = citations.get(0);
-        String snippet = top.getSnippet();
-        if (snippet == null) return "I found something but couldn't render it. Try asking differently.";
-        if (snippet.length() > 120) snippet = snippet.substring(0, 120) + "...";
-        return snippet;
     }
 
     // =========================

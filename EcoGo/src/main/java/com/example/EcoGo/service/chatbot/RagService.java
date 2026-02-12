@@ -148,8 +148,8 @@ public class RagService {
                 .map(s -> new ChatResponseDto.Citation(
                         s.chunk().title(),
                         s.chunk().source(),
-                        s.chunk().text().length() > 240
-                                ? s.chunk().text().substring(0, 240)
+                        s.chunk().text().length() > 600
+                                ? s.chunk().text().substring(0, 600)
                                 : s.chunk().text()
                 ))
                 .collect(Collectors.toList());
