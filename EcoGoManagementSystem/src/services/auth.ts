@@ -70,6 +70,7 @@ api.interceptors.response.use(
 export const loginAdmin = async (credentials: LoginRequest): Promise<LoginResponse> => {
     try {
         const response = await api.post<LoginResponse>('/users/login', credentials);
+        console.log(response.data);
         return response.data;
     } catch (error) {
         if (axios.isAxiosError(error)) {
