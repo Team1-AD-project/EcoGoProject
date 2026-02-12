@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EcoGo</string>
+    <string name="map_ready">地图加载完成</string>
+    <string name="location_permission_required">需要定位权限才能使用此功能</string>
+    <string name="start_tracking">开始行程</string>
+    <string name="stop_tracking">结束行程</string>
+    <string name="tracking_in_progress">行程追踪中...</string>
+    <string name="recommend_route">推荐路线</string>
+    <string name="low_carbon_route">低碳路线</string>
+    <string name="balance_route">平衡路线</string>
+    <string name="carbon_saved">减碳: %1$.2f kg</string>
+    <string name="duration">预计时间: %1$d 分钟</string>
+    <string name="select_destination">请选择目的地</string>
+    <string name="timer_format">用时: %1$s</string>
+    <string name="mode_driving">驾车</string>
+    <string name="mode_transit">公交</string>
+    <string name="mode_cycling">骑行</string>
+    <string name="mode_walking">步行</string>
+</resources>

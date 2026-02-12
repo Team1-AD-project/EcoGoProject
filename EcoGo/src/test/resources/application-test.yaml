@@ -1,0 +1,21 @@
+spring:
+  data:
+    mongodb:
+      uri: ${SPRING_DATA_MONGODB_URI:mongodb://localhost:27017/ecogo}
+      database: ecogo
+  mongodb:
+    embedded:
+      version: 4.0.2
+
+logging:
+  level:
+    com.example.EcoGo: info
+    org.springframework.data.mongodb: warn
+
+server:
+  port: 0  # Random port for tests
+
+weather:
+  api:
+    key: "test-key"
+    url: "https://api.openweathermap.org/data/2.5/weather"

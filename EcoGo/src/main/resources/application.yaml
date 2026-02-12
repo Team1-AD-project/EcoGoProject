@@ -1,0 +1,72 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/EcoGo #我现在本地部署得用localhost才行，所以就在我这个地方改成了这样
+      database: EcoGo
+
+logging:
+  level:
+    com.example.EcoGo: debug
+    org.springframework.data.mongodb: debug
+  file:
+    name: logs/eco-go.log
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+server:
+  port: 8090
+
+# Weather API configuration
+weather:
+  api:
+    key: fac4ae69bdf19368de7ee38add2460bf
+    url: https://api.openweathermap.org/data/2.5/weather
+# Actuator configuration for monitoring
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: always
+    metrics:
+      enabled: true
+    prometheus:
+      enabled: true
+  metrics:
+    export:
+      prometheus:
+        enabled: true
+    tags:
+      application: ${spring.application.name:EcoGo}
+
+# Chatbot configuration
+chatbot:
+  model:
+    base-url: ${CHATBOT_MODEL_URL:http://localhost:9000}
+    api-key: ${CHATBOT_MODEL_KEY:dev-model-key}
+    name: ${CHATBOT_MODEL_NAME:greentravel-local}
+    enabled: ${CHATBOT_MODEL_ENABLED:true}
+  # Python FastAPI chatbot backend proxy (fallback when model server is unavailable)
+  python-backend:
+    base-url: ${CHATBOT_PYTHON_URL:http://localhost:8000}
+    enabled: ${CHATBOT_PYTHON_ENABLED:true}
+    timeout-seconds: ${CHATBOT_PYTHON_TIMEOUT:5}
+  # NUS NextBus API credentials (https://nnextbus.nus.edu.sg)
+  # Override via env vars: CHATBOT_NUS_BUS_USERNAME / CHATBOT_NUS_BUS_PASSWORD
+  nus-bus:
+    username: NUSnextbus
+    password: '13dL?zY,3feWR^"T'
+# Admin seeder
+app:
+  admin:
+    default-password: ${ADMIN_DEFAULT_PASSWORD:admin123}
+
+# Application info
+info:
+  app:
+    name: EcoGo
+    description: Eco-friendly carbon tracking application
+    version: 1.0.0
