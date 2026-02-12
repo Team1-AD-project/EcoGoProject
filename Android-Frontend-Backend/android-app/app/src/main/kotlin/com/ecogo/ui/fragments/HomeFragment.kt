@@ -22,8 +22,8 @@ import com.ecogo.ui.adapters.HighlightAdapter
 import com.ecogo.ui.adapters.HomeStatAdapter
 import com.ecogo.ui.adapters.HomeStat
 import com.ecogo.repository.EcoGoRepository
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import com.ecogo.api.NextBusApiClient
 import com.ecogo.utils.NotificationUtil
 
@@ -155,72 +155,59 @@ class HomeFragment : Fragment() {
         }
     }
 
+    // Shared profile result — avoids duplicate API calls
+    @Volatile
+    private var cachedProfile: com.ecogo.api.MobileProfileResponse? = null
+
     /**
-     * Optimization: use concurrent and lazy loading strategies
-     * 1. Critical data loaded immediately (bus info)
-     * 2. Secondary data loaded concurrently
-     * 3. Non-critical data loaded with delay
+     * All data loaded concurrently — no blocking, no artificial delays.
+     * Profile is fetched once and shared across consumers.
      */
     private fun loadData() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // Priority 1: Load critical data immediately (bus info)
-            loadBusInfo()
-
-            // Priority 2: Load secondary data concurrently
-            launch { loadMonthlyHighlightsStats() }
+            // Fetch profile once, share with multiple consumers
+            launch {
+                cachedProfile = repository.getMobileUserProfile().getOrNull()
+                // Once profile is ready, update UI and kick off dependent loads in parallel
+                if (_binding == null) return@launch
+                launch { applyUserProfile(cachedProfile) }
+                launch { applyCarbonFootprint(cachedProfile) }
+                launch { loadSocScore() }
+                launch { loadChurnRisk() }
+                launch { loadMonthlyHighlightsStats(cachedProfile) }
+            }
+            // All independent loads fire simultaneously
+            launch { loadBusInfo() }
             launch { loadHomeActivities() }
-            launch { loadUserProfile() }
             launch { loadMonthlyPoints() }
-
-            // Priority 3: Delayed loading for non-critical data (after 200ms)
-            kotlinx.coroutines.delay(200)
             launch { loadNotifications() }
             launch { loadDailyGoal() }
             launch { loadWeather() }
         }
     }
 
-    private suspend fun loadUserProfile() {
-        val result = repository.getMobileUserProfile()
-        if (_binding == null) return
-        if (result.isFailure) {
-            Log.w(TAG, "loadUserProfile failed", result.exceptionOrNull())
-            return
-        }
-        val profile = result.getOrNull() ?: return
+    /** Apply greeting from profile (fast — no API call) */
+    private fun applyUserProfile(profile: com.ecogo.api.MobileProfileResponse?) {
+        if (profile == null || _binding == null) return
         val userInfo = profile.userInfo
 
-        // Dynamic Greeting
         val isVip = (profile.vipInfo?.active == true) ||
-                    (profile.userInfo.vip?.active == true) ||
+                    (userInfo.vip?.active == true) ||
                     (profile.vipInfo?.plan != null) ||
-                    (profile.userInfo.vip?.plan != null) ||
-                    (profile.userInfo.isAdmin == true)
+                    (userInfo.vip?.plan != null) ||
+                    (userInfo.isAdmin == true)
 
         val displayNickname = if (isVip) "${userInfo.nickname} (VIP)" else userInfo.nickname
         val welcomeText = "Hello, $displayNickname"
         binding.textWelcome.text = welcomeText
         save("welcome_text" to welcomeText)
+    }
 
-        // Load SoC Score independently
-        loadSocScore()
+    /** Apply carbon footprint from profile (fast — no API call) */
+    private fun applyCarbonFootprint(profile: com.ecogo.api.MobileProfileResponse?) {
+        if (profile == null || _binding == null) return
+        val userInfo = profile.userInfo
 
-        // Show churn toast after login
-        val userId = com.ecogo.auth.TokenManager.getUserId()
-        if (!userId.isNullOrBlank()) {
-            val level = repository.fetchMyChurnRisk(userId)
-            if (_binding == null || !isAdded) return
-            withContext(kotlinx.coroutines.Dispatchers.Main) {
-                kotlinx.coroutines.delay(800)
-                if (_binding != null && isAdded) {
-                    NotificationUtil.showChurnNotification(requireContext(), level)
-                }
-            }
-        }
-
-        if (_binding == null) return
-
-        // Update Carbon Footprint
         val carbon = userInfo.totalCarbon
         val trees = if (carbon > 0) carbon / 18.0 else 0.0
         val co2Text = "%.1f kg".format(carbon)
@@ -229,12 +216,19 @@ class HomeFragment : Fragment() {
         binding.textTreeEquivalent.text = treeText
         save("co2_saved" to co2Text, "tree_equivalent" to treeText)
 
-        // Update Carbon Period if stats available
-        profile.stats?.let { stats ->
-            val periodText = "Total · ${stats.totalTrips} eco trips"
+        profile.stats?.let { userStats ->
+            val periodText = "Total · ${userStats.totalTrips} eco trips"
             binding.textCarbonPeriod.text = periodText
             save("carbon_period" to periodText)
         }
+    }
+
+    /** Churn risk — independent API call, no blocking */
+    private suspend fun loadChurnRisk() {
+        val userId = com.ecogo.auth.TokenManager.getUserId() ?: return
+        val level = repository.fetchMyChurnRisk(userId)
+        if (_binding == null || !isAdded) return
+        NotificationUtil.showChurnNotification(requireContext(), level)
     }
 
     private suspend fun loadSocScore() {
@@ -367,47 +361,32 @@ class HomeFragment : Fragment() {
 
 
 
-    private suspend fun loadMonthlyHighlightsStats() {
+    private suspend fun loadMonthlyHighlightsStats(profile: com.ecogo.api.MobileProfileResponse?) {
         val userId = com.ecogo.auth.TokenManager.getUserId() ?: return
-        val stats = mutableListOf<HomeStat>()
 
-        // 1. Get points data
-        val pointsResult = repository.getCurrentPoints().getOrNull()
-        val userProfile = repository.getMobileUserProfile().getOrNull()
-        val currentPoints = pointsResult?.currentPoints
-            ?: userProfile?.userInfo?.currentPoints?.toLong()
-            ?: 0L
+        // Fire all 3 API calls in parallel using coroutineScope
+        kotlinx.coroutines.coroutineScope {
+            val pointsDeferred = async { repository.getCurrentPoints().getOrNull() }
+            val activitiesDeferred = async { repository.getJoinedActivitiesCount(userId).getOrNull() ?: 0 }
+            val challengesDeferred = async { repository.getJoinedChallengesCount(userId).getOrNull() ?: 0 }
 
-        stats.add(HomeStat(
-            icon = "⭐",
-            title = "Total Points",
-            value = "$currentPoints",
-            subtitle = "current balance",
-            color = "#FCD34D"
-        ))
+            val pointsResult = pointsDeferred.await()
+            val joinedActivitiesCount = activitiesDeferred.await()
+            val joinedChallengesCount = challengesDeferred.await()
 
-        // 2. Get count of activities user has joined
-        val joinedActivitiesCount = repository.getJoinedActivitiesCount(userId).getOrNull() ?: 0
-        stats.add(HomeStat(
-            icon = "🎯",
-            title = "Activities",
-            value = "$joinedActivitiesCount",
-            subtitle = "joined this month",
-            color = "#A78BFA"
-        ))
+            val currentPoints = pointsResult?.currentPoints
+                ?: profile?.userInfo?.currentPoints?.toLong()
+                ?: 0L
 
-        // 3. Get count of challenges user has joined
-        val joinedChallengesCount = repository.getJoinedChallengesCount(userId).getOrNull() ?: 0
-        stats.add(HomeStat(
-            icon = "🏆",
-            title = "Challenges",
-            value = "$joinedChallengesCount",
-            subtitle = "joined this month",
-            color = "#F97316"
-        ))
+            if (_binding == null) return@coroutineScope
 
-        if (_binding == null) return
-        (binding.recyclerHighlights.adapter as? HomeStatAdapter)?.updateData(stats)
+            val stats = listOf(
+                HomeStat(icon = "⭐", title = "Total Points", value = "$currentPoints", subtitle = "current balance", color = "#FCD34D"),
+                HomeStat(icon = "🎯", title = "Activities", value = "$joinedActivitiesCount", subtitle = "joined this month", color = "#A78BFA"),
+                HomeStat(icon = "🏆", title = "Challenges", value = "$joinedChallengesCount", subtitle = "joined this month", color = "#F97316")
+            )
+            (binding.recyclerHighlights.adapter as? HomeStatAdapter)?.updateData(stats)
+        }
     }
 
     private suspend fun loadHomeActivities() {
@@ -551,95 +530,87 @@ class HomeFragment : Fragment() {
 
     // === New feature helper methods ===
 
-    private fun loadNotifications() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val userId = com.ecogo.auth.TokenManager.getUserId() ?: return@launch
-            val notifications = repository.getNotifications(userId).getOrNull()
-            if (_binding == null) return@launch
-            val unreadNotif = notifications?.firstOrNull()
-            if (unreadNotif != null) {
-                binding.cardNotification.visibility = View.VISIBLE
-                binding.textNotificationTitle.text = unreadNotif.title
-                binding.textNotificationMessage.text = unreadNotif.message
-            }
+    private suspend fun loadNotifications() {
+        val userId = com.ecogo.auth.TokenManager.getUserId() ?: return
+        val notifications = repository.getNotifications(userId).getOrNull()
+        if (_binding == null) return
+        val unreadNotif = notifications?.firstOrNull()
+        if (unreadNotif != null) {
+            binding.cardNotification.visibility = View.VISIBLE
+            binding.textNotificationTitle.text = unreadNotif.title
+            binding.textNotificationMessage.text = unreadNotif.message
         }
     }
 
-    private fun loadDailyGoal() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val tripsResult = repository.getMyTripHistory()
-            if (tripsResult.isFailure) {
-                Log.w(TAG, "loadDailyGoal (trip history) failed", tripsResult.exceptionOrNull())
-                return@launch
-            }
-            if (_binding == null) return@launch
-
-            val allTrips = tripsResult.getOrNull().orEmpty()
-            val todayStr = java.time.LocalDate.now().toString() // "2026-02-13"
-
-            // Filter today's trips by startTime (format: "2026-02-13T08:30:00")
-            val todayTrips = allTrips.filter { trip ->
-                trip.startTime?.startsWith(todayStr) == true
-            }
-
-            val totalDistance = todayTrips.sumOf { it.distance ?: 0.0 }
-            val ecoTripCount = todayTrips.count { it.isGreenTrip == true }
-            val totalCarbonSaved = todayTrips.sumOf { it.carbonSaved ?: 0.0 }
-
-            // Progress bars: use reasonable daily targets for percentage
-            val distTarget = 5.0   // 5 km daily target
-            val tripTarget = 3     // 3 eco trips daily target
-            val co2Target = 2.0    // 2 kg CO₂ daily target
-
-            val distPct = ((totalDistance / distTarget) * 100).toInt().coerceIn(0, 100)
-            val tripPct = ((ecoTripCount.toFloat() / tripTarget) * 100).toInt().coerceIn(0, 100)
-            val co2Pct = ((totalCarbonSaved / co2Target) * 100).toInt().coerceIn(0, 100)
-
-            val distText = "${"%.1f".format(totalDistance)} km"
-            val tripText = "$ecoTripCount eco trips"
-            val co2Text = "${"%.2f".format(totalCarbonSaved)} kg saved"
-
-            binding.progressSteps.progress = distPct
-            binding.progressTrips.progress = tripPct
-            binding.progressCo2.progress = co2Pct
-            binding.textStepsProgress.text = distText
-            binding.textTripsProgress.text = tripText
-            binding.textCo2Progress.text = co2Text
-            save(
-                "goal_step_pct" to distPct,
-                "goal_trip_pct" to tripPct,
-                "goal_co2_pct" to co2Pct,
-                "goal_steps_text" to distText,
-                "goal_trips_text" to tripText,
-                "goal_co2_text" to co2Text
-            )
+    private suspend fun loadDailyGoal() {
+        val tripsResult = repository.getMyTripHistory()
+        if (tripsResult.isFailure) {
+            Log.w(TAG, "loadDailyGoal (trip history) failed", tripsResult.exceptionOrNull())
+            return
         }
+        if (_binding == null) return
+
+        val allTrips = tripsResult.getOrNull().orEmpty()
+        val todayStr = java.time.LocalDate.now().toString()
+
+        val todayTrips = allTrips.filter { trip ->
+            trip.startTime?.startsWith(todayStr) == true
+        }
+
+        val totalDistance = todayTrips.sumOf { it.distance ?: 0.0 }
+        val ecoTripCount = todayTrips.count { it.isGreenTrip == true }
+        val totalCarbonSaved = todayTrips.sumOf { it.carbonSaved ?: 0.0 }
+
+        val distTarget = 5.0
+        val tripTarget = 3
+        val co2Target = 2.0
+
+        val distPct = ((totalDistance / distTarget) * 100).toInt().coerceIn(0, 100)
+        val tripPct = ((ecoTripCount.toFloat() / tripTarget) * 100).toInt().coerceIn(0, 100)
+        val co2Pct = ((totalCarbonSaved / co2Target) * 100).toInt().coerceIn(0, 100)
+
+        val distText = "${"%.1f".format(totalDistance)} km"
+        val tripText = "$ecoTripCount eco trips"
+        val co2Text = "${"%.2f".format(totalCarbonSaved)} kg saved"
+
+        binding.progressSteps.progress = distPct
+        binding.progressTrips.progress = tripPct
+        binding.progressCo2.progress = co2Pct
+        binding.textStepsProgress.text = distText
+        binding.textTripsProgress.text = tripText
+        binding.textCo2Progress.text = co2Text
+        save(
+            "goal_step_pct" to distPct,
+            "goal_trip_pct" to tripPct,
+            "goal_co2_pct" to co2Pct,
+            "goal_steps_text" to distText,
+            "goal_trips_text" to tripText,
+            "goal_co2_text" to co2Text
+        )
     }
 
-    private fun loadWeather() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val result = repository.getWeather()
-            if (_binding == null) return@launch
+    private suspend fun loadWeather() {
+        val result = repository.getWeather()
+        if (_binding == null) return
 
-            if (result.isFailure) {
-                Log.w(TAG, "loadWeather failed", result.exceptionOrNull())
-            }
-            if (result.isSuccess) {
-                val weather = result.getOrNull()
-                if (weather != null) {
-                    val tempText = "${weather.temperature}°C"
-                    val condText = weather.description
-                    val aqiText = "AQI ${weather.airQuality}"
-                    binding.textTemperature.text = tempText
-                    binding.textWeatherCondition.text = condText
-                    binding.textAqiValue.text = aqiText
-                    binding.imageWeatherIcon.setImageResource(getWeatherIcon(weather.description))
-                    save(
-                        "weather_temp" to tempText,
-                        "weather_condition" to condText,
-                        "weather_aqi" to aqiText
-                    )
-                }
+        if (result.isFailure) {
+            Log.w(TAG, "loadWeather failed", result.exceptionOrNull())
+        }
+        if (result.isSuccess) {
+            val weather = result.getOrNull()
+            if (weather != null) {
+                val tempText = "${weather.temperature}°C"
+                val condText = weather.description
+                val aqiText = "AQI ${weather.airQuality}"
+                binding.textTemperature.text = tempText
+                binding.textWeatherCondition.text = condText
+                binding.textAqiValue.text = aqiText
+                binding.imageWeatherIcon.setImageResource(getWeatherIcon(weather.description))
+                save(
+                    "weather_temp" to tempText,
+                    "weather_condition" to condText,
+                    "weather_aqi" to aqiText
+                )
             }
         }
     }
