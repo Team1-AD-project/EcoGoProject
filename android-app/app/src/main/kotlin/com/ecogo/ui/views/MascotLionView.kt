@@ -31,6 +31,19 @@ class MascotLionView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
+    companion object {
+        private const val COLOR_BODY = "#F59E0B"
+        private const val COLOR_FACE = "#FCD34D"
+        private const val COLOR_DARK_GRAY = "#374151"
+        private const val COLOR_RED = "#DC2626"
+        private const val COLOR_GOLD = "#FBBF24"
+        private const val COLOR_NAVY = "#1E293B"
+        private const val COLOR_LIGHT_GRAY = "#D1D5DB"
+        private const val COLOR_SLATE = "#E2E8F0"
+        private const val COLOR_CHARCOAL = "#1F2937"
+        private const val COLOR_TOMATO = "#EF4444"
+    }
+
     // 当前装备
     var outfit: Outfit = Outfit()
         set(value) {
@@ -66,17 +79,17 @@ class MascotLionView @JvmOverloads constructor(
 
     // 画笔
     private val lionBodyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#F59E0B")
+        color = Color.parseColor(COLOR_BODY)
         style = Paint.Style.FILL
     }
 
     private val lionFacePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#FCD34D")
+        color = Color.parseColor(COLOR_FACE)
         style = Paint.Style.FILL
     }
 
     private val eyePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#374151")
+        color = Color.parseColor(COLOR_DARK_GRAY)
         style = Paint.Style.FILL
     }
 
@@ -86,14 +99,14 @@ class MascotLionView @JvmOverloads constructor(
     }
 
     private val strokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#374151")
+        color = Color.parseColor(COLOR_DARK_GRAY)
         style = Paint.Style.STROKE
         strokeWidth = 6f
         strokeCap = Paint.Cap.ROUND
     }
 
     private val tailPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = Color.parseColor("#F59E0B")
+        color = Color.parseColor(COLOR_BODY)
         style = Paint.Style.STROKE
         strokeWidth = 16f
         strokeCap = Paint.Cap.ROUND
@@ -455,7 +468,7 @@ class MascotLionView @JvmOverloads constructor(
         // 问号
         if (!simplifiedMode) {
             val questionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.parseColor("#F59E0B")
+                color = Color.parseColor(COLOR_BODY)
                 textSize = 20f * scale
                 textAlign = Paint.Align.CENTER
                 isFakeBoldText = true
@@ -482,7 +495,7 @@ class MascotLionView @JvmOverloads constructor(
         // 火花效果
         if (!simplifiedMode) {
             val sparklePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-                color = Color.parseColor("#FBBF24")
+                color = Color.parseColor(COLOR_GOLD)
                 style = Paint.Style.FILL
             }
             listOf(
@@ -593,7 +606,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // 纽扣
         val buttonCirclePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#D1D5DB")
+            color = Color.parseColor(COLOR_LIGHT_GRAY)
             style = Paint.Style.FILL
         }
         canvas.drawCircle(100f * scale, 118f * scale, 2f * scale, buttonCirclePaint)
@@ -635,7 +648,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // 拉链线
         val zipperPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#1E293B")
+            color = Color.parseColor(COLOR_NAVY)
             alpha = 25
             style = Paint.Style.STROKE
             strokeWidth = 4f * scale
@@ -645,7 +658,7 @@ class MascotLionView @JvmOverloads constructor(
 
     private fun drawPlaidShirt(canvas: Canvas, scale: Float) {
         val plaidPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#EF4444")
+            color = Color.parseColor(COLOR_TOMATO)
             style = Paint.Style.FILL
         }
 
@@ -677,7 +690,7 @@ class MascotLionView @JvmOverloads constructor(
     private fun drawSuit(canvas: Canvas, scale: Float) {
         // 黑色西装
         val suitPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#1E293B")
+            color = Color.parseColor(COLOR_NAVY)
             style = Paint.Style.FILL
         }
 
@@ -692,7 +705,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // 红色领带
         val tiePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#DC2626")
+            color = Color.parseColor(COLOR_RED)
             style = Paint.Style.FILL
         }
 
@@ -736,7 +749,7 @@ class MascotLionView @JvmOverloads constructor(
         }
 
         val coatStrokePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#E2E8F0")
+            color = Color.parseColor(COLOR_SLATE)
             style = Paint.Style.STROKE
             strokeWidth = 2f * scale
         }
@@ -750,7 +763,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // 中线
         val centerLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#E2E8F0")
+            color = Color.parseColor(COLOR_SLATE)
             style = Paint.Style.STROKE
             strokeWidth = 4f * scale
         }
@@ -768,7 +781,7 @@ class MascotLionView @JvmOverloads constructor(
 
     private fun drawSportsJersey(canvas: Canvas, scale: Float) {
         val jerseyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#DC2626")
+            color = Color.parseColor(COLOR_RED)
             style = Paint.Style.FILL
         }
         val jerseyRect = RectF(60f * scale, 102f * scale, 140f * scale, 162f * scale)
@@ -801,7 +814,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // Obi sash
         val obiPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FBBF24")
+            color = Color.parseColor(COLOR_GOLD)
             style = Paint.Style.FILL
         }
         val obiRect = RectF(58f * scale, 135f * scale, 142f * scale, 148f * scale)
@@ -842,7 +855,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // Bow tie
         val bowTiePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#DC2626")
+            color = Color.parseColor(COLOR_RED)
             style = Paint.Style.FILL
         }
         canvas.drawCircle(100f * scale, 108f * scale, 5f * scale, bowTiePaint)
@@ -865,7 +878,7 @@ class MascotLionView @JvmOverloads constructor(
     private fun drawSuperheroCape(canvas: Canvas, scale: Float) {
         // Cape behind body
         val capePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#DC2626")
+            color = Color.parseColor(COLOR_RED)
             style = Paint.Style.FILL
         }
         val capePath = Path().apply {
@@ -887,7 +900,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // Shield emblem
         val emblemPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FBBF24")
+            color = Color.parseColor(COLOR_GOLD)
             style = Paint.Style.FILL
         }
         val emblemPath = Path().apply {
@@ -908,7 +921,7 @@ class MascotLionView @JvmOverloads constructor(
             style = Paint.Style.FILL
         }
         val coatStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#D1D5DB")
+            color = Color.parseColor(COLOR_LIGHT_GRAY)
             style = Paint.Style.STROKE
             strokeWidth = 2f * scale
         }
@@ -918,7 +931,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // Center line
         val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#D1D5DB")
+            color = Color.parseColor(COLOR_LIGHT_GRAY)
             style = Paint.Style.STROKE
             strokeWidth = 3f * scale
         }
@@ -934,7 +947,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // Stethoscope hint (cross)
         val crossPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#EF4444")
+            color = Color.parseColor(COLOR_TOMATO)
             style = Paint.Style.FILL
         }
         canvas.drawRect(95f * scale, 118f * scale, 105f * scale, 122f * scale, crossPaint)
@@ -952,7 +965,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // Gold buttons
         val buttonPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FBBF24")
+            color = Color.parseColor(COLOR_GOLD)
             style = Paint.Style.FILL
         }
         canvas.drawCircle(100f * scale, 115f * scale, 3f * scale, buttonPaint)
@@ -961,7 +974,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // Shoulder epaulettes
         val epaulettePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FBBF24")
+            color = Color.parseColor(COLOR_GOLD)
             style = Paint.Style.FILL
         }
         val leftEpaulette = RectF(60f * scale, 100f * scale, 78f * scale, 106f * scale)
@@ -973,7 +986,7 @@ class MascotLionView @JvmOverloads constructor(
     private fun drawNinjaOutfit(canvas: Canvas, scale: Float) {
         // Dark ninja suit
         val ninjaPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#1F2937")
+            color = Color.parseColor(COLOR_CHARCOAL)
             style = Paint.Style.FILL
         }
         val ninjaRect = RectF(60f * scale, 100f * scale, 140f * scale, 168f * scale)
@@ -981,7 +994,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // Belt
         val beltPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#DC2626")
+            color = Color.parseColor(COLOR_RED)
             style = Paint.Style.FILL
         }
         val beltRect = RectF(60f * scale, 132f * scale, 140f * scale, 140f * scale)
@@ -992,7 +1005,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // Diagonal wrap line
         val wrapPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#374151")
+            color = Color.parseColor(COLOR_DARK_GRAY)
             style = Paint.Style.STROKE
             strokeWidth = 4f * scale
         }
@@ -1084,7 +1097,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // 边框
         val badgeBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#E2E8F0")
+            color = Color.parseColor(COLOR_SLATE)
             style = Paint.Style.STROKE
             strokeWidth = 2f * scale
         }
@@ -1149,7 +1162,7 @@ class MascotLionView @JvmOverloads constructor(
 
     private fun drawGradCap(canvas: Canvas, scale: Float) {
         val capPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#1E293B")
+            color = Color.parseColor(COLOR_NAVY)
             style = Paint.Style.FILL
         }
 
@@ -1168,7 +1181,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // 流苏
         val tasselPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FCD34D")
+            color = Color.parseColor(COLOR_FACE)
             style = Paint.Style.STROKE
             strokeWidth = 4f * scale
         }
@@ -1195,7 +1208,7 @@ class MascotLionView @JvmOverloads constructor(
 
     private fun drawSafetyHelmet(canvas: Canvas, scale: Float) {
         val helmetPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FBBF24")
+            color = Color.parseColor(COLOR_GOLD)
             style = Paint.Style.FILL
         }
 
@@ -1221,7 +1234,7 @@ class MascotLionView @JvmOverloads constructor(
 
     private fun drawBeret(canvas: Canvas, scale: Float) {
         val beretPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#DC2626")
+            color = Color.parseColor(COLOR_RED)
             style = Paint.Style.FILL
         }
 
@@ -1241,7 +1254,7 @@ class MascotLionView @JvmOverloads constructor(
 
     private fun drawCrown(canvas: Canvas, scale: Float) {
         val crownPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FBBF24")
+            color = Color.parseColor(COLOR_GOLD)
             style = Paint.Style.FILL
         }
         // Crown base
@@ -1261,7 +1274,7 @@ class MascotLionView @JvmOverloads constructor(
         canvas.drawPath(crownPath, crownPaint)
         // Gems
         val gemPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#DC2626")
+            color = Color.parseColor(COLOR_RED)
             style = Paint.Style.FILL
         }
         canvas.drawCircle(85f * scale, 46f * scale, 3f * scale, gemPaint)
@@ -1284,7 +1297,7 @@ class MascotLionView @JvmOverloads constructor(
         canvas.drawPath(conePath, hatPaint)
         // Stripe decoration
         val stripePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FBBF24")
+            color = Color.parseColor(COLOR_GOLD)
             style = Paint.Style.STROKE
             strokeWidth = 4f * scale
         }
@@ -1292,7 +1305,7 @@ class MascotLionView @JvmOverloads constructor(
         canvas.drawLine(88f * scale, 32f * scale, 112f * scale, 32f * scale, stripePaint)
         // Pompom on top
         val pompomPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FBBF24")
+            color = Color.parseColor(COLOR_GOLD)
             style = Paint.Style.FILL
         }
         canvas.drawCircle(100f * scale, 10f * scale, 5f * scale, pompomPaint)
@@ -1352,7 +1365,7 @@ class MascotLionView @JvmOverloads constructor(
         canvas.drawPath(crownPath, crownPaint)
         // Hat band
         val bandPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FBBF24")
+            color = Color.parseColor(COLOR_GOLD)
             style = Paint.Style.STROKE
             strokeWidth = 4f * scale
         }
@@ -1365,7 +1378,7 @@ class MascotLionView @JvmOverloads constructor(
             style = Paint.Style.FILL
         }
         val hatStroke = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#D1D5DB")
+            color = Color.parseColor(COLOR_LIGHT_GRAY)
             style = Paint.Style.STROKE
             strokeWidth = 2f * scale
         }
@@ -1409,7 +1422,7 @@ class MascotLionView @JvmOverloads constructor(
         canvas.drawPath(brimPath, brimPaint)
         // Stars decoration
         val starPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FBBF24")
+            color = Color.parseColor(COLOR_GOLD)
             style = Paint.Style.FILL
         }
         canvas.drawCircle(90f * scale, 25f * scale, 3f * scale, starPaint)
@@ -1512,7 +1525,7 @@ class MascotLionView @JvmOverloads constructor(
 
         // 侧边带子
         val strapPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#1E293B")
+            color = Color.parseColor(COLOR_NAVY)
             style = Paint.Style.STROKE
             strokeWidth = 6f * scale
         }
@@ -1522,7 +1535,7 @@ class MascotLionView @JvmOverloads constructor(
 
     private fun drawNerdGlasses(canvas: Canvas, scale: Float) {
         val framePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#1F2937")
+            color = Color.parseColor(COLOR_CHARCOAL)
             style = Paint.Style.STROKE
             strokeWidth = 4f * scale
         }
@@ -1557,7 +1570,7 @@ class MascotLionView @JvmOverloads constructor(
         canvas.drawRoundRect(frameRect, 4f * scale, 4f * scale, framePaint)
         // Left lens (red/cyan)
         val leftLensPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#EF4444")
+            color = Color.parseColor(COLOR_TOMATO)
             alpha = 180
             style = Paint.Style.FILL
         }
@@ -1575,7 +1588,7 @@ class MascotLionView @JvmOverloads constructor(
 
     private fun drawSuperheroMask(canvas: Canvas, scale: Float) {
         val maskPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#1E293B")
+            color = Color.parseColor(COLOR_NAVY)
             style = Paint.Style.FILL
         }
         // Mask shape
@@ -1601,7 +1614,7 @@ class MascotLionView @JvmOverloads constructor(
 
     private fun drawMonocle(canvas: Canvas, scale: Float) {
         val monocleFramePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#FBBF24")
+            color = Color.parseColor(COLOR_GOLD)
             style = Paint.Style.STROKE
             strokeWidth = 3f * scale
         }
@@ -1628,7 +1641,7 @@ class MascotLionView @JvmOverloads constructor(
 
     private fun drawScarf(canvas: Canvas, scale: Float) {
         val scarfPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#DC2626")
+            color = Color.parseColor(COLOR_RED)
             style = Paint.Style.FILL
         }
         // Scarf around neck
@@ -1659,7 +1672,7 @@ class MascotLionView @JvmOverloads constructor(
 
     private fun drawVRHeadset(canvas: Canvas, scale: Float) {
         val headsetPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#1F2937")
+            color = Color.parseColor(COLOR_CHARCOAL)
             style = Paint.Style.FILL
         }
         // Main headset body
@@ -1675,7 +1688,7 @@ class MascotLionView @JvmOverloads constructor(
         canvas.drawRoundRect(visorRect, 5f * scale, 5f * scale, visorPaint)
         // Strap
         val strapPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            color = Color.parseColor("#374151")
+            color = Color.parseColor(COLOR_DARK_GRAY)
             style = Paint.Style.STROKE
             strokeWidth = 6f * scale
         }

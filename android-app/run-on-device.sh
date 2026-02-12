@@ -7,7 +7,7 @@ ADB="$HOME/Library/Android/sdk/platform-tools/adb"
 # 检查设备连接
 DEVICES=$($ADB devices | grep -v "List of devices" | grep "device$" | wc -l)
 
-if [ "$DEVICES" -eq 0 ]; then
+if [[ "$DEVICES" -eq 0 ]]; then
     echo "❌ 未检测到设备！请确保："
     echo "   1. 手机通过 USB 连接到电脑"
     echo "   2. 手机已开启 USB 调试"
@@ -22,7 +22,7 @@ echo ""
 echo "📦 开始构建应用..."
 ./gradlew clean assembleDebug
 
-if [ $? -ne 0 ]; then
+if [[ $? -ne 0 ]]; then
     echo "❌ 构建失败！请检查错误信息"
     exit 1
 fi
@@ -31,7 +31,7 @@ echo ""
 echo "📲 正在安装应用到设备..."
 $ADB install -r app/build/outputs/apk/debug/app-debug.apk
 
-if [ $? -ne 0 ]; then
+if [[ $? -ne 0 ]]; then
     echo "❌ 安装失败！"
     exit 1
 fi

@@ -117,8 +117,8 @@ class SignupWizardFragment : Fragment() {
 
         // 输入验证
         val textWatcher = object : TextWatcher {
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
             override fun afterTextChanged(s: Editable?) {
                 validatePersonalInfo()
             }
@@ -138,53 +138,7 @@ class SignupWizardFragment : Fragment() {
             email = binding.inputEmail.text.toString()
             nusnetId = binding.inputNusnet.text.toString()
             password = binding.inputPassword.text.toString()
-
-            // Disable button and show loading state
-            binding.btnNextToFaculty.isEnabled = false
-            binding.btnNextToFaculty.text = "Creating Account..."
-
-            val request = com.ecogo.api.MobileRegisterRequest(
-                userid = nusnetId,
-                password = password,
-                repassword = password,
-                nickname = username,
-                email = email
-            )
-
-            // Call Register API
-            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                try {
-                    val apiService = com.ecogo.api.RetrofitClient.apiService
-                    val response = apiService.register(request)
-
-                    withContext(Dispatchers.Main) {
-                        binding.btnNextToFaculty.isEnabled = true
-                        binding.btnNextToFaculty.text = "Next: Choose Faculty"
-
-                        if (response.success && response.data != null) {
-                            Log.d("DEBUG_SIGNUP", "Step 0 Registration Success: ${response.data.userid}")
-                            Toast.makeText(requireContext(), "Account created! Please complete your profile.", Toast.LENGTH_SHORT).show()
-
-                            // Save registration data locally immediately
-                            saveRegistrationData()
-
-                            // Proceed to next step
-                            showFacultySelection()
-                        } else {
-                            val msg = response.message
-                            Log.e("DEBUG_SIGNUP", "Registration Failed: $msg")
-                            Toast.makeText(requireContext(), "Registration Failed: $msg", Toast.LENGTH_LONG).show()
-                        }
-                    }
-                } catch (e: Exception) {
-                    withContext(Dispatchers.Main) {
-                        Log.e("DEBUG_SIGNUP", "Network Error: ${e.message}")
-                        binding.btnNextToFaculty.isEnabled = true
-                        binding.btnNextToFaculty.text = "Next: Choose Faculty"
-                        Toast.makeText(requireContext(), "Network Error: ${e.message}", Toast.LENGTH_LONG).show()
-                    }
-                }
-            }
+            performRegistration()
         }
     }
 
@@ -195,7 +149,6 @@ class SignupWizardFragment : Fragment() {
         val passwordText = binding.inputPassword.text.toString()
         val confirmPasswordText = binding.inputConfirmPassword.text.toString()
 
-        // 基本验证
         val isUsernameValid = usernameText.length >= 3
         val isEmailValid = emailText.contains("@") && emailText.contains(".")
         val isNusnetValid = nusnetText.startsWith("e", ignoreCase = true) && nusnetText.length >= 7
@@ -203,39 +156,62 @@ class SignupWizardFragment : Fragment() {
         val isPasswordMatch = passwordText == confirmPasswordText && passwordText.isNotEmpty()
 
         val isValid = isUsernameValid && isEmailValid && isNusnetValid && isPasswordValid && isPasswordMatch
-
         binding.btnNextToFaculty.isEnabled = isValid
         binding.btnNextToFaculty.alpha = if (isValid) 1f else 0.5f
 
-        // 错误提示
-        if (usernameText.isNotEmpty() && !isUsernameValid) {
-            binding.inputLayoutUsername.error = "Username must be at least 3 characters"
-        } else {
-            binding.inputLayoutUsername.error = null
-        }
+        updateFieldError(binding.inputLayoutUsername, usernameText, isUsernameValid, "Username must be at least 3 characters")
+        updateFieldError(binding.inputLayoutEmail, emailText, isEmailValid, "Invalid email format")
+        updateFieldError(binding.inputLayoutNusnet, nusnetText, isNusnetValid, "Must start with 'e' and be at least 7 characters")
+        updateFieldError(binding.inputLayoutPassword, passwordText, isPasswordValid, "Password must be at least 6 characters")
+        updateFieldError(binding.inputLayoutConfirmPassword, confirmPasswordText, isPasswordMatch, "Passwords do not match")
+    }
 
-        if (emailText.isNotEmpty() && !isEmailValid) {
-            binding.inputLayoutEmail.error = "Invalid email format"
-        } else {
-            binding.inputLayoutEmail.error = null
-        }
+    private fun updateFieldError(
+        layout: com.google.android.material.textfield.TextInputLayout,
+        text: String,
+        isValid: Boolean,
+        errorMsg: String
+    ) {
+        layout.error = if (text.isNotEmpty() && !isValid) errorMsg else null
+    }
 
-        if (nusnetText.isNotEmpty() && !isNusnetValid) {
-            binding.inputLayoutNusnet.error = "Must start with 'e' and be at least 7 characters"
-        } else {
-            binding.inputLayoutNusnet.error = null
-        }
+    private fun performRegistration() {
+        binding.btnNextToFaculty.isEnabled = false
+        binding.btnNextToFaculty.text = "Creating Account..."
 
-        if (passwordText.isNotEmpty() && !isPasswordValid) {
-            binding.inputLayoutPassword.error = "Password must be at least 6 characters"
-        } else {
-            binding.inputLayoutPassword.error = null
-        }
+        val request = com.ecogo.api.MobileRegisterRequest(
+            userid = nusnetId, password = password, repassword = password,
+            nickname = username, email = email
+        )
 
-        if (confirmPasswordText.isNotEmpty() && !isPasswordMatch) {
-            binding.inputLayoutConfirmPassword.error = "Passwords do not match"
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val response = com.ecogo.api.RetrofitClient.apiService.register(request)
+                withContext(Dispatchers.Main) {
+                    binding.btnNextToFaculty.isEnabled = true
+                    binding.btnNextToFaculty.text = "Next: Choose Faculty"
+                    handleRegistrationResponse(response)
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Log.e("DEBUG_SIGNUP", "Network Error: ${e.message}")
+                    binding.btnNextToFaculty.isEnabled = true
+                    binding.btnNextToFaculty.text = "Next: Choose Faculty"
+                    Toast.makeText(requireContext(), "Network Error: ${e.message}", Toast.LENGTH_LONG).show()
+                }
+            }
+        }
+    }
+
+    private fun handleRegistrationResponse(response: com.ecogo.api.ApiResponse<com.ecogo.api.MobileRegisterData>) {
+        if (response.success && response.data != null) {
+            Log.d("DEBUG_SIGNUP", "Step 0 Registration Success: ${response.data.userid}")
+            Toast.makeText(requireContext(), "Account created! Please complete your profile.", Toast.LENGTH_SHORT).show()
+            saveRegistrationData()
+            showFacultySelection()
         } else {
-            binding.inputLayoutConfirmPassword.error = null
+            Log.e("DEBUG_SIGNUP", "Registration Failed: ${response.message}")
+            Toast.makeText(requireContext(), "Registration Failed: ${response.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -529,7 +505,6 @@ class SignupWizardFragment : Fragment() {
     private fun showMascotReveal(faculty: FacultyData) {
         currentStep = 5
 
-        // 切换到小狮子展示界面
         binding.layoutPersonalInfo.visibility = View.GONE
         binding.layoutFacultySelection.visibility = View.GONE
         binding.layoutTransportPreference.root.visibility = View.GONE
@@ -539,11 +514,14 @@ class SignupWizardFragment : Fragment() {
 
         binding.textRevealTitle.text = "Welcome, $username!"
         binding.textRevealSubtitle.text = "Meet your new buddy."
-
-        // 设置小狮子装备
         binding.mascotReveal.outfit = faculty.outfit
 
-        // 入场动画
+        startMascotAnimations()
+        displayFacultyInfo(faculty)
+        setupLetsGoButton(faculty)
+    }
+
+    private fun startMascotAnimations() {
         mascotScaleAnimator = ValueAnimator.ofFloat(0.5f, 1f).apply {
             duration = 600
             interpolator = AccelerateDecelerateInterpolator()
@@ -555,7 +533,6 @@ class SignupWizardFragment : Fragment() {
         }
         mascotScaleAnimator?.start()
 
-        // 轻微旋转动画
         mascotRotateAnimator = ValueAnimator.ofFloat(-5f, 5f).apply {
             duration = 2000
             repeatMode = ValueAnimator.REVERSE
@@ -567,25 +544,6 @@ class SignupWizardFragment : Fragment() {
         }
         mascotRotateAnimator?.start()
 
-        // 学院信息
-        binding.textFacultyName.text = faculty.name
-        binding.textFacultySlogan.text = faculty.slogan
-        binding.viewFacultyColor.setBackgroundColor(android.graphics.Color.parseColor(faculty.color))
-
-        // 服装预览
-        val outfitItems = mutableListOf<String>()
-        if (faculty.outfit.head != "none") {
-            outfitItems.add(getItemName(faculty.outfit.head))
-        }
-        if (faculty.outfit.face != "none") {
-            outfitItems.add(getItemName(faculty.outfit.face))
-        }
-        if (faculty.outfit.body != "none") {
-            outfitItems.add(getItemName(faculty.outfit.body))
-        }
-        binding.textOutfitItems.text = "Starter Outfit: ${outfitItems.joinToString(", ")}"
-
-        // Let's Go! 按钮动画
         buttonAnimator = ValueAnimator.ofFloat(1f, 1.05f).apply {
             duration = 1000
             repeatMode = ValueAnimator.REVERSE
@@ -598,17 +556,27 @@ class SignupWizardFragment : Fragment() {
             }
         }
         buttonAnimator?.start()
+    }
 
+    private fun displayFacultyInfo(faculty: FacultyData) {
+        binding.textFacultyName.text = faculty.name
+        binding.textFacultySlogan.text = faculty.slogan
+        binding.viewFacultyColor.setBackgroundColor(android.graphics.Color.parseColor(faculty.color))
+
+        val outfitItems = listOf(faculty.outfit.head, faculty.outfit.face, faculty.outfit.body)
+            .filter { it != "none" }
+            .map { getItemName(it) }
+        binding.textOutfitItems.text = "Starter Outfit: ${outfitItems.joinToString(", ")}"
+    }
+
+    private fun setupLetsGoButton(faculty: FacultyData) {
         binding.btnLetsGo.setOnClickListener {
             Log.d("DEBUG_SIGNUP", "Let's Go button clicked!")
-            Toast.makeText(requireContext(), "🎯 Let's Go 按钮已点击", Toast.LENGTH_SHORT).show()
 
-            // 停止所有动画
             buttonAnimator?.cancel()
             mascotScaleAnimator?.cancel()
             mascotRotateAnimator?.cancel()
 
-            // 重置按钮缩放
             binding.btnLetsGo.scaleX = 1f
             binding.btnLetsGo.scaleY = 1f
 

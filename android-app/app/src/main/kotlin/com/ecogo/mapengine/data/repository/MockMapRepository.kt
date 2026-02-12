@@ -370,105 +370,115 @@ class MockMapRepository : IMapRepository {
         val origin = LatLng(startPoint.lat, startPoint.lng)
         val destination = LatLng(endPoint.lat, endPoint.lng)
 
-        val routePoints: List<GeoPoint>
-        val distance: Double
-        val duration: Int
-        val steps: List<RouteStep>
-        val alternatives: List<RouteAlternative>?
-
-        // 公交模式获取多条路线
-        if (apiMode == "transit") {
-            val allRoutes = DirectionsService.getRoutes(origin, destination, apiMode)
-
-            // 只保留包含 TRANSIT 步骤的路线（过滤掉纯步行路线）
-            val transitRoutes = allRoutes.filter { route ->
-                route.steps.any { it.travel_mode == "TRANSIT" }
-            }
-
-            if (transitRoutes.isNotEmpty()) {
-                // 使用第一条真正的公交路线作为默认路线
-                val firstRoute = transitRoutes[0]
-                routePoints = firstRoute.points.map { GeoPoint(lng = it.longitude, lat = it.latitude) }
-                distance = firstRoute.distanceMeters / 1000.0
-                duration = firstRoute.durationSeconds / 60
-                steps = firstRoute.steps
-
-                // 生成所有路线选项
-                alternatives = transitRoutes.mapIndexed { index, route ->
-                    val routeDist = route.distanceMeters / 1000.0
-                    val routeDur = route.durationSeconds / 60
-                    val routeCarbon = calculateCarbonForMode(routeDist, transportMode).totalCarbon
-
-                    // 生成路线摘要
-                    val summary = generateRouteSummary(route.steps)
-
-                    RouteAlternative(
-                        index = index,
-                        total_distance = routeDist,
-                        estimated_duration = routeDur,
-                        total_carbon = routeCarbon,
-                        route_points = route.points.map { GeoPoint(lng = it.longitude, lat = it.latitude) },
-                        route_steps = route.steps,
-                        summary = summary
-                    )
-                }
-
-                Log.d(TAG, "Found ${alternatives.size} transit routes (filtered from ${allRoutes.size} total routes)")
-            } else {
-                // Fallback 到步行
-                Log.w(TAG, "Transit mode failed, falling back to walking")
-                val walkingRoute = DirectionsService.getRoute(origin, destination, "walking")
-                if (walkingRoute != null) {
-                    routePoints = walkingRoute.points.map { GeoPoint(lng = it.longitude, lat = it.latitude) }
-                    distance = walkingRoute.distanceMeters / 1000.0
-                    duration = walkingRoute.durationSeconds / 60
-                    steps = walkingRoute.steps
-                    alternatives = null
-                } else {
-                    routePoints = generateRoutePoints(startPoint, endPoint)
-                    distance = calculateDistance(startPoint, endPoint)
-                    duration = estimateDuration(distance, transportMode)
-                    steps = emptyList()
-                    alternatives = null
-                }
-            }
+        val routeData = if (apiMode == "transit") {
+            fetchTransitRoute(origin, destination, startPoint, endPoint, transportMode)
         } else {
-            // 非公交模式：单条路线
-            val directionsResult = DirectionsService.getRoute(origin, destination, apiMode)
-
-            if (directionsResult != null) {
-                routePoints = directionsResult.points.map { GeoPoint(lng = it.longitude, lat = it.latitude) }
-                distance = directionsResult.distanceMeters / 1000.0
-                duration = directionsResult.durationSeconds / 60
-                steps = directionsResult.steps
-                alternatives = null
-            } else {
-                // Fallback：直线
-                Log.w(TAG, "Directions API failed, using straight line")
-                routePoints = generateRoutePoints(startPoint, endPoint)
-                distance = calculateDistance(startPoint, endPoint)
-                duration = estimateDuration(distance, transportMode)
-                steps = emptyList()
-                alternatives = null
-            }
+            fetchSingleRoute(origin, destination, apiMode, startPoint, endPoint, transportMode)
         }
 
         // 计算碳排放
-        val carbonData = calculateCarbonForMode(distance, transportMode)
+        val carbonData = calculateCarbonForMode(routeData.distance, transportMode)
 
         Result.success(RouteRecommendData(
             route_id = "${transportMode.value.uppercase()}_${System.currentTimeMillis()}",
             route_type = transportMode.value,
-            total_distance = distance,
-            estimated_duration = duration,
+            total_distance = routeData.distance,
+            estimated_duration = routeData.duration,
             total_carbon = carbonData.totalCarbon,
             carbon_saved = carbonData.carbonSaved,
             route_segments = emptyList(),
-            route_points = routePoints,
-            route_steps = steps,
-            route_alternatives = alternatives  // 传递多条路线选项
+            route_points = routeData.routePoints,
+            route_steps = routeData.steps,
+            route_alternatives = routeData.alternatives
         ))
     }
+
+    /**
+     * 获取公交路线（含多条备选方案）
+     */
+    private suspend fun fetchTransitRoute(
+        origin: LatLng,
+        destination: LatLng,
+        startPoint: GeoPoint,
+        endPoint: GeoPoint,
+        transportMode: TransportMode
+    ): RouteResult {
+        val allRoutes = DirectionsService.getRoutes(origin, destination, "transit")
+        val transitRoutes = allRoutes.filter { route ->
+            route.steps.any { it.travel_mode == "TRANSIT" }
+        }
+
+        if (transitRoutes.isNotEmpty()) {
+            val firstRoute = transitRoutes[0]
+            val alternatives = transitRoutes.mapIndexed { index, route ->
+                val routeDist = route.distanceMeters / 1000.0
+                RouteAlternative(
+                    index = index,
+                    total_distance = routeDist,
+                    estimated_duration = route.durationSeconds / 60,
+                    total_carbon = calculateCarbonForMode(routeDist, transportMode).totalCarbon,
+                    route_points = route.points.map { GeoPoint(lng = it.longitude, lat = it.latitude) },
+                    route_steps = route.steps,
+                    summary = generateRouteSummary(route.steps)
+                )
+            }
+            Log.d(TAG, "Found ${alternatives.size} transit routes (filtered from ${allRoutes.size} total routes)")
+            return RouteResult(
+                routePoints = firstRoute.points.map { GeoPoint(lng = it.longitude, lat = it.latitude) },
+                distance = firstRoute.distanceMeters / 1000.0,
+                duration = firstRoute.durationSeconds / 60,
+                steps = firstRoute.steps,
+                alternatives = alternatives
+            )
+        }
+
+        // Fallback 到步行
+        Log.w(TAG, "Transit mode failed, falling back to walking")
+        return fetchSingleRoute(origin, destination, "walking", startPoint, endPoint, transportMode)
+    }
+
+    /**
+     * 获取单条路线（非公交模式或 fallback）
+     */
+    private suspend fun fetchSingleRoute(
+        origin: LatLng,
+        destination: LatLng,
+        apiMode: String,
+        startPoint: GeoPoint,
+        endPoint: GeoPoint,
+        transportMode: TransportMode
+    ): RouteResult {
+        val directionsResult = DirectionsService.getRoute(origin, destination, apiMode)
+        if (directionsResult != null) {
+            return RouteResult(
+                routePoints = directionsResult.points.map { GeoPoint(lng = it.longitude, lat = it.latitude) },
+                distance = directionsResult.distanceMeters / 1000.0,
+                duration = directionsResult.durationSeconds / 60,
+                steps = directionsResult.steps,
+                alternatives = null
+            )
+        }
+        // Fallback：直线
+        Log.w(TAG, "Directions API failed, using straight line")
+        return RouteResult(
+            routePoints = generateRoutePoints(startPoint, endPoint),
+            distance = calculateDistance(startPoint, endPoint),
+            duration = estimateDuration(calculateDistance(startPoint, endPoint), transportMode),
+            steps = emptyList(),
+            alternatives = null
+        )
+    }
+
+    /**
+     * 路线结果数据类
+     */
+    private data class RouteResult(
+        val routePoints: List<GeoPoint>,
+        val distance: Double,
+        val duration: Int,
+        val steps: List<RouteStep>,
+        val alternatives: List<RouteAlternative>?
+    )
 
     // ========================================
     // 辅助方法

@@ -150,65 +150,72 @@ class DataExporter(
             val verifiedCount = labelingDao.getVerifiedCount()
             val modeDistribution = labelingDao.getTransportModeDistribution()
             val sourceDistribution = labelingDao.getLabelSourceDistribution()
-            
+
             val report = StringBuilder()
             report.append("=== 训练数据统计报告 ===\n")
             report.append("生成时间: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(Date())}\n\n")
-            
+
             report.append("总体统计:\n")
             report.append("- 总记录数: $totalCount\n")
             report.append("- 已验证: $verifiedCount (${if (totalCount > 0) verifiedCount * 100 / totalCount else 0}%)\n")
             report.append("- 待验证: ${totalCount - verifiedCount}\n\n")
-            
-            report.append("交通方式分布:\n")
-            modeDistribution.forEach { (mode, count) ->
-                val percentage = if (totalCount > 0) count * 100 / totalCount else 0
-                report.append("- $mode: $count 个 ($percentage%)\n")
-            }
-            report.append("\n")
-            
-            report.append("标签来源分布:\n")
-            sourceDistribution.forEach { (source, count) ->
-                val percentage = if (totalCount > 0) count * 100 / totalCount else 0
-                report.append("- $source: $count 个 ($percentage%)\n")
-            }
-            report.append("\n")
-            
-            // 数据质量评估
-            report.append("数据质量评估:\n")
-            if (totalCount < 100) {
-                report.append("⚠️  数据量较小 (< 100条)，建议继续收集\n")
-            } else if (totalCount < 500) {
-                report.append("⚠️  数据量适中 (< 500条)，可以开始训练初版模型\n")
-            } else {
-                report.append("✓ 数据量充足 (≥ 500条)，适合训练生产级模型\n")
-            }
-            
-            if (verifiedCount < totalCount * 0.8) {
-                report.append("⚠️  验证率较低 (< 80%)，建议增加人工验证\n")
-            } else {
-                report.append("✓ 验证率高 (≥ 80%)，数据质量良好\n")
-            }
-            
-            // 检查各交通方式是否均衡
-            val counts = modeDistribution.map { it.count }
-            if (counts.isNotEmpty()) {
-                val minCount = counts.minOrNull() ?: 0
-                val maxCount = counts.maxOrNull() ?: 0
-                val ratio = if (minCount > 0) maxCount / minCount else 0
-                
-                if (ratio > 5) {
-                    report.append("⚠️  交通方式分布不均衡 (最大/最小比: $ratio)，可能影响模型性能\n")
-                } else {
-                    report.append("✓ 交通方式分布相对均衡\n")
-                }
-            }
-            
+
+            appendDistribution(report, "交通方式分布", modeDistribution.map { it.transportMode to it.count }, totalCount)
+            appendDistribution(report, "标签来源分布", sourceDistribution.map { it.labelSource to it.count }, totalCount)
+
+            appendQualityAssessment(report, totalCount, verifiedCount, modeDistribution)
+
             report.toString()
         } catch (e: Exception) {
             Log.e(TAG, "生成报告失败: ${e.message}", e)
             "报告生成失败: ${e.message}"
         }
+    }
+
+    private fun appendDistribution(
+        report: StringBuilder,
+        title: String,
+        distribution: List<Pair<String, Int>>,
+        totalCount: Int
+    ) {
+        report.append("$title:\n")
+        distribution.forEach { (label, count) ->
+            val percentage = if (totalCount > 0) count * 100 / totalCount else 0
+            report.append("- $label: $count 个 ($percentage%)\n")
+        }
+        report.append("\n")
+    }
+
+    private fun appendQualityAssessment(
+        report: StringBuilder,
+        totalCount: Int,
+        verifiedCount: Int,
+        modeDistribution: List<com.ecogo.mapengine.ml.database.TransportModeCount>
+    ) {
+        report.append("数据质量评估:\n")
+        report.append(assessDataVolume(totalCount))
+        report.append(assessVerificationRate(totalCount, verifiedCount))
+        report.append(assessModeBalance(modeDistribution))
+    }
+
+    private fun assessDataVolume(totalCount: Int): String = when {
+        totalCount < 100 -> "⚠️  数据量较小 (< 100条)，建议继续收集\n"
+        totalCount < 500 -> "⚠️  数据量适中 (< 500条)，可以开始训练初版模型\n"
+        else -> "✓ 数据量充足 (≥ 500条)，适合训练生产级模型\n"
+    }
+
+    private fun assessVerificationRate(totalCount: Int, verifiedCount: Int): String =
+        if (verifiedCount < totalCount * 0.8) "⚠️  验证率较低 (< 80%)，建议增加人工验证\n"
+        else "✓ 验证率高 (≥ 80%)，数据质量良好\n"
+
+    private fun assessModeBalance(modeDistribution: List<com.ecogo.mapengine.ml.database.TransportModeCount>): String {
+        val counts = modeDistribution.map { it.count }
+        if (counts.isEmpty()) return ""
+        val minCount = counts.minOrNull() ?: 0
+        val maxCount = counts.maxOrNull() ?: 0
+        val ratio = if (minCount > 0) maxCount / minCount else 0
+        return if (ratio > 5) "⚠️  交通方式分布不均衡 (最大/最小比: $ratio)，可能影响模型性能\n"
+        else "✓ 交通方式分布相对均衡\n"
     }
     
     /**

@@ -28,9 +28,14 @@ import java.time.format.DateTimeFormatter
  */
 class MonthlyHighlightsFragment : Fragment() {
 
+    companion object {
+        private const val DEFAULT_USER_ID = "user123"
+        private const val CO2_FORMAT = "%.2f kg CO\u2082"
+    }
+
     private var _binding: FragmentMonthlyHighlightsBinding? = null
     private val binding get() = _binding!!
-    
+
     private val repository = EcoGoRepository()
     
     override fun onCreateView(
@@ -128,7 +133,7 @@ class MonthlyHighlightsFragment : Fragment() {
     }
     
     private suspend fun loadMonthlyStats() {
-        val userId = com.ecogo.auth.TokenManager.getUserId() ?: "user123"
+        val userId = com.ecogo.auth.TokenManager.getUserId() ?: DEFAULT_USER_ID
         val stats = mutableListOf<MonthStat>()
 
 
@@ -211,7 +216,7 @@ class MonthlyHighlightsFragment : Fragment() {
     }
     
     private suspend fun loadFeaturedActivities() {
-        val userId = com.ecogo.auth.TokenManager.getUserId() ?: "user123"
+        val userId = com.ecogo.auth.TokenManager.getUserId() ?: DEFAULT_USER_ID
         val activitiesResult = repository.getAllActivities().getOrElse { emptyList() }
 
         // 筛选用户已加入的活动
@@ -245,7 +250,7 @@ class MonthlyHighlightsFragment : Fragment() {
     }
     
     private suspend fun loadChallenges() {
-        val userId = com.ecogo.auth.TokenManager.getUserId() ?: "user123"
+        val userId = com.ecogo.auth.TokenManager.getUserId() ?: DEFAULT_USER_ID
 
         // 从后端获取用户已加入的挑战列表
         val joinedChallenges = repository.getJoinedChallenges(userId).getOrElse { emptyList() }
@@ -280,17 +285,17 @@ class MonthlyHighlightsFragment : Fragment() {
                 if (rankings.isNotEmpty()) {
                     val r1 = rankings[0]
                     binding.textRank1Name.text = r1.nickname
-                    binding.textRank1Subtitle.text = String.format("%.2f kg CO\u2082", r1.carbonSaved)
+                    binding.textRank1Subtitle.text = String.format(CO2_FORMAT, r1.carbonSaved)
                 }
                 if (rankings.size > 1) {
                     val r2 = rankings[1]
                     binding.textRank2Name.text = r2.nickname
-                    binding.textRank2Subtitle.text = String.format("%.2f kg CO\u2082", r2.carbonSaved)
+                    binding.textRank2Subtitle.text = String.format(CO2_FORMAT, r2.carbonSaved)
                 }
                 if (rankings.size > 2) {
                     val r3 = rankings[2]
                     binding.textRank3Name.text = r3.nickname
-                    binding.textRank3Subtitle.text = String.format("%.2f kg CO\u2082", r3.carbonSaved)
+                    binding.textRank3Subtitle.text = String.format(CO2_FORMAT, r3.carbonSaved)
                 }
             }
         } catch (e: Exception) {

@@ -26,10 +26,19 @@ import java.io.FileOutputStream
  */
 class ShareImpactFragment : Fragment() {
 
+    companion object {
+        private const val PERIOD_TODAY = "today"
+        private const val PERIOD_WEEK = "week"
+        private const val PERIOD_MONTH = "month"
+        private const val COLOR_PRIMARY = "#059669"
+        private const val COLOR_SECONDARY = "#6B7280"
+        private const val COLOR_BG = "#ECFDF5"
+    }
+
     private var _binding: FragmentShareImpactBinding? = null
     private val binding get() = _binding!!
-    
-    private var selectedPeriod = "today" // today, week, month
+
+    private var selectedPeriod = PERIOD_TODAY
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -54,9 +63,9 @@ class ShareImpactFragment : Fragment() {
         }
         
         // 周期选择
-        binding.chipToday.setOnClickListener { selectPeriod("today") }
-        binding.chipWeek.setOnClickListener { selectPeriod("week") }
-        binding.chipMonth.setOnClickListener { selectPeriod("month") }
+        binding.chipToday.setOnClickListener { selectPeriod(PERIOD_TODAY) }
+        binding.chipWeek.setOnClickListener { selectPeriod(PERIOD_WEEK) }
+        binding.chipMonth.setOnClickListener { selectPeriod(PERIOD_MONTH) }
         
         // 分享按钮
         binding.btnShare.setOnClickListener {
@@ -73,9 +82,9 @@ class ShareImpactFragment : Fragment() {
         selectedPeriod = period
         
         // 更新Chip选中状态
-        binding.chipToday.isChecked = period == "today"
-        binding.chipWeek.isChecked = period == "week"
-        binding.chipMonth.isChecked = period == "month"
+        binding.chipToday.isChecked = period == PERIOD_TODAY
+        binding.chipWeek.isChecked = period == PERIOD_WEEK
+        binding.chipMonth.isChecked = period == PERIOD_MONTH
         
         loadStatistics()
     }
@@ -83,21 +92,21 @@ class ShareImpactFragment : Fragment() {
     private fun loadStatistics() {
         // 根据选择的周期加载不同的统计数据（模拟）
         when (selectedPeriod) {
-            "today" -> {
+            PERIOD_TODAY -> {
                 binding.textPeriod.text = "今日影响力"
                 binding.textTrips.text = "3"
                 binding.textDistance.text = "5.2"
                 binding.textCarbonSaved.text = "580"
                 binding.textPoints.text = "290"
             }
-            "week" -> {
+            PERIOD_WEEK -> {
                 binding.textPeriod.text = "本周影响力"
                 binding.textTrips.text = "15"
                 binding.textDistance.text = "24.5"
                 binding.textCarbonSaved.text = "2,750"
                 binding.textPoints.text = "1,375"
             }
-            "month" -> {
+            PERIOD_MONTH -> {
                 binding.textPeriod.text = "本月影响力"
                 binding.textTrips.text = "52"
                 binding.textDistance.text = "98.3"
@@ -157,37 +166,40 @@ class ShareImpactFragment : Fragment() {
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         
+        val primaryColor = Color.parseColor(COLOR_PRIMARY)
+        val secondaryColor = Color.parseColor(COLOR_SECONDARY)
+
         // 背景
         val bgPaint = Paint().apply {
-            color = Color.parseColor("#ECFDF5")
+            color = Color.parseColor(COLOR_BG)
         }
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), bgPaint)
-        
+
         // 标题
         val titlePaint = Paint().apply {
-            color = Color.parseColor("#059669")
+            color = primaryColor
             textSize = 48f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
         }
         canvas.drawText("我的绿色出行", width / 2f, 80f, titlePaint)
-        
+
         // 周期
         val periodPaint = Paint().apply {
-            color = Color.parseColor("#6B7280")
+            color = secondaryColor
             textSize = 32f
             textAlign = Paint.Align.CENTER
         }
         canvas.drawText(binding.textPeriod.text.toString(), width / 2f, 130f, periodPaint)
-        
+
         // 统计数据
         val labelPaint = Paint().apply {
-            color = Color.parseColor("#6B7280")
+            color = secondaryColor
             textSize = 24f
             textAlign = Paint.Align.CENTER
         }
         val valuePaint = Paint().apply {
-            color = Color.parseColor("#059669")
+            color = primaryColor
             textSize = 42f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
@@ -211,7 +223,7 @@ class ShareImpactFragment : Fragment() {
         
         // 底部信息
         val footerPaint = Paint().apply {
-            color = Color.parseColor("#059669")
+            color = primaryColor
             textSize = 28f
             textAlign = Paint.Align.CENTER
         }

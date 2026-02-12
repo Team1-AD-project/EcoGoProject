@@ -119,32 +119,38 @@ class ItemDetailFragment : Fragment() {
     
     private fun togglePreview() {
         val item = MockData.SHOP_ITEMS.find { it.id == itemId } ?: return
-        
-        // 切换预览（添加/移除该装备）
-        val newOutfit = when (item.type) {
-            "head" -> currentOutfit.copy(head = if (currentOutfit.head == item.id) "none" else item.id)
-            "face" -> currentOutfit.copy(face = if (currentOutfit.face == item.id) "none" else item.id)
-            "body" -> currentOutfit.copy(body = if (currentOutfit.body == item.id) "none" else item.id)
-            "badge" -> currentOutfit.copy(badge = if (currentOutfit.badge == item.id) "none" else item.id)
-            else -> currentOutfit
-        }
-        
+
+        val newOutfit = toggleOutfitSlot(item.type, item.id)
         currentOutfit = newOutfit
         binding.mascotPreview.outfit = newOutfit
-        
-        // 跳跃动画
         binding.mascotPreview.celebrateAnimation()
-        
-        // 更新按钮文本
-        val isPreviewing = when (item.type) {
-            "head" -> currentOutfit.head == item.id
-            "face" -> currentOutfit.face == item.id
-            "body" -> currentOutfit.body == item.id
-            "badge" -> currentOutfit.badge == item.id
+
+        val isPreviewing = isSlotEquipped(item.type, item.id)
+        binding.btnTryOn.text = getPreviewButtonText(isPreviewing)
+    }
+
+    private fun toggleOutfitSlot(type: String, id: String): Outfit {
+        return when (type) {
+            "head" -> currentOutfit.copy(head = if (currentOutfit.head == id) "none" else id)
+            "face" -> currentOutfit.copy(face = if (currentOutfit.face == id) "none" else id)
+            "body" -> currentOutfit.copy(body = if (currentOutfit.body == id) "none" else id)
+            "badge" -> currentOutfit.copy(badge = if (currentOutfit.badge == id) "none" else id)
+            else -> currentOutfit
+        }
+    }
+
+    private fun isSlotEquipped(type: String, id: String): Boolean {
+        return when (type) {
+            "head" -> currentOutfit.head == id
+            "face" -> currentOutfit.face == id
+            "body" -> currentOutfit.body == id
+            "badge" -> currentOutfit.badge == id
             else -> false
         }
-        
-        binding.btnTryOn.text = if (isPreviewing) {
+    }
+
+    private fun getPreviewButtonText(isPreviewing: Boolean): String {
+        return if (isPreviewing) {
             if (isOwned) "取消预览" else "取消试穿"
         } else {
             if (isOwned) "预览装备" else "试穿预览"

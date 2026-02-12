@@ -6,8 +6,10 @@
 -keep class androidx.compose.** { *; }
 -keep class kotlin.Metadata { *; }
 
-# Keep data classes
+# Keep data/model classes (Gson serialization)
 -keep class com.ecogo.data.** { *; }
+-keep class com.ecogo.mapengine.data.model.** { *; }
+-keep class com.ecogo.mapengine.data.local.entity.** { *; }
 
 # Retrofit
 -keepattributes Signature, InnerClasses, EnclosingMethod

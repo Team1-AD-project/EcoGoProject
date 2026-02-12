@@ -63,8 +63,12 @@ class ActivitiesFragment : Fragment() {
                 }
                 filterAndDisplayActivities()
             }
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                // No action needed on tab unselection
+            }
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                // No action needed on tab reselection
+            }
         })
 
         // 如果从 MonthlyHighlights 的 View All 进来，默认选中 Joined tab

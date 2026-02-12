@@ -91,7 +91,6 @@ class ProfileFragment : Fragment() {
         setupUI()
         setupClosetEntry()
         setupBadgeEntry()
-        setupBadgeRecyclerView()
         setupTabs()
         setupAnimations()
         setupActions()
@@ -244,7 +243,8 @@ class ProfileFragment : Fragment() {
     }
 
     private fun setupUI() {
-        // ✅ 不设置任何占位符，等数据加载完成后再更新
+        // No placeholder values set; UI is updated after data loads from the server
+        Log.d("ProfileFragment", "setupUI: waiting for server data")
     }
 
     private fun setupClosetEntry() {
@@ -834,9 +834,6 @@ class ProfileFragment : Fragment() {
         }
 
         dialog.show()
-    }
-
-    private fun setupBadgeRecyclerView() {
     }
 
     private fun handleBadgeClick(

@@ -148,39 +148,13 @@ class TripRepository private constructor() {
         transportModeSegments: List<TransportModeSegment>? = null
     ): Result<TripCompleteResponse> = withContext(Dispatchers.IO) {
         try {
-            // 转换轨迹点格式
-            val polylinePoints = trackPoints.map {
-                PolylinePoint(lng = it.longitude, lat = it.latitude)
-            }
-
-            // 优先使用传入的段列表，否则用单段兜底
-            val transportModes = if (!transportModeSegments.isNullOrEmpty()) {
-                transportModeSegments
-            } else {
-                listOf(
-                    TransportModeSegment(
-                        mode = transportMode,
-                        subDistance = distance / 1000.0,
-                        subDuration = 0
-                    )
-                )
-            }
-
-            val request = TripCompleteRequest(
-                endLng = endLng,
-                endLat = endLat,
-                endAddress = endAddress,
-                endPlaceName = endPlaceName,
-                distance = distance / 1000.0, // 转为公里
-                detectedMode = detectedMode,
-                mlConfidence = mlConfidence,
-                isGreenTrip = isGreenTrip,
-                carbonSaved = carbonSaved,
-                transportModes = transportModes,
-                polylinePoints = polylinePoints
+            val request = buildCompleteRequest(
+                endLat, endLng, endPlaceName, endAddress, distance,
+                trackPoints, transportMode, detectedMode, mlConfidence,
+                carbonSaved, isGreenTrip, transportModeSegments
             )
 
-            Log.d(TAG, "Completing trip: tripId=$tripId, points=${polylinePoints.size}")
+            Log.d(TAG, "Completing trip: tripId=$tripId, points=${trackPoints.size}")
 
             val response = tripApiService.completeTrip(tripId, resolveAuthToken(), request)
 
@@ -189,12 +163,7 @@ class TripRepository private constructor() {
                 if (apiResponse.isSuccess && apiResponse.data != null) {
                     val result = apiResponse.data
                     Log.d(TAG, "Trip completed successfully: $result")
-
-                    // 清除当前行程ID
-                    if (currentTripId == tripId) {
-                        currentTripId = null
-                    }
-
+                    clearTripIdIfMatch(tripId)
                     Result.success(result)
                 } else {
                     val error = "API returned error: ${apiResponse.message}"
@@ -209,6 +178,39 @@ class TripRepository private constructor() {
         } catch (e: Exception) {
             Log.e(TAG, "Error completing trip", e)
             Result.failure(e)
+        }
+    }
+
+    private fun buildCompleteRequest(
+        endLat: Double, endLng: Double,
+        endPlaceName: String, endAddress: String,
+        distance: Double, trackPoints: List<LatLng>,
+        transportMode: String, detectedMode: String?,
+        mlConfidence: Double?, carbonSaved: Long,
+        isGreenTrip: Boolean,
+        transportModeSegments: List<TransportModeSegment>?
+    ): TripCompleteRequest {
+        val polylinePoints = trackPoints.map {
+            PolylinePoint(lng = it.longitude, lat = it.latitude)
+        }
+        val transportModes = if (!transportModeSegments.isNullOrEmpty()) {
+            transportModeSegments
+        } else {
+            listOf(TransportModeSegment(mode = transportMode, subDistance = distance / 1000.0, subDuration = 0))
+        }
+        return TripCompleteRequest(
+            endLng = endLng, endLat = endLat,
+            endAddress = endAddress, endPlaceName = endPlaceName,
+            distance = distance / 1000.0,
+            detectedMode = detectedMode, mlConfidence = mlConfidence,
+            isGreenTrip = isGreenTrip, carbonSaved = carbonSaved,
+            transportModes = transportModes, polylinePoints = polylinePoints
+        )
+    }
+
+    private fun clearTripIdIfMatch(tripId: String) {
+        if (currentTripId == tripId) {
+            currentTripId = null
         }
     }
 

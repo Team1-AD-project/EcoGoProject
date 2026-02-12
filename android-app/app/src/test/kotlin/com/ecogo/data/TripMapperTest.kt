@@ -5,14 +5,19 @@ import org.junit.Test
 
 class TripMapperTest {
 
+    companion object {
+        private const val TEST_START_TIME = "2026-02-10T04:00:00.000"
+        private const val TEST_END_TIME = "2026-02-10T04:30:00.000"
+    }
+
     @Test
     fun `toSummary with complete trip builds correct summary`() {
         val trip = TripDto(
             id = "trip-001",
             startLocation = PlaceLocation(address = "NUS SOC", placeName = "School of Computing"),
             endLocation = PlaceLocation(address = "NUS BIZ", placeName = "Business School"),
-            startTime = "2026-02-10T04:00:00.000",
-            endTime = "2026-02-10T04:30:00.000",
+            startTime = TEST_START_TIME,
+            endTime = TEST_END_TIME,
             detectedMode = "WALKING",
             distance = 1.25,
             pointsGained = 50,
@@ -38,7 +43,7 @@ class TripMapperTest {
             id = "trip-002",
             startLocation = null,
             endLocation = null,
-            startTime = "2026-02-10T04:00:00.000",
+            startTime = TEST_START_TIME,
             endTime = null
         )
 
@@ -52,7 +57,7 @@ class TripMapperTest {
     fun `toSummary with null endTime shows Now and TRACKING status`() {
         val trip = TripDto(
             id = "trip-003",
-            startTime = "2026-02-10T04:00:00.000",
+            startTime = TEST_START_TIME,
             endTime = null,
             carbonStatus = null
         )
@@ -67,8 +72,8 @@ class TripMapperTest {
     fun `toSummary with completed trip and no carbonStatus defaults to COMPLETED`() {
         val trip = TripDto(
             id = "trip-004",
-            startTime = "2026-02-10T04:00:00.000",
-            endTime = "2026-02-10T04:30:00.000",
+            startTime = TEST_START_TIME,
+            endTime = TEST_END_TIME,
             carbonStatus = null
         )
 

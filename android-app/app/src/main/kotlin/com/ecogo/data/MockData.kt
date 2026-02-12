@@ -1,7 +1,17 @@
 package com.ecogo.data
 
 object MockData {
-    
+
+    // String constants to avoid duplication (S1192)
+    private const val TYPE_FACE = "face"
+    private const val TYPE_HEAD = "head"
+    private const val TYPE_BODY = "body"
+    private const val TYPE_BADGE = "badge"
+    private const val TYPE_VOUCHER = "voucher"
+    private const val TYPE_GOODS = "goods"
+    private const val MOCK_USER_ID = "user123"
+    private const val OUTFIT_NONE = "none"
+
     // === Navigation Related Mock Data ===
     
     /**
@@ -277,7 +287,7 @@ object MockData {
         ShopItem(
             id = "face_glasses_square",
             name = "Square Glasses 👓",
-            type = "face",
+            type = TYPE_FACE,
             cost = 300,
             owned = false,
             equipped = false
@@ -287,7 +297,7 @@ object MockData {
         ShopItem(
             id = "hat_grad",
             name = "Graduation Cap 🎓",
-            type = "head",
+            type = TYPE_HEAD,
             cost = 500,
             owned = true,
             equipped = false
@@ -295,7 +305,7 @@ object MockData {
         ShopItem(
             id = "hat_cap",
             name = "Orange Cap 🧢",
-            type = "head",
+            type = TYPE_HEAD,
             cost = 200,
             owned = false,
             equipped = false
@@ -303,7 +313,7 @@ object MockData {
         ShopItem(
             id = "hat_helmet",
             name = "Safety Helmet ⛑️",
-            type = "head",
+            type = TYPE_HEAD,
             cost = 300,
             owned = false,
             equipped = false
@@ -311,7 +321,7 @@ object MockData {
         ShopItem(
             id = "hat_beret",
             name = "Artist Beret 🎨",
-            type = "head",
+            type = TYPE_HEAD,
             cost = 300,
             owned = false,
             equipped = false
@@ -319,7 +329,7 @@ object MockData {
         ShopItem(
             id = "hat_crown",
             name = "Golden Crown 👑",
-            type = "head",
+            type = TYPE_HEAD,
             cost = 800,
             owned = false,
             equipped = false
@@ -327,7 +337,7 @@ object MockData {
         ShopItem(
             id = "hat_party",
             name = "Party Hat 🎉",
-            type = "head",
+            type = TYPE_HEAD,
             cost = 250,
             owned = false,
             equipped = false
@@ -335,7 +345,7 @@ object MockData {
         ShopItem(
             id = "hat_beanie",
             name = "Winter Beanie ❄️",
-            type = "head",
+            type = TYPE_HEAD,
             cost = 350,
             owned = false,
             equipped = false
@@ -343,7 +353,7 @@ object MockData {
         ShopItem(
             id = "hat_cowboy",
             name = "Cowboy Hat 🤠",
-            type = "head",
+            type = TYPE_HEAD,
             cost = 400,
             owned = false,
             equipped = false
@@ -351,7 +361,7 @@ object MockData {
         ShopItem(
             id = "hat_chef",
             name = "Chef Hat 👨‍🍳",
-            type = "head",
+            type = TYPE_HEAD,
             cost = 450,
             owned = false,
             equipped = false
@@ -359,7 +369,7 @@ object MockData {
         ShopItem(
             id = "hat_wizard",
             name = "Wizard Hat 🧙",
-            type = "head",
+            type = TYPE_HEAD,
             cost = 700,
             owned = false,
             equipped = false
@@ -369,7 +379,7 @@ object MockData {
         ShopItem(
             id = "glasses_sun",
             name = "Cool Shades 😎",
-            type = "face",
+            type = TYPE_FACE,
             cost = 300,
             owned = false,
             equipped = false
@@ -377,7 +387,7 @@ object MockData {
         ShopItem(
             id = "face_goggles",
             name = "Safety Goggles 🥽",
-            type = "face",
+            type = TYPE_FACE,
             cost = 250,
             owned = false,
             equipped = false
@@ -385,7 +395,7 @@ object MockData {
         ShopItem(
             id = "glasses_nerd",
             name = "Nerd Glasses 🤓",
-            type = "face",
+            type = TYPE_FACE,
             cost = 280,
             owned = false,
             equipped = false
@@ -393,7 +403,7 @@ object MockData {
         ShopItem(
             id = "glasses_3d",
             name = "3D Glasses 🎬",
-            type = "face",
+            type = TYPE_FACE,
             cost = 220,
             owned = false,
             equipped = false
@@ -401,7 +411,7 @@ object MockData {
         ShopItem(
             id = "face_mask",
             name = "Superhero Mask 🦸",
-            type = "face",
+            type = TYPE_FACE,
             cost = 450,
             owned = false,
             equipped = false
@@ -409,7 +419,7 @@ object MockData {
         ShopItem(
             id = "face_monocle",
             name = "Fancy Monocle 🧐",
-            type = "face",
+            type = TYPE_FACE,
             cost = 380,
             owned = false,
             equipped = false
@@ -417,7 +427,7 @@ object MockData {
         ShopItem(
             id = "face_scarf",
             name = "Winter Scarf 🧣",
-            type = "face",
+            type = TYPE_FACE,
             cost = 320,
             owned = false,
             equipped = false
@@ -425,7 +435,7 @@ object MockData {
         ShopItem(
             id = "face_vr",
             name = "VR Headset 🥽",
-            type = "face",
+            type = TYPE_FACE,
             cost = 600,
             owned = false,
             equipped = false
@@ -435,7 +445,7 @@ object MockData {
         ShopItem(
             id = "body_white_shirt",
             name = "White Shirt 👔",
-            type = "body",
+            type = TYPE_BODY,
             cost = 350,
             owned = false,
             equipped = false
@@ -443,7 +453,7 @@ object MockData {
         ShopItem(
             id = "shirt_nus",
             name = "NUS Tee 🎓",
-            type = "body",
+            type = TYPE_BODY,
             cost = 400,
             owned = true,
             equipped = true
@@ -451,7 +461,7 @@ object MockData {
         ShopItem(
             id = "shirt_hoodie",
             name = "Blue Hoodie 🧥",
-            type = "body",
+            type = TYPE_BODY,
             cost = 600,
             owned = false,
             equipped = false
@@ -459,7 +469,7 @@ object MockData {
         ShopItem(
             id = "body_plaid",
             name = "Engineering Plaid 👔",
-            type = "body",
+            type = TYPE_BODY,
             cost = 400,
             owned = false,
             equipped = false
@@ -467,7 +477,7 @@ object MockData {
         ShopItem(
             id = "body_suit",
             name = "Business Suit 🤵",
-            type = "body",
+            type = TYPE_BODY,
             cost = 500,
             owned = false,
             equipped = false
@@ -475,7 +485,7 @@ object MockData {
         ShopItem(
             id = "body_coat",
             name = "Lab Coat 🥼",
-            type = "body",
+            type = TYPE_BODY,
             cost = 450,
             owned = false,
             equipped = false
@@ -483,7 +493,7 @@ object MockData {
         ShopItem(
             id = "body_sports",
             name = "Sports Jersey ⚽",
-            type = "body",
+            type = TYPE_BODY,
             cost = 550,
             owned = false,
             equipped = false
@@ -491,7 +501,7 @@ object MockData {
         ShopItem(
             id = "body_kimono",
             name = "Traditional Kimono 👘",
-            type = "body",
+            type = TYPE_BODY,
             cost = 650,
             owned = false,
             equipped = false
@@ -499,7 +509,7 @@ object MockData {
         ShopItem(
             id = "body_tux",
             name = "Fancy Tuxedo 🎩",
-            type = "body",
+            type = TYPE_BODY,
             cost = 800,
             owned = false,
             equipped = false
@@ -507,7 +517,7 @@ object MockData {
         ShopItem(
             id = "body_superhero",
             name = "Superhero Cape 🦸",
-            type = "body",
+            type = TYPE_BODY,
             cost = 700,
             owned = false,
             equipped = false
@@ -515,7 +525,7 @@ object MockData {
         ShopItem(
             id = "body_doctor",
             name = "Doctor's Coat 👨‍⚕️",
-            type = "body",
+            type = TYPE_BODY,
             cost = 480,
             owned = false,
             equipped = false
@@ -523,7 +533,7 @@ object MockData {
         ShopItem(
             id = "body_pilot",
             name = "Pilot Uniform ✈️",
-            type = "body",
+            type = TYPE_BODY,
             cost = 620,
             owned = false,
             equipped = false
@@ -531,7 +541,7 @@ object MockData {
         ShopItem(
             id = "body_ninja",
             name = "Ninja Outfit 🥷",
-            type = "body",
+            type = TYPE_BODY,
             cost = 750,
             owned = false,
             equipped = false
@@ -539,7 +549,7 @@ object MockData {
         ShopItem(
             id = "body_scrubs",
             name = "Medical Scrubs 🏥",
-            type = "body",
+            type = TYPE_BODY,
             cost = 450,
             owned = false,
             equipped = false
@@ -547,7 +557,7 @@ object MockData {
         ShopItem(
             id = "body_polo",
             name = "Nurse Polo 👩‍⚕️",
-            type = "body",
+            type = TYPE_BODY,
             cost = 400,
             owned = false,
             equipped = false
@@ -557,7 +567,7 @@ object MockData {
         ShopItem(
             id = "badge_eco_warrior",
             name = "Eco Warrior Badge 🌿",
-            type = "badge",
+            type = TYPE_BADGE,
             cost = 1000,
             owned = false,
             equipped = false
@@ -565,7 +575,7 @@ object MockData {
         ShopItem(
             id = "badge_walker",
             name = "10K Steps Master 🚶",
-            type = "badge",
+            type = TYPE_BADGE,
             cost = 800,
             owned = false,
             equipped = false
@@ -573,7 +583,7 @@ object MockData {
         ShopItem(
             id = "badge_cyclist",
             name = "Cycling Champion 🚴",
-            type = "badge",
+            type = TYPE_BADGE,
             cost = 850,
             owned = false,
             equipped = false
@@ -581,7 +591,7 @@ object MockData {
         ShopItem(
             id = "badge_green",
             name = "Green Hero 🌱",
-            type = "badge",
+            type = TYPE_BADGE,
             cost = 600,
             owned = false,
             equipped = false
@@ -589,7 +599,7 @@ object MockData {
         ShopItem(
             id = "badge_pioneer",
             name = "EcoGo Pioneer 🏆",
-            type = "badge",
+            type = TYPE_BADGE,
             cost = 1200,
             owned = false,
             equipped = false
@@ -597,7 +607,7 @@ object MockData {
         ShopItem(
             id = "badge_streak",
             name = "30-Day Streak 🔥",
-            type = "badge",
+            type = TYPE_BADGE,
             cost = 900,
             owned = false,
             equipped = false
@@ -605,7 +615,7 @@ object MockData {
         ShopItem(
             id = "badge_social",
             name = "Social Butterfly 🦋",
-            type = "badge",
+            type = TYPE_BADGE,
             cost = 700,
             owned = false,
             equipped = false
@@ -613,7 +623,7 @@ object MockData {
         ShopItem(
             id = "badge_explorer",
             name = "Campus Explorer 🗺️",
-            type = "badge",
+            type = TYPE_BADGE,
             cost = 650,
             owned = false,
             equipped = false
@@ -621,7 +631,7 @@ object MockData {
         ShopItem(
             id = "badge_recycler",
             name = "Recycling Pro ♻️",
-            type = "badge",
+            type = TYPE_BADGE,
             cost = 550,
             owned = false,
             equipped = false
@@ -629,7 +639,7 @@ object MockData {
         ShopItem(
             id = "badge_legend",
             name = "EcoGo Legend ⭐",
-            type = "badge",
+            type = TYPE_BADGE,
             cost = 1500,
             owned = false,
             equipped = false
@@ -1233,111 +1243,111 @@ object MockData {
             name = "Institute of Systems Science",
             color = "#6B7280",
             slogan = "Systems for Tomorrow 🔬",
-            outfit = Outfit(head = "none", face = "face_glasses_square", body = "body_white_shirt")
+            outfit = Outfit(head = OUTFIT_NONE, face = "face_glasses_square", body = "body_white_shirt")
         ),
         FacultyData(
             id = "soc",
             name = "School of Computing",
             color = "#3B82F6",
             slogan = "Code the Future 💻",
-            outfit = Outfit(head = "hat_cap", face = "none", body = "shirt_hoodie")
+            outfit = Outfit(head = "hat_cap", face = OUTFIT_NONE, body = "shirt_hoodie")
         ),
         FacultyData(
             id = "eng",
             name = "Faculty of Engineering",
             color = "#EF4444",
             slogan = "Building the Future 🛠️",
-            outfit = Outfit(head = "hat_helmet", face = "none", body = "body_plaid")
+            outfit = Outfit(head = "hat_helmet", face = OUTFIT_NONE, body = "body_plaid")
         ),
         FacultyData(
             id = "sci",
             name = "Faculty of Science",
             color = "#6366F1",
             slogan = "Discovering Truth 🧪",
-            outfit = Outfit(head = "none", face = "face_goggles", body = "body_coat")
+            outfit = Outfit(head = OUTFIT_NONE, face = "face_goggles", body = "body_coat")
         ),
         FacultyData(
             id = "fass",
             name = "Faculty of Arts and Social Sciences",
             color = "#F97316",
             slogan = "Create & Inspire 🎨",
-            outfit = Outfit(head = "hat_beret", face = "none", body = "body_kimono")
+            outfit = Outfit(head = "hat_beret", face = OUTFIT_NONE, body = "body_kimono")
         ),
         FacultyData(
             id = "biz",
             name = "Business School",
             color = "#EAB308",
             slogan = "Leading the Way 💼",
-            outfit = Outfit(head = "none", face = "face_monocle", body = "body_suit")
+            outfit = Outfit(head = OUTFIT_NONE, face = "face_monocle", body = "body_suit")
         ),
         FacultyData(
             id = "law",
             name = "Faculty of Law",
             color = "#7C3AED",
             slogan = "Justice for All ⚖️",
-            outfit = Outfit(head = "hat_grad", face = "none", body = "body_tux")
+            outfit = Outfit(head = "hat_grad", face = OUTFIT_NONE, body = "body_tux")
         ),
         FacultyData(
             id = "dent",
             name = "Faculty of Dentistry",
             color = "#14B8A6",
             slogan = "Smile with Confidence 🦷",
-            outfit = Outfit(head = "none", face = "face_mask", body = "body_doctor")
+            outfit = Outfit(head = OUTFIT_NONE, face = "face_mask", body = "body_doctor")
         ),
         FacultyData(
             id = "med",
             name = "Yong Loo Lin School of Medicine",
             color = "#10B981",
             slogan = "Saving Lives 🩺",
-            outfit = Outfit(head = "none", face = "none", body = "body_scrubs")
+            outfit = Outfit(head = OUTFIT_NONE, face = OUTFIT_NONE, body = "body_scrubs")
         ),
         FacultyData(
             id = "sde",
             name = "School of Design and Environment",
             color = "#06B6D4",
             slogan = "Design a Better World 🌍",
-            outfit = Outfit(head = "hat_beret", face = "none", body = "body_superhero")
+            outfit = Outfit(head = "hat_beret", face = OUTFIT_NONE, body = "body_superhero")
         ),
         FacultyData(
             id = "music",
             name = "Yong Siew Toh Conservatory of Music",
             color = "#EC4899",
             slogan = "Harmony in Motion 🎵",
-            outfit = Outfit(head = "hat_party", face = "none", body = "shirt_nus")
+            outfit = Outfit(head = "hat_party", face = OUTFIT_NONE, body = "shirt_nus")
         ),
         FacultyData(
             id = "nursing",
             name = "Faculty of Nursing",
             color = "#F43F5E",
             slogan = "Care with Heart 💉",
-            outfit = Outfit(head = "none", face = "face_scarf", body = "body_polo")
+            outfit = Outfit(head = OUTFIT_NONE, face = "face_scarf", body = "body_polo")
         ),
         FacultyData(
             id = "sph",
             name = "School of Public Health",
             color = "#84CC16",
             slogan = "Health for All 🏥",
-            outfit = Outfit(head = "hat_cap", face = "none", body = "body_sports")
+            outfit = Outfit(head = "hat_cap", face = OUTFIT_NONE, body = "body_sports")
         ),
         FacultyData(
             id = "cle",
             name = "School of Continuing and Lifelong Education",
             color = "#A855F7",
             slogan = "Never Stop Learning 📚",
-            outfit = Outfit(head = "hat_cowboy", face = "none", body = "body_pilot")
+            outfit = Outfit(head = "hat_cowboy", face = OUTFIT_NONE, body = "body_pilot")
         ),
         FacultyData(
             id = "chs",
             name = "College of Humanities and Sciences",
             color = "#0EA5E9",
             slogan = "Explore the Unknown 🔮",
-            outfit = Outfit(head = "hat_wizard", face = "none", body = "body_ninja")
+            outfit = Outfit(head = "hat_wizard", face = OUTFIT_NONE, body = "body_ninja")
         )
     ) }
     
     // Check-in Mock Data
     val CHECK_IN_STATUS by lazy { CheckInStatus(
-        userId = "user123",
+        userId = MOCK_USER_ID,
         lastCheckInDate = "2026-01-30",
         consecutiveDays = 5,
         totalCheckIns = 28,
@@ -1348,7 +1358,7 @@ object MockData {
     val CHECK_IN_HISTORY by lazy { listOf(
         CheckIn(
             id = "checkin_001",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-02-02",
             pointsEarned = 10,
             consecutiveDays = 8,
@@ -1356,7 +1366,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_002",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-02-01",
             pointsEarned = 10,
             consecutiveDays = 7,
@@ -1364,7 +1374,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_003",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-31",
             pointsEarned = 10,
             consecutiveDays = 6,
@@ -1372,7 +1382,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_004",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-30",
             pointsEarned = 10,
             consecutiveDays = 5,
@@ -1380,7 +1390,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_005",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-29",
             pointsEarned = 10,
             consecutiveDays = 4,
@@ -1388,7 +1398,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_006",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-28",
             pointsEarned = 10,
             consecutiveDays = 3,
@@ -1396,7 +1406,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_007",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-27",
             pointsEarned = 10,
             consecutiveDays = 2,
@@ -1404,7 +1414,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_008",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-26",
             pointsEarned = 10,
             consecutiveDays = 1,
@@ -1412,7 +1422,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_009",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-24",
             pointsEarned = 10,
             consecutiveDays = 1,
@@ -1420,7 +1430,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_010",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-23",
             pointsEarned = 10,
             consecutiveDays = 2,
@@ -1428,7 +1438,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_011",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-22",
             pointsEarned = 10,
             consecutiveDays = 1,
@@ -1436,7 +1446,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_012",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-20",
             pointsEarned = 10,
             consecutiveDays = 1,
@@ -1444,7 +1454,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_013",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-19",
             pointsEarned = 10,
             consecutiveDays = 3,
@@ -1452,7 +1462,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_014",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-18",
             pointsEarned = 10,
             consecutiveDays = 2,
@@ -1460,7 +1470,7 @@ object MockData {
         ),
         CheckIn(
             id = "checkin_015",
-            userId = "user123",
+            userId = MOCK_USER_ID,
             checkInDate = "2026-01-17",
             pointsEarned = 10,
             consecutiveDays = 1,
@@ -1471,7 +1481,7 @@ object MockData {
     // Daily Goal Mock Data
     val DAILY_GOAL by lazy { DailyGoal(
         id = "goal123",
-        userId = "user123",
+        userId = MOCK_USER_ID,
         date = "2026-01-31",
         stepGoal = 10000,
         currentSteps = 6500,
@@ -1526,7 +1536,7 @@ object MockData {
     
     // Carbon Footprint Mock Data
     val CARBON_FOOTPRINT by lazy { CarbonFootprint(
-        userId = "user123",
+        userId = MOCK_USER_ID,
         period = "monthly",
         co2Saved = 12.5f,
         equivalentTrees = 3,
@@ -1587,7 +1597,7 @@ object MockData {
         Product(
             id = "p1",
             name = "Starbucks $5 Off",
-            type = "voucher",
+            type = TYPE_VOUCHER,
             category = "food",
             description = "Valid at all campus locations",
             pointsPrice = 500,
@@ -1599,7 +1609,7 @@ object MockData {
         Product(
             id = "p2",
             name = "Grab $10 Voucher",
-            type = "voucher",
+            type = TYPE_VOUCHER,
             category = "transport",
             description = "$10 credit for Grab rides",
             pointsPrice = 800,
@@ -1610,7 +1620,7 @@ object MockData {
         Product(
             id = "p3",
             name = "Foodpanda $8 Off",
-            type = "voucher",
+            type = TYPE_VOUCHER,
             category = "food",
             description = "Save $8 on food delivery",
             pointsPrice = 650,
@@ -1623,7 +1633,7 @@ object MockData {
         Product(
             id = "p4",
             name = "Eco Bamboo Bottle",
-            type = "goods",
+            type = TYPE_GOODS,
             category = "eco_product",
             description = "Sustainable 500ml water bottle",
             pointsPrice = 1200,
@@ -1636,7 +1646,7 @@ object MockData {
         Product(
             id = "p5",
             name = "EcoGo T-Shirt",
-            type = "goods",
+            type = TYPE_GOODS,
             category = "merchandise",
             description = "Official EcoGo merchandise",
             pointsPrice = null,  // 只支持现金
@@ -1649,7 +1659,7 @@ object MockData {
         Product(
             id = "p6",
             name = "Tree Planting Certificate",
-            type = "goods",
+            type = TYPE_GOODS,
             category = "digital",
             description = "Digital certificate - Plant a tree in your name",
             pointsPrice = 300,
@@ -1661,7 +1671,7 @@ object MockData {
         Product(
             id = "p7",
             name = "Reusable Tote Bag",
-            type = "goods",
+            type = TYPE_GOODS,
             category = "eco_product",
             description = "Canvas tote bag for sustainable shopping",
             pointsPrice = 600,
@@ -1674,7 +1684,7 @@ object MockData {
         Product(
             id = "p8",
             name = "NUS Bookstore 15% Off",
-            type = "voucher",
+            type = TYPE_VOUCHER,
             category = "merchandise",
             description = "15% discount on books and stationery",
             pointsPrice = 450,

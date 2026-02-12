@@ -10,10 +10,15 @@ import com.ecogo.data.ShopItem
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 
+private const val TYPE_HEAD = "head"
+private const val TYPE_FACE = "face"
+private const val TYPE_BODY = "body"
+private const val TYPE_BADGE = "badge"
+
 class GoodsAdapter(
     private val onGoodsClick: (ShopItem) -> Unit = {}
 ) : RecyclerView.Adapter<GoodsAdapter.GoodsViewHolder>() {
-    
+
     private var goods: List<ShopItem> = emptyList()
     
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GoodsViewHolder {
@@ -91,27 +96,27 @@ class GoodsAdapter(
         
         private fun getDescription(item: ShopItem): String {
             return when (item.type) {
-                "head" -> when {
+                TYPE_HEAD -> when {
                     item.name.contains("Crown") -> "Royal headwear for your LiNUS avatar"
                     item.name.contains("Wizard") -> "Magical hat with mystical powers"
                     item.name.contains("Chef") -> "Professional chef's headwear"
                     item.name.contains("Cowboy") -> "Wild west style hat"
                     else -> "Stylish headwear for LiNUS avatar"
                 }
-                "face" -> when {
+                TYPE_FACE -> when {
                     item.name.contains("VR") -> "Experience virtual reality in style"
                     item.name.contains("Superhero") -> "Protect your secret identity"
                     item.name.contains("Monocle") -> "Classic sophisticated look"
                     else -> "Cool accessory for LiNUS face"
                 }
-                "body" -> when {
+                TYPE_BODY -> when {
                     item.name.contains("Superhero") -> "Save the world with style"
                     item.name.contains("Ninja") -> "Stealthy and stylish outfit"
                     item.name.contains("Tuxedo") -> "Elegant formal attire"
                     item.name.contains("Kimono") -> "Traditional Japanese garment"
                     else -> "Fashionable outfit for LiNUS avatar"
                 }
-                "badge" -> when {
+                TYPE_BADGE -> when {
                     item.name.contains("Legend") -> "Ultimate achievement for eco champions"
                     item.name.contains("Pioneer") -> "Early adopter exclusive badge"
                     item.name.contains("Warrior") -> "Earned by true eco heroes"
@@ -132,20 +137,20 @@ class GoodsAdapter(
             
             // Fallback icons
             return when (item.type) {
-                "head" -> "👑"
-                "face" -> "😎"
-                "body" -> "👕"
-                "badge" -> "🏅"
+                TYPE_HEAD -> "👑"
+                TYPE_FACE -> "😎"
+                TYPE_BODY -> "👕"
+                TYPE_BADGE -> "🏅"
                 else -> "🎁"
             }
         }
         
         private fun getCategoryName(type: String): String {
             return when (type) {
-                "head" -> "👑 Headwear"
-                "face" -> "😎 Accessory"
-                "body" -> "👕 Outfit"
-                "badge" -> "🏅 Badge"
+                TYPE_HEAD -> "👑 Headwear"
+                TYPE_FACE -> "😎 Accessory"
+                TYPE_BODY -> "👕 Outfit"
+                TYPE_BADGE -> "🏅 Badge"
                 else -> "🎁 Item"
             }
         }
@@ -155,10 +160,10 @@ class GoodsAdapter(
             val iconCard = itemView.findViewById<com.google.android.material.card.MaterialCardView>(R.id.card_image)
             val bgColor = try {
                 when (type) {
-                    "head" -> android.graphics.Color.parseColor("#FEF3C7")     // Yellow
-                    "face" -> android.graphics.Color.parseColor("#DBEAFE")     // Blue
-                    "body" -> android.graphics.Color.parseColor("#FCE7F3")     // Pink
-                    "badge" -> android.graphics.Color.parseColor("#D1FAE5")    // Green
+                    TYPE_HEAD -> android.graphics.Color.parseColor("#FEF3C7")     // Yellow
+                    TYPE_FACE -> android.graphics.Color.parseColor("#DBEAFE")     // Blue
+                    TYPE_BODY -> android.graphics.Color.parseColor("#FCE7F3")     // Pink
+                    TYPE_BADGE -> android.graphics.Color.parseColor("#D1FAE5")    // Green
                     else -> android.graphics.Color.parseColor("#F0FDF4")
                 }
             } catch (e: Exception) {
@@ -169,10 +174,10 @@ class GoodsAdapter(
             // Apply stroke color matching the background
             val strokeColor = try {
                 when (type) {
-                    "head" -> android.graphics.Color.parseColor("#FDE68A")
-                    "face" -> android.graphics.Color.parseColor("#BFDBFE")
-                    "body" -> android.graphics.Color.parseColor("#FBCFE8")
-                    "badge" -> android.graphics.Color.parseColor("#BBF7D0")
+                    TYPE_HEAD -> android.graphics.Color.parseColor("#FDE68A")
+                    TYPE_FACE -> android.graphics.Color.parseColor("#BFDBFE")
+                    TYPE_BODY -> android.graphics.Color.parseColor("#FBCFE8")
+                    TYPE_BADGE -> android.graphics.Color.parseColor("#BBF7D0")
                     else -> android.graphics.Color.parseColor("#BBF7D0")
                 }
             } catch (e: Exception) {

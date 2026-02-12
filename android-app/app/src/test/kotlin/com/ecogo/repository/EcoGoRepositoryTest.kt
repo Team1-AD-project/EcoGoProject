@@ -23,6 +23,11 @@ import org.mockito.kotlin.whenever
 @OptIn(ExperimentalCoroutinesApi::class)
 class EcoGoRepositoryTest {
 
+    companion object {
+        private const val MSG_OK = "OK"
+        private const val CODE_SUCCESS = 200
+    }
+
     private val testDispatcher = StandardTestDispatcher()
     private lateinit var mockApi: ApiService
     private lateinit var repository: EcoGoRepository
@@ -48,7 +53,7 @@ class EcoGoRepositoryTest {
             Activity(id = "2", title = "Beach Cleanup")
         )
         whenever(mockApi.getAllActivities()).thenReturn(
-            ApiResponse(code = 200, message = "OK", data = activities)
+            ApiResponse(code = CODE_SUCCESS, message = MSG_OK, data = activities)
         )
 
         val result = repository.getAllActivities()
@@ -88,7 +93,7 @@ class EcoGoRepositoryTest {
             Challenge(id = "c1", title = "Walk 10km", description = "Walk", type = "GREEN_TRIPS_DISTANCE", target = 10.0, reward = 100)
         )
         whenever(mockApi.getAllChallenges()).thenReturn(
-            ApiResponse(code = 200, message = "OK", data = challenges)
+            ApiResponse(code = CODE_SUCCESS, message = MSG_OK, data = challenges)
         )
 
         val result = repository.getChallenges()
@@ -111,7 +116,7 @@ class EcoGoRepositoryTest {
             recommendation = "Great day for cycling!"
         )
         whenever(mockApi.getWeather()).thenReturn(
-            ApiResponse(code = 200, message = "OK", data = weather)
+            ApiResponse(code = CODE_SUCCESS, message = MSG_OK, data = weather)
         )
 
         val result = repository.getWeather()
@@ -127,7 +132,7 @@ class EcoGoRepositoryTest {
     fun `joinActivity success returns updated activity`() = runTest {
         val activity = Activity(id = "a1", title = "Cycling Event", participantIds = listOf("user-1"))
         whenever(mockApi.joinActivity("a1", "user-1")).thenReturn(
-            ApiResponse(code = 200, message = "Joined", data = activity)
+            ApiResponse(code = CODE_SUCCESS, message = "Joined", data = activity)
         )
 
         val result = repository.joinActivity("a1", "user-1")
@@ -146,7 +151,7 @@ class EcoGoRepositoryTest {
             progressPercent = 0.0, joinedAt = "2026-02-11"
         )
         whenever(mockApi.joinChallenge("c1", "u1")).thenReturn(
-            ApiResponse(code = 200, message = "OK", data = progress)
+            ApiResponse(code = CODE_SUCCESS, message = MSG_OK, data = progress)
         )
 
         val result = repository.acceptChallenge("c1", "u1")
@@ -165,7 +170,7 @@ class EcoGoRepositoryTest {
             Activity(id = "3", title = "C", participantIds = listOf("user-1"))
         )
         whenever(mockApi.getAllActivities()).thenReturn(
-            ApiResponse(code = 200, message = "OK", data = activities)
+            ApiResponse(code = CODE_SUCCESS, message = MSG_OK, data = activities)
         )
 
         val result = repository.getJoinedActivitiesCount("user-1")

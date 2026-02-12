@@ -284,76 +284,64 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private var currentAdIndex = 0
 
     private fun setupAdCarousel() {
-        // 获取广告数据
-        // 获取广告数据
         lifecycleScope.launch {
-            binding.layoutAdCarousel.visibility = View.GONE // Default to hidden
+            binding.layoutAdCarousel.visibility = View.GONE
             try {
-                // 0. Init TokenManager just in case
                 com.ecogo.auth.TokenManager.init(this@MapActivity)
 
-                // 1. Check cached VIP status first (fastest) - Custom Prefs AND TokenManager
-                val prefs = getSharedPreferences("EcoGoPrefs", android.content.Context.MODE_PRIVATE)
-                val isVipPref = prefs.getBoolean("is_vip", false)
-
-                if (com.ecogo.auth.TokenManager.isVipActive() || isVipPref) {
+                if (isUserVipCached()) {
                     Log.d(TAG, "User is VIP (cached/pref), hiding advertisement carousel")
                     return@launch
                 }
 
-                // 2. Double check with Repository (in case cache is stale)
                 val repository = com.ecogo.EcoGoApplication.repository
-                val profileResult = repository.getMobileUserProfile()
-                
-                val profile = profileResult.getOrNull()
-                // Fail-safe: If we cannot fetch profile to verify status, do not show ads to potential VIPs
-                // Or if user is VIP, hide ads.
+                val profile = repository.getMobileUserProfile().getOrNull()
                 if (profile == null) {
                     Log.d(TAG, "Profile fetch failed, defaulting to hidden ads")
                     return@launch
                 }
 
-                val isVip = (profile?.vipInfo?.active == true) ||
-                            (profile?.userInfo?.vip?.active == true) ||
-                            (profile?.vipInfo?.plan != null) ||
-                            (profile?.userInfo?.vip?.plan != null) ||
-                            (profile?.userInfo?.isAdmin == true)
-
-                if (isVip) {
+                if (isProfileVip(profile)) {
                     Log.d(TAG, "User is VIP/Admin (network), hiding advertisement carousel")
-                    // Update cache for next time
-                    com.ecogo.auth.TokenManager.init(this@MapActivity)
-                    if (profile != null) {
-                        com.ecogo.auth.TokenManager.saveToken(
-                            token = com.ecogo.auth.TokenManager.getToken() ?: "",
-                            userId = profile.userInfo.userid,
-                            username = profile.userInfo.nickname,
-                            vipActive = true
-                        )
-                    }
-                    binding.layoutAdCarousel.visibility = View.GONE // Ensure GONE
+                    updateVipCache(profile)
                     return@launch
                 }
 
-                // If not VIP, proceed to fetch ads
-                val result = repository.getAdvertisements()
-
-                val ads = result.getOrNull()?.filter {
+                val ads = repository.getAdvertisements().getOrNull()?.filter {
                     it.position == "banner" && it.status == "Active"
                 } ?: emptyList()
 
-                if (ads.isNotEmpty() && !isVip) { // Double check !isVip
+                if (ads.isNotEmpty()) {
                     binding.layoutAdCarousel.visibility = View.VISIBLE
                     setupAdViewPager(ads)
-                } else {
-                    // 没有广告时隐藏轮播区
-                    binding.layoutAdCarousel.visibility = View.GONE
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error fetching ads", e)
                 binding.layoutAdCarousel.visibility = View.GONE
             }
         }
+    }
+
+    private fun isUserVipCached(): Boolean {
+        val prefs = getSharedPreferences("EcoGoPrefs", android.content.Context.MODE_PRIVATE)
+        return com.ecogo.auth.TokenManager.isVipActive() || prefs.getBoolean("is_vip", false)
+    }
+
+    private fun isProfileVip(profile: com.ecogo.api.MobileProfileResponse): Boolean {
+        return (profile.vipInfo?.active == true) ||
+                (profile.userInfo?.vip?.active == true) ||
+                (profile.vipInfo?.plan != null) ||
+                (profile.userInfo?.vip?.plan != null) ||
+                (profile.userInfo?.isAdmin == true)
+    }
+
+    private fun updateVipCache(profile: com.ecogo.api.MobileProfileResponse) {
+        com.ecogo.auth.TokenManager.saveToken(
+            token = com.ecogo.auth.TokenManager.getToken() ?: "",
+            userId = profile.userInfo.userid,
+            username = profile.userInfo.nickname,
+            vipActive = true
+        )
     }
 
     private fun setupAdViewPager(ads: List<com.ecogo.data.Advertisement>) {

@@ -39,108 +39,20 @@ class LoginFragment : Fragment() {
         binding.buttonSignIn.setOnClickListener {
             val inputNusnetId = binding.editNusnetId.text.toString()
             val inputPassword = binding.editPassword.text.toString()
-            
+
             Log.d("DEBUG_LOGIN", "SignIn button clicked")
-            
+
             if (inputNusnetId.isEmpty() || inputPassword.isEmpty()) {
                 Toast.makeText(requireContext(), "Please enter NUSNET ID and password", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            
-            // 测试账号：用户名123，密码123
+
             if (inputNusnetId == "123" && inputPassword == "123") {
-                Log.d("DEBUG_LOGIN", "Test account login successful")
-                
-                val prefs = requireContext().getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
-                // 标记用户已登录
-                prefs.edit().putBoolean("is_logged_in", true).apply()
-                
-                Toast.makeText(requireContext(), "Test Account Login Successful! 🎉", Toast.LENGTH_SHORT).show()
-                
-                try {
-                    Log.d("DEBUG_LOGIN", "Test account, going to home")
-                    findNavController().navigate(R.id.action_login_to_home)
-                } catch (e: Exception) {
-                    Log.e("DEBUG_LOGIN", "Navigation FAILED: ${e.message}", e)
-                    Toast.makeText(requireContext(), "❌ Navigation error: ${e.message}", Toast.LENGTH_LONG).show()
-                }
+                handleTestLogin()
                 return@setOnClickListener
             }
-            
-            // 验证输入的凭证
-            lifecycleScope.launch {
-                try {
-                    // Show loading state (optional, can add a ProgressBar later)
-                    binding.buttonSignIn.isEnabled = false
-                    binding.buttonSignIn.text = "Signing in..."
 
-                    val request = MobileLoginRequest(
-                        userid = inputNusnetId,
-                        password = inputPassword // Assuming backend handles string/number conversion if needed
-                    )
-
-                    val response = RetrofitClient.apiService.login(request)
-                    
-                    // Restore button state
-                    binding.buttonSignIn.isEnabled = true
-                    binding.buttonSignIn.text = "Sign In"
-
-                    if (response.success && response.data != null) {
-                        val loginData = response.data
-                        val userInfo = loginData.userInfo
-                        Log.d("DEBUG_LOGIN", "Login successful: ${userInfo.nickname}")
-                        
-                        // Save token using TokenManager
-                        TokenManager.init(requireContext()) 
-                        TokenManager.saveToken(
-                            token = loginData.token,
-                            userId = userInfo.userid,
-                            username = userInfo.nickname
-                        )
-
-                        // Save VIP status to EcoGoPrefs for SplashActivity
-                        val prefs = requireContext().getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
-                        val isVip = userInfo.vip?.active == true
-                        Log.d("DEBUG_LOGIN", "VIP Status: $isVip")
-
-                        prefs.edit().apply {
-                            putBoolean("is_logged_in", true) // Keep for compatibility
-                            putBoolean("is_vip", isVip)      // Crucial for SplashActivity
-                            putString("nusnet_id", userInfo.userid)
-                            apply()
-                        }
-
-                        Toast.makeText(requireContext(), "Login Success! Navigating...", Toast.LENGTH_SHORT).show()
-                        findNavController().navigate(com.ecogo.R.id.action_login_to_home)
-                    } else {
-                        val msg = "Code: ${response.code}, Success: ${response.success}, Data: ${response.data}"
-                        Log.e("DEBUG_LOGIN", "Login failed checks: $msg")
-                        Toast.makeText(requireContext(), "Debug: $msg", Toast.LENGTH_LONG).show()
-                    }
-
-                } catch (e: Exception) {
-                    Log.e("DEBUG_LOGIN", "Login error: ${e.message}", e)
-                    
-                    // Restore button state
-                    binding.buttonSignIn.isEnabled = true
-                    binding.buttonSignIn.text = "Sign In"
-                    
-                    val errorMessage = when(e) {
-                        is retrofit2.HttpException -> {
-                            when(e.code()) {
-                                401 -> "Invalid credentials"
-                                404 -> "User not found"
-                                500 -> "Server error"
-                                else -> "Network error: ${e.code()}"
-                            }
-                        }
-                        is java.net.ConnectException -> "Cannot connect to server. Check your internet connection."
-                        else -> "Error: ${e.message}"
-                    }
-                    
-                    Toast.makeText(requireContext(), errorMessage, Toast.LENGTH_SHORT).show()
-                }
-            }
+            performApiLogin(inputNusnetId, inputPassword)
         }
         
         binding.buttonRegister.setOnClickListener {
@@ -157,6 +69,79 @@ class LoginFragment : Fragment() {
         }
     }
     
+    private fun handleTestLogin() {
+        Log.d("DEBUG_LOGIN", "Test account login successful")
+        val prefs = requireContext().getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putBoolean("is_logged_in", true).apply()
+        Toast.makeText(requireContext(), "Test Account Login Successful!", Toast.LENGTH_SHORT).show()
+        try {
+            findNavController().navigate(R.id.action_login_to_home)
+        } catch (e: Exception) {
+            Log.e("DEBUG_LOGIN", "Navigation FAILED: ${e.message}", e)
+        }
+    }
+
+    private fun performApiLogin(inputNusnetId: String, inputPassword: String) {
+        lifecycleScope.launch {
+            try {
+                binding.buttonSignIn.isEnabled = false
+                binding.buttonSignIn.text = "Signing in..."
+
+                val request = MobileLoginRequest(userid = inputNusnetId, password = inputPassword)
+                val response = RetrofitClient.apiService.login(request)
+
+                binding.buttonSignIn.isEnabled = true
+                binding.buttonSignIn.text = "Sign In"
+
+                if (response.success && response.data != null) {
+                    handleLoginSuccess(response.data)
+                } else {
+                    val msg = "Code: ${response.code}, Success: ${response.success}, Data: ${response.data}"
+                    Log.e("DEBUG_LOGIN", "Login failed checks: $msg")
+                    Toast.makeText(requireContext(), "Debug: $msg", Toast.LENGTH_LONG).show()
+                }
+            } catch (e: Exception) {
+                Log.e("DEBUG_LOGIN", "Login error: ${e.message}", e)
+                binding.buttonSignIn.isEnabled = true
+                binding.buttonSignIn.text = "Sign In"
+                Toast.makeText(requireContext(), getLoginErrorMessage(e), Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun handleLoginSuccess(loginData: com.ecogo.api.MobileLoginResponse) {
+        val userInfo = loginData.userInfo
+        Log.d("DEBUG_LOGIN", "Login successful: ${userInfo.nickname}")
+
+        TokenManager.init(requireContext())
+        TokenManager.saveToken(token = loginData.token, userId = userInfo.userid, username = userInfo.nickname)
+
+        val prefs = requireContext().getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
+        val isVip = userInfo.vip?.active == true
+        prefs.edit().apply {
+            putBoolean("is_logged_in", true)
+            putBoolean("is_vip", isVip)
+            putString("nusnet_id", userInfo.userid)
+            apply()
+        }
+
+        Toast.makeText(requireContext(), "Login Success! Navigating...", Toast.LENGTH_SHORT).show()
+        findNavController().navigate(com.ecogo.R.id.action_login_to_home)
+    }
+
+    private fun getLoginErrorMessage(e: Exception): String {
+        return when (e) {
+            is retrofit2.HttpException -> when (e.code()) {
+                401 -> "Invalid credentials"
+                404 -> "User not found"
+                500 -> "Server error"
+                else -> "Network error: ${e.code()}"
+            }
+            is java.net.ConnectException -> "Cannot connect to server. Check your internet connection."
+            else -> "Error: ${e.message}"
+        }
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

@@ -5,15 +5,21 @@ import org.junit.Test
 
 class TripTimeFormatTest {
 
+    companion object {
+        private const val FALLBACK_TEXT = "--"
+        private const val TEST_LOCAL_TIME = "2026-02-10T04:26:43.034"
+        private const val TEST_END_TIME = "2026-02-10T05:00:00.000"
+    }
+
     @Test
     fun `toSgTime with null returns --`() {
-        assertEquals("--", TripTimeFormat.toSgTime(null))
+        assertEquals(FALLBACK_TEXT, TripTimeFormat.toSgTime(null))
     }
 
     @Test
     fun `toSgTime with blank returns --`() {
-        assertEquals("--", TripTimeFormat.toSgTime(""))
-        assertEquals("--", TripTimeFormat.toSgTime("   "))
+        assertEquals(FALLBACK_TEXT, TripTimeFormat.toSgTime(""))
+        assertEquals(FALLBACK_TEXT, TripTimeFormat.toSgTime("   "))
     }
 
     @Test
@@ -32,7 +38,7 @@ class TripTimeFormatTest {
 
     @Test
     fun `toSgTime without offset parses as local time`() {
-        val result = TripTimeFormat.toSgTime("2026-02-10T04:26:43.034")
+        val result = TripTimeFormat.toSgTime(TEST_LOCAL_TIME)
         assertEquals("2026-02-10 04:26", result)
     }
 
@@ -45,21 +51,21 @@ class TripTimeFormatTest {
     @Test
     fun `rangeText with start and end`() {
         val result = TripTimeFormat.rangeText(
-            "2026-02-10T04:26:43.034",
-            "2026-02-10T05:00:00.000"
+            TEST_LOCAL_TIME,
+            TEST_END_TIME
         )
         assertEquals("2026-02-10 04:26 ~ 2026-02-10 05:00", result)
     }
 
     @Test
     fun `rangeText with null end shows Now`() {
-        val result = TripTimeFormat.rangeText("2026-02-10T04:26:43.034", null)
+        val result = TripTimeFormat.rangeText(TEST_LOCAL_TIME, null)
         assertTrue(result.endsWith("Now"))
     }
 
     @Test
     fun `rangeText with blank end shows Now`() {
-        val result = TripTimeFormat.rangeText("2026-02-10T04:26:43.034", "")
+        val result = TripTimeFormat.rangeText(TEST_LOCAL_TIME, "")
         assertTrue(result.endsWith("Now"))
     }
 }

@@ -5,12 +5,12 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
-import android.view.View
+import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.ecogo.auth.TokenManager
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 class SplashActivity : AppCompatActivity() {
@@ -29,31 +29,22 @@ class SplashActivity : AppCompatActivity() {
         // VIP Check
         val prefs = getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
         val isVip = prefs.getBoolean("is_vip", false)
-        // Use TokenManager to check login status
         val isLoggedIn = com.ecogo.auth.TokenManager.isLoggedIn()
 
         Log.d(TAG, "onCreate: isVip=$isVip, isLoggedIn=$isLoggedIn")
 
         if (isVip && isLoggedIn) {
-            // VIP & Logged In -> Skip Ad & Login -> Go to Home
             Log.d(TAG, "User is VIP & Logged In. Skipping Ad.")
-            proceedToMain(
-                shouldGoToHome = true,
-                notificationDest = notificationDest
-            )
-
+            proceedToMain(shouldGoToHome = true, notificationDest = notificationDest)
             return
         }
 
-        // Show Ad Layout
         setContentView(R.layout.activity_splash)
 
-        // Setup Views
-        val imgAd = findViewById<android.widget.ImageView>(R.id.imgAd)
+        val imgAd = findViewById<ImageView>(R.id.imgAd)
         val btnSkip = findViewById<LinearLayout>(R.id.btnSkip)
         val tvSkipText = findViewById<TextView>(R.id.tvSkipText)
 
-        // Skip Button Logic
         btnSkip.setOnClickListener {
             Log.d(TAG, "Skip button clicked")
             countdownTimer?.cancel()
@@ -63,54 +54,21 @@ class SplashActivity : AppCompatActivity() {
             )
         }
 
+        fetchAndDisplayAd(imgAd)
+        syncVipStatus(isLoggedIn, notificationDest)
+        startCountdownTimer(tvSkipText, notificationDest)
+    }
+
+    private fun fetchAndDisplayAd(imgAd: ImageView) {
         val adUrl = "http://47.129.124.55:8090/api/v1/advertisements/active"
 
-        // Fetch Ad Data (Async)
         Thread {
             try {
                 Log.d(TAG, "Fetching ads from $adUrl")
-                val url = java.net.URL(adUrl)
-                val connection = url.openConnection() as java.net.HttpURLConnection
-                connection.requestMethod = "GET"
-                connection.connectTimeout = 2000 // 2s timeout
-                connection.readTimeout = 2000
+                val connection = createAdConnection(adUrl)
 
                 if (connection.responseCode == 200) {
-                    val stream = connection.inputStream
-                    val reader = java.io.InputStreamReader(stream)
-                    val responseText = reader.readText()
-                    reader.close()
-
-                    // Parse Response (Using Gson since it's in dependencies)
-                    val gson = com.google.gson.Gson()
-                    val response = gson.fromJson(responseText, com.ecogo.data.AdResponse::class.java)
-
-                    if (response.code == 200 && !response.data.isNullOrEmpty()) {
-                        val randomAd = response.data.random()
-                        val imageUrl = randomAd.imageUrl
-                        Log.d(TAG, "Selected Ad: ${randomAd.name}, Image: $imageUrl")
-
-                        runOnUiThread {
-                            try {
-                                com.bumptech.glide.Glide.with(this)
-                                    .load(imageUrl)
-                                    .centerCrop()
-                                    .placeholder(R.drawable.bg_splash_ad_placeholder)
-                                    .error(R.drawable.bg_splash_ad_placeholder)
-                                    .into(imgAd)
-
-                                // Optional: Handle Ad Click
-                                imgAd.setOnClickListener {
-                                    Log.d(TAG, "Ad clicked: ${randomAd.linkUrl}")
-                                    // TODO: Open linkUrl in browser if needed
-                                }
-                            } catch (e: Exception) {
-                                Log.e(TAG, "Glide Error: ${e.message}")
-                            }
-                        }
-                    } else {
-                        Log.w(TAG, "No active ads or error code: ${response.code}")
-                    }
+                    handleAdResponse(connection, imgAd)
                 } else {
                     Log.e(TAG, "HTTP Error: ${connection.responseCode}")
                 }
@@ -118,46 +76,90 @@ class SplashActivity : AppCompatActivity() {
                 Log.e(TAG, "Fetch Error: ${e.message}")
             }
         }.start()
+    }
 
-        // Sync VIP status in background if logged in
-        if (isLoggedIn) {
-            val userId = com.ecogo.auth.TokenManager.getUserId()
-            if (!userId.isNullOrEmpty()) {
-                lifecycleScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                    try {
-                        val apiService = com.ecogo.api.RetrofitClient.apiService
-                        val response = apiService.getUserProfile(userId)
-                        if (response.success && response.data != null) {
-                            val userInfo = response.data
-                            val serverIsVip = userInfo.vip?.active == true
-                            
-                            // Update local storage
-                            val localPrefs = getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
-                            localPrefs.edit().putBoolean("is_vip", serverIsVip).apply()
-                            
-                            Log.d(TAG, "Synced VIP status from server: $serverIsVip")
-                            
-                            // If user is VIP, we can skip ad immediately if it's still showing
-                            if (serverIsVip) {
-                                runOnUiThread {
-                                    Log.d(TAG, "User effectively VIP after sync. Skipping ad now.")
-                                    countdownTimer?.cancel()
-                                    proceedToMain(
-                                        shouldGoToHome = com.ecogo.auth.TokenManager.isLoggedIn(),
-                                        notificationDest = notificationDest
-                                    )
+    private fun createAdConnection(adUrl: String): java.net.HttpURLConnection {
+        val url = java.net.URL(adUrl)
+        val connection = url.openConnection() as java.net.HttpURLConnection
+        connection.requestMethod = "GET"
+        connection.connectTimeout = 2000
+        connection.readTimeout = 2000
+        return connection
+    }
 
-                                }
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Log.e(TAG, "Failed to sync user profile: ${e.message}")
-                    }
+    private fun handleAdResponse(connection: java.net.HttpURLConnection, imgAd: ImageView) {
+        val reader = java.io.InputStreamReader(connection.inputStream)
+        val responseText = reader.readText()
+        reader.close()
+
+        val gson = com.google.gson.Gson()
+        val response = gson.fromJson(responseText, com.ecogo.data.AdResponse::class.java)
+
+        if (response.code == 200 && !response.data.isNullOrEmpty()) {
+            val randomAd = response.data.random()
+            Log.d(TAG, "Selected Ad: ${randomAd.name}, Image: ${randomAd.imageUrl}")
+            displayAd(imgAd, randomAd)
+        } else {
+            Log.w(TAG, "No active ads or error code: ${response.code}")
+        }
+    }
+
+    private fun displayAd(imgAd: ImageView, ad: com.ecogo.data.Advertisement) {
+        runOnUiThread {
+            try {
+                com.bumptech.glide.Glide.with(this)
+                    .load(ad.imageUrl)
+                    .centerCrop()
+                    .placeholder(R.drawable.bg_splash_ad_placeholder)
+                    .error(R.drawable.bg_splash_ad_placeholder)
+                    .into(imgAd)
+
+                imgAd.setOnClickListener {
+                    Log.d(TAG, "Ad clicked: ${ad.linkUrl}")
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Glide Error: ${e.message}")
             }
         }
+    }
 
-        // Start 3s Timer
+    private fun syncVipStatus(isLoggedIn: Boolean, notificationDest: String?) {
+        if (!isLoggedIn) return
+
+        val userId = com.ecogo.auth.TokenManager.getUserId()
+        if (userId.isNullOrEmpty()) return
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val apiService = com.ecogo.api.RetrofitClient.apiService
+                val response = apiService.getUserProfile(userId)
+                if (response.success && response.data != null) {
+                    applyVipSync(response.data.vip?.active == true, notificationDest)
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Failed to sync user profile: ${e.message}")
+            }
+        }
+    }
+
+    private fun applyVipSync(serverIsVip: Boolean, notificationDest: String?) {
+        val localPrefs = getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
+        localPrefs.edit().putBoolean("is_vip", serverIsVip).apply()
+        Log.d(TAG, "Synced VIP status from server: $serverIsVip")
+
+        if (serverIsVip) {
+            runOnUiThread {
+                Log.d(TAG, "User effectively VIP after sync. Skipping ad now.")
+                countdownTimer?.cancel()
+                proceedToMain(
+                    shouldGoToHome = com.ecogo.auth.TokenManager.isLoggedIn(),
+                    notificationDest = notificationDest
+                )
+            }
+        }
+    }
+
+    private fun startCountdownTimer(tvSkipText: TextView, notificationDest: String?) {
         Log.d(TAG, "Starting 3s countdown")
         countdownTimer = object : CountDownTimer(3000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
@@ -168,10 +170,7 @@ class SplashActivity : AppCompatActivity() {
             override fun onFinish() {
                 Log.d(TAG, "Countdown finished")
                 tvSkipText.text = "跳过 0"
-                proceedToMain(
-                    shouldGoToHome = true,
-                    notificationDest = notificationDest
-                )
+                proceedToMain(shouldGoToHome = true, notificationDest = notificationDest)
             }
         }.start()
     }
@@ -193,7 +192,6 @@ class SplashActivity : AppCompatActivity() {
         startActivity(intent)
         finish()
     }
-
 
     override fun onDestroy() {
         super.onDestroy()

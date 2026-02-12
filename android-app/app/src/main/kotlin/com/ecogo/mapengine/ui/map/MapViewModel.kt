@@ -34,6 +34,11 @@ class MapViewModel(
     // 模拟用户 ID (实际应从登录状态获取)
     private val userId: String = "test-user-001"
 
+    companion object {
+        private const val ERR_NO_ORIGIN = "无法获取起点位置"
+        private const val ERR_NO_DESTINATION = "请先设置目的地"
+    }
+
     // ========================================
     // UI 状态
     // ========================================
@@ -223,11 +228,11 @@ class MapViewModel(
      */
     fun fetchLowCarbonRoute() {
         val start = _origin.value ?: _currentLocation.value ?: run {
-            _errorMessage.value = "无法获取起点位置"
+            _errorMessage.value = ERR_NO_ORIGIN
             return
         }
         val end = _destination.value ?: run {
-            _errorMessage.value = "请先设置目的地"
+            _errorMessage.value = ERR_NO_DESTINATION
             return
         }
 
@@ -261,11 +266,11 @@ class MapViewModel(
      */
     fun fetchBalancedRoute() {
         val start = _origin.value ?: _currentLocation.value ?: run {
-            _errorMessage.value = "无法获取起点位置"
+            _errorMessage.value = ERR_NO_ORIGIN
             return
         }
         val end = _destination.value ?: run {
-            _errorMessage.value = "请先设置目的地"
+            _errorMessage.value = ERR_NO_DESTINATION
             return
         }
 
@@ -301,11 +306,11 @@ class MapViewModel(
         _selectedTransportMode.value = mode
 
         val start = _origin.value ?: _currentLocation.value ?: run {
-            _errorMessage.value = "无法获取起点位置"
+            _errorMessage.value = ERR_NO_ORIGIN
             return
         }
         val end = _destination.value ?: run {
-            _errorMessage.value = "请先设置目的地"
+            _errorMessage.value = ERR_NO_DESTINATION
             return
         }
 

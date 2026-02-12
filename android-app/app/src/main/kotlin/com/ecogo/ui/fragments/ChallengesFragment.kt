@@ -66,8 +66,8 @@ class ChallengesFragment : Fragment() {
                 }
                 filterAndDisplayChallenges()
             }
-            override fun onTabUnselected(tab: TabLayout.Tab?) {}
-            override fun onTabReselected(tab: TabLayout.Tab?) {}
+            override fun onTabUnselected(tab: TabLayout.Tab?) = Unit
+            override fun onTabReselected(tab: TabLayout.Tab?) = Unit
         })
     }
 
@@ -102,39 +102,41 @@ class ChallengesFragment : Fragment() {
                     return@launch
                 }
 
-                // 获取用户已加入的挑战ID列表
-                val userId = TokenManager.getUserId() ?: "user123"
-                try {
-                    val userResponse = RetrofitClient.apiService.getUserChallenges(userId)
-                    if (userResponse.success && userResponse.data != null) {
-                        joinedChallengeIds = userResponse.data.map { it.id }.toSet()
-                        Log.d("ChallengesFragment", "User joined ${joinedChallengeIds.size} challenges")
-
-                        // 检查每个已参加挑战的进度，判断哪些已完成
-                        completedChallengeIds.clear()
-                        for (challengeId in joinedChallengeIds) {
-                            try {
-                                val progressResp = RetrofitClient.apiService.getChallengeProgress(challengeId, userId)
-                                if (progressResp.code == 200 && progressResp.data != null) {
-                                    if (progressResp.data.status == "COMPLETED") {
-                                        completedChallengeIds.add(challengeId)
-                                    }
-                                }
-                            } catch (e: Exception) {
-                                Log.e("ChallengesFragment", "Error checking progress for $challengeId", e)
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.e("ChallengesFragment", "Error loading user challenges", e)
-                }
-
+                loadUserChallengeStatus()
                 filterAndDisplayChallenges()
             } catch (e: Exception) {
                 Log.e("ChallengesFragment", "Error loading challenges", e)
                 showError("Network error: ${e.message}")
             } finally {
                 showLoading(false)
+            }
+        }
+    }
+
+    private suspend fun loadUserChallengeStatus() {
+        val userId = TokenManager.getUserId() ?: "user123"
+        try {
+            val userResponse = RetrofitClient.apiService.getUserChallenges(userId)
+            if (userResponse.success && userResponse.data != null) {
+                joinedChallengeIds = userResponse.data.map { it.id }.toSet()
+                Log.d("ChallengesFragment", "User joined ${joinedChallengeIds.size} challenges")
+                loadCompletedChallenges(userId)
+            }
+        } catch (e: Exception) {
+            Log.e("ChallengesFragment", "Error loading user challenges", e)
+        }
+    }
+
+    private suspend fun loadCompletedChallenges(userId: String) {
+        completedChallengeIds.clear()
+        for (challengeId in joinedChallengeIds) {
+            try {
+                val progressResp = RetrofitClient.apiService.getChallengeProgress(challengeId, userId)
+                if (progressResp.code == 200 && progressResp.data?.status == "COMPLETED") {
+                    completedChallengeIds.add(challengeId)
+                }
+            } catch (e: Exception) {
+                Log.e("ChallengesFragment", "Error checking progress for $challengeId", e)
             }
         }
     }
