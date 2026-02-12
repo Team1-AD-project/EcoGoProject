@@ -161,6 +161,11 @@ export function RewardStoreManagement() {
           }
         }
 
+        // Fix: Update totalVouchers for array response if not set by pagination
+        if (Array.isArray(responseData) || (!responseData.pagination && !responseData.total)) {
+          setTotalVouchers(list.length);
+        }
+
 
 
         // Ensure ID mapping is robust
