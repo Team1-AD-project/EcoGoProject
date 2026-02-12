@@ -22,6 +22,11 @@ export default defineConfig({
       },
     },
   },
+  build: {
+    outDir: 'dist', // 打包输出目录（Pipeline 部署时会读取这个目录）
+    sourcemap: false, // 生产环境关闭源码映射，提升前端加载速度
+    chunkSizeWarningLimit: 1000, // 避免打包时出现不必要的体积警告
+  },
   test: {
     globals: true,
     environment: 'jsdom',
