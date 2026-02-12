@@ -1,0 +1,1223 @@
+
+> ecogomanagementsystem@0.0.0 test
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/outsider/Downloads/ADproject/EcoGoManagementSystem[39m
+
+ [31m❯[39m src/components/modules/RewardStoreManagement.test.tsx [2m([22m[2m0 test[22m[2m)[22m
+ [31m❯[39m src/services/auth.test.ts [2m([22m[2m0 test[22m[2m)[22m
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould call GET /trips/all and return data on success
+[22m[39m[TripService] Fetching ALL trips from /trips/all (baseURL: /api/v1/web)...
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould call GET /trips/all and return data on success
+[22m[39m[TripService] fetchAllTrips Response: { code: [33m200[39m, message: [32m'success'[39m, data: [ { id: [32m't1'[39m, distance: [33m10[39m } ] }
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] Fetching ALL trips from /trips/all (baseURL: /api/v1/web)...
+
+[90mstderr[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] fetchAllTrips non-200: { code: [33m400[39m, message: [32m'fail'[39m, data: [] }
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] fetchAllTrips Response: { code: [33m400[39m, message: [32m'fail'[39m, data: [] }
+
+ [32m✓[39m src/services/rewardService.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array on exception
+[22m[39m[TripService] Fetching ALL trips from /trips/all (baseURL: /api/v1/web)...
+
+[90mstderr[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array on exception
+[22m[39m[TripService] fetchAllTrips failed: Error: Network error
+    at [90m/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39msrc/services/tripService.test.ts:38:50
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould call GET /trips/user/{userid} and return data
+[22m[39m[TripService] Fetching trips for user: u1
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould call GET /trips/user/{userid} and return data
+[22m[39m[TripService] Response for u1: { code: [33m200[39m, message: [32m'success'[39m, data: [ { id: [32m't1'[39m, userId: [32m'u1'[39m } ] }
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] Fetching trips for user: u1
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] Response for u1: { code: [33m500[39m, message: [32m'error'[39m, data: [] }
+
+[90mstderr[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] API returned non-200 code: { code: [33m500[39m, message: [32m'error'[39m, data: [] }
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array on error
+[22m[39m[TripService] Fetching trips for user: u1
+
+[90mstderr[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array on error
+[22m[39m[TripService] Error fetching trips for u1: Error: Fail
+    at [90m/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39msrc/services/tripService.test.ts:69:50
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+ [32m✓[39m src/services/tripService.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 27[2mms[22m[39m
+ [32m✓[39m src/services/activityService.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 20[2mms[22m[39m
+[90mstdout[2m | src/components/modules/TripDataManagement.test.tsx[2m > [22m[2mTripDataManagement[2m > [22m[2mshould render and load users
+[22m[39m[TripData] Loaded batch trips: [33m1[39m
+[TripData] Sample Trip: {
+  id: [32m't1'[39m,
+  userId: [32m'u1'[39m,
+  distance: [33m5.5[39m,
+  carbonSaved: [33m1.2[39m,
+  isGreenTrip: [33mtrue[39m,
+  carbonStatus: [32m'completed'[39m,
+  startTime: [32m'2026-01-01 10:00'[39m,
+  startPoint: { lat: [33m1.3[39m, lng: [33m103.8[39m },
+  endPoint: { lat: [33m1.31[39m, lng: [33m103.81[39m },
+  startLocation: { placeName: [32m'Home'[39m },
+  endLocation: { placeName: [32m'Work'[39m }
+}
+[TripData] Aggregated Stats Map: { u1: { completed: [33m1[39m, carbon: [33m1.2[39m } }
+
+[90mstdout[2m | src/components/modules/TripDataManagement.test.tsx[2m > [22m[2mTripDataManagement[2m > [22m[2mshould select user and load trips
+[22m[39m[TripData] Loaded batch trips: [33m1[39m
+[TripData] Sample Trip: {
+  id: [32m't1'[39m,
+  userId: [32m'u1'[39m,
+  distance: [33m5.5[39m,
+  carbonSaved: [33m1.2[39m,
+  isGreenTrip: [33mtrue[39m,
+  carbonStatus: [32m'completed'[39m,
+  startTime: [32m'2026-01-01 10:00'[39m,
+  startPoint: { lat: [33m1.3[39m, lng: [33m103.8[39m },
+  endPoint: { lat: [33m1.31[39m, lng: [33m103.81[39m },
+  startLocation: { placeName: [32m'Home'[39m },
+  endLocation: { placeName: [32m'Work'[39m }
+}
+[TripData] Aggregated Stats Map: { u1: { completed: [33m1[39m, carbon: [33m1.2[39m } }
+
+[90mstdout[2m | src/components/modules/TripDataManagement.test.tsx[2m > [22m[2mTripDataManagement[2m > [22m[2mshould select user and load trips
+[22m[39m[DEBUG] Raw Trip List: [
+  {
+    id: [32m't1'[39m,
+    userId: [32m'u1'[39m,
+    distance: [33m5.5[39m,
+    carbonSaved: [33m1.2[39m,
+    isGreenTrip: [33mtrue[39m,
+    carbonStatus: [32m'completed'[39m,
+    startTime: [32m'2026-01-01 10:00'[39m,
+    startPoint: { lat: [33m1.3[39m, lng: [33m103.8[39m },
+    endPoint: { lat: [33m1.31[39m, lng: [33m103.81[39m },
+    startLocation: { placeName: [32m'Home'[39m },
+    endLocation: { placeName: [32m'Work'[39m }
+  }
+]
+[DEBUG] First Trip Sample: {
+  id: [32m't1'[39m,
+  userId: [32m'u1'[39m,
+  distance: [33m5.5[39m,
+  carbonSaved: [33m1.2[39m,
+  isGreenTrip: [33mtrue[39m,
+  carbonStatus: [32m'completed'[39m,
+  startTime: [32m'2026-01-01 10:00'[39m,
+  startPoint: { lat: [33m1.3[39m, lng: [33m103.8[39m },
+  endPoint: { lat: [33m1.31[39m, lng: [33m103.81[39m },
+  startLocation: { placeName: [32m'Home'[39m },
+  endLocation: { placeName: [32m'Work'[39m }
+}
+[DEBUG] Carbon Values: carbonSaved: [33m1.2[39m carbon_saved: [90mundefined[39m
+
+ [32m✓[39m src/api/leaderboardApi.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/api/challengeApi.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/api/statisticsApi.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/api/advertisementApi.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/api/collectiblesApi.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+[90mstderr[2m | src/components/modules/UserManagement.test.tsx[2m > [22m[2mUserManagement[2m > [22m[2mshould open edit dialog and save changes
+[22m[39mWarning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `SlotClone`.
+    at DialogOverlay (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:54:3)
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:25:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:6:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-primitive/dist/index.mjs:26:13
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-portal/dist/index.mjs:11:22
+    at Presence (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-presence/dist/index.mjs:19:11)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at DialogPortal (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:84:11)
+    at DialogPortal (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:36:6)
+    at DialogContent (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:78:3)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at Dialog (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:25:5)
+    at Dialog (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:18:6)
+    at div
+    at UserManagement (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/modules/UserManagement.tsx:22:63)
+
+ [32m✓[39m src/components/modules/UserManagement.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 306[2mms[22m[39m
+ [32m✓[39m src/services/userService.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/services/pointsService.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/services/vipService.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [31m❯[39m src/components/modules/TripDataManagement.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1070[2mms[22m[39m
+     [32m✓[39m should render and load users[32m 48[2mms[22m[39m
+[31m     [31m×[31m should select user and load trips[39m[33m 1020[2mms[22m[39m
+ [31m❯[39m src/components/modules/VIPManagement.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1197[2mms[22m[39m
+     [32m✓[39m should render vip user list[32m 160[2mms[22m[39m
+[31m     [31m×[31m should load and toggle features[39m[33m 1035[2mms[22m[39m
+[90mstderr[2m | src/components/modules/PointsTransactionManagement.test.tsx[2m > [22m[2mPointsTransactionManagement[2m > [22m[2mshould open adjust points dialog and submit
+[22m[39mWarning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `SlotClone`.
+    at DialogOverlay (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:54:3)
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:25:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:6:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-primitive/dist/index.mjs:26:13
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-portal/dist/index.mjs:11:22
+    at Presence (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-presence/dist/index.mjs:19:11)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at DialogPortal (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:84:11)
+    at DialogPortal (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:36:6)
+    at DialogContent (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:78:3)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at Dialog (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:25:5)
+    at Dialog (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:18:6)
+    at div
+    at div
+    at div
+    at div
+    at div
+    at div
+    at div
+    at PointsTransactionManagement (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/modules/PointsTransactionManagement.tsx:35:63)
+
+ [31m❯[39m src/components/modules/PointsTransactionManagement.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1159[2mms[22m[39m
+[31m     [31m×[31m should render user list and select user to show transactions[39m[33m 1073[2mms[22m[39m
+     [32m✓[39m should open adjust points dialog and submit[32m 85[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Suites 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/services/auth.test.ts[2m [ src/services/auth.test.ts ][22m
+[31m[1mReferenceError[22m: Cannot access 'mockPost' before initialization[39m
+[36m [2m❯[22m Object.<anonymous> src/services/auth.test.ts:[2m12:23[22m[39m
+    [90m 10| [39m        [35mdefault[39m[33m:[39m {
+    [90m 11| [39m            create[33m:[39m vi[33m.[39m[34mfn[39m(() [33m=>[39m ({
+    [90m 12| [39m                post[33m:[39m mockPost[33m,[39m
+    [90m   | [39m                      [31m^[39m
+    [90m 13| [39m                [35mget[39m[33m:[39m mockGet[33m,[39m
+    [90m 14| [39m                interceptors[33m:[39m {
+[90m [2m❯[22m src/services/auth.ts:[2m34:26[22m[39m
+[90m [2m❯[22m src/services/auth.test.ts:[2m2:1[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/modules/RewardStoreManagement.test.tsx[2m [ src/components/modules/RewardStoreManagement.test.tsx ][22m
+[31m[1mError[22m: Transform failed with 1 error:
+/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/modules/RewardStoreManagement.test.tsx:8:8: ERROR: Expected ";" but found "'@/services/rewardService'"[39m
+  Plugin: [35mvite:esbuild[39m
+  File: [36m/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/modules/RewardStoreManagement.test.tsx[39m:8:8
+[33m  
+  Expected ";" but found "'@/services/rewardService'"
+  6  |  
+  7  |  // Mock services
+  8  |  vi.mock '@/services/rewardService', () => ({
+     |          ^
+  9  |      fetchRewards: vi.fn(),
+  10 |      fetchOrders: vi.fn(),
+  [39m
+[90m [2m❯[22m failureErrorWithLog node_modules/esbuild/lib/main.js:[2m1467:15[22m[39m
+[90m [2m❯[22m node_modules/esbuild/lib/main.js:[2m736:50[22m[39m
+[90m [2m❯[22m responseCallbacks.<computed> node_modules/esbuild/lib/main.js:[2m603:9[22m[39m
+[90m [2m❯[22m handleIncomingPacket node_modules/esbuild/lib/main.js:[2m658:12[22m[39m
+[90m [2m❯[22m Socket.readFromStdout node_modules/esbuild/lib/main.js:[2m581:7[22m[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/5]⎯[22m[39m
+
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 3 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/components/modules/PointsTransactionManagement.test.tsx[2m > [22mPointsTransactionManagement[2m > [22mshould render user list and select user to show transactions
+[31m[1mTestingLibraryElementError[22m[39m: Found multiple elements with the text: Trip Earnings
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<span[39m
+  [33mclass[39m=[32m"inline-flex items-center justify-center rounded-md border px-2 py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground text-xs"[39m
+  [33mdata-slot[39m=[32m"badge"[39m
+[36m>[39m
+  [0mTrip Earnings[0m
+[36m</span>[39m
+
+Ignored nodes: comments, script, style
+[36m<p[39m
+  [33mclass[39m=[32m"text-sm font-medium text-gray-900"[39m
+[36m>[39m
+  [0mTrip Earnings[0m
+[36m</p>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"h-full flex flex-col bg-gray-50"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"p-6 bg-white border-b flex justify-between items-start"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-2xl font-bold text-gray-900"[39m
+          [36m>[39m
+            [0mPoints Transaction Management[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-gray-600 mt-1"[39m
+          [36m>[39m
+            [0mView user points income and expenditure records and transaction details[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"relative w-64"[39m
+        [36m/>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 flex overflow-hidden"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"w-80 bg-white border-r flex flex-col"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"p-4 border-b bg-gray-50 flex-shrink-0 space-y-3"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<h3[39m
+                [33mclass[39m=[32m"font-semibold text-gray-900"[39m
+              [36m>[39m
+                [0mUser List[0m
+              [36m</h3>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-xs text-gray-600 mt-1"[39m
+              [36m>[39m
+                [0mClick to view transaction records[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"relative"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"lucide lucide-search absolute left-2 top-2.5 h-4 w-4 text-gray-500"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<circle[39m
+                  [33mcx[39m=[32m"11"[39m
+                  [33mcy[39m=[32m"11"[39m
+                  [33mr[39m=[32m"8"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m21 21-4.3-4.3"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+              [36m<input[39m
+                [33mclass[39m=[32m"file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex w-full min-w-0 rounded-md border px-3 py-1 transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive pl-8 bg-white h-9 text-sm"[39m
+                [33mdata-slot[39m=[32m"input"[39m
+                [33mplaceholder[39m=[32m"Search users..."[39m
+                [33mvalue[39m=[32m""[39m
+              [36m/>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex-1 overflow-y-auto p-2 space-y-2"[39m
+          [36m>[39m
+            [36m<button[39m
+              [33mclass[39m=[32m"w-full p-3 rounded-lg text-left transition-all border bg-blue-50 border-blue-500 shadow-sm"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center gap-3"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"relative flex shrink-0 overflow-hidden rounded-full size-10 flex-shrink-0"[39m
+                  [33mdata-slot[39m=[32m"avatar"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"flex size-full items-center justify-center rounded-full bg-purple-600 text-white text-xs"[39m
+                    [33mdata-slot[39m=[32m"avatar-fallback"[39m
+                  [36m>[39m
+                    [0mAL[0m
+                  [36m</span>[39m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex-1 min-w-0"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex items-center justify-between mb-1"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"font-semibold text-gray-900 truncate text-sm"[39m
+                    [36m>[39m
+                      [0mAlice[0m
+                      [0m [0m
+                      [36m<span[39m
+                        [33mclass[39m=[32m"text-xs text-gray-500 font-normal"[39m
+                      [36m>[39m
+                        [0m([0m
+                        [0mu1[0m
+                        [0m)[0m
+                      [36m</span>[39m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"inline-flex items-center justify-center rounded-md border py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&]:hover:bg-secondary/90 bg-purple-100 text-purple-700 text-[10px] h-5 px-1.5"[39m
+                      [33mdata-slot[39m=[32m"badge"[39m
+                    [36m>[39m
+                      [0mVIP[0m
+                    [36m</span>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex items-center justify-between text-xs"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"text-gray-500"[39m
+                    [36m>[39m
+                      [0mBalance:[0m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"font-bold text-blue-600"[39m
+                    [36m>[39m
+                      [0m100[0m
+                      [0m pts[0m
+                    [36m</span>[39m
+                  ...
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"h-full flex flex-col bg-gray-50"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"p-6 bg-white border-b flex justify-between items-start"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<h2[39m
+              [33mclass[39m=[32m"text-2xl font-bold text-gray-900"[39m
+            [36m>[39m
+              [0mPoints Transaction Management[0m
+            [36m</h2>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-gray-600 mt-1"[39m
+            [36m>[39m
+              [0mView user points income and expenditure records and transaction details[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"relative w-64"[39m
+          [36m/>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex-1 flex overflow-hidden"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"w-80 bg-white border-r flex flex-col"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"p-4 border-b bg-gray-50 flex-shrink-0 space-y-3"[39m
+            [36m>[39m
+              [36m<div>[39m
+                [36m<h3[39m
+                  [33mclass[39m=[32m"font-semibold text-gray-900"[39m
+                [36m>[39m
+                  [0mUser List[0m
+                [36m</h3>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-xs text-gray-600 mt-1"[39m
+                [36m>[39m
+                  [0mClick to view transaction records[0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"relative"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-search absolute left-2 top-2.5 h-4 w-4 text-gray-500"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"11"[39m
+                    [33mcy[39m=[32m"11"[39m
+                    [33mr[39m=[32m"8"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m21 21-4.3-4.3"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+                [36m<input[39m
+                  [33mclass[39m=[32m"file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex w-full min-w-0 rounded-md border px-3 py-1 transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive pl-8 bg-white h-9 text-sm"[39m
+                  [33mdata-slot[39m=[32m"input"[39m
+                  [33mplaceholder[39m=[32m"Search users..."[39m
+                  [33mvalue[39m=[32m""[39m
+                [36m/>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex-1 overflow-y-auto p-2 space-y-2"[39m
+            [36m>[39m
+              [36m<button[39m
+                [33mclass[39m=[32m"w-full p-3 rounded-lg text-left transition-all border bg-blue-50 border-blue-500 shadow-sm"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-center gap-3"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"relative flex shrink-0 overflow-hidden rounded-full size-10 flex-shrink-0"[39m
+                    [33mdata-slot[39m=[32m"avatar"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"flex size-full items-center justify-center rounded-full bg-purple-600 text-white text-xs"[39m
+                      [33mdata-slot[39m=[32m"avatar-fallback"[39m
+                    [36m>[39m
+                      [0mAL[0m
+                    [36m</span>[39m
+                  [36m</span>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex-1 min-w-0"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"flex items-center justify-between mb-1"[39m
+                    [36m>[39m
+                      [36m<span[39m
+                        [33mclass[39m=[32m"font-semibold text-gray-900 truncate text-sm"[39m
+                      [36m>[39m
+                        [0mAlice[0m
+                        [0m [0m
+                        [36m<span[39m
+                          [33mclass[39m=[32m"text-xs text-gray-500 font-normal"[39m
+                        [36m>[39m
+                          [0m([0m
+                          [0mu1[0m
+                          [0m)[0m
+                        [36m</span>[39m
+                      [36m</span>[39m
+                      [36m<span[39m
+                        [33mclass[39m=[32m"inline-flex items-center justify-center rounded-md border py-0.5 font-medium w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-1 [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent [a&]:hover:bg-secondary/90 bg-purple-100 text-purple-700 text-[10px] h-5 px-1.5"[39m
+                        [33mdata-slot[39m=[32m"badge"[39m
+                      [36m>[39m
+                        [0mVIP[0m
+                      [36m</span>[39m
+                    [36m</div>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"flex items-center justify-between text-xs"[39m
+                    [36m>[39m
+                      [36m<span[39m
+                        [33mclass[39m=[32m"text-gray-500"[39m
+                      [36m>[39m
+                        [0mBalance:[0m
+        ...
+[90m [2m❯[22m Proxy.waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:[2m163:27[22m[39m
+[36m [2m❯[22m src/components/modules/PointsTransactionManagement.test.tsx:[2m62:15[22m[39m
+    [90m 60| [39m
+    [90m 61| [39m        [90m// Should load transactions[39m
+    [90m 62| [39m        [35mawait[39m [34mwaitFor[39m(() [33m=>[39m {
+    [90m   | [39m              [31m^[39m
+    [90m 63| [39m            [34mexpect[39m(fetchUserTransactions)[33m.[39m[34mtoHaveBeenCalledWith[39m([32m'u1'[39m)[33m;[39m
+    [90m 64| [39m            expect(screen.getByText('Transaction Records')).toBeInTheD…
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/modules/TripDataManagement.test.tsx[2m > [22mTripDataManagement[2m > [22mshould select user and load trips
+[31m[1mTestingLibraryElementError[22m[39m: Found multiple elements with the text: /1.20/
+
+Here are the matching elements:
+
+Ignored nodes: comments, script, style
+[36m<span[39m
+  [33mclass[39m=[32m"bg-green-50 px-1.5 py-0.5 rounded text-green-700 font-medium"[39m
+[36m>[39m
+  [0mSaved: [0m
+  [0m1.20[0m
+  [0m kg[0m
+[36m</span>[39m
+
+Ignored nodes: comments, script, style
+[36m<span>[39m
+  [0m1.20[0m
+  [0m [0m
+  [0mkg[0m
+  [0m CO₂[0m
+[36m</span>[39m
+
+Ignored nodes: comments, script, style
+[36m<div[39m
+  [33mclass[39m=[32m"text-lg font-bold text-green-700"[39m
+[36m>[39m
+  [0m1.20[0m
+  [0m [0m
+  [36m<span[39m
+    [33mclass[39m=[32m"text-xs font-normal text-green-600"[39m
+  [36m>[39m
+    [0mkg[0m
+  [36m</span>[39m
+[36m</div>[39m
+
+(If this is intentional, then use the `*AllBy*` variant of the query (like `queryAllByText`, `getAllByText`, or `findAllByText`)).
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"flex flex-col h-full p-6 gap-6"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-none flex justify-between items-center"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-2xl font-bold text-gray-900"[39m
+          [36m>[39m
+            [0mTrip Data Management[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-gray-600"[39m
+          [36m>[39m
+            [0mView user trip routes and carbon emission data[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<button[39m
+          [33mclass[39m=[32m"inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background text-foreground hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5"[39m
+          [33mdata-slot[39m=[32m"button"[39m
+        [36m>[39m
+          [36m<svg[39m
+            [33mclass[39m=[32m"lucide lucide-refresh-cw h-4 w-4 mr-2"[39m
+            [33mfill[39m=[32m"none"[39m
+            [33mheight[39m=[32m"24"[39m
+            [33mstroke[39m=[32m"currentColor"[39m
+            [33mstroke-linecap[39m=[32m"round"[39m
+            [33mstroke-linejoin[39m=[32m"round"[39m
+            [33mstroke-width[39m=[32m"2"[39m
+            [33mviewBox[39m=[32m"0 0 24 24"[39m
+            [33mwidth[39m=[32m"24"[39m
+            [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+          [36m>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M21 3v5h-5"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"[39m
+            [36m/>[39m
+            [36m<path[39m
+              [33md[39m=[32m"M8 16H3v5"[39m
+            [36m/>[39m
+          [36m</svg>[39m
+          [0m Refresh List[0m
+        [36m</button>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 flex gap-6 min-h-0"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl flex-1 min-w-0 border-0 shadow-sm relative h-[600px]"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"w-full h-full z-0"[39m
+          [36m/>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"absolute top-4 left-4 ml-2 w-[340px] bg-white/95 backdrop-blur-sm shadow-xl rounded-xl p-5 z-[500] space-y-5 border border-gray-100 transition-all duration-300 animate-in fade-in slide-in-from-top-2"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-4 border-b border-gray-100 pb-4"[39m
+            [36m>[39m
+              [36m<span[39m
+                [33mclass[39m=[32m"relative flex size-10 shrink-0 overflow-hidden rounded-full h-12 w-12 border-2 border-white shadow-md ring-1 ring-gray-100"[39m
+                [33mdata-slot[39m=[32m"avatar"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"flex size-full items-center justify-center rounded-full bg-blue-100 text-blue-700 font-bold"[39m
+                  [33mdata-slot[39m=[32m"avatar-fallback"[39m
+                [36m>[39m
+                  [0mAL[0m
+                [36m</span>[39m
+              [36m</span>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex-1 min-w-0"[39m
+              [36m>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex items-center gap-2"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"font-bold text-lg text-gray-900 truncate"[39m
+                  [36m>[39m
+                    [0mAlice[0m
+                  [36m</div>[39m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"text-xs text-gray-500 font-mono truncate mb-1"[39m
+                [36m>[39m
+                  [0mID: [0m
+                  [0mu1[0m
+                [36m</div>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex gap-2 text-[10px] text-gray-500"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-medium"[39m
+                  [36m>[39m
+                    [0mCompleted: [0m
+                    [0m1[0m
+                  [36m</span>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"bg-green-50 px-1.5 py-0.5 rounded text-green-700 font-medium"[39m
+                  [36m>[39m
+                    [0mSaved: [0m
+                    [0m1.20[0m
+                    [0m kg[0m
+                  [36m</span>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"space-y-2"[39m
+            [36m>[39m
+              [36m<label[39m
+                [33mclass[39m=[32m"text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-map-pin h-3 w-3"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"[39m
+                  [36m/>[39m
+                  [36m<circle[39m
+                    [33mcx[39m=[32m"12"[39m
+                    [33mcy[39m=[32m"10"[39m
+                    ...
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex flex-col h-full p-6 gap-6"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex-none flex justify-between items-center"[39m
+        [36m>[39m
+          [36m<div>[39m
+            [36m<h2[39m
+              [33mclass[39m=[32m"text-2xl font-bold text-gray-900"[39m
+            [36m>[39m
+              [0mTrip Data Management[0m
+            [36m</h2>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-gray-600"[39m
+            [36m>[39m
+              [0mView user trip routes and carbon emission data[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<button[39m
+            [33mclass[39m=[32m"inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive border bg-background text-foreground hover:bg-accent hover:text-accent-foreground dark:bg-input/30 dark:border-input dark:hover:bg-input/50 h-8 rounded-md gap-1.5 px-3 has-[>svg]:px-2.5"[39m
+            [33mdata-slot[39m=[32m"button"[39m
+          [36m>[39m
+            [36m<svg[39m
+              [33mclass[39m=[32m"lucide lucide-refresh-cw h-4 w-4 mr-2"[39m
+              [33mfill[39m=[32m"none"[39m
+              [33mheight[39m=[32m"24"[39m
+              [33mstroke[39m=[32m"currentColor"[39m
+              [33mstroke-linecap[39m=[32m"round"[39m
+              [33mstroke-linejoin[39m=[32m"round"[39m
+              [33mstroke-width[39m=[32m"2"[39m
+              [33mviewBox[39m=[32m"0 0 24 24"[39m
+              [33mwidth[39m=[32m"24"[39m
+              [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+            [36m>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M21 3v5h-5"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"[39m
+              [36m/>[39m
+              [36m<path[39m
+                [33md[39m=[32m"M8 16H3v5"[39m
+              [36m/>[39m
+            [36m</svg>[39m
+            [0m Refresh List[0m
+          [36m</button>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex-1 flex gap-6 min-h-0"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl flex-1 min-w-0 border-0 shadow-sm relative h-[600px]"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"w-full h-full z-0"[39m
+            [36m/>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"absolute top-4 left-4 ml-2 w-[340px] bg-white/95 backdrop-blur-sm shadow-xl rounded-xl p-5 z-[500] space-y-5 border border-gray-100 transition-all duration-300 animate-in fade-in slide-in-from-top-2"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center gap-4 border-b border-gray-100 pb-4"[39m
+              [36m>[39m
+                [36m<span[39m
+                  [33mclass[39m=[32m"relative flex size-10 shrink-0 overflow-hidden rounded-full h-12 w-12 border-2 border-white shadow-md ring-1 ring-gray-100"[39m
+                  [33mdata-slot[39m=[32m"avatar"[39m
+                [36m>[39m
+                  [36m<span[39m
+                    [33mclass[39m=[32m"flex size-full items-center justify-center rounded-full bg-blue-100 text-blue-700 font-bold"[39m
+                    [33mdata-slot[39m=[32m"avatar-fallback"[39m
+                  [36m>[39m
+                    [0mAL[0m
+                  [36m</span>[39m
+                [36m</span>[39m
+                [36m<div[39m
+                  [33mclass[39m=[32m"flex-1 min-w-0"[39m
+                [36m>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex items-center gap-2"[39m
+                  [36m>[39m
+                    [36m<div[39m
+                      [33mclass[39m=[32m"font-bold text-lg text-gray-900 truncate"[39m
+                    [36m>[39m
+                      [0mAlice[0m
+                    [36m</div>[39m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"text-xs text-gray-500 font-mono truncate mb-1"[39m
+                  [36m>[39m
+                    [0mID: [0m
+                    [0mu1[0m
+                  [36m</div>[39m
+                  [36m<div[39m
+                    [33mclass[39m=[32m"flex gap-2 text-[10px] text-gray-500"[39m
+                  [36m>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"bg-gray-100 px-1.5 py-0.5 rounded text-gray-600 font-medium"[39m
+                    [36m>[39m
+                      [0mCompleted: [0m
+                      [0m1[0m
+                    [36m</span>[39m
+                    [36m<span[39m
+                      [33mclass[39m=[32m"bg-green-50 px-1.5 py-0.5 rounded text-green-700 font-medium"[39m
+                    [36m>[39m
+                      [0mSaved: [0m
+                      [0m1.20[0m
+                      [0m kg[0m
+                    [36m</span>[39m
+                  [36m</div>[39m
+                [36m</div>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"space-y-2"[39m
+              [36m>[39m
+                [36m<label[39m
+                  [33mclass[39m=[32m"text-xs font-semibold text-gray-500 uppercase tracking-wider flex items-center gap-1"[39m
+                [36m>[39m
+                  [36m<svg[39m
+                    [33mclass[39m=[32m"lucide lucide-map-pin h-3 w-3"[39m
+                    [33mfill[39m=[32m"none"[39m
+                    [33mheight[39m=[32m"24"[39m
+                    [33mstroke[39m=[32m"currentColor"[39m
+                    [33mstroke-linecap[39m=[32m"round"[39m
+                    [33mstroke-linejoin[39m=[32m"round"[39m
+                    [33mstroke-width[39m=[32m"2"[39m
+                    [33mviewBox[39m=[32m"0 0 24 24"[39m
+                    [33mwidth[39m=[32m"24"[39m
+                    [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                  [36m>[39m
+                    [36m<path[39m
+                     ...
+[90m [2m❯[22m Proxy.waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:[2m163:27[22m[39m
+[36m [2m❯[22m src/components/modules/TripDataManagement.test.tsx:[2m115:15[22m[39m
+    [90m113| [39m        fireEvent[33m.[39m[34mclick[39m(screen[33m.[39m[34mgetByText[39m([32m'Alice'[39m))[33m;[39m
+    [90m114| [39m
+    [90m115| [39m        [35mawait[39m [34mwaitFor[39m(() [33m=>[39m {
+    [90m   | [39m              [31m^[39m
+    [90m116| [39m            [34mexpect[39m(fetchUserTrips)[33m.[39m[34mtoHaveBeenCalledWith[39m([32m'u1'[39m)[33m;[39m
+    [90m117| [39m            [90m// Check for trip stats or elements[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/5]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/modules/VIPManagement.test.tsx[2m > [22mVIPManagement[2m > [22mshould load and toggle features
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: Feature 1. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"p-6 space-y-6 bg-gray-50 min-h-full"[39m
+    [36m>[39m
+      [36m<div>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"text-2xl font-bold text-gray-900"[39m
+        [36m>[39m
+          [0mVIP Subscription Management[0m
+        [36m</h2>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"text-gray-600 mt-1"[39m
+        [36m>[39m
+          [0mManage VIP user memberships and premium features[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"grid grid-cols-1 md:grid-cols-4 gap-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-4"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center justify-between"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-gray-600"[39m
+              [36m>[39m
+                [0mTotal VIP Users[0m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-3xl font-bold text-gray-900 mt-1"[39m
+              [36m>[39m
+                [0m1[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"size-12 bg-purple-50 rounded-lg flex items-center justify-center"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"lucide lucide-crown size-6 text-purple-600"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M5 21h14"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-4"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center justify-between"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-gray-600"[39m
+              [36m>[39m
+                [0mActive[0m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-3xl font-bold text-green-600 mt-1"[39m
+              [36m>[39m
+                [0m1[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"size-12 bg-green-50 rounded-lg flex items-center justify-center"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"lucide lucide-circle-check-big size-6 text-green-600"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M21.801 10A10 10 0 1 1 17 3.335"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m9 11 3 3L22 4"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-4"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center justify-between"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-gray-600"[39m
+              [36m>[39m
+                [0mExpiring Soon[0m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-3xl font-bold text-orange-600 mt-1"[39m
+              [36m>[39m
+                [0m0[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"size-12 bg-orange-50 rounded-lg flex items-center justify-center"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"lucide lucide-calendar size-6 text-orange-600"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8 2v4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M16 2v4"[39m
+                [36m/>[39m
+                [36m<rect[39m
+                  [33mheight[39m=[32m"18"[39m
+                  [33mrx[39m=[32m"2"[39m
+                  [33mwidth[39m=[32m"18"[39m
+                  [33mx[39m=[32m"3"[39m
+                  [33my[39m=[32m"4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M3 10h18"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<d...
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"p-6 space-y-6 bg-gray-50 min-h-full"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-2xl font-bold text-gray-900"[39m
+          [36m>[39m
+            [0mVIP Subscription Management[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-gray-600 mt-1"[39m
+          [36m>[39m
+            [0mManage VIP user memberships and premium features[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid grid-cols-1 md:grid-cols-4 gap-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-4"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center justify-between"[39m
+            [36m>[39m
+              [36m<div>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-sm text-gray-600"[39m
+                [36m>[39m
+                  [0mTotal VIP Users[0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-3xl font-bold text-gray-900 mt-1"[39m
+                [36m>[39m
+                  [0m1[0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"size-12 bg-purple-50 rounded-lg flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-crown size-6 text-purple-600"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M5 21h14"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-4"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center justify-between"[39m
+            [36m>[39m
+              [36m<div>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-sm text-gray-600"[39m
+                [36m>[39m
+                  [0mActive[0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-3xl font-bold text-green-600 mt-1"[39m
+                [36m>[39m
+                  [0m1[0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"size-12 bg-green-50 rounded-lg flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-circle-check-big size-6 text-green-600"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21.801 10A10 10 0 1 1 17 3.335"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m9 11 3 3L22 4"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-4"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center justify-between"[39m
+            [36m>[39m
+              [36m<div>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-sm text-gray-600"[39m
+                [36m>[39m
+                  [0mExpiring Soon[0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-3xl font-bold text-orange-600 mt-1"[39m
+                [36m>[39m
+                  [0m0[0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"size-12 bg-orange-50 rounded-lg flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-calendar size-6 text-orange-600"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M8 2v4"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M16 2v4"[39m
+                  [36m/>[39m
+                  [36m<rect[39m
+                    [33mheight[39m=[32m"18"[39m
+                    [33mrx[39m=[32m"2"[39m
+                    [33mwidth[39m=[32m"18"[39m
+              ...
+[90m [2m❯[22m Proxy.waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:[2m163:27[22m[39m
+[36m [2m❯[22m src/components/modules/VIPManagement.test.tsx:[2m65:15[22m[39m
+    [90m 63| [39m        fireEvent[33m.[39m[34mclick[39m(featuresTab)[33m;[39m
+    [90m 64| [39m
+    [90m 65| [39m        await waitFor(() => expect(screen.getByText('Feature 1')).toBe…
+    [90m   | [39m              [31m^[39m
+    [90m 66| [39m
+    [90m 67| [39m        [90m// Toggle feature1 (enabled -> disabled)[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/5]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m5 failed[39m[22m[2m | [22m[1m[32m12 passed[39m[22m[90m (17)[39m
+[2m      Tests [22m [1m[31m3 failed[39m[22m[2m | [22m[1m[32m103 passed[39m[22m[90m (106)[39m
+[2m   Start at [22m 22:29:42
+[2m   Duration [22m 2.51s[2m (transform 991ms, setup 0ms, import 2.77s, tests 3.82s, environment 8.48s)[22m
+

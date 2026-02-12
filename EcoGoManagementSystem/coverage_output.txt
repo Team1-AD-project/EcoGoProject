@@ -1,0 +1,291 @@
+
+> ecogomanagementsystem@0.0.0 test:coverage
+> vitest run --coverage
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/outsider/Downloads/ADproject/EcoGoManagementSystem[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould call GET /trips/all and return data on success
+[22m[39m[TripService] Fetching ALL trips from /trips/all (baseURL: /api/v1/web)...
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould call GET /trips/all and return data on success
+[22m[39m[TripService] fetchAllTrips Response: { code: [33m200[39m, message: [32m'success'[39m, data: [ { id: [32m't1'[39m, distance: [33m10[39m } ] }
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] Fetching ALL trips from /trips/all (baseURL: /api/v1/web)...
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] fetchAllTrips Response: { code: [33m400[39m, message: [32m'fail'[39m, data: [] }
+
+[90mstderr[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] fetchAllTrips non-200: { code: [33m400[39m, message: [32m'fail'[39m, data: [] }
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array on exception
+[22m[39m[TripService] Fetching ALL trips from /trips/all (baseURL: /api/v1/web)...
+
+[90mstderr[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array on exception
+[22m[39m[TripService] fetchAllTrips failed: Error: Network error
+    at [90m/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39msrc/services/tripService.test.ts:38:50
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould call GET /trips/user/{userid} and return data
+[22m[39m[TripService] Fetching trips for user: u1
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould call GET /trips/user/{userid} and return data
+[22m[39m[TripService] Response for u1: { code: [33m200[39m, message: [32m'success'[39m, data: [ { id: [32m't1'[39m, userId: [32m'u1'[39m } ] }
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] Fetching trips for user: u1
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] Response for u1: { code: [33m500[39m, message: [32m'error'[39m, data: [] }
+
+[90mstderr[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] API returned non-200 code: { code: [33m500[39m, message: [32m'error'[39m, data: [] }
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array on error
+[22m[39m[TripService] Fetching trips for user: u1
+
+[90mstderr[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array on error
+[22m[39m[TripService] Error fetching trips for u1: Error: Fail
+    at [90m/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39msrc/services/tripService.test.ts:69:50
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+ [32m✓[39m src/services/tripService.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+ [32m✓[39m src/api/advertisementApi.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 8[2mms[22m[39m
+ [32m✓[39m src/services/rewardService.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+ [32m✓[39m src/api/collectiblesApi.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 7[2mms[22m[39m
+[90mstdout[2m | src/components/modules/TripDataManagement.test.tsx[2m > [22m[2mTripDataManagement[2m > [22m[2mshould render and load users
+[22m[39m[TripData] Loaded batch trips: [33m1[39m
+[TripData] Sample Trip: {
+  id: [32m't1'[39m,
+  userId: [32m'u1'[39m,
+  distance: [33m5.5[39m,
+  carbonSaved: [33m1.2[39m,
+  isGreenTrip: [33mtrue[39m,
+  carbonStatus: [32m'completed'[39m,
+  startTime: [32m'2026-01-01 10:00'[39m,
+  startPoint: { lat: [33m1.3[39m, lng: [33m103.8[39m },
+  endPoint: { lat: [33m1.31[39m, lng: [33m103.81[39m },
+  startLocation: { placeName: [32m'Home'[39m },
+  endLocation: { placeName: [32m'Work'[39m }
+}
+[TripData] Aggregated Stats Map: { u1: { completed: [33m1[39m, carbon: [33m1.2[39m } }
+
+ [32m✓[39m src/api/statisticsApi.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+[90mstdout[2m | src/components/modules/TripDataManagement.test.tsx[2m > [22m[2mTripDataManagement[2m > [22m[2mshould select user and load trips
+[22m[39m[TripData] Loaded batch trips: [33m1[39m
+[TripData] Sample Trip: {
+  id: [32m't1'[39m,
+  userId: [32m'u1'[39m,
+  distance: [33m5.5[39m,
+  carbonSaved: [33m1.2[39m,
+  isGreenTrip: [33mtrue[39m,
+  carbonStatus: [32m'completed'[39m,
+  startTime: [32m'2026-01-01 10:00'[39m,
+  startPoint: { lat: [33m1.3[39m, lng: [33m103.8[39m },
+  endPoint: { lat: [33m1.31[39m, lng: [33m103.81[39m },
+  startLocation: { placeName: [32m'Home'[39m },
+  endLocation: { placeName: [32m'Work'[39m }
+}
+[TripData] Aggregated Stats Map: { u1: { completed: [33m1[39m, carbon: [33m1.2[39m } }
+
+[90mstdout[2m | src/components/modules/TripDataManagement.test.tsx[2m > [22m[2mTripDataManagement[2m > [22m[2mshould select user and load trips
+[22m[39m[DEBUG] Raw Trip List: [
+  {
+    id: [32m't1'[39m,
+    userId: [32m'u1'[39m,
+    distance: [33m5.5[39m,
+    carbonSaved: [33m1.2[39m,
+    isGreenTrip: [33mtrue[39m,
+    carbonStatus: [32m'completed'[39m,
+    startTime: [32m'2026-01-01 10:00'[39m,
+    startPoint: { lat: [33m1.3[39m, lng: [33m103.8[39m },
+    endPoint: { lat: [33m1.31[39m, lng: [33m103.81[39m },
+    startLocation: { placeName: [32m'Home'[39m },
+    endLocation: { placeName: [32m'Work'[39m }
+  }
+]
+[DEBUG] First Trip Sample: {
+  id: [32m't1'[39m,
+  userId: [32m'u1'[39m,
+  distance: [33m5.5[39m,
+  carbonSaved: [33m1.2[39m,
+  isGreenTrip: [33mtrue[39m,
+  carbonStatus: [32m'completed'[39m,
+  startTime: [32m'2026-01-01 10:00'[39m,
+  startPoint: { lat: [33m1.3[39m, lng: [33m103.8[39m },
+  endPoint: { lat: [33m1.31[39m, lng: [33m103.81[39m },
+  startLocation: { placeName: [32m'Home'[39m },
+  endLocation: { placeName: [32m'Work'[39m }
+}
+[DEBUG] Carbon Values: carbonSaved: [33m1.2[39m carbon_saved: [90mundefined[39m
+
+ [32m✓[39m src/services/activityService.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+ [32m✓[39m src/api/challengeApi.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/api/leaderboardApi.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/components/modules/TripDataManagement.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 144[2mms[22m[39m
+[90mstdout[2m | src/components/modules/RewardStoreManagement.test.tsx[2m > [22m[2mRewardStoreManagement[2m > [22m[2mshould render and load data
+[22m[39mRewards API Response: {
+  code: [33m200[39m,
+  message: [32m'success'[39m,
+  data: [],
+  pagination: { total: [33m0[39m, page: [33m1[39m, size: [33m10[39m, totalPages: [33m0[39m }
+}
+
+[90mstdout[2m | src/components/modules/RewardStoreManagement.test.tsx[2m > [22m[2mRewardStoreManagement[2m > [22m[2mshould switch tabs
+[22m[39mRewards API Response: {
+  code: [33m200[39m,
+  message: [32m'success'[39m,
+  data: [],
+  pagination: { total: [33m0[39m, page: [33m1[39m, size: [33m10[39m, totalPages: [33m0[39m }
+}
+
+[90mstderr[2m | src/components/modules/UserManagement.test.tsx[2m > [22m[2mUserManagement[2m > [22m[2mshould open edit dialog and save changes
+[22m[39mWarning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `SlotClone`.
+    at DialogOverlay (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:54:3)
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:25:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:6:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-primitive/dist/index.mjs:26:13
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-portal/dist/index.mjs:11:22
+    at Presence (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-presence/dist/index.mjs:19:11)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at DialogPortal (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:84:11)
+    at DialogPortal (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:36:6)
+    at DialogContent (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:78:3)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at Dialog (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:25:5)
+    at Dialog (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:18:6)
+    at div
+    at UserManagement (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/modules/UserManagement.tsx:22:63)
+
+[90mstderr[2m | src/components/modules/PointsTransactionManagement.test.tsx[2m > [22m[2mPointsTransactionManagement[2m > [22m[2mshould open adjust points dialog and submit
+[22m[39mWarning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `SlotClone`.
+    at DialogOverlay (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:54:3)
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:25:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:6:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-primitive/dist/index.mjs:26:13
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-portal/dist/index.mjs:11:22
+    at Presence (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-presence/dist/index.mjs:19:11)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at DialogPortal (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:84:11)
+    at DialogPortal (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:36:6)
+    at DialogContent (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:78:3)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at Dialog (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:25:5)
+    at Dialog (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:18:6)
+    at div
+    at div
+    at div
+    at div
+    at div
+    at div
+    at div
+    at PointsTransactionManagement (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/modules/PointsTransactionManagement.tsx:35:63)
+
+[90mstdout[2m | src/components/modules/RewardStoreManagement.test.tsx[2m > [22m[2mRewardStoreManagement[2m > [22m[2mshould open add product dialog
+[22m[39mRewards API Response: {
+  code: [33m200[39m,
+  message: [32m'success'[39m,
+  data: [],
+  pagination: { total: [33m0[39m, page: [33m1[39m, size: [33m10[39m, totalPages: [33m0[39m }
+}
+
+[90mstderr[2m | src/components/modules/RewardStoreManagement.test.tsx[2m > [22m[2mRewardStoreManagement[2m > [22m[2mshould open add product dialog
+[22m[39mWarning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `SlotClone`.
+    at DialogOverlay (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:54:3)
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:25:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:6:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-primitive/dist/index.mjs:26:13
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-portal/dist/index.mjs:11:22
+    at Presence (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-presence/dist/index.mjs:19:11)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at DialogPortal (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:84:11)
+    at DialogPortal (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:36:6)
+    at DialogContent (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:78:3)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at Dialog (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:25:5)
+    at Dialog (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:18:6)
+    at div
+    at RewardStoreManagement (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/modules/RewardStoreManagement.tsx:59:67)
+
+ [32m✓[39m src/components/modules/PointsTransactionManagement.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 413[2mms[22m[39m
+ [32m✓[39m src/components/modules/RewardStoreManagement.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 416[2mms[22m[39m
+ [32m✓[39m src/components/modules/UserManagement.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 522[2mms[22m[39m
+ [32m✓[39m src/components/modules/VIPManagement.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 461[2mms[22m[39m
+ [32m✓[39m src/services/pointsService.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m src/services/auth.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/services/userService.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/services/vipService.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m17 passed[39m[22m[90m (17)[39m
+[2m      Tests [22m [1m[32m113 passed[39m[22m[90m (113)[39m
+[2m   Start at [22m 22:38:19
+[2m   Duration [22m 2.06s[2m (transform 1.22s, setup 0ms, import 3.79s, tests 2.03s, environment 8.11s)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   63.97 |    40.59 |   63.13 |   67.39 |                   
+ api               |     100 |      100 |     100 |     100 |                   
+  ...isementApi.ts |     100 |      100 |     100 |     100 |                   
+  challengeApi.ts  |     100 |      100 |     100 |     100 |                   
+  ...ctiblesApi.ts |     100 |      100 |     100 |     100 |                   
+  ...erboardApi.ts |     100 |      100 |     100 |     100 |                   
+  statisticsApi.ts |     100 |      100 |     100 |     100 |                   
+ components/figma  |   16.66 |        0 |       0 |   16.66 |                   
+  ...hFallback.tsx |   16.66 |        0 |       0 |   16.66 | 11-19             
+ ...onents/modules |   55.88 |    37.37 |   50.54 |   59.58 |                   
+  ...anagement.tsx |   72.16 |    59.78 |      75 |   72.72 | ...96,244-255,330 
+  ...anagement.tsx |   41.86 |    24.72 |   20.31 |   45.17 | ...84-786,795-934 
+  ...anagement.tsx |   54.77 |    31.76 |   62.22 |   58.19 | ...01-452,505-518 
+  ...anagement.tsx |   60.36 |    45.71 |   48.38 |      65 | ...89-325,361-452 
+  ...anagement.tsx |   72.63 |     59.7 |     100 |      84 | ...91,116-118,140 
+ components/ui     |   80.32 |    73.68 |   74.46 |   80.32 |                   
+  avatar.tsx       |      75 |      100 |   66.66 |      75 | 28                
+  badge.tsx        |     100 |    66.66 |     100 |     100 | 35                
+  button.tsx       |     100 |    66.66 |     100 |     100 | 44                
+  card.tsx         |   57.14 |      100 |   57.14 |   57.14 | 42-52,75          
+  dialog.tsx       |    90.9 |      100 |      90 |    90.9 | 30                
+  input.tsx        |     100 |      100 |     100 |     100 |                   
+  label.tsx        |     100 |      100 |     100 |     100 |                   
+  scroll-area.tsx  |     100 |       80 |     100 |     100 | 44                
+  select.tsx       |   72.72 |      100 |      70 |   72.72 | 22,96,133         
+  switch.tsx       |     100 |      100 |     100 |     100 |                   
+  tabs.tsx         |     100 |      100 |     100 |     100 |                   
+  textarea.tsx     |     100 |      100 |     100 |     100 |                   
+  tooltip.tsx      |      20 |        0 |       0 |      20 | 12-43             
+  utils.ts         |     100 |      100 |     100 |     100 |                   
+ services          |   91.86 |       76 |   88.23 |   91.86 |                   
+  ...ityService.ts |     100 |      100 |     100 |     100 |                   
+  auth.ts          |   52.38 |    44.44 |      20 |   52.38 | 45-52,58-66       
+  pointsService.ts |     100 |      100 |     100 |     100 |                   
+  rewardService.ts |     100 |      100 |     100 |     100 |                   
+  tripService.ts   |     100 |     87.5 |     100 |     100 | 74                
+  userService.ts   |     100 |      100 |     100 |     100 |                   
+  vipService.ts    |     100 |      100 |     100 |     100 |                   
+-------------------|---------|----------|---------|---------|-------------------

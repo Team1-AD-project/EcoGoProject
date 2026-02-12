@@ -1,0 +1,10 @@
+@import './fonts.css';
+@import './tailwind.css';
+@import './theme.css';
+
+/* 确保根元素占满整个视口高度 */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}

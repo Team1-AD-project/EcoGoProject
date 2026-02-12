@@ -1,0 +1,927 @@
+
+> ecogomanagementsystem@0.0.0 test
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv4.0.18 [39m[90m/Users/outsider/Downloads/ADproject/EcoGoManagementSystem[39m
+
+ [32m✓[39m src/services/activityService.test.ts [2m([22m[2m13 tests[22m[2m)[22m[32m 18[2mms[22m[39m
+ [32m✓[39m src/services/auth.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 10[2mms[22m[39m
+ [32m✓[39m src/api/collectiblesApi.test.ts [2m([22m[2m17 tests[22m[2m)[22m[32m 21[2mms[22m[39m
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould call GET /trips/all and return data on success
+[22m[39m[TripService] Fetching ALL trips from /trips/all (baseURL: /api/v1/web)...
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould call GET /trips/all and return data on success
+[22m[39m[TripService] fetchAllTrips Response: { code: [33m200[39m, message: [32m'success'[39m, data: [ { id: [32m't1'[39m, distance: [33m10[39m } ] }
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] Fetching ALL trips from /trips/all (baseURL: /api/v1/web)...
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] fetchAllTrips Response: { code: [33m400[39m, message: [32m'fail'[39m, data: [] }
+
+[90mstderr[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] fetchAllTrips non-200: { code: [33m400[39m, message: [32m'fail'[39m, data: [] }
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array on exception
+[22m[39m[TripService] Fetching ALL trips from /trips/all (baseURL: /api/v1/web)...
+
+[90mstderr[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchAllTrips[2m > [22m[2mshould return empty array on exception
+[22m[39m[TripService] fetchAllTrips failed: Error: Network error
+    at [90m/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39msrc/services/tripService.test.ts:38:50
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould call GET /trips/user/{userid} and return data
+[22m[39m[TripService] Fetching trips for user: u1
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould call GET /trips/user/{userid} and return data
+[22m[39m[TripService] Response for u1: { code: [33m200[39m, message: [32m'success'[39m, data: [ { id: [32m't1'[39m, userId: [32m'u1'[39m } ] }
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] Fetching trips for user: u1
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] Response for u1: { code: [33m500[39m, message: [32m'error'[39m, data: [] }
+
+[90mstderr[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array if response code is not 200
+[22m[39m[TripService] API returned non-200 code: { code: [33m500[39m, message: [32m'error'[39m, data: [] }
+
+[90mstdout[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array on error
+[22m[39m[TripService] Fetching trips for user: u1
+
+[90mstderr[2m | src/services/tripService.test.ts[2m > [22m[2mtripService[2m > [22m[2mfetchUserTrips[2m > [22m[2mshould return empty array on error
+[22m[39m[TripService] Error fetching trips for u1: Error: Fail
+    at [90m/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39msrc/services/tripService.test.ts:69:50
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:145:11
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:915:26
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1243:20
+    at new Promise (<anonymous>)
+    at runWithTimeout [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1209:10[90m)[39m
+    at [90mfile:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:37
+    at Traces.$ [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4mvitest[24m/dist/chunks/traces.CCmnQaNT.js:142:27[90m)[39m
+    at trace [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4mvitest[24m/dist/chunks/test.B8ej_ZHS.js:239:21[90m)[39m
+    at runTest [90m(file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/[39mnode_modules/[4m@vitest/runner[24m/dist/index.js:1653:12[90m)[39m
+
+ [32m✓[39m src/services/tripService.test.ts [2m([22m[2m6 tests[22m[2m)[22m[32m 12[2mms[22m[39m
+[90mstdout[2m | src/components/modules/TripDataManagement.test.tsx[2m > [22m[2mTripDataManagement[2m > [22m[2mshould render and load users
+[22m[39m[TripData] Loaded batch trips: [33m1[39m
+[TripData] Sample Trip: {
+  id: [32m't1'[39m,
+  userId: [32m'u1'[39m,
+  distance: [33m5.5[39m,
+  carbonSaved: [33m1.2[39m,
+  isGreenTrip: [33mtrue[39m,
+  carbonStatus: [32m'completed'[39m,
+  startTime: [32m'2026-01-01 10:00'[39m,
+  startPoint: { lat: [33m1.3[39m, lng: [33m103.8[39m },
+  endPoint: { lat: [33m1.31[39m, lng: [33m103.81[39m },
+  startLocation: { placeName: [32m'Home'[39m },
+  endLocation: { placeName: [32m'Work'[39m }
+}
+[TripData] Aggregated Stats Map: { u1: { completed: [33m1[39m, carbon: [33m1.2[39m } }
+
+[90mstdout[2m | src/components/modules/TripDataManagement.test.tsx[2m > [22m[2mTripDataManagement[2m > [22m[2mshould select user and load trips
+[22m[39m[TripData] Loaded batch trips: [33m1[39m
+[TripData] Sample Trip: {
+  id: [32m't1'[39m,
+  userId: [32m'u1'[39m,
+  distance: [33m5.5[39m,
+  carbonSaved: [33m1.2[39m,
+  isGreenTrip: [33mtrue[39m,
+  carbonStatus: [32m'completed'[39m,
+  startTime: [32m'2026-01-01 10:00'[39m,
+  startPoint: { lat: [33m1.3[39m, lng: [33m103.8[39m },
+  endPoint: { lat: [33m1.31[39m, lng: [33m103.81[39m },
+  startLocation: { placeName: [32m'Home'[39m },
+  endLocation: { placeName: [32m'Work'[39m }
+}
+[TripData] Aggregated Stats Map: { u1: { completed: [33m1[39m, carbon: [33m1.2[39m } }
+
+[90mstdout[2m | src/components/modules/TripDataManagement.test.tsx[2m > [22m[2mTripDataManagement[2m > [22m[2mshould select user and load trips
+[22m[39m[DEBUG] Raw Trip List: [
+  {
+    id: [32m't1'[39m,
+    userId: [32m'u1'[39m,
+    distance: [33m5.5[39m,
+    carbonSaved: [33m1.2[39m,
+    isGreenTrip: [33mtrue[39m,
+    carbonStatus: [32m'completed'[39m,
+    startTime: [32m'2026-01-01 10:00'[39m,
+    startPoint: { lat: [33m1.3[39m, lng: [33m103.8[39m },
+    endPoint: { lat: [33m1.31[39m, lng: [33m103.81[39m },
+    startLocation: { placeName: [32m'Home'[39m },
+    endLocation: { placeName: [32m'Work'[39m }
+  }
+]
+[DEBUG] First Trip Sample: {
+  id: [32m't1'[39m,
+  userId: [32m'u1'[39m,
+  distance: [33m5.5[39m,
+  carbonSaved: [33m1.2[39m,
+  isGreenTrip: [33mtrue[39m,
+  carbonStatus: [32m'completed'[39m,
+  startTime: [32m'2026-01-01 10:00'[39m,
+  startPoint: { lat: [33m1.3[39m, lng: [33m103.8[39m },
+  endPoint: { lat: [33m1.31[39m, lng: [33m103.81[39m },
+  startLocation: { placeName: [32m'Home'[39m },
+  endLocation: { placeName: [32m'Work'[39m }
+}
+[DEBUG] Carbon Values: carbonSaved: [33m1.2[39m carbon_saved: [90mundefined[39m
+
+ [32m✓[39m src/components/modules/TripDataManagement.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 141[2mms[22m[39m
+ [32m✓[39m src/services/rewardService.test.ts [2m([22m[2m10 tests[22m[2m)[22m[32m 5[2mms[22m[39m
+ [32m✓[39m src/api/statisticsApi.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 4[2mms[22m[39m
+ [32m✓[39m src/api/advertisementApi.test.ts [2m([22m[2m11 tests[22m[2m)[22m[32m 11[2mms[22m[39m
+ [32m✓[39m src/api/challengeApi.test.ts [2m([22m[2m14 tests[22m[2m)[22m[32m 6[2mms[22m[39m
+[90mstdout[2m | src/components/modules/RewardStoreManagement.test.tsx[2m > [22m[2mRewardStoreManagement[2m > [22m[2mshould render and load data
+[22m[39mRewards API Response: {
+  code: [33m200[39m,
+  message: [32m'success'[39m,
+  data: [],
+  pagination: { total: [33m0[39m, page: [33m1[39m, size: [33m10[39m, totalPages: [33m0[39m }
+}
+
+[90mstdout[2m | src/components/modules/RewardStoreManagement.test.tsx[2m > [22m[2mRewardStoreManagement[2m > [22m[2mshould switch tabs
+[22m[39mRewards API Response: {
+  code: [33m200[39m,
+  message: [32m'success'[39m,
+  data: [],
+  pagination: { total: [33m0[39m, page: [33m1[39m, size: [33m10[39m, totalPages: [33m0[39m }
+}
+
+[90mstderr[2m | src/components/modules/PointsTransactionManagement.test.tsx[2m > [22m[2mPointsTransactionManagement[2m > [22m[2mshould open adjust points dialog and submit
+[22m[39mWarning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `SlotClone`.
+    at DialogOverlay (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:54:3)
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:25:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:6:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-primitive/dist/index.mjs:26:13
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-portal/dist/index.mjs:11:22
+    at Presence (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-presence/dist/index.mjs:19:11)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at DialogPortal (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:84:11)
+    at DialogPortal (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:36:6)
+    at DialogContent (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:78:3)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at Dialog (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:25:5)
+    at Dialog (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:18:6)
+    at div
+    at div
+    at div
+    at div
+    at div
+    at div
+    at div
+    at PointsTransactionManagement (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/modules/PointsTransactionManagement.tsx:35:63)
+
+ [32m✓[39m src/components/modules/PointsTransactionManagement.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[33m 380[2mms[22m[39m
+[90mstderr[2m | src/components/modules/UserManagement.test.tsx[2m > [22m[2mUserManagement[2m > [22m[2mshould open edit dialog and save changes
+[22m[39mWarning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `SlotClone`.
+    at DialogOverlay (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:54:3)
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:25:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:6:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-primitive/dist/index.mjs:26:13
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-portal/dist/index.mjs:11:22
+    at Presence (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-presence/dist/index.mjs:19:11)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at DialogPortal (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:84:11)
+    at DialogPortal (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:36:6)
+    at DialogContent (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:78:3)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at Dialog (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:25:5)
+    at Dialog (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:18:6)
+    at div
+    at UserManagement (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/modules/UserManagement.tsx:22:63)
+
+[90mstdout[2m | src/components/modules/RewardStoreManagement.test.tsx[2m > [22m[2mRewardStoreManagement[2m > [22m[2mshould open add product dialog
+[22m[39mRewards API Response: {
+  code: [33m200[39m,
+  message: [32m'success'[39m,
+  data: [],
+  pagination: { total: [33m0[39m, page: [33m1[39m, size: [33m10[39m, totalPages: [33m0[39m }
+}
+
+[90mstderr[2m | src/components/modules/RewardStoreManagement.test.tsx[2m > [22m[2mRewardStoreManagement[2m > [22m[2mshould open add product dialog
+[22m[39mWarning: Function components cannot be given refs. Attempts to access this ref will fail. Did you mean to use React.forwardRef()?
+
+Check the render method of `SlotClone`.
+    at DialogOverlay (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:54:3)
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:25:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-slot/dist/index.mjs:6:11
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-primitive/dist/index.mjs:26:13
+    at file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-portal/dist/index.mjs:11:22
+    at Presence (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-presence/dist/index.mjs:19:11)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at DialogPortal (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:84:11)
+    at DialogPortal (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:36:6)
+    at DialogContent (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:78:3)
+    at Provider (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-context/dist/index.mjs:27:15)
+    at Dialog (file:///Users/outsider/Downloads/ADproject/EcoGoManagementSystem/node_modules/@radix-ui/react-dialog/dist/index.mjs:25:5)
+    at Dialog (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/ui/dialog.tsx:18:6)
+    at div
+    at RewardStoreManagement (/Users/outsider/Downloads/ADproject/EcoGoManagementSystem/src/components/modules/RewardStoreManagement.tsx:59:67)
+
+ [32m✓[39m src/components/modules/UserManagement.test.tsx [2m([22m[2m4 tests[22m[2m)[22m[33m 479[2mms[22m[39m
+ [32m✓[39m src/api/leaderboardApi.test.ts [2m([22m[2m7 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/services/userService.test.ts [2m([22m[2m5 tests[22m[2m)[22m[32m 3[2mms[22m[39m
+ [32m✓[39m src/services/pointsService.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [32m✓[39m src/services/vipService.test.ts [2m([22m[2m2 tests[22m[2m)[22m[32m 2[2mms[22m[39m
+ [31m❯[39m src/components/modules/VIPManagement.test.tsx [2m([22m[2m2 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1179[2mms[22m[39m
+     [32m✓[39m should render vip user list[32m 145[2mms[22m[39m
+[31m     [31m×[31m should load and toggle features[39m[33m 1032[2mms[22m[39m
+ [31m❯[39m src/components/modules/RewardStoreManagement.test.tsx [2m([22m[2m3 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[33m 1381[2mms[22m[39m
+     [32m✓[39m should render and load data[32m 209[2mms[22m[39m
+     [32m✓[39m should switch tabs[32m 79[2mms[22m[39m
+[31m     [31m×[31m should open add product dialog[39m[33m 1085[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 2 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/components/modules/RewardStoreManagement.test.tsx[2m > [22mRewardStoreManagement[2m > [22mshould open add product dialog
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: Edit Product Details. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body[39m
+  [33mdata-scroll-locked[39m=[32m"1"[39m
+  [33mstyle[39m=[32m"pointer-events: none;"[39m
+[36m>[39m
+  [36m<span[39m
+    [33maria-hidden[39m=[32m"true"[39m
+    [33mdata-aria-hidden[39m=[32m"true"[39m
+    [33mdata-radix-focus-guard[39m=[32m""[39m
+    [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
+    [33mtabindex[39m=[32m"0"[39m
+  [36m/>[39m
+  [36m<div[39m
+    [33maria-hidden[39m=[32m"true"[39m
+    [33mdata-aria-hidden[39m=[32m"true"[39m
+  [36m>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"min-h-full bg-gray-50 flex flex-col h-full"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"p-6 bg-white border-b flex-shrink-0"[39m
+      [36m>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"text-2xl font-bold text-gray-900"[39m
+        [36m>[39m
+          [0mReward Store Management[0m
+        [36m</h2>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"text-gray-600 mt-1"[39m
+        [36m>[39m
+          [0mManage product inventory, redemption points, and VIP rewards[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"flex-1 overflow-y-auto p-6"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-col gap-6 rounded-xl border p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3 mb-2"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"lucide lucide-package size-8"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M12 22V12"[39m
+                [36m/>[39m
+                [36m<polyline[39m
+                  [33mpoints[39m=[32m"3.29 7 12 12 20.71 7"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m7.5 4.27 9 5.15"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-sm opacity-90 mb-1"[39m
+            [36m>[39m
+              [0mTotal Products[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-3xl font-bold"[39m
+            [36m>[39m
+              [0m0[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-col gap-6 rounded-xl border p-4 bg-gradient-to-br from-green-500 to-green-600 text-white"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3 mb-2"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"lucide lucide-shopping-bag size-8"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M3 6h18"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M16 10a4 4 0 0 1-8 0"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-sm opacity-90 mb-1"[39m
+            [36m>[39m
+              [0mTotal Redemptions[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-3xl font-bold"[39m
+            [36m>[39m
+              [0m0[0m
+            [36m</p>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex flex-col gap-6 rounded-xl border p-4 bg-gradient-to-br from-purple-500 to-purple-600 text-white"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center gap-3 mb-2"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"lucide lucide-trending-up size-8"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<polyline[39m
+                  [33mpoints[39m=[32m"22 7 13.5 15.5 8.5 10.5 2 17"[39m
+                [36m/>[39m
+                [36m<polyline[39m
+                  [33mpoints[39m=[32m"16 7 22 7 22 13"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-sm opacity-90 mb-1"[39m
+            [36m>[39m
+              [0mTotal Points Redeemed[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-3xl font-bold"[39m
+            [36m>[39m
+              [0m0[0m
+            [36m</p>[39m
+            [36m<p[39m
+              [33mclass[39m=[32m"text-xs opacity-75 mt-1"[39m
+            [36m>[39m
+  ...
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body[39m
+    [33mdata-scroll-locked[39m=[32m"1"[39m
+    [33mstyle[39m=[32m"pointer-events: none;"[39m
+  [36m>[39m
+    [36m<span[39m
+      [33maria-hidden[39m=[32m"true"[39m
+      [33mdata-aria-hidden[39m=[32m"true"[39m
+      [33mdata-radix-focus-guard[39m=[32m""[39m
+      [33mstyle[39m=[32m"outline: none; opacity: 0; position: fixed; pointer-events: none;"[39m
+      [33mtabindex[39m=[32m"0"[39m
+    [36m/>[39m
+    [36m<div[39m
+      [33maria-hidden[39m=[32m"true"[39m
+      [33mdata-aria-hidden[39m=[32m"true"[39m
+    [36m>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"min-h-full bg-gray-50 flex flex-col h-full"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"p-6 bg-white border-b flex-shrink-0"[39m
+        [36m>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-2xl font-bold text-gray-900"[39m
+          [36m>[39m
+            [0mReward Store Management[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-gray-600 mt-1"[39m
+          [36m>[39m
+            [0mManage product inventory, redemption points, and VIP rewards[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"flex-1 overflow-y-auto p-6"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"grid grid-cols-1 md:grid-cols-4 gap-4 mb-6"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-6 rounded-xl border p-4 bg-gradient-to-br from-blue-500 to-blue-600 text-white"[39m
+              [33mdata-slot[39m=[32m"card"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center gap-3 mb-2"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-package size-8"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M12 22V12"[39m
+                  [36m/>[39m
+                  [36m<polyline[39m
+                    [33mpoints[39m=[32m"3.29 7 12 12 20.71 7"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m7.5 4.27 9 5.15"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm opacity-90 mb-1"[39m
+              [36m>[39m
+                [0mTotal Products[0m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-3xl font-bold"[39m
+              [36m>[39m
+                [0m0[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-6 rounded-xl border p-4 bg-gradient-to-br from-green-500 to-green-600 text-white"[39m
+              [33mdata-slot[39m=[32m"card"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center gap-3 mb-2"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-shopping-bag size-8"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M3 6h18"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M16 10a4 4 0 0 1-8 0"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm opacity-90 mb-1"[39m
+              [36m>[39m
+                [0mTotal Redemptions[0m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-3xl font-bold"[39m
+              [36m>[39m
+                [0m0[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex flex-col gap-6 rounded-xl border p-4 bg-gradient-to-br from-purple-500 to-purple-600 text-white"[39m
+              [33mdata-slot[39m=[32m"card"[39m
+            [36m>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"flex items-center gap-3 mb-2"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-trending-up size-8"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<polyline[39m
+                    [33mpoints[39m=[32m"22 7 13.5 15.5 8.5 10.5 2 17"[39m
+                  [36m/>[39m
+                  [36m<polyline[39m
+                    [33mpoints[39m=[32m"16 7 22 7 22 13"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm opacity-90 mb-1"[39m
+              [36m>[39m
+     ...
+[90m [2m❯[22m Proxy.waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:[2m163:27[22m[39m
+[36m [2m❯[22m src/components/modules/RewardStoreManagement.test.tsx:[2m62:15[22m[39m
+    [90m 60| [39m        fireEvent[33m.[39m[34mclick[39m(addButton)[33m;[39m
+    [90m 61| [39m
+    [90m 62| [39m        [35mawait[39m [34mwaitFor[39m(() [33m=>[39m {
+    [90m   | [39m              [31m^[39m
+    [90m 63| [39m            // Depending on how dialog is implemented, 'Edit' might be…
+    [90m 64| [39m            [90m// Checking for input fields is safer[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/2]⎯[22m[39m
+
+[41m[1m FAIL [22m[49m src/components/modules/VIPManagement.test.tsx[2m > [22mVIPManagement[2m > [22mshould load and toggle features
+[31m[1mTestingLibraryElementError[22m[39m: Unable to find an element with the text: Feature 1. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+
+Ignored nodes: comments, script, style
+[36m<body>[39m
+  [36m<div>[39m
+    [36m<div[39m
+      [33mclass[39m=[32m"p-6 space-y-6 bg-gray-50 min-h-full"[39m
+    [36m>[39m
+      [36m<div>[39m
+        [36m<h2[39m
+          [33mclass[39m=[32m"text-2xl font-bold text-gray-900"[39m
+        [36m>[39m
+          [0mVIP Subscription Management[0m
+        [36m</h2>[39m
+        [36m<p[39m
+          [33mclass[39m=[32m"text-gray-600 mt-1"[39m
+        [36m>[39m
+          [0mManage VIP user memberships and premium features[0m
+        [36m</p>[39m
+      [36m</div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"grid grid-cols-1 md:grid-cols-4 gap-4"[39m
+      [36m>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-4"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center justify-between"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-gray-600"[39m
+              [36m>[39m
+                [0mTotal VIP Users[0m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-3xl font-bold text-gray-900 mt-1"[39m
+              [36m>[39m
+                [0m1[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"size-12 bg-purple-50 rounded-lg flex items-center justify-center"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"lucide lucide-crown size-6 text-purple-600"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M5 21h14"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-4"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center justify-between"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-gray-600"[39m
+              [36m>[39m
+                [0mActive[0m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-3xl font-bold text-green-600 mt-1"[39m
+              [36m>[39m
+                [0m1[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"size-12 bg-green-50 rounded-lg flex items-center justify-center"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"lucide lucide-circle-check-big size-6 text-green-600"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M21.801 10A10 10 0 1 1 17 3.335"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"m9 11 3 3L22 4"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-4"[39m
+          [33mdata-slot[39m=[32m"card"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"flex items-center justify-between"[39m
+          [36m>[39m
+            [36m<div>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-sm text-gray-600"[39m
+              [36m>[39m
+                [0mExpiring Soon[0m
+              [36m</p>[39m
+              [36m<p[39m
+                [33mclass[39m=[32m"text-3xl font-bold text-orange-600 mt-1"[39m
+              [36m>[39m
+                [0m0[0m
+              [36m</p>[39m
+            [36m</div>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"size-12 bg-orange-50 rounded-lg flex items-center justify-center"[39m
+            [36m>[39m
+              [36m<svg[39m
+                [33mclass[39m=[32m"lucide lucide-calendar size-6 text-orange-600"[39m
+                [33mfill[39m=[32m"none"[39m
+                [33mheight[39m=[32m"24"[39m
+                [33mstroke[39m=[32m"currentColor"[39m
+                [33mstroke-linecap[39m=[32m"round"[39m
+                [33mstroke-linejoin[39m=[32m"round"[39m
+                [33mstroke-width[39m=[32m"2"[39m
+                [33mviewBox[39m=[32m"0 0 24 24"[39m
+                [33mwidth[39m=[32m"24"[39m
+                [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+              [36m>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M8 2v4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M16 2v4"[39m
+                [36m/>[39m
+                [36m<rect[39m
+                  [33mheight[39m=[32m"18"[39m
+                  [33mrx[39m=[32m"2"[39m
+                  [33mwidth[39m=[32m"18"[39m
+                  [33mx[39m=[32m"3"[39m
+                  [33my[39m=[32m"4"[39m
+                [36m/>[39m
+                [36m<path[39m
+                  [33md[39m=[32m"M3 10h18"[39m
+                [36m/>[39m
+              [36m</svg>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+        [36m</div>[39m
+        [36m<d...
+
+Ignored nodes: comments, script, style
+[36m<html>[39m
+  [36m<head />[39m
+  [36m<body>[39m
+    [36m<div>[39m
+      [36m<div[39m
+        [33mclass[39m=[32m"p-6 space-y-6 bg-gray-50 min-h-full"[39m
+      [36m>[39m
+        [36m<div>[39m
+          [36m<h2[39m
+            [33mclass[39m=[32m"text-2xl font-bold text-gray-900"[39m
+          [36m>[39m
+            [0mVIP Subscription Management[0m
+          [36m</h2>[39m
+          [36m<p[39m
+            [33mclass[39m=[32m"text-gray-600 mt-1"[39m
+          [36m>[39m
+            [0mManage VIP user memberships and premium features[0m
+          [36m</p>[39m
+        [36m</div>[39m
+        [36m<div[39m
+          [33mclass[39m=[32m"grid grid-cols-1 md:grid-cols-4 gap-4"[39m
+        [36m>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-4"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center justify-between"[39m
+            [36m>[39m
+              [36m<div>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-sm text-gray-600"[39m
+                [36m>[39m
+                  [0mTotal VIP Users[0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-3xl font-bold text-gray-900 mt-1"[39m
+                [36m>[39m
+                  [0m1[0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"size-12 bg-purple-50 rounded-lg flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-crown size-6 text-purple-600"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M11.562 3.266a.5.5 0 0 1 .876 0L15.39 8.87a1 1 0 0 0 1.516.294L21.183 5.5a.5.5 0 0 1 .798.519l-2.834 10.246a1 1 0 0 1-.956.734H5.81a1 1 0 0 1-.957-.734L2.02 6.02a.5.5 0 0 1 .798-.519l4.276 3.664a1 1 0 0 0 1.516-.294z"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M5 21h14"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-4"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center justify-between"[39m
+            [36m>[39m
+              [36m<div>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-sm text-gray-600"[39m
+                [36m>[39m
+                  [0mActive[0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-3xl font-bold text-green-600 mt-1"[39m
+                [36m>[39m
+                  [0m1[0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"size-12 bg-green-50 rounded-lg flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-circle-check-big size-6 text-green-600"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M21.801 10A10 10 0 1 1 17 3.335"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"m9 11 3 3L22 4"[39m
+                  [36m/>[39m
+                [36m</svg>[39m
+              [36m</div>[39m
+            [36m</div>[39m
+          [36m</div>[39m
+          [36m<div[39m
+            [33mclass[39m=[32m"bg-card text-card-foreground flex flex-col gap-6 rounded-xl border p-4"[39m
+            [33mdata-slot[39m=[32m"card"[39m
+          [36m>[39m
+            [36m<div[39m
+              [33mclass[39m=[32m"flex items-center justify-between"[39m
+            [36m>[39m
+              [36m<div>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-sm text-gray-600"[39m
+                [36m>[39m
+                  [0mExpiring Soon[0m
+                [36m</p>[39m
+                [36m<p[39m
+                  [33mclass[39m=[32m"text-3xl font-bold text-orange-600 mt-1"[39m
+                [36m>[39m
+                  [0m0[0m
+                [36m</p>[39m
+              [36m</div>[39m
+              [36m<div[39m
+                [33mclass[39m=[32m"size-12 bg-orange-50 rounded-lg flex items-center justify-center"[39m
+              [36m>[39m
+                [36m<svg[39m
+                  [33mclass[39m=[32m"lucide lucide-calendar size-6 text-orange-600"[39m
+                  [33mfill[39m=[32m"none"[39m
+                  [33mheight[39m=[32m"24"[39m
+                  [33mstroke[39m=[32m"currentColor"[39m
+                  [33mstroke-linecap[39m=[32m"round"[39m
+                  [33mstroke-linejoin[39m=[32m"round"[39m
+                  [33mstroke-width[39m=[32m"2"[39m
+                  [33mviewBox[39m=[32m"0 0 24 24"[39m
+                  [33mwidth[39m=[32m"24"[39m
+                  [33mxmlns[39m=[32m"http://www.w3.org/2000/svg"[39m
+                [36m>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M8 2v4"[39m
+                  [36m/>[39m
+                  [36m<path[39m
+                    [33md[39m=[32m"M16 2v4"[39m
+                  [36m/>[39m
+                  [36m<rect[39m
+                    [33mheight[39m=[32m"18"[39m
+                    [33mrx[39m=[32m"2"[39m
+                    [33mwidth[39m=[32m"18"[39m
+              ...
+[90m [2m❯[22m Proxy.waitForWrapper node_modules/@testing-library/dom/dist/wait-for.js:[2m163:27[22m[39m
+[36m [2m❯[22m src/components/modules/VIPManagement.test.tsx:[2m65:15[22m[39m
+    [90m 63| [39m        fireEvent[33m.[39m[34mclick[39m(featuresTab)[33m;[39m
+    [90m 64| [39m
+    [90m 65| [39m        await waitFor(() => expect(screen.getByText('Feature 1')).toBe…
+    [90m   | [39m              [31m^[39m
+    [90m 66| [39m
+    [90m 67| [39m        [90m// Toggle feature1 (enabled -> disabled)[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/2]⎯[22m[39m
+
+
+[2m Test Files [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m15 passed[39m[22m[90m (17)[39m
+[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m111 passed[39m[22m[90m (113)[39m
+[2m   Start at [22m 22:32:49
+[2m   Duration [22m 2.83s[2m (transform 1.45s, setup 0ms, import 3.76s, tests 3.66s, environment 8.49s)[22m
+
