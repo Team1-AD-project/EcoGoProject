@@ -709,6 +709,16 @@ class MapViewModelTest {
         assertNull(viewModel.recommendedRoute.value)
     }
 
+    @Test
+    fun `initial carbonResult is null`() {
+        assertNull(viewModel.carbonResult.value)
+    }
+
+    @Test
+    fun `initial routePoints is null`() {
+        assertNull(viewModel.routePoints.value)
+    }
+
     // ==================== TripState ====================
 
     @Test

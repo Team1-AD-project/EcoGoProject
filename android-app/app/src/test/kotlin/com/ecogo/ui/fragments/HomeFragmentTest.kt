@@ -9,18 +9,29 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import com.ecogo.R
 import com.ecogo.mapengine.ui.map.MapActivity
+import android.os.Looper
 import org.junit.Assert.*
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows
 import org.robolectric.annotation.Config
+import java.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
 class HomeFragmentTest {
 
     private val STATUS_ON_TIME = "On Time"
+
+    @Before
+    fun setUp() {
+        val shadowLooper = Shadows.shadowOf(Looper.getMainLooper())
+        repeat(3) {
+            try { shadowLooper.idleFor(Duration.ofMillis(100)) } catch (_: Exception) { }
+        }
+    }
 
     /**
      * Helper: launch HomeFragment and attach a TestNavHostController (no Mockito needed)
