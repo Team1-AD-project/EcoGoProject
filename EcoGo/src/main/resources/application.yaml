@@ -14,7 +14,7 @@ logging:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
 server:
-  port: 8090
+  port: 9000
 
 # Weather API configuration
 weather:
