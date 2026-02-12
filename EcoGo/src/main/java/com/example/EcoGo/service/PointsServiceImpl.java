@@ -130,7 +130,7 @@ public class PointsServiceImpl implements PointsService {
         double totalCarbonSaved = savingPerKm * distance;
 
         // 4. Points: 1g = 10 pts
-        return (long) (totalCarbonSaved * 10);
+        return Math.abs((long) (totalCarbonSaved * 10));
     }
 
     @Override
