@@ -15,7 +15,10 @@ import java.util.Map;
 @Component
 public class JwtUtils {
 
-    private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private static final String SECRET_STRING = "EcoGo2026-JwtSecret-32ByteStrongKey!!";
+    private static final Key SECRET_KEY = Keys
+            .hmacShaKeyFor(SECRET_STRING.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
     // Token validity period: 7 days
     private static final long EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000L;
 
@@ -40,10 +43,10 @@ public class JwtUtils {
     }
 
     /**
-     * 验证 Token 并获取 Claims
+     * Validate Token and get Claims
      * 
-     * @param token token字符串
-     * @return Claims 对象 (如果验证失败则抛出异常)
+     * @param token Token string
+     * @return Claims object (throws exception if validation fails)
      */
     public Claims validateToken(String token) {
         try {
@@ -65,7 +68,7 @@ public class JwtUtils {
     }
 
     /**
-     * 获取过期时间
+     * Get expiration date
      */
     public Date getExpirationDate(String token) {
         return validateToken(token).getExpiration();
