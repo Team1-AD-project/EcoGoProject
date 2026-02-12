@@ -59,7 +59,7 @@ class MonthlyHighlightsFragment : Fragment() {
     private fun setupUI() {
         // Back button
         binding.btnBack.setOnClickListener {
-            findNavController().navigateUp()
+            safeNavigate { findNavController().navigateUp() }
         }
 
         // Set current month
@@ -68,19 +68,21 @@ class MonthlyHighlightsFragment : Fragment() {
         
         // View all joined activities
         binding.btnViewAllActivities.setOnClickListener {
-            val action = MonthlyHighlightsFragmentDirections
-                .actionMonthlyHighlightsToJoinedActivities(showJoinedOnly = true)
-            findNavController().navigate(action)
+            safeNavigate {
+                val action = MonthlyHighlightsFragmentDirections
+                    .actionMonthlyHighlightsToJoinedActivities(showJoinedOnly = true)
+                findNavController().navigate(action)
+            }
         }
         
         // View full leaderboard
         binding.btnViewFullLeaderboard.setOnClickListener {
-            findNavController().navigate(R.id.communityFragment)
+            safeNavigate { findNavController().navigate(R.id.action_monthlyHighlights_to_community) }
         }
 
         // View all challenges
         binding.btnViewAllChallenges.setOnClickListener {
-            findNavController().navigate(R.id.action_monthlyHighlights_to_challenges)
+            safeNavigate { findNavController().navigate(R.id.action_monthlyHighlights_to_challenges) }
         }
     }
     
@@ -95,10 +97,11 @@ class MonthlyHighlightsFragment : Fragment() {
         binding.recyclerFeaturedActivities.apply {
             layoutManager = GridLayoutManager(context, 2)
             adapter = MonthlyActivityAdapter(emptyList()) { activity ->
-                // Navigate to activity detail
-                val action = MonthlyHighlightsFragmentDirections
-                    .actionMonthlyHighlightsToActivityDetail(activity.id ?: "")
-                findNavController().navigate(action)
+                safeNavigate {
+                    val action = MonthlyHighlightsFragmentDirections
+                        .actionMonthlyHighlightsToActivityDetail(activity.id ?: "")
+                    findNavController().navigate(action)
+                }
             }
         }
         
@@ -106,7 +109,9 @@ class MonthlyHighlightsFragment : Fragment() {
         binding.recyclerChallenges.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = MonthlyChallengeAdapter(emptyList()) { challenge ->
-                findNavController().navigate(R.id.action_monthlyHighlights_to_challenges)
+                safeNavigate {
+                    findNavController().navigate(R.id.action_monthlyHighlights_to_challenges)
+                }
             }
         }
 
@@ -300,6 +305,29 @@ class MonthlyHighlightsFragment : Fragment() {
             }
         } catch (e: Exception) {
             android.util.Log.e("MonthlyHighlights", "Error loading leaderboard top 3", e)
+        }
+    }
+
+    /**
+     * Safe navigation helper to prevent crashes from:
+     * - Double-click / rapid navigation
+     * - Fragment already navigated away
+     * - Navigation action not found
+     */
+    private fun safeNavigate(action: () -> Unit) {
+        try {
+            // Check if fragment is still added and view exists
+            if (isAdded && _binding != null) {
+                action()
+            }
+        } catch (e: IllegalArgumentException) {
+            // Navigation action not found or already navigated
+            android.util.Log.w("MonthlyHighlights", "Navigation failed: ${e.message}")
+        } catch (e: IllegalStateException) {
+            // Fragment not attached to NavController
+            android.util.Log.w("MonthlyHighlights", "Navigation state error: ${e.message}")
+        } catch (e: Exception) {
+            android.util.Log.e("MonthlyHighlights", "Unexpected navigation error", e)
         }
     }
 

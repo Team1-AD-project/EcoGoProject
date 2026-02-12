@@ -3,29 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="12dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp">
+    android:layout_marginBottom="10dp"
+    app:cardBackgroundColor="@color/surface"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="1dp"
+    app:strokeColor="@color/border"
+    app:strokeWidth="0.5dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="14dp">
 
+        <!-- Challenge icon -->
         <TextView
             android:id="@+id/text_challenge_icon"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="@drawable/bg_stat_icon"
+            android:background="@drawable/bg_challenge_icon"
             android:gravity="center"
             android:text="🏆"
             android:textSize="24sp" />
 
+        <!-- Challenge details -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="12dp"
+            android:layout_marginStart="14dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -33,6 +39,8 @@
                 android:id="@+id/text_challenge_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:text="Challenge Title"
                 android:textColor="@color/text_primary"
                 android:textSize="14sp"
@@ -42,26 +50,35 @@
                 android:id="@+id/text_challenge_description"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="3dp"
+                android:ellipsize="end"
+                android:maxLines="1"
                 android:text="Challenge description"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp" />
 
+            <!-- Progress bar -->
             <ProgressBar
                 android:id="@+id/progress_challenge"
                 style="?android:attr/progressBarStyleHorizontal"
                 android:layout_width="match_parent"
-                android:layout_height="6dp"
-                android:layout_marginTop="8dp"
+                android:layout_height="8dp"
+                android:layout_marginTop="10dp"
                 android:max="100"
                 android:progress="0"
                 android:progressDrawable="@drawable/progress_bar_horizontal" />
 
+            <!-- Progress text -->
             <TextView
                 android:id="@+id/text_challenge_progress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_section_title_icon"
+                android:paddingStart="8dp"
+                android:paddingTop="2dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="2dp"
                 android:text="0/10 · +100 pts"
                 android:textColor="@color/primary"
                 android:textSize="11sp"

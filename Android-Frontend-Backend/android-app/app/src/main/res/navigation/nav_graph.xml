@@ -458,6 +458,9 @@
         <action
             android:id="@+id/action_monthlyHighlights_to_challenges"
             app:destination="@id/challengesFragment" />
+        <action
+            android:id="@+id/action_monthlyHighlights_to_community"
+            app:destination="@id/communityFragment" />
     </fragment>
 
 </navigation>

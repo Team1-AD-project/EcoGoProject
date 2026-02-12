@@ -5,29 +5,32 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background"
-    android:fillViewport="true">
+    android:clipToPadding="false"
+    android:fillViewport="true"
+    android:overScrollMode="never">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Header with back button and title -->
-        <com.google.android.material.card.MaterialCardView
+        <!-- ==================== HEADER ==================== -->
+        <FrameLayout
             android:id="@+id/card_header"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:cardCornerRadius="0dp"
-            app:cardElevation="4dp">
+            android:layout_height="wrap_content">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_hero_gradient"
+                android:background="@drawable/bg_monthly_header"
                 android:orientation="vertical"
-                android:padding="16dp">
+                android:paddingStart="20dp"
+                android:paddingTop="16dp"
+                android:paddingEnd="20dp"
+                android:paddingBottom="32dp">
 
-                <!-- Top bar with back button -->
+                <!-- Top bar -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -38,7 +41,7 @@
                         android:id="@+id/btn_back"
                         android:layout_width="40dp"
                         android:layout_height="40dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:background="@drawable/bg_button_circle_transparent"
                         android:contentDescription="Back"
                         android:src="@drawable/ic_arrow_left"
                         app:tint="@color/text_white" />
@@ -48,6 +51,7 @@
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
                         android:gravity="center"
+                        android:letterSpacing="0.02"
                         android:text="Monthly Highlights"
                         android:textColor="@color/text_white"
                         android:textSize="20sp"
@@ -58,45 +62,51 @@
                         android:layout_height="40dp" />
                 </LinearLayout>
 
-                <!-- Current month display -->
+                <!-- Month display -->
                 <TextView
                     android:id="@+id/text_current_month"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
+                    android:layout_marginTop="20dp"
                     android:gravity="center"
+                    android:letterSpacing="0.05"
                     android:text="February 2026"
                     android:textColor="@color/text_white"
-                    android:textSize="18sp"
+                    android:textSize="26sp"
                     android:textStyle="bold" />
 
-                <!-- Month summary -->
+                <!-- Subtitle -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="8dp"
+                    android:layout_marginTop="6dp"
+                    android:alpha="0.85"
                     android:text="Your eco journey this month"
                     android:textColor="@color/text_white"
-                    android:alpha="0.9"
                     android:textSize="14sp" />
             </LinearLayout>
-        </com.google.android.material.card.MaterialCardView>
+        </FrameLayout>
 
-        <!-- Main content area -->
+        <!-- ==================== CONTENT ==================== -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="-16dp"
+            android:clipToPadding="false"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
 
-            <!-- Monthly Statistics Cards -->
+            <!-- ========== MONTHLY STATS ========== -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_stats"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardBackgroundColor="@color/surface"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -104,190 +114,53 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <TextView
+                    <!-- Section title -->
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="📊 This Month's Stats"
-                        android:textColor="@color/text_primary"
-                        android:textSize="16sp"
-                        android:textStyle="bold" />
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:background="@drawable/bg_section_title_icon"
+                            android:gravity="center"
+                            android:text="📊"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="This Month's Stats"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recycler_month_stats"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="14dp"
+                        android:clipToPadding="false"
                         android:nestedScrollingEnabled="false"
-                        android:overScrollMode="never" />
+                        android:overScrollMode="never"
+                        android:paddingEnd="4dp" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Joined Activities Section -->
-            <LinearLayout
+            <!-- ========== JOINED ACTIVITIES ========== -->
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/layout_joined_activities_section"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <TextView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="🌟 Joined Activities"
-                        android:textColor="@color/text_primary"
-                        android:textSize="18sp"
-                        android:textStyle="bold" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_view_all_activities"
-                        style="@style/Widget.Material3.Button.TextButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="View All"
-                        android:textColor="@color/primary"
-                        android:textSize="12sp" />
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/text_activity_count"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="4dp"
-                    android:text="0 Joined Activities"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="13sp" />
-
-                <!-- Joined Activities Grid -->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/recycler_featured_activities"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="12dp"
-                    android:nestedScrollingEnabled="false"
-                    android:overScrollMode="never"
-                    tools:itemCount="2"
-                    tools:listitem="@layout/item_monthly_activity" />
-
-                <!-- Empty state -->
-                <TextView
-                    android:id="@+id/text_no_joined_activities"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="16dp"
-                    android:layout_marginBottom="16dp"
-                    android:gravity="center"
-                    android:text="No activities joined yet"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="14sp"
-                    android:visibility="gone" />
-            </LinearLayout>
-
-            <!-- Monthly Challenges Section -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="🏆 Monthly Challenges"
-                    android:textColor="@color/text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_view_all_challenges"
-                    style="@style/Widget.Material3.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="View All"
-                    android:textColor="@color/primary"
-                    android:textSize="12sp" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/text_challenge_count"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Complete challenges to earn extra rewards"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/recycler_challenges"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:nestedScrollingEnabled="false"
-                android:overScrollMode="never" />
-
-            <!-- Empty state for challenges -->
-            <TextView
-                android:id="@+id/text_no_joined_challenges"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="16dp"
-                android:gravity="center"
-                android:text="No challenges joined yet"
-                android:textColor="@color/text_secondary"
-                android:textSize="14sp"
-                android:visibility="gone" />
-
-            <!-- Leaderboard Preview -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="🏅 This Month's Leaderboard"
-                    android:textColor="@color/text_primary"
-                    android:textSize="18sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/btn_view_full_leaderboard"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="View All ›"
-                    android:textColor="@color/primary"
-                    android:textSize="12sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Top performers this month"
-                android:textColor="@color/text_secondary"
-                android:textSize="13sp" />
-
-            <!-- Top 3 Leaderboard -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                app:cardBackgroundColor="@color/surface"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -295,21 +168,288 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- Rank 1 -->
+                    <!-- Section header -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center_vertical"
-                        android:orientation="horizontal"
-                        android:paddingBottom="12dp">
+                        android:orientation="horizontal">
 
                         <TextView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
-                            android:background="@drawable/bg_achievement_badge"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:background="@drawable/bg_section_title_icon"
+                            android:gravity="center"
+                            android:text="🌟"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_weight="1"
+                            android:text="Joined Activities"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_view_all_activities"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:text="View All"
+                            android:textColor="@color/primary"
+                            android:textSize="12sp"
+                            app:cornerRadius="12dp"
+                            app:rippleColor="#2015803D" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/text_activity_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="38dp"
+                        android:layout_marginTop="2dp"
+                        android:text="0 Joined Activities"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+
+                    <!-- Activities grid -->
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_featured_activities"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:nestedScrollingEnabled="false"
+                        android:overScrollMode="never"
+                        tools:itemCount="2"
+                        tools:listitem="@layout/item_monthly_activity" />
+
+                    <!-- Empty state -->
+                    <LinearLayout
+                        android:id="@+id/text_no_joined_activities"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🌿"
+                            android:textSize="32sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="No activities joined yet"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Join an activity to start your eco journey!"
+                            android:textColor="@color/text_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ========== MONTHLY CHALLENGES ========== -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/surface"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Section header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:background="@drawable/bg_section_title_icon"
+                            android:gravity="center"
+                            android:text="🏆"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_weight="1"
+                            android:text="Monthly Challenges"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/btn_view_all_challenges"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="36dp"
+                            android:text="View All"
+                            android:textColor="@color/primary"
+                            android:textSize="12sp"
+                            app:cornerRadius="12dp"
+                            app:rippleColor="#2015803D" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/text_challenge_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="38dp"
+                        android:layout_marginTop="2dp"
+                        android:text="Complete challenges to earn extra rewards"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recycler_challenges"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="12dp"
+                        android:nestedScrollingEnabled="false"
+                        android:overScrollMode="never" />
+
+                    <!-- Empty state -->
+                    <LinearLayout
+                        android:id="@+id/text_no_joined_challenges"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:layout_marginBottom="8dp"
+                        android:gravity="center"
+                        android:orientation="vertical"
+                        android:visibility="gone">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="🎯"
+                            android:textSize="32sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="No challenges joined yet"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="Take on a challenge and earn rewards!"
+                            android:textColor="@color/text_muted"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- ========== LEADERBOARD PREVIEW ========== -->
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@color/surface"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <!-- Section header -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:background="@drawable/bg_section_title_icon"
+                            android:gravity="center"
+                            android:text="🏅"
+                            android:textSize="14sp" />
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:layout_weight="1"
+                            android:text="This Month's Leaderboard"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/btn_view_full_leaderboard"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:paddingStart="8dp"
+                            android:paddingTop="4dp"
+                            android:paddingEnd="8dp"
+                            android:paddingBottom="4dp"
+                            android:text="View All ›"
+                            android:textColor="@color/primary"
+                            android:textSize="12sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="38dp"
+                        android:layout_marginTop="2dp"
+                        android:text="Top performers this month"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+
+                    <!-- Rank 1 - Gold -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        android:background="@drawable/bg_rank_gold"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:padding="14dp">
+
+                        <TextView
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
                             android:gravity="center"
                             android:text="🥇"
-                            android:textSize="18sp" />
+                            android:textSize="20sp" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -323,48 +463,52 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="--"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
+                                android:textColor="#92400E"
+                                android:textSize="15sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/text_rank1_subtitle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
                                 android:text="--"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="11sp" />
+                                android:textColor="#B45309"
+                                android:textSize="12sp" />
                         </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="#1"
-                            android:textColor="@color/primary"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
+                        <FrameLayout
+                            android:layout_width="36dp"
+                            android:layout_height="36dp">
+
+                            <TextView
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:background="@drawable/bg_rank_number"
+                                android:gravity="center"
+                                android:text="#1"
+                                android:textColor="#92400E"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </FrameLayout>
                     </LinearLayout>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/border" />
-
-                    <!-- Rank 2 -->
+                    <!-- Rank 2 - Silver -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_rank_silver"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingTop="12dp"
-                        android:paddingBottom="12dp">
+                        android:padding="14dp">
 
                         <TextView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
                             android:gravity="center"
                             android:text="🥈"
-                            android:textSize="18sp" />
+                            android:textSize="20sp" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -378,47 +522,52 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="--"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
+                                android:textColor="#374151"
+                                android:textSize="15sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/text_rank2_subtitle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
                                 android:text="--"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="11sp" />
+                                android:textColor="#6B7280"
+                                android:textSize="12sp" />
                         </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="#2"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
+                        <FrameLayout
+                            android:layout_width="36dp"
+                            android:layout_height="36dp">
+
+                            <TextView
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:background="@drawable/bg_rank_number"
+                                android:gravity="center"
+                                android:text="#2"
+                                android:textColor="#6B7280"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </FrameLayout>
                     </LinearLayout>
 
-                    <View
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:background="@color/border" />
-
-                    <!-- Rank 3 -->
+                    <!-- Rank 3 - Bronze -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_rank_bronze"
                         android:gravity="center_vertical"
                         android:orientation="horizontal"
-                        android:paddingTop="12dp">
+                        android:padding="14dp">
 
                         <TextView
-                            android:layout_width="32dp"
-                            android:layout_height="32dp"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
                             android:gravity="center"
                             android:text="🥉"
-                            android:textSize="18sp" />
+                            android:textSize="20sp" />
 
                         <LinearLayout
                             android:layout_width="0dp"
@@ -432,86 +581,121 @@
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:text="--"
-                                android:textColor="@color/text_primary"
-                                android:textSize="14sp"
+                                android:textColor="#7C2D12"
+                                android:textSize="15sp"
                                 android:textStyle="bold" />
 
                             <TextView
                                 android:id="@+id/text_rank3_subtitle"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
                                 android:text="--"
-                                android:textColor="@color/text_secondary"
-                                android:textSize="11sp" />
+                                android:textColor="#9A3412"
+                                android:textSize="12sp" />
                         </LinearLayout>
 
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="#3"
-                            android:textColor="@color/text_secondary"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
+                        <FrameLayout
+                            android:layout_width="36dp"
+                            android:layout_height="36dp">
+
+                            <TextView
+                                android:layout_width="36dp"
+                                android:layout_height="36dp"
+                                android:background="@drawable/bg_rank_number"
+                                android:gravity="center"
+                                android:text="#3"
+                                android:textColor="#9A3412"
+                                android:textSize="14sp"
+                                android:textStyle="bold" />
+                        </FrameLayout>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Eco Tips -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:text="💡 Eco Tips of the Month"
-                android:textColor="@color/text_primary"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
+            <!-- ========== ECO TIPS ========== -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                app:cardBackgroundColor="#E0F2F1"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                android:layout_marginTop="16dp"
+                app:cardBackgroundColor="@android:color/transparent"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="4dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:background="@drawable/bg_eco_tip_card"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:padding="20dp">
+
+                    <!-- Title row -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="32dp"
+                            android:layout_height="32dp"
+                            android:background="@drawable/bg_section_title_icon"
+                            android:gravity="center"
+                            android:text="💡"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="10dp"
+                            android:text="Eco Tip of the Month"
+                            android:textColor="@color/text_primary"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+
+                    <!-- Divider -->
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:layout_marginTop="14dp"
+                        android:layout_marginBottom="14dp"
+                        android:alpha="0.3"
+                        android:background="@color/primary" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="💚 Did You Know?"
-                        android:textColor="@color/text_primary"
+                        android:textColor="#065F46"
                         android:textSize="14sp"
                         android:textStyle="bold" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp"
-                        android:lineSpacingMultiplier="1.4"
+                        android:layout_marginTop="10dp"
+                        android:lineSpacingMultiplier="1.5"
                         android:text="Taking the bus instead of driving can reduce your carbon footprint by up to 45% per trip. By choosing public transport, you're not just saving money—you're helping save the planet!"
-                        android:textColor="@color/text_primary"
+                        android:textColor="#065F46"
                         android:textSize="13sp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
+                        android:layout_marginTop="14dp"
                         android:text="🌍 Keep up the great work!"
                         android:textColor="@color/primary"
-                        android:textSize="12sp"
+                        android:textSize="13sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Footer Spacing -->
+            <!-- Footer spacing -->
             <View
                 android:layout_width="match_parent"
-                android:layout_height="24dp" />
+                android:layout_height="32dp" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

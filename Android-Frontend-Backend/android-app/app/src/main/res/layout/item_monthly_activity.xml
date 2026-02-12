@@ -3,62 +3,63 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="6dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp">
+    android:layout_margin="5dp"
+    app:cardBackgroundColor="@color/surface"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:strokeColor="@color/border"
+    app:strokeWidth="0.5dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- Activity header with icon and status -->
-        <RelativeLayout
+        <!-- Activity header area -->
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="120dp"
-            android:background="@color/primary_light"
-            android:padding="12dp">
+            android:layout_height="100dp"
+            android:background="@drawable/bg_activity_header_gradient">
 
-            <!-- Activity icon/emoji -->
+            <!-- Activity icon -->
             <TextView
                 android:id="@+id/text_activity_icon"
-                android:layout_width="60dp"
-                android:layout_height="60dp"
-                android:layout_centerInParent="true"
-                android:gravity="center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:text="🌱"
-                android:textSize="40sp" />
+                android:textSize="36sp" />
 
-            <!-- Status badge -->
+            <!-- Status badge - top right -->
             <TextView
                 android:id="@+id/text_activity_status"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentTop="true"
-                android:layout_alignParentEnd="true"
+                android:layout_gravity="top|end"
+                android:layout_margin="8dp"
                 android:background="@drawable/bg_time_badge"
-                android:paddingStart="8dp"
+                android:paddingStart="10dp"
                 android:paddingTop="4dp"
-                android:paddingEnd="8dp"
+                android:paddingEnd="10dp"
                 android:paddingBottom="4dp"
                 android:text="Ongoing"
                 android:textColor="@color/primary"
                 android:textSize="9sp"
                 android:textStyle="bold" />
 
-            <!-- Reward badge -->
+            <!-- Reward badge - bottom left -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_alignParentBottom="true"
+                android:layout_gravity="bottom|start"
+                android:layout_margin="8dp"
                 android:background="@drawable/bg_reward_badge"
                 android:gravity="center_vertical"
                 android:orientation="horizontal"
-                android:paddingStart="6dp"
-                android:paddingTop="3dp"
-                android:paddingEnd="6dp"
-                android:paddingBottom="3dp">
+                android:paddingStart="8dp"
+                android:paddingTop="4dp"
+                android:paddingEnd="8dp"
+                android:paddingBottom="4dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -70,13 +71,13 @@
                     android:id="@+id/text_activity_reward"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="2dp"
+                    android:layout_marginStart="3dp"
                     android:text="+50"
                     android:textColor="@color/text_white"
                     android:textSize="10sp"
                     android:textStyle="bold" />
             </LinearLayout>
-        </RelativeLayout>
+        </FrameLayout>
 
         <!-- Activity details -->
         <LinearLayout
@@ -85,7 +86,7 @@
             android:orientation="vertical"
             android:padding="12dp">
 
-            <!-- Activity title -->
+            <!-- Title -->
             <TextView
                 android:id="@+id/text_activity_title"
                 android:layout_width="match_parent"
@@ -94,35 +95,35 @@
                 android:maxLines="2"
                 android:text="Campus Clean-Up Day"
                 android:textColor="@color/text_primary"
-                android:textSize="14sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
-            <!-- Activity date -->
+            <!-- Date row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="8dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
                     android:src="@drawable/ic_calendar"
-                    app:tint="@color/text_secondary" />
+                    app:tint="@color/text_muted" />
 
                 <TextView
                     android:id="@+id/text_activity_date"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
+                    android:layout_marginStart="5dp"
                     android:layout_weight="1"
                     android:text="Feb 15, 2026"
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
             </LinearLayout>
 
-            <!-- Participants count -->
+            <!-- Participants row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -131,16 +132,16 @@
                 android:orientation="horizontal">
 
                 <ImageView
-                    android:layout_width="12dp"
-                    android:layout_height="12dp"
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
                     android:src="@drawable/ic_users"
-                    app:tint="@color/text_secondary" />
+                    app:tint="@color/text_muted" />
 
                 <TextView
                     android:id="@+id/text_activity_participants"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="4dp"
+                    android:layout_marginStart="5dp"
                     android:layout_weight="1"
                     android:text="45 joined"
                     android:textColor="@color/text_secondary"

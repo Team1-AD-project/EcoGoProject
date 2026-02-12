@@ -42,10 +42,16 @@ class MonthStatAdapter(
             title.text = stat.title
             subtitle.text = stat.subtitle
             
-            // Apply color to icon background
+            // Apply color to icon background with rounded rectangle
             try {
-                icon.setBackgroundColor(Color.parseColor(stat.color + "33")) // Add alpha for transparency
-                subtitle.setTextColor(Color.parseColor(stat.color))
+                val color = Color.parseColor(stat.color)
+                val bgDrawable = android.graphics.drawable.GradientDrawable().apply {
+                    shape = android.graphics.drawable.GradientDrawable.RECTANGLE
+                    cornerRadius = 14f * itemView.resources.displayMetrics.density
+                    setColor(Color.argb(30, Color.red(color), Color.green(color), Color.blue(color)))
+                }
+                icon.background = bgDrawable
+                subtitle.setTextColor(color)
             } catch (e: Exception) {
                 // Fallback to default colors if parsing fails
             }
