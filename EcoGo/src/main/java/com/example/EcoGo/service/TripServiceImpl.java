@@ -16,7 +16,12 @@ import com.example.EcoGo.repository.UserRepository;
 import com.example.EcoGo.utils.LogSanitizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.bson.Document;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -51,6 +56,9 @@ public class TripServiceImpl implements TripService {
 
     @Autowired
     private PointsService pointsService;
+
+    @Autowired
+    private MongoTemplate mongoTemplate;
 
     @Override
     public Trip startTrip(String userId, TripDto.StartTripRequest request) {
@@ -271,45 +279,58 @@ public class TripServiceImpl implements TripService {
 
     @Override
     public List<TripDto.TripSummaryResponse> getAllTrips() {
-        List<Trip> allTrips;
+        List<Document> rawDocs;
         try {
-            // Use tripRepository (Spring Data handles @Field mapping correctly)
-            allTrips = tripRepository.findAll();
+            rawDocs = mongoTemplate.findAll(Document.class, "trips");
         } catch (Exception e) {
             log.error("[getAllTrips] Failed to fetch trips from DB: {}", e.getMessage(), e);
             return new ArrayList<>();
         }
-        log.info("[getAllTrips] Found {} trips in DB", allTrips.size());
+        log.info("[getAllTrips] Found {} trip documents in DB", rawDocs.size());
         List<TripDto.TripSummaryResponse> result = new ArrayList<>();
-        for (Trip trip : allTrips) {
+        int failCount = 0;
+        for (Document doc : rawDocs) {
             try {
+                Trip trip = mongoTemplate.getConverter().read(Trip.class, doc);
                 result.add(convertToSummary(trip));
             } catch (Exception e) {
-                log.error("[getAllTrips] Failed to convert trip id={}: {}", trip.getId(), e.getMessage(), e);
+                failCount++;
+                log.error("[getAllTrips] Skipping corrupted trip _id={}: {}", doc.get("_id"), e.getMessage());
             }
+        }
+        if (failCount > 0) {
+            log.warn("[getAllTrips] Skipped {} corrupted trip records out of {}", failCount, rawDocs.size());
         }
         return result;
     }
 
     @Override
     public List<TripDto.TripResponse> getTripsByUser(String userId) {
-        List<Trip> userTrips;
+        Query query = new Query(Criteria.where("user_id").is(userId))
+                .with(Sort.by(Sort.Direction.DESC, "created_at"));
+        List<Document> rawDocs;
         try {
-            // Use tripRepository (Spring Data handles @Field mapping correctly)
-            userTrips = tripRepository.findByUserIdOrderByCreatedAtDesc(userId);
+            rawDocs = mongoTemplate.find(query, Document.class, "trips");
         } catch (Exception e) {
             log.error("[getTripsByUser] Failed to fetch trips for userId={}: {}", userId, e.getMessage(), e);
             return new ArrayList<>();
         }
-        log.info("[getTripsByUser] Found {} trips for userId={}", userTrips.size(), LogSanitizer.sanitize(userId));
+        log.info("[getTripsByUser] Found {} trips for userId={}", rawDocs.size(), LogSanitizer.sanitize(userId));
         List<TripDto.TripResponse> result = new ArrayList<>();
-        for (Trip trip : userTrips) {
+        int failCount = 0;
+        for (Document doc : rawDocs) {
             try {
+                Trip trip = mongoTemplate.getConverter().read(Trip.class, doc);
                 result.add(convertToResponse(trip));
             } catch (Exception e) {
-                log.error("[getTripsByUser] Failed to convert trip id={} for userId={}: {}", trip.getId(), userId,
-                        e.getMessage(), e);
+                failCount++;
+                log.error("[getTripsByUser] Skipping corrupted trip _id={} for userId={}: {}",
+                        doc.get("_id"), userId, e.getMessage());
             }
+        }
+        if (failCount > 0) {
+            log.warn("[getTripsByUser] Skipped {} corrupted trips out of {} for userId={}",
+                    failCount, rawDocs.size(), LogSanitizer.sanitize(userId));
         }
         return result;
     }
