@@ -811,7 +811,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         backendTripId = tripId
                         Log.d(TAG, "Trip started on backend: tripId=$tripId")
                         runOnUiThread {
-                            Toast.makeText(this@MapActivity, "Trip created: $tripId", Toast.LENGTH_SHORT).show()
+                            viewModel.setBackendTripId(tripId)
+                            Toast.makeText(this@MapActivity, "行程已创建: $tripId", Toast.LENGTH_SHORT).show()
                         }
                     },
                     onFailure = { error ->

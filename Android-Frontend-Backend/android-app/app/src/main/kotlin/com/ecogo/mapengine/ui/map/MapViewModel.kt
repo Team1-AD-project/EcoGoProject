@@ -10,8 +10,6 @@ import com.ecogo.mapengine.data.repository.MapRepository
 import com.ecogo.mapengine.data.repository.MockMapRepository
 import com.google.android.gms.maps.model.LatLng
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.*
 
 /**
  * Map ViewModel
@@ -155,34 +153,20 @@ class MapViewModel(
     // ========================================
 
     /**
-     * Start trip tracking
+     * 开始行程追踪（仅更新 UI 状态）
+     * 实际的后端 API 调用由 MapActivity.startTripOnBackend() 通过 TripRepository 完成
      */
     fun startTracking() {
-        val location = _currentLocation.value ?: run {
-            _errorMessage.value = "Unable to get current location"
-            return
-        }
+        _tripState.value = TripState.Tracking("pending")
+    }
 
-        viewModelScope.launch {
-            _isLoading.value = true
-            _tripState.value = TripState.Starting
-
-            val startPoint = GeoPoint.fromLatLng(location)
-            val result = repository.startTripTracking(userId, startPoint)
-
-            result.fold(
-                onSuccess = { data ->
-                    _currentTripId.value = data.trip_id
-                    _tripState.value = TripState.Tracking(data.trip_id)
-                    _successMessage.value = data.message ?: "Trip started"
-                },
-                onFailure = { error ->
-                    _tripState.value = TripState.Idle
-                    _errorMessage.value = error.message
-                }
-            )
-            _isLoading.value = false
-        }
+    /**
+     * 设置后端返回的真实 tripId，更新追踪状态
+     * 由 MapActivity 在 TripRepository.startTrip() 成功后调用
+     */
+    fun setBackendTripId(tripId: String) {
+        _currentTripId.value = tripId
+        _tripState.value = TripState.Tracking(tripId)
     }
 
     /**
@@ -195,28 +179,13 @@ class MapViewModel(
     }
 
     /**
-     * Cancel trip
+     * 取消行程（仅更新 UI 状态）
+     * 实际的后端取消调用由 MapActivity 通过 TripRepository 完成
      */
     fun cancelTracking(reason: String? = null) {
-        val tripId = _currentTripId.value ?: return
-
-        viewModelScope.launch {
-            _isLoading.value = true
-
-            val result = repository.cancelTripTracking(tripId, userId, reason)
-
-            result.fold(
-                onSuccess = { data ->
-                    _tripState.value = TripState.Idle
-                    _currentTripId.value = null
-                    _successMessage.value = data.message ?: "Trip cancelled"
-                },
-                onFailure = { error ->
-                    _errorMessage.value = error.message
-                }
-            )
-            _isLoading.value = false
-        }
+        _tripState.value = TripState.Idle
+        _currentTripId.value = null
+        _successMessage.value = "行程已取消"
     }
 
     // ========================================

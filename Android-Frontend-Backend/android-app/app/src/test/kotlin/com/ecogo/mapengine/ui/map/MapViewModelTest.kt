@@ -142,56 +142,22 @@ class MapViewModelTest {
     // ==================== Trip Tracking ====================
 
     @Test
-    fun `startTracking without location sets error`() {
+    fun `startTracking transitions to Tracking state`() {
         viewModel.startTracking()
-        assertNotNull(viewModel.errorMessage.value)
+
+        val state = viewModel.tripState.value
+        assertTrue(state is TripState.Tracking)
     }
 
     @Test
-    fun `startTracking success transitions to Tracking state`() = runTest {
-        viewModel.updateCurrentLocation(testOrigin)
-
-        whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = TRIP_ID_123, start_time = TEST_START_TIME))
-        )
-
+    fun `setBackendTripId updates tripId and state`() {
         viewModel.startTracking()
-        advanceUntilIdle()
+        viewModel.setBackendTripId(TRIP_ID_123)
 
         val state = viewModel.tripState.value
         assertTrue(state is TripState.Tracking)
         assertEquals(TRIP_ID_123, (state as TripState.Tracking).tripId)
         assertEquals(TRIP_ID_123, viewModel.currentTripId.value)
-        assertNotNull(viewModel.successMessage.value)
-    }
-
-    @Test
-    fun `startTracking failure reverts to Idle state`() = runTest {
-        viewModel.updateCurrentLocation(testOrigin)
-
-        whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.failure(RuntimeException("Server error"))
-        )
-
-        viewModel.startTracking()
-        advanceUntilIdle()
-
-        assertEquals(TripState.Idle, viewModel.tripState.value)
-        assertNotNull(viewModel.errorMessage.value)
-    }
-
-    @Test
-    fun `startTracking sets loading state`() = runTest {
-        viewModel.updateCurrentLocation(testOrigin)
-
-        whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = TRIP_ID_123, start_time = TEST_START_TIME))
-        )
-
-        viewModel.startTracking()
-        advanceUntilIdle()
-
-        assertEquals(false, viewModel.isLoading.value)
     }
 
     @Test
@@ -203,45 +169,9 @@ class MapViewModelTest {
     }
 
     @Test
-    fun `stopTracking success completes trip and calculates carbon`() = runTest {
-        viewModel.updateCurrentLocation(testOrigin)
-        whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = TRIP_ID_123, start_time = TEST_START_TIME))
-        )
+    fun `stopTracking after startTracking sets Completed state`() {
         viewModel.startTracking()
-        advanceUntilIdle()
-
-        whenever(mockRepository.saveTrip(
-            eq(TRIP_ID_123), any(), any(), anyOrNull(), any(), any()
-        )).thenReturn(
-            Result.success(TripSaveData(trip_id = TRIP_ID_123, status = "saved"))
-        )
-
-        whenever(mockRepository.calculateCarbon(eq(TRIP_ID_123), any())).thenReturn(
-            Result.success(CarbonCalculateData(
-                trip_id = TRIP_ID_123,
-                total_carbon_emission = 0.5,
-                carbon_saved = 0.3,
-                green_points = 10
-            ))
-        )
-
-        viewModel.stopTracking()
-        advanceUntilIdle()
-
-        assertEquals(TripState.Completed, viewModel.tripState.value)
-        assertNull(viewModel.currentTripId.value)
-        assertNotNull(viewModel.successMessage.value)
-    }
-
-    @Test
-    fun `stopTracking after startTracking sets Completed state`() = runTest {
-        viewModel.updateCurrentLocation(testOrigin)
-        whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = "trip-789", start_time = TEST_START_TIME))
-        )
-        viewModel.startTracking()
-        advanceUntilIdle()
+        viewModel.setBackendTripId(TRIP_ID_123)
 
         // stopTracking() is a simple UI state transition; actual saving is handled by MapActivity
         viewModel.stopTracking()
@@ -251,73 +181,15 @@ class MapViewModelTest {
     }
 
     @Test
-    fun `stopTracking with carbon calculation failure still completes trip`() = runTest {
-        viewModel.updateCurrentLocation(testOrigin)
-        whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = TRIP_ID_CALC, start_time = TEST_START_TIME))
-        )
+    fun `cancelTracking transitions to Idle and clears tripId`() {
         viewModel.startTracking()
-        advanceUntilIdle()
+        viewModel.setBackendTripId(TRIP_ID_456)
 
-        whenever(mockRepository.saveTrip(
-            eq(TRIP_ID_CALC), any(), any(), anyOrNull(), any(), any()
-        )).thenReturn(
-            Result.success(TripSaveData(trip_id = TRIP_ID_CALC, status = "saved"))
-        )
-
-        whenever(mockRepository.calculateCarbon(eq(TRIP_ID_CALC), any())).thenReturn(
-            Result.failure(RuntimeException("Carbon calc failed"))
-        )
-
-        viewModel.stopTracking()
-        advanceUntilIdle()
-
-        assertEquals(TripState.Completed, viewModel.tripState.value)
-    }
-
-    @Test
-    fun `cancelTracking without tripId does nothing`() {
-        viewModel.cancelTracking("user cancelled")
-        assertEquals(TripState.Idle, viewModel.tripState.value)
-    }
-
-    @Test
-    fun `cancelTracking success transitions to Idle`() = runTest {
-        viewModel.updateCurrentLocation(testOrigin)
-        whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = TRIP_ID_456, start_time = TEST_START_TIME))
-        )
-        viewModel.startTracking()
-        advanceUntilIdle()
-
-        whenever(mockRepository.cancelTripTracking(eq(TRIP_ID_456), any(), anyOrNull())).thenReturn(
-            Result.success(TripCancelData(trip_id = TRIP_ID_456, status = "canceled"))
-        )
         viewModel.cancelTracking("test")
-        advanceUntilIdle()
 
         assertEquals(TripState.Idle, viewModel.tripState.value)
         assertNull(viewModel.currentTripId.value)
         assertNotNull(viewModel.successMessage.value)
-    }
-
-    @Test
-    fun `cancelTracking failure sets error`() = runTest {
-        viewModel.updateCurrentLocation(testOrigin)
-        whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = "trip-err", start_time = TEST_START_TIME))
-        )
-        viewModel.startTracking()
-        advanceUntilIdle()
-        viewModel.clearError()
-
-        whenever(mockRepository.cancelTripTracking(eq("trip-err"), any(), anyOrNull())).thenReturn(
-            Result.failure(RuntimeException("Cancel failed"))
-        )
-        viewModel.cancelTracking()
-        advanceUntilIdle()
-
-        assertNotNull(viewModel.errorMessage.value)
     }
 
     // ==================== Route Fetching - Low Carbon ====================
@@ -672,7 +544,8 @@ class MapViewModelTest {
 
     @Test
     fun `clearError clears error message`() {
-        viewModel.startTracking()
+        // Trigger an error by fetching route without origin/destination
+        viewModel.fetchLowCarbonRoute()
         assertNotNull(viewModel.errorMessage.value)
         viewModel.clearError()
         assertNull(viewModel.errorMessage.value)

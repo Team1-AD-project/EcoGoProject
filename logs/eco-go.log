@@ -1,0 +1,246 @@
+2026-02-12T11:54:01.985+08:00  INFO 26912 --- [main] com.example.EcoGo.EcoGoApplication       : Starting EcoGoApplication using Java 21.0.9 with PID 26912 (C:\Users\25293\Desktop\新建文件夹 (5)\EcoGoProject\EcoGo\target\classes started by 25293 in C:\Users\25293\Desktop\新建文件夹 (5)\EcoGoProject)
+2026-02-12T11:54:01.991+08:00 DEBUG 26912 --- [main] com.example.EcoGo.EcoGoApplication       : Running with Spring Boot v3.5.9, Spring v6.2.15
+2026-02-12T11:54:01.992+08:00  INFO 26912 --- [main] com.example.EcoGo.EcoGoApplication       : No active profile set, falling back to 1 default profile: "default"
+2026-02-12T11:54:04.629+08:00  INFO 26912 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2026-02-12T11:54:04.947+08:00  INFO 26912 --- [main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 277 ms. Found 22 MongoDB repository interfaces.
+2026-02-12T11:54:05.965+08:00  INFO 26912 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8090 (http)
+2026-02-12T11:54:05.997+08:00  INFO 26912 --- [main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-02-12T11:54:05.997+08:00  INFO 26912 --- [main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.50]
+2026-02-12T11:54:06.056+08:00  INFO 26912 --- [main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-02-12T11:54:06.057+08:00  INFO 26912 --- [main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 3988 ms
+2026-02-12T11:54:06.399+08:00 DEBUG 26912 --- [main] c.e.E.config.JwtAuthenticationFilter     : Filter 'jwtAuthenticationFilter' configured for use
+2026-02-12T11:54:06.704+08:00  INFO 26912 --- [main] org.mongodb.driver.client                : MongoClient with metadata {"driver": {"name": "mongo-java-driver|sync|spring-boot", "version": "5.5.2"}, "os": {"type": "Windows", "name": "Windows 11", "architecture": "amd64", "version": "10.0"}, "platform": "Java/Eclipse Adoptium/21.0.9+10-LTS"} created with settings MongoClientSettings{readPreference=primary, writeConcern=WriteConcern{w=null, wTimeout=null ms, journal=null}, retryWrites=true, retryReads=true, readConcern=ReadConcern{level=null}, credential=null, transportSettings=null, commandListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsCommandListener@44dd0d38], codecRegistry=ProvidersCodecRegistry{codecProviders=[ValueCodecProvider{}, BsonValueCodecProvider{}, DBRefCodecProvider{}, DBObjectCodecProvider{}, DocumentCodecProvider{}, CollectionCodecProvider{}, IterableCodecProvider{}, MapCodecProvider{}, GeoJsonCodecProvider{}, GridFSFileCodecProvider{}, Jsr310CodecProvider{}, JsonObjectCodecProvider{}, BsonCodecProvider{}, EnumCodecProvider{}, com.mongodb.client.model.mql.ExpressionCodecProvider@184751f3, com.mongodb.Jep395RecordCodecProvider@46ea78f0, com.mongodb.KotlinCodecProvider@5889fc44]}, loggerSettings=LoggerSettings{maxDocumentLength=1000}, clusterSettings={hosts=[localhost:27017], srvServiceName=mongodb, mode=SINGLE, requiredClusterType=UNKNOWN, requiredReplicaSetName='null', serverSelector='null', clusterListeners='[]', serverSelectionTimeout='30000 ms', localThreshold='15 ms'}, socketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=0, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, heartbeatSocketSettings=SocketSettings{connectTimeoutMS=10000, readTimeoutMS=10000, receiveBufferSize=0, proxySettings=ProxySettings{host=null, port=null, username=null, password=null}}, connectionPoolSettings=ConnectionPoolSettings{maxSize=100, minSize=0, maxWaitTimeMS=120000, maxConnectionLifeTimeMS=0, maxConnectionIdleTimeMS=0, maintenanceInitialDelayMS=0, maintenanceFrequencyMS=60000, connectionPoolListeners=[io.micrometer.core.instrument.binder.mongodb.MongoMetricsConnectionPoolListener@537b3b2e], maxConnecting=2}, serverSettings=ServerSettings{heartbeatFrequencyMS=10000, minHeartbeatFrequencyMS=500, serverMonitoringMode=AUTO, serverListeners='[]', serverMonitorListeners='[]'}, sslSettings=SslSettings{enabled=false, invalidHostNameAllowed=false, context=null}, applicationName='null', compressorList=[], uuidRepresentation=JAVA_LEGACY, serverApi=null, autoEncryptionSettings=null, dnsClient=null, inetAddressResolver=null, contextProvider=null, timeoutMS=null}
+2026-02-12T11:54:06.795+08:00  INFO 26912 --- [cluster-ClusterId{value='698d4ede1f6d8ada7cfaa050', description='null'}-localhost:27017] org.mongodb.driver.cluster               : Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, cryptd=false, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=27, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=79462900, minRoundTripTimeNanos=0}
+2026-02-12T11:54:07.761+08:00  INFO 26912 --- [main] c.e.EcoGo.service.chatbot.RagService     : RAG service initialized with 20 chunks
+2026-02-12T11:54:08.616+08:00  INFO 26912 --- [main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [static/index.html]
+2026-02-12T11:54:09.040+08:00  INFO 26912 --- [main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 4 endpoints beneath base path '/actuator'
+2026-02-12T11:54:09.086+08:00  WARN 26912 --- [main] .s.s.UserDetailsServiceAutoConfiguration : 
+
+Using generated security password: f4f8fccd-3097-4781-8963-c1ca5cd7fc11
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-02-12T11:54:09.113+08:00  INFO 26912 --- [main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-02-12T11:54:10.033+08:00  INFO 26912 --- [main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8090 (http) with context path '/'
+2026-02-12T11:54:10.064+08:00  INFO 26912 --- [main] com.example.EcoGo.EcoGoApplication       : Started EcoGoApplication in 8.849 seconds (process running for 9.227)
+2026-02-12T11:54:10.275+08:00 DEBUG 26912 --- [main] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "userid" : "admin"}, Fields: {}, Sort: {}
+2026-02-12T11:54:10.317+08:00 DEBUG 26912 --- [main] o.s.data.mongodb.core.MongoTemplate      : find using query: { "userid" : "admin"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.User in collection: users
+2026-02-12T11:54:10.535+08:00 DEBUG 26912 --- [main] o.s.data.mongodb.core.MongoTemplate      : Executing count: {} in collection: transport_modes_dict
+2026-02-12T11:56:32.164+08:00  INFO 26912 --- [http-nio-8090-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-02-12T11:56:32.165+08:00  INFO 26912 --- [http-nio-8090-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-02-12T11:56:32.172+08:00  INFO 26912 --- [http-nio-8090-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 6 ms
+2026-02-12T11:56:32.323+08:00 ERROR 26912 --- [http-nio-8090-exec-1] c.e.E.config.JwtAuthenticationFilter     : Cannot set user authentication: {}
+
+java.lang.RuntimeException: Invalid JWT token
+	at com.example.EcoGo.utils.JwtUtils.validateToken(JwtUtils.java:59) ~[classes/:na]
+	at com.example.EcoGo.config.JwtAuthenticationFilter.doFilterInternal(JwtAuthenticationFilter.java:44) ~[classes/:na]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:241) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:228) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:138) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:107) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.authentication.logout.LogoutFilter.doFilter(LogoutFilter.java:93) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:241) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:228) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:138) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.web.filter.CorsFilter.doFilterInternal(CorsFilter.java:91) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:241) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:228) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:138) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.header.HeaderWriterFilter.doHeadersAfter(HeaderWriterFilter.java:90) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.header.HeaderWriterFilter.doFilterInternal(HeaderWriterFilter.java:75) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:241) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:228) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:138) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:82) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.context.SecurityContextHolderFilter.doFilter(SecurityContextHolderFilter.java:69) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:241) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:228) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:138) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter.doFilterInternal(WebAsyncManagerIntegrationFilter.java:62) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:241) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:228) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:138) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.session.DisableEncodeUrlFilter.doFilterInternal(DisableEncodeUrlFilter.java:42) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.wrapFilter(ObservationFilterChainDecorator.java:241) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$AroundFilterObservation$SimpleAroundFilterObservation.lambda$wrap$0(ObservationFilterChainDecorator.java:334) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$ObservationFilter.doFilter(ObservationFilterChainDecorator.java:225) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.ObservationFilterChainDecorator$VirtualFilterChain.doFilter(ObservationFilterChainDecorator.java:138) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.FilterChainProxy.doFilterInternal(FilterChainProxy.java:233) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.security.web.FilterChainProxy.doFilter(FilterChainProxy.java:191) ~[spring-security-web-6.5.7.jar:6.5.7]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.web.filter.ServletRequestPathFilter.doFilter(ServletRequestPathFilter.java:52) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.security.config.annotation.web.configuration.WebSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebSecurityConfiguration.java:319) ~[spring-security-config-6.5.7.jar:6.5.7]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.web.servlet.handler.HandlerMappingIntrospector.lambda$createCacheFilter$4(HandlerMappingIntrospector.java:267) ~[spring-webmvc-6.2.15.jar:6.2.15]
+	at org.springframework.web.filter.CompositeFilter$VirtualFilterChain.doFilter(CompositeFilter.java:113) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.web.filter.CompositeFilter.doFilter(CompositeFilter.java:74) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.security.config.annotation.web.configuration.WebMvcSecurityConfiguration$CompositeFilterChainProxy.doFilter(WebMvcSecurityConfiguration.java:240) ~[spring-security-config-6.5.7.jar:6.5.7]
+	at org.springframework.web.filter.DelegatingFilterProxy.invokeDelegate(DelegatingFilterProxy.java:362) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.web.filter.DelegatingFilterProxy.doFilter(DelegatingFilterProxy.java:278) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:162) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:138) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:162) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:138) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:162) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:138) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.springframework.web.filter.ServerHttpObservationFilter.doFilterInternal(ServerHttpObservationFilter.java:110) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:162) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:138) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.15.jar:6.2.15]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:162) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:138) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:165) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:88) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:482) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:113) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:83) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:72) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:342) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:399) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:903) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1774) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:973) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:491) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.50.jar:10.1.50]
+	at java.base/java.lang.Thread.run(Unknown Source) ~[na:na]
+
+2026-02-12T11:56:32.479+08:00 DEBUG 26912 --- [http-nio-8090-exec-1] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "userid" : "admin"}, Fields: {}, Sort: {}
+2026-02-12T11:56:32.480+08:00 DEBUG 26912 --- [http-nio-8090-exec-1] o.s.data.mongodb.core.MongoTemplate      : find using query: { "userid" : "admin"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.User in collection: users
+2026-02-12T11:56:32.620+08:00 DEBUG 26912 --- [http-nio-8090-exec-1] o.s.data.mongodb.core.MongoTemplate      : Saving Document containing fields: [_id, userid, email, password, nickname, isAdmin, isDeactivated, vip, stats, preferences, totalCarbon, totalPoints, currentPoints, lastLoginAt, createdAt, updatedAt, activityMetrics, _class]
+2026-02-12T11:56:32.782+08:00 DEBUG 26912 --- [http-nio-8090-exec-3] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Trip in collection: trips
+2026-02-12T11:56:32.787+08:00 DEBUG 26912 --- [http-nio-8090-exec-7] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Goods in collection: goods
+2026-02-12T11:56:32.799+08:00  INFO 26912 --- [http-nio-8090-exec-2] c.e.E.controller.StatisticsController    : [WEB] Fetching management analytics for time range: monthly
+2026-02-12T11:56:32.799+08:00  INFO 26912 --- [http-nio-8090-exec-2] c.e.E.service.StatisticsImplementation   : [getManagementAnalytics] Called with timeRange=monthly
+2026-02-12T11:56:32.800+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.User in collection: users
+2026-02-12T11:56:32.803+08:00  INFO 26912 --- [http-nio-8090-exec-5] c.e.E.controller.LeaderboardController   : [WEB] Fetching MONTHLY leaderboard, date: , search: ''
+2026-02-12T11:56:32.806+08:00  INFO 26912 --- [http-nio-8090-exec-5] c.e.E.service.LeaderboardImplementation  : Computing MONTHLY leaderboard for period 2026-02 (2026-02-01T00:00 to 2026-03-01T00:00)
+2026-02-12T11:56:32.852+08:00 DEBUG 26912 --- [http-nio-8090-exec-4] o.s.data.mongodb.core.MongoTemplate      : Executing aggregation: [{ "$match" : { "carbon_status" : "completed", "start_time" : { "$gte" : { "$date" : "2026-01-31T16:00:00Z"}, "$lt" : { "$date" : "2026-02-28T16:00:00Z"}}}}, { "$group" : { "_id" : "$user_id", "totalCarbonSaved" : { "$sum" : "$carbon_saved"}}}, { "$sort" : { "totalCarbonSaved" : -1}}] in collection trips
+2026-02-12T11:56:32.852+08:00 DEBUG 26912 --- [http-nio-8090-exec-5] o.s.data.mongodb.core.MongoTemplate      : Executing aggregation: [{ "$match" : { "carbon_status" : "completed", "start_time" : { "$gte" : { "$date" : "2026-01-31T16:00:00Z"}, "$lt" : { "$date" : "2026-02-28T16:00:00Z"}}}}, { "$group" : { "_id" : "$user_id", "totalCarbonSaved" : { "$sum" : "$carbon_saved"}}}, { "$sort" : { "totalCarbonSaved" : -1}}] in collection trips
+2026-02-12T11:56:32.914+08:00 DEBUG 26912 --- [http-nio-8090-exec-6] o.s.data.mongodb.core.MongoTemplate      : Executing aggregation: [{ "$group" : { "_id" : "$badge_id", "purchaseCount" : { "$sum" : 1}}}] in collection user_badges
+2026-02-12T11:56:32.923+08:00  INFO 26912 --- [http-nio-8090-exec-2] c.e.E.service.StatisticsImplementation   : [getManagementAnalytics] Loaded 56 users
+2026-02-12T11:56:32.925+08:00 DEBUG 26912 --- [http-nio-8090-exec-5] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "userid" : { "$in" : ["e000010", "e1553256", "e1538489", "e1538488", "user012"]}}, Fields: {}, Sort: {}
+2026-02-12T11:56:32.925+08:00 DEBUG 26912 --- [http-nio-8090-exec-4] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "userid" : { "$in" : ["e000010", "e1553256", "e1538489", "e1538488", "user012"]}}, Fields: {}, Sort: {}
+2026-02-12T11:56:32.929+08:00 DEBUG 26912 --- [http-nio-8090-exec-4] o.s.data.mongodb.core.MongoTemplate      : find using query: { "userid" : { "$in" : ["e000010", "e1553256", "e1538489", "e1538488", "user012"]}} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.User in collection: users
+2026-02-12T11:56:32.929+08:00 DEBUG 26912 --- [http-nio-8090-exec-5] o.s.data.mongodb.core.MongoTemplate      : find using query: { "userid" : { "$in" : ["e000010", "e1553256", "e1538489", "e1538488", "user012"]}} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.User in collection: users
+2026-02-12T11:56:32.933+08:00 DEBUG 26912 --- [http-nio-8090-exec-8] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Badge in collection: badges
+2026-02-12T11:56:32.938+08:00  INFO 26912 --- [http-nio-8090-exec-3] c.example.EcoGo.service.TripServiceImpl  : [getAllTrips] Found 45 trips in DB
+2026-02-12T11:56:32.940+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "startTime" : { "$gt" : { "$java" : 2026-02-01T00:00 }, "$lt" : { "$java" : 2026-02-28T23:59:59 } }, "carbonStatus" : "completed" }, Fields: {}, Sort: {}
+2026-02-12T11:56:32.942+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.data.mongodb.core.MongoTemplate      : find using query: { "start_time" : { "$gt" : { "$date" : "2026-01-31T16:00:00Z"}, "$lt" : { "$date" : "2026-02-28T15:59:59Z"}}, "carbon_status" : "completed"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Trip in collection: trips
+2026-02-12T11:56:32.943+08:00 DEBUG 26912 --- [http-nio-8090-exec-4] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Faculty in collection: faculties
+2026-02-12T11:56:32.965+08:00 DEBUG 26912 --- [http-nio-8090-exec-9] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.User in collection: users
+2026-02-12T11:56:32.980+08:00  INFO 26912 --- [http-nio-8090-exec-10] c.e.E.controller.ChallengeController     : [WEB] Fetching all challenges
+2026-02-12T11:56:32.981+08:00 DEBUG 26912 --- [http-nio-8090-exec-10] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Challenge in collection: challenges
+2026-02-12T11:56:32.985+08:00 DEBUG 26912 --- [http-nio-8090-exec-5] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "type" : "MONTHLY", "periodKey" : "2026-02"}, Fields: {}, Sort: {}
+2026-02-12T11:56:32.987+08:00 DEBUG 26912 --- [http-nio-8090-exec-5] o.s.data.mongodb.core.MongoTemplate      : find using query: { "type" : "MONTHLY", "period_key" : "2026-02"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.LeaderboardReward in collection: leaderboard_rewards
+2026-02-12T11:56:33.003+08:00 DEBUG 26912 --- [http-nio-8090-exec-1] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Order in collection: orders
+2026-02-12T11:56:33.008+08:00 DEBUG 26912 --- [http-nio-8090-exec-7] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "isAdmin" : false}, Fields: {}, Sort: {}
+2026-02-12T11:56:33.015+08:00 DEBUG 26912 --- [http-nio-8090-exec-10] o.s.data.mongodb.core.MongoTemplate      : Executing count: { "challenge_id" : "698596d266ec2048e942276a"} in collection: user_challenge_progress
+2026-02-12T11:56:33.017+08:00  WARN 26912 --- [http-nio-8090-exec-5] ration$PageModule$WarningLoggingModifier : Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
+	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
+	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
+
+2026-02-12T11:56:33.018+08:00 DEBUG 26912 --- [http-nio-8090-exec-7] o.s.data.mongodb.core.MongoTemplate      : find using query: { "isAdmin" : false} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.User in collection: users
+2026-02-12T11:56:33.029+08:00 DEBUG 26912 --- [http-nio-8090-exec-10] o.s.data.mongodb.core.MongoTemplate      : Executing count: { "challenge_id" : "698596d266ec2048e942276b"} in collection: user_challenge_progress
+2026-02-12T11:56:33.038+08:00 DEBUG 26912 --- [http-nio-8090-exec-6] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.UserPointsLog in collection: user_points_logs
+2026-02-12T11:56:33.045+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "startTime" : { "$gt" : { "$java" : 2026-01-01T00:00 }, "$lt" : { "$java" : 2026-01-31T23:59:59 } }, "carbonStatus" : "completed" }, Fields: {}, Sort: {}
+2026-02-12T11:56:33.047+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.data.mongodb.core.MongoTemplate      : find using query: { "start_time" : { "$gt" : { "$date" : "2025-12-31T16:00:00Z"}, "$lt" : { "$date" : "2026-01-31T15:59:59Z"}}, "carbon_status" : "completed"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Trip in collection: trips
+2026-02-12T11:56:33.049+08:00 DEBUG 26912 --- [http-nio-8090-exec-10] o.s.data.mongodb.core.MongoTemplate      : Executing count: { "challenge_id" : "698596d266ec2048e942276c"} in collection: user_challenge_progress
+2026-02-12T11:56:33.062+08:00 DEBUG 26912 --- [http-nio-8090-exec-10] o.s.data.mongodb.core.MongoTemplate      : Executing count: { "challenge_id" : "698596d266ec2048e942276d"} in collection: user_challenge_progress
+2026-02-12T11:56:33.063+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "startTime" : { "$gt" : { "$java" : 2025-12-01T00:00 }, "$lt" : { "$java" : 2025-12-31T23:59:59 } }, "carbonStatus" : "completed" }, Fields: {}, Sort: {}
+2026-02-12T11:56:33.064+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.data.mongodb.core.MongoTemplate      : find using query: { "start_time" : { "$gt" : { "$date" : "2025-11-30T16:00:00Z"}, "$lt" : { "$date" : "2025-12-31T15:59:59Z"}}, "carbon_status" : "completed"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Trip in collection: trips
+2026-02-12T11:56:33.073+08:00 DEBUG 26912 --- [http-nio-8090-exec-10] o.s.data.mongodb.core.MongoTemplate      : Executing count: { "challenge_id" : "698596d266ec2048e942276e"} in collection: user_challenge_progress
+2026-02-12T11:56:33.084+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "startTime" : { "$gt" : { "$java" : 2025-11-01T00:00 }, "$lt" : { "$java" : 2025-11-30T23:59:59 } }, "carbonStatus" : "completed" }, Fields: {}, Sort: {}
+2026-02-12T11:56:33.085+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.data.mongodb.core.MongoTemplate      : find using query: { "start_time" : { "$gt" : { "$date" : "2025-10-31T16:00:00Z"}, "$lt" : { "$date" : "2025-11-30T15:59:59Z"}}, "carbon_status" : "completed"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Trip in collection: trips
+2026-02-12T11:56:33.095+08:00 DEBUG 26912 --- [http-nio-8090-exec-10] o.s.data.mongodb.core.MongoTemplate      : Executing count: { "challenge_id" : "698596d266ec2048e942276f"} in collection: user_challenge_progress
+2026-02-12T11:56:33.104+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "startTime" : { "$gt" : { "$java" : 2025-10-01T00:00 }, "$lt" : { "$java" : 2025-10-31T23:59:59 } }, "carbonStatus" : "completed" }, Fields: {}, Sort: {}
+2026-02-12T11:56:33.105+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.data.mongodb.core.MongoTemplate      : find using query: { "start_time" : { "$gt" : { "$date" : "2025-09-30T16:00:00Z"}, "$lt" : { "$date" : "2025-10-31T15:59:59Z"}}, "carbon_status" : "completed"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Trip in collection: trips
+2026-02-12T11:56:33.145+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "startTime" : { "$gt" : { "$java" : 2025-09-01T00:00 }, "$lt" : { "$java" : 2025-09-30T23:59:59 } }, "carbonStatus" : "completed" }, Fields: {}, Sort: {}
+2026-02-12T11:56:33.146+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.data.mongodb.core.MongoTemplate      : find using query: { "start_time" : { "$gt" : { "$date" : "2025-08-31T16:00:00Z"}, "$lt" : { "$date" : "2025-09-30T15:59:59Z"}}, "carbon_status" : "completed"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Trip in collection: trips
+2026-02-12T11:56:34.126+08:00 DEBUG 26912 --- [http-nio-8090-exec-3] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "isAdmin" : false}, Fields: {}, Sort: {}
+2026-02-12T11:56:34.127+08:00 DEBUG 26912 --- [http-nio-8090-exec-3] o.s.data.mongodb.core.MongoTemplate      : find using query: { "isAdmin" : false} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.User in collection: users
+2026-02-12T11:56:34.176+08:00 DEBUG 26912 --- [http-nio-8090-exec-3] o.s.data.mongodb.core.MongoTemplate      : Executing count: { "isAdmin" : false} in collection: users
+2026-02-12T11:56:34.482+08:00 DEBUG 26912 --- [http-nio-8090-exec-8] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "category" : "cloth"}, Fields: {}, Sort: {}
+2026-02-12T11:56:34.482+08:00 DEBUG 26912 --- [http-nio-8090-exec-4] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "category" : "badge"}, Fields: {}, Sort: {}
+2026-02-12T11:56:34.483+08:00 DEBUG 26912 --- [http-nio-8090-exec-4] o.s.data.mongodb.core.MongoTemplate      : find using query: { "category" : "badge"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Badge in collection: badges
+2026-02-12T11:56:34.484+08:00 DEBUG 26912 --- [http-nio-8090-exec-8] o.s.data.mongodb.core.MongoTemplate      : find using query: { "category" : "cloth"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Badge in collection: badges
+2026-02-12T11:56:34.486+08:00 DEBUG 26912 --- [http-nio-8090-exec-9] o.s.data.mongodb.core.MongoTemplate      : Executing aggregation: [{ "$group" : { "_id" : "$badge_id", "purchaseCount" : { "$sum" : 1}}}] in collection user_badges
+2026-02-12T11:56:34.741+08:00 DEBUG 26912 --- [http-nio-8090-exec-5] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "isAdmin" : false}, Fields: {}, Sort: {}
+2026-02-12T11:56:34.743+08:00 DEBUG 26912 --- [http-nio-8090-exec-5] o.s.data.mongodb.core.MongoTemplate      : find using query: { "isAdmin" : false} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.User in collection: users
+2026-02-12T11:56:34.774+08:00 DEBUG 26912 --- [http-nio-8090-exec-5] o.s.data.mongodb.core.MongoTemplate      : Executing count: { "isAdmin" : false} in collection: users
+2026-02-12T11:56:34.992+08:00 DEBUG 26912 --- [http-nio-8090-exec-1] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Goods in collection: goods
+2026-02-12T11:56:34.992+08:00 DEBUG 26912 --- [http-nio-8090-exec-2] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Order in collection: orders
+2026-02-12T11:56:34.993+08:00 DEBUG 26912 --- [http-nio-8090-exec-6] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Goods in collection: goods
+2026-02-12T11:56:34.993+08:00 DEBUG 26912 --- [http-nio-8090-exec-7] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Order in collection: orders
+2026-02-12T11:56:35.462+08:00 DEBUG 26912 --- [http-nio-8090-exec-3] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "category" : "cloth"}, Fields: {}, Sort: {}
+2026-02-12T11:56:35.462+08:00 DEBUG 26912 --- [http-nio-8090-exec-8] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "category" : "badge"}, Fields: {}, Sort: {}
+2026-02-12T11:56:35.463+08:00 DEBUG 26912 --- [http-nio-8090-exec-8] o.s.data.mongodb.core.MongoTemplate      : find using query: { "category" : "badge"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Badge in collection: badges
+2026-02-12T11:56:35.463+08:00 DEBUG 26912 --- [http-nio-8090-exec-3] o.s.data.mongodb.core.MongoTemplate      : find using query: { "category" : "cloth"} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Badge in collection: badges
+2026-02-12T11:56:35.467+08:00 DEBUG 26912 --- [http-nio-8090-exec-4] o.s.data.mongodb.core.MongoTemplate      : Executing aggregation: [{ "$group" : { "_id" : "$badge_id", "purchaseCount" : { "$sum" : 1}}}] in collection user_badges
+2026-02-12T11:56:35.913+08:00  INFO 26912 --- [http-nio-8090-exec-9] c.e.E.c.AdvertisementController          : [WEB] Fetching all advertisements
+2026-02-12T11:56:35.914+08:00 DEBUG 26912 --- [http-nio-8090-exec-9] o.s.data.mongodb.core.MongoTemplate      : Executing count: {} in collection: advertisements
+2026-02-12T11:56:35.926+08:00 DEBUG 26912 --- [http-nio-8090-exec-9] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Advertisement in collection: advertisements
+2026-02-12T12:00:00.011+08:00 DEBUG 26912 --- [scheduling-1] o.s.d.m.r.query.MongoQueryCreator        : Created query Query: { "vip.isActive" : true, "vip.expiryDate" : { "$lt" : { "$java" : 2026-02-12T12:00:00.008231 } } }, Fields: {}, Sort: {}
+2026-02-12T12:00:00.017+08:00 DEBUG 26912 --- [scheduling-1] o.s.data.mongodb.core.MongoTemplate      : find using query: { "vip.isActive" : true, "vip.expiryDate" : { "$lt" : { "$date" : "2026-02-12T04:00:00.008Z"}}} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.User in collection: users
+2026-02-12T12:07:39.445+08:00  INFO 26912 --- [http-nio-8090-exec-5] c.e.E.c.AdvertisementController          : [WEB] Fetching all advertisements
+2026-02-12T12:07:39.447+08:00 DEBUG 26912 --- [http-nio-8090-exec-5] o.s.data.mongodb.core.MongoTemplate      : Executing count: {} in collection: advertisements
+2026-02-12T12:07:39.477+08:00 DEBUG 26912 --- [http-nio-8090-exec-5] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Advertisement in collection: advertisements
+2026-02-12T12:07:47.904+08:00  INFO 26912 --- [http-nio-8090-exec-10] c.e.E.c.AdvertisementController          : [WEB] Fetching all advertisements
+2026-02-12T12:07:47.906+08:00 DEBUG 26912 --- [http-nio-8090-exec-10] o.s.data.mongodb.core.MongoTemplate      : Executing count: {} in collection: advertisements
+2026-02-12T12:07:47.923+08:00 DEBUG 26912 --- [http-nio-8090-exec-10] o.s.data.mongodb.core.MongoTemplate      : find using query: {} fields: Document{{}} sort: null for class: class com.example.EcoGo.model.Advertisement in collection: advertisements
+2026-02-12T12:49:24.711+08:00  INFO 26912 --- [http-nio-8090-exec-1] c.e.E.c.AdvertisementController          : [WEB] Fetching all advertisements
+2026-02-12T12:49:22.493+08:00  INFO 26912 --- [cluster-ClusterId{value='698d4ede1f6d8ada7cfaa050', description='null'}-localhost:27017] org.mongodb.driver.cluster               : Exception in monitor thread while connecting to server localhost:27017
+
+com.mongodb.MongoSocketReadException: Exception receiving message
+	at com.mongodb.internal.connection.InternalStreamConnection.translateReadException(InternalStreamConnection.java:809) ~[mongodb-driver-core-5.5.2.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.receiveResponseBuffers(InternalStreamConnection.java:857) ~[mongodb-driver-core-5.5.2.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.receiveCommandMessageResponse(InternalStreamConnection.java:517) ~[mongodb-driver-core-5.5.2.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.receive(InternalStreamConnection.java:469) ~[mongodb-driver-core-5.5.2.jar:na]
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitor.lookupServerDescription(DefaultServerMonitor.java:249) ~[mongodb-driver-core-5.5.2.jar:na]
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitor.run(DefaultServerMonitor.java:176) ~[mongodb-driver-core-5.5.2.jar:na]
+Caused by: java.net.SocketException: Connection reset
+	at java.base/sun.nio.ch.NioSocketImpl.implRead(Unknown Source) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.read(Unknown Source) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl$1.read(Unknown Source) ~[na:na]
+	at java.base/java.net.Socket$SocketInputStream.read(Unknown Source) ~[na:na]
+	at com.mongodb.internal.connection.SocketStream.read(SocketStream.java:182) ~[mongodb-driver-core-5.5.2.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.receiveResponseBuffers(InternalStreamConnection.java:824) ~[mongodb-driver-core-5.5.2.jar:na]
+	... 4 common frames omitted
+
+2026-02-12T12:49:24.726+08:00 DEBUG 26912 --- [http-nio-8090-exec-1] o.s.data.mongodb.core.MongoTemplate      : Executing count: {} in collection: advertisements
+2026-02-12T12:49:24.855+08:00  INFO 26912 --- [cluster-ClusterId{value='698d4ede1f6d8ada7cfaa050', description='null'}-localhost:27017] org.mongodb.driver.cluster               : Exception in monitor thread while connecting to server localhost:27017
+
+com.mongodb.MongoSocketOpenException: Exception opening socket
+	at com.mongodb.internal.connection.SocketStream.lambda$open$0(SocketStream.java:85) ~[mongodb-driver-core-5.5.2.jar:na]
+	at java.base/java.util.Optional.orElseThrow(Unknown Source) ~[na:na]
+	at com.mongodb.internal.connection.SocketStream.open(SocketStream.java:85) ~[mongodb-driver-core-5.5.2.jar:na]
+	at com.mongodb.internal.connection.InternalStreamConnection.open(InternalStreamConnection.java:233) ~[mongodb-driver-core-5.5.2.jar:na]
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitor.lookupServerDescription(DefaultServerMonitor.java:219) ~[mongodb-driver-core-5.5.2.jar:na]
+	at com.mongodb.internal.connection.DefaultServerMonitor$ServerMonitor.run(DefaultServerMonitor.java:176) ~[mongodb-driver-core-5.5.2.jar:na]
+Caused by: java.net.ConnectException: Connection refused: getsockopt
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method) ~[na:na]
+	at java.base/sun.nio.ch.Net.pollConnectNow(Unknown Source) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(Unknown Source) ~[na:na]
+	at java.base/sun.nio.ch.NioSocketImpl.connect(Unknown Source) ~[na:na]
+	at java.base/java.net.SocksSocketImpl.connect(Unknown Source) ~[na:na]
+	at java.base/java.net.Socket.connect(Unknown Source) ~[na:na]
+	at com.mongodb.internal.connection.SocketStreamHelper.initialize(SocketStreamHelper.java:76) ~[mongodb-driver-core-5.5.2.jar:na]
+	at com.mongodb.internal.connection.SocketStream.initializeSocket(SocketStream.java:104) ~[mongodb-driver-core-5.5.2.jar:na]
+	at com.mongodb.internal.connection.SocketStream.open(SocketStream.java:79) ~[mongodb-driver-core-5.5.2.jar:na]
+	... 3 common frames omitted
+
+2026-02-12T12:49:24.884+08:00  INFO 26912 --- [http-nio-8090-exec-1] org.mongodb.driver.cluster               : Waiting for server to become available for operation with ID 225. Remaining time: 29883 ms. Selector: ReadPreferenceServerSelector{readPreference=primary}, topology description: {type=UNKNOWN, servers=[{address=localhost:27017, type=UNKNOWN, state=CONNECTING, exception={com.mongodb.MongoSocketReadException: Exception receiving message}, caused by {java.net.SocketException: Connection reset}}].
