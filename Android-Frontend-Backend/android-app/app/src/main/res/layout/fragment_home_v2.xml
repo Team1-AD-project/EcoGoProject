@@ -260,30 +260,30 @@
                         android:layout_weight="1"
                         android:background="@drawable/card_background"
                         android:hint="@string/home_plan_hint"
+                        android:imeOptions="actionGo"
+                        android:inputType="text"
+                        android:maxLines="1"
                         android:paddingStart="12dp"
                         android:paddingEnd="8dp"
                         android:textColor="@color/text_primary"
                         android:textColorHint="@color/text_hint"
                         android:textSize="13sp" />
 
-                    <ImageButton
-                        android:id="@+id/button_plan_mic"
-                        android:layout_width="40dp"
-                        android:layout_height="40dp"
-                        android:background="?attr/selectableItemBackgroundBorderless"
-                        android:contentDescription="@string/home_plan_hint"
-                        android:src="@drawable/ic_mic"
-                        app:tint="@color/text_secondary" />
-
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/button_go"
-                        android:layout_width="56dp"
+                        android:layout_width="wrap_content"
                         android:layout_height="44dp"
-                        android:layout_marginStart="4dp"
+                        android:layout_marginStart="8dp"
+                        android:minWidth="72dp"
                         android:text="@string/home_plan_go"
                         android:textAllCaps="false"
+                        android:textSize="14sp"
                         app:backgroundTint="@color/primary"
-                        app:cornerRadius="12dp" />
+                        app:cornerRadius="12dp"
+                        app:icon="@drawable/ic_navigation"
+                        app:iconGravity="textStart"
+                        app:iconSize="18dp"
+                        app:iconTint="@android:color/white" />
                 </LinearLayout>
 
                 <LinearLayout

@@ -35,8 +35,8 @@
     <string name="home_view_all">View All</string>
     <string name="home_greeting">Hello</string>
     <string name="home_location">Sunday, February 1, 2026</string>
-    <string name="home_plan_title">+ Today\'s Goals</string>
-    <string name="home_plan_hint">e.g. Science Library, Gym...</string>
+    <string name="home_plan_title">Where are you heading?</string>
+    <string name="home_plan_hint">e.g. UTown, Science Library, Gym…</string>
     <string name="home_plan_go">Go</string>
     <string name="home_monthly_label">Monthly</string>
     <string name="home_soc_score">SoC Score</string>

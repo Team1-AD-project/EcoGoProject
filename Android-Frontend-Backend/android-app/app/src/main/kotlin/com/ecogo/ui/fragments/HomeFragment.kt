@@ -457,14 +457,15 @@ class HomeFragment : Fragment() {
             findNavController().navigate(com.ecogo.R.id.profileFragment)
         }
         binding.buttonGo.setOnClickListener {
-            val destination = binding.editPlan.text?.toString()?.trim().orEmpty()
-            if (destination.isNotEmpty()) {
-                requestRecommendation(destination)
-                binding.editPlan.text?.clear()
-            }
+            submitDestination()
         }
-        binding.buttonPlanMic?.setOnClickListener {
-            // Voice input placeholder: can integrate voice recognition later
+
+        // Support keyboard "Go" action on the input field
+        binding.editPlan.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_GO) {
+                submitDestination()
+                true
+            } else false
         }
 
         // Monthly points card -> Profile page
@@ -519,6 +520,17 @@ class HomeFragment : Fragment() {
         // Challenges shortcut entry
         binding.cardChallengesShortcut.setOnClickListener {
             findNavController().navigate(com.ecogo.R.id.action_home_to_challenges)
+        }
+    }
+
+    private fun submitDestination() {
+        val destination = binding.editPlan.text?.toString()?.trim().orEmpty()
+        if (destination.isNotEmpty()) {
+            requestRecommendation(destination)
+            binding.editPlan.text?.clear()
+            // Hide keyboard after submission
+            val imm = requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+            imm.hideSoftInputFromWindow(binding.editPlan.windowToken, 0)
         }
     }
 
