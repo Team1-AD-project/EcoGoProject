@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">NUS EcoRide</string>
+    <string name="app_name">EcoGo</string>
     
     <!-- Navigation -->
     <string name="nav_home">Home</string>
@@ -10,7 +10,7 @@
     <string name="nav_profile">Profile</string>
     
     <!-- Login -->
-    <string name="login_title">Welcome to NUS EcoRide</string>
+    <string name="login_title">Welcome to EcoGo</string>
     <string name="login_subtitle">Making campus transport sustainable</string>
     <string name="login_nusnet_id">NUSNET ID</string>
     <string name="login_password">Password</string>

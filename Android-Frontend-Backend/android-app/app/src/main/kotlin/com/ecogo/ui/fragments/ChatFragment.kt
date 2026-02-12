@@ -168,12 +168,13 @@ class ChatFragment : Fragment() {
                 "SUGGESTIONS" -> {
                     @Suppress("UNCHECKED_CAST")
                     val options = action.payload?.get("options") as? List<String>
-                    if (!options.isNullOrEmpty()) {
+                    val filtered = options?.filter { !it.contains("Book a Trip") && !it.contains("My Profile") }
+                    if (!filtered.isNullOrEmpty()) {
                         adapter.addMessage(
                             ChatMessageAdapter.ChatMessage(
                                 text = "",
                                 isUser = false,
-                                suggestions = options
+                                suggestions = filtered
                             )
                         )
                     }
