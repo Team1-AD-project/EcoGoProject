@@ -21,7 +21,8 @@ public class SecurityConfig {
         private static final String ADMIN_ROLE = "ADMIN";
 
         @Bean
-        @SuppressWarnings("java:S4502") // CSRF is safely disabled: stateless REST API using JWT bearer tokens, no cookies/sessions
+        @SuppressWarnings("java:S4502") // CSRF is safely disabled: stateless REST API using JWT bearer tokens, no
+                                        // cookies/sessions
         public SecurityFilterChain securityFilterChain(HttpSecurity http,
                         JwtAuthenticationFilter jwtAuthenticationFilter,
                         CustomAccessDeniedHandler accessDeniedHandler,
@@ -30,7 +31,8 @@ public class SecurityConfig {
                                 // Enable CORS using the custom configuration bean
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
 
-                                // CSRF protection is disabled because this API is stateless (JWT bearer tokens).
+                                // CSRF protection is disabled because this API is stateless (JWT bearer
+                                // tokens).
                                 // No session cookies are used, so CSRF attacks are not applicable.
                                 .csrf(AbstractHttpConfigurer::disable)
 
@@ -95,19 +97,27 @@ public class SecurityConfig {
         @Bean
         public CorsConfigurationSource corsConfigurationSource() {
                 CorsConfiguration configuration = new CorsConfiguration();
-                // Use allowedOriginPatterns instead of allowedOrigins to support credentials
-                // with wildcard
-                configuration.setAllowedOriginPatterns(Arrays.asList("*"));
-                // Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
-                configuration.setAllowedMethods(Arrays.asList("*"));
-                // Allow all headers
+
+                // Critical fix: Replace wildcard with exact frontend origin to resolve CORS
+                // issues
+                configuration.setAllowedOrigins(Arrays.asList("http://47.129.124.55:3000"));
+
+                // Allow all standard HTTP methods for API operations
+                configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+
+                // Allow all request headers (including JWT tokens, content-type, etc.)
                 configuration.setAllowedHeaders(Arrays.asList("*"));
-                // Allow credentials (like cookies)
+
+                // Enable credentials (cookies, authorization headers, TLS client certificates)
                 configuration.setAllowCredentials(true);
 
+                // Cache preflight OPTIONS request response for 1 hour to reduce overhead
+                configuration.setMaxAge(3600L);
+
                 UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-                // Apply this CORS configuration to all paths
+                // Apply CORS configuration to all API endpoints
                 source.registerCorsConfiguration("/**", configuration);
+
                 return source;
         }
 }
