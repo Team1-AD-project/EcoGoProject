@@ -259,7 +259,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 } ?: emptyList()
 
                 if (ads.isNotEmpty()) {
-                    binding.layoutAdCarousel.visibility = View.VISIBLE
+                    // Don't show ads during active trip tracking
+                    if (viewModel.tripState.value is TripState.Tracking) {
+                        Log.d(TAG, "Ads loaded but trip is tracking, keeping ads hidden")
+                    } else {
+                        binding.layoutAdCarousel.visibility = View.VISIBLE
+                    }
                     setupAdViewPager(ads)
                 }
             } catch (e: Exception) {
@@ -395,12 +400,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     Log.d(TAG, "Places SDK initialized with key: ${apiKey.take(10)}...")
                 } else {
                     Log.e(TAG, "Google Maps API Key not found in manifest")
-                    Toast.makeText(this, "API key not configured", Toast.LENGTH_SHORT).show()
                 }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize Places SDK: ${e.message}", e)
-            Toast.makeText(this, "Place service initialization failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -414,6 +417,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // Back button click - return to main interface
         binding.fabBack.setOnClickListener {
+            finish()
+        }
+        binding.btnRouteInfoBack.setOnClickListener {
             finish()
         }
 
@@ -481,16 +487,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         binding.btnTracking.setOnClickListener {
             when (viewModel.tripState.value) {
                 is TripState.Idle, is TripState.Completed -> {
-                    // Check if a route exists
-                    val hasRoute = !viewModel.routePoints.value.isNullOrEmpty()
-                    if (!hasRoute) {
-                        // Prompt user to get a route first
-                        Toast.makeText(
-                            this,
-                            "Tip: Please select a transport mode to get a navigation route first",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
                     startLocationTracking()
                     viewModel.startTracking()
                 }
@@ -777,8 +773,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun startTripOnBackend() {
         val startLocation = viewModel.currentLocation.value
         if (startLocation == null) {
-            Log.w(TAG, "No current location, skipping startTrip API call")
-            Toast.makeText(this, "GPS positioning in progress, trip will be created after location is acquired...", Toast.LENGTH_SHORT).show()
+            Log.w(TAG, "No current location, will retry startTrip after GPS fix")
             // Delayed retry: wait for GPS fix before creating trip
             lifecycleScope.launch {
                 kotlinx.coroutines.delay(3000)
@@ -812,21 +807,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         Log.d(TAG, "Trip started on backend: tripId=$tripId")
                         runOnUiThread {
                             viewModel.setBackendTripId(tripId)
-                            Toast.makeText(this@MapActivity, "行程已创建: $tripId", Toast.LENGTH_SHORT).show()
                         }
                     },
                     onFailure = { error ->
                         Log.e(TAG, "Failed to start trip on backend: ${error.message}", error)
-                        runOnUiThread {
-                            Toast.makeText(this@MapActivity, "Trip creation failed: ${error.message}", Toast.LENGTH_LONG).show()
-                        }
                     }
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "Error starting trip on backend", e)
-                runOnUiThread {
-                    Toast.makeText(this@MapActivity, "Trip creation error: ${e.message}", Toast.LENGTH_LONG).show()
-                }
             }
         }
     }
@@ -840,14 +828,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val tripId = backendTripId ?: viewModel.currentTripId.value
         if (tripId == null || tripId.startsWith("MOCK_") || tripId == "restored-trip") {
             Log.w(TAG, "No valid backend tripId ($tripId), skipping completeTrip API call")
-            Toast.makeText(this, "Invalid trip ID, unable to sync to server", Toast.LENGTH_SHORT).show()
             return
         }
 
         val endLocation = viewModel.currentLocation.value
         if (endLocation == null) {
             Log.w(TAG, "No current location, skipping completeTrip API call")
-            Toast.makeText(this, "Unable to get current location, trip not synced", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -860,7 +846,6 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         if (trackPoints.isEmpty()) {
             Log.w(TAG, "No track points, skipping completeTrip API call")
-            Toast.makeText(this, "No track points collected, trip not synced", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -921,22 +906,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     onSuccess = { response ->
                         backendTripId = null
                         Log.d(TAG, "Trip completed on backend: ${response.tripId}, status=${response.status}")
-                        runOnUiThread {
-                            Toast.makeText(this@MapActivity, "Trip synced to server", Toast.LENGTH_SHORT).show()
-                        }
                     },
                     onFailure = { error ->
                         Log.e(TAG, "Failed to complete trip on backend: ${error.message}", error)
-                        runOnUiThread {
-                            Toast.makeText(this@MapActivity, "Trip sync failed: ${error.message}", Toast.LENGTH_LONG).show()
-                        }
                     }
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "Error completing trip on backend", e)
-                runOnUiThread {
-                    Toast.makeText(this@MapActivity, "Trip sync error: ${e.message}", Toast.LENGTH_LONG).show()
-                }
             }
         }
     }
@@ -2109,6 +2085,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.btnTracking.isEnabled = true
                 binding.chipGroupTransport.visibility = View.GONE
                 binding.cardSearch.visibility = View.GONE
+                binding.layoutAdCarousel.visibility = View.GONE
                 // Show tracking info card
                 binding.cardRouteInfo.visibility = View.VISIBLE
 

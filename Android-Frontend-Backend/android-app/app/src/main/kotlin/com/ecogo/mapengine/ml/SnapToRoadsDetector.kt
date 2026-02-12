@@ -19,6 +19,9 @@ class SnapToRoadsDetector {
         private const val TAG = "SnapToRoadsDetector"
     }
 
+    // Track last predicted mode for hysteresis
+    private var lastPredictedMode: TransportModeLabel? = null
+
     /**
      * Infer transport mode from GPS trajectory points and speed information
      */
@@ -111,197 +114,108 @@ class SnapToRoadsDetector {
 
     /**
      * 根据道路类型和速度推断交通方式
+     * Uses hysteresis (5 km/h buffer) at speed boundaries to prevent oscillation
      */
     private fun inferTransportMode(
         roadTypes: List<RoadInfo>,
         avgSpeedKmh: Float
     ): TransportModePrediction {
-        // 统计各类型道路的出现频率
         val typeDistribution = roadTypes.groupingBy { it.roadType }.eachCount()
         val hasAlignedRoad = typeDistribution.containsKey("aligned_street")
 
-        return when {
-            // 高速公路（通常是驾车）
-            typeDistribution.containsKey("motorway") && 
-            avgSpeedKmh > 50 -> {
-                TransportModePrediction(
-                    mode = TransportModeLabel.DRIVING,
-                    confidence = 0.95f,
-                    probabilities = mapOf(
-                        TransportModeLabel.DRIVING to 0.95f,
-                        TransportModeLabel.BUS to 0.03f,
-                        TransportModeLabel.CYCLING to 0.02f,
-                        TransportModeLabel.WALKING to 0.0f,
-                        TransportModeLabel.SUBWAY to 0.0f,
-                        TransportModeLabel.UNKNOWN to 0.0f
-                    )
-                )
-            }
+        // Hysteresis buffer: require crossing threshold by 5 km/h to change mode
+        val hysteresis = 5f
+        val last = lastPredictedMode
 
-            // 公交路线（通常公交吸附到主干道，速度 20-60 km/h，会停靠）
-            typeDistribution.containsKey("trunk") && 
-            avgSpeedKmh in 15f..60f -> {
-                TransportModePrediction(
-                    mode = TransportModeLabel.BUS,
-                    confidence = 0.85f,
-                    probabilities = mapOf(
-                        TransportModeLabel.BUS to 0.85f,
-                        TransportModeLabel.DRIVING to 0.10f,
-                        TransportModeLabel.CYCLING to 0.03f,
-                        TransportModeLabel.WALKING to 0.02f,
-                        TransportModeLabel.SUBWAY to 0.0f,
-                        TransportModeLabel.UNKNOWN to 0.0f
-                    )
-                )
-            }
+        val prediction = when {
+            // Motorway + high speed → DRIVING
+            typeDistribution.containsKey("motorway") &&
+            avgSpeedKmh > 50 -> makePrediction(TransportModeLabel.DRIVING, 0.95f)
 
-            // 自行车道（速度通常 15-25 km/h）
-            typeDistribution.containsKey("cycleway") -> {
-                TransportModePrediction(
-                    mode = TransportModeLabel.CYCLING,
-                    confidence = 0.9f,
-                    probabilities = mapOf(
-                        TransportModeLabel.CYCLING to 0.9f,
-                        TransportModeLabel.WALKING to 0.07f,
-                        TransportModeLabel.BUS to 0.02f,
-                        TransportModeLabel.DRIVING to 0.01f,
-                        TransportModeLabel.SUBWAY to 0.0f,
-                        TransportModeLabel.UNKNOWN to 0.0f
-                    )
-                )
-            }
+            // Trunk road + medium speed → BUS
+            typeDistribution.containsKey("trunk") &&
+            avgSpeedKmh in 15f..60f -> makePrediction(TransportModeLabel.BUS, 0.85f)
 
-            // 已对齐道路 + 低速（步行或骑行）
-            hasAlignedRoad && avgSpeedKmh < 10 -> {
-                TransportModePrediction(
-                    mode = TransportModeLabel.WALKING,
-                    confidence = 0.85f,
-                    probabilities = mapOf(
-                        TransportModeLabel.WALKING to 0.85f,
-                        TransportModeLabel.CYCLING to 0.10f,
-                        TransportModeLabel.BUS to 0.03f,
-                        TransportModeLabel.DRIVING to 0.01f,
-                        TransportModeLabel.SUBWAY to 0.01f,
-                        TransportModeLabel.UNKNOWN to 0.0f
-                    )
-                )
-            }
+            // Cycleway → CYCLING
+            typeDistribution.containsKey("cycleway") -> makePrediction(TransportModeLabel.CYCLING, 0.9f)
 
-            // 已对齐道路 + 低-中等速度（骑行）
-            hasAlignedRoad && avgSpeedKmh in 10f..25f -> {
-                TransportModePrediction(
-                    mode = TransportModeLabel.CYCLING,
-                    confidence = 0.80f,
-                    probabilities = mapOf(
-                        TransportModeLabel.CYCLING to 0.80f,
-                        TransportModeLabel.WALKING to 0.08f,
-                        TransportModeLabel.BUS to 0.08f,
-                        TransportModeLabel.DRIVING to 0.03f,
-                        TransportModeLabel.SUBWAY to 0.01f,
-                        TransportModeLabel.UNKNOWN to 0.0f
-                    )
-                )
-            }
+            // Aligned road: speed-based with hysteresis
+            hasAlignedRoad -> classifyBySpeedWithHysteresis(avgSpeedKmh, last, hysteresis)
 
-            // 已对齐道路 + 中等速度（公交或驾车）
-            hasAlignedRoad && avgSpeedKmh in 25f..50f -> {
-                TransportModePrediction(
-                    mode = TransportModeLabel.BUS,
-                    confidence = 0.75f,
-                    probabilities = mapOf(
-                        TransportModeLabel.BUS to 0.75f,
-                        TransportModeLabel.DRIVING to 0.20f,
-                        TransportModeLabel.CYCLING to 0.03f,
-                        TransportModeLabel.WALKING to 0.01f,
-                        TransportModeLabel.SUBWAY to 0.01f,
-                        TransportModeLabel.UNKNOWN to 0.0f
-                    )
-                )
-            }
-
-            // 已对齐道路 + 高速（驾车）
-            hasAlignedRoad && avgSpeedKmh > 50 -> {
-                TransportModePrediction(
-                    mode = TransportModeLabel.DRIVING,
-                    confidence = 0.90f,
-                    probabilities = mapOf(
-                        TransportModeLabel.DRIVING to 0.90f,
-                        TransportModeLabel.BUS to 0.07f,
-                        TransportModeLabel.CYCLING to 0.02f,
-                        TransportModeLabel.WALKING to 0.01f,
-                        TransportModeLabel.SUBWAY to 0.0f,
-                        TransportModeLabel.UNKNOWN to 0.0f
-                    )
-                )
-            }
-
-            // 人行道或低速街道 + 低速（步行）
-            avgSpeedKmh < 10 -> {
-                TransportModePrediction(
-                    mode = TransportModeLabel.WALKING,
-                    confidence = 0.88f,
-                    probabilities = mapOf(
-                        TransportModeLabel.WALKING to 0.88f,
-                        TransportModeLabel.CYCLING to 0.08f,
-                        TransportModeLabel.BUS to 0.02f,
-                        TransportModeLabel.DRIVING to 0.01f,
-                        TransportModeLabel.SUBWAY to 0.01f,
-                        TransportModeLabel.UNKNOWN to 0.0f
-                    )
-                )
-            }
-
-            // 街道 + 中等速度（可能是自行车或轻型机动车）
-            typeDistribution.containsKey("residential") ||
-            typeDistribution.containsKey("secondary") -> {
-                when {
-                    avgSpeedKmh < 15f -> {
-                        TransportModePrediction(
-                            mode = TransportModeLabel.CYCLING,
-                            confidence = 0.70f,
-                            probabilities = mapOf(
-                                TransportModeLabel.CYCLING to 0.70f,
-                                TransportModeLabel.WALKING to 0.15f,
-                                TransportModeLabel.BUS to 0.10f,
-                                TransportModeLabel.DRIVING to 0.04f,
-                                TransportModeLabel.SUBWAY to 0.01f,
-                                TransportModeLabel.UNKNOWN to 0.0f
-                            )
-                        )
-                    }
-                    else -> {
-                        TransportModePrediction(
-                            mode = TransportModeLabel.DRIVING,
-                            confidence = 0.75f,
-                            probabilities = mapOf(
-                                TransportModeLabel.DRIVING to 0.75f,
-                                TransportModeLabel.BUS to 0.15f,
-                                TransportModeLabel.CYCLING to 0.07f,
-                                TransportModeLabel.WALKING to 0.02f,
-                                TransportModeLabel.SUBWAY to 0.01f,
-                                TransportModeLabel.UNKNOWN to 0.0f
-                            )
-                        )
-                    }
-                }
-            }
-
-            // 默认
-            else -> {
-                TransportModePrediction(
-                    mode = TransportModeLabel.WALKING,
-                    confidence = 0.50f,
-                    probabilities = mapOf(
-                        TransportModeLabel.WALKING to 0.50f,
-                        TransportModeLabel.CYCLING to 0.20f,
-                        TransportModeLabel.BUS to 0.15f,
-                        TransportModeLabel.DRIVING to 0.10f,
-                        TransportModeLabel.SUBWAY to 0.03f,
-                        TransportModeLabel.UNKNOWN to 0.02f
-                    )
-                )
-            }
+            // No road type info: pure speed-based with hysteresis
+            else -> classifyBySpeedWithHysteresis(avgSpeedKmh, last, hysteresis)
         }
+
+        lastPredictedMode = prediction.mode
+        return prediction
+    }
+
+    /**
+     * Classify transport mode by speed with hysteresis to prevent oscillation.
+     *
+     * Thresholds: Walking < 10, Cycling 10-30, Bus 30-55, Driving > 55
+     * When already in a mode, require crossing threshold +/- hysteresis to change.
+     */
+    private fun classifyBySpeedWithHysteresis(
+        speedKmh: Float,
+        lastMode: TransportModeLabel?,
+        hysteresis: Float
+    ): TransportModePrediction {
+        // Define base thresholds
+        val walkCycleThreshold = 10f
+        val cycleBusThreshold = 30f
+        val busDriveThreshold = 55f
+
+        // Apply hysteresis: stick with current mode unless speed clearly crosses boundary
+        return when (lastMode) {
+            TransportModeLabel.WALKING -> when {
+                speedKmh > walkCycleThreshold + hysteresis -> classifyBySpeed(speedKmh)
+                else -> makePrediction(TransportModeLabel.WALKING, 0.85f)
+            }
+            TransportModeLabel.CYCLING -> when {
+                speedKmh < walkCycleThreshold - hysteresis -> makePrediction(TransportModeLabel.WALKING, 0.85f)
+                speedKmh > cycleBusThreshold + hysteresis -> classifyBySpeed(speedKmh)
+                else -> makePrediction(TransportModeLabel.CYCLING, 0.80f)
+            }
+            TransportModeLabel.BUS -> when {
+                speedKmh < cycleBusThreshold - hysteresis -> classifyBySpeed(speedKmh)
+                speedKmh > busDriveThreshold + hysteresis -> makePrediction(TransportModeLabel.DRIVING, 0.90f)
+                else -> makePrediction(TransportModeLabel.BUS, 0.75f)
+            }
+            TransportModeLabel.DRIVING -> when {
+                speedKmh < busDriveThreshold - hysteresis -> classifyBySpeed(speedKmh)
+                else -> makePrediction(TransportModeLabel.DRIVING, 0.90f)
+            }
+            else -> classifyBySpeed(speedKmh)
+        }
+    }
+
+    /**
+     * Pure speed-based classification (no hysteresis, used for initial classification)
+     */
+    private fun classifyBySpeed(speedKmh: Float): TransportModePrediction {
+        return when {
+            speedKmh < 10f -> makePrediction(TransportModeLabel.WALKING, 0.85f)
+            speedKmh < 30f -> makePrediction(TransportModeLabel.CYCLING, 0.80f)
+            speedKmh < 55f -> makePrediction(TransportModeLabel.BUS, 0.75f)
+            else -> makePrediction(TransportModeLabel.DRIVING, 0.90f)
+        }
+    }
+
+    private fun makePrediction(mode: TransportModeLabel, confidence: Float): TransportModePrediction {
+        val probabilities = mutableMapOf(
+            TransportModeLabel.WALKING to 0f,
+            TransportModeLabel.CYCLING to 0f,
+            TransportModeLabel.BUS to 0f,
+            TransportModeLabel.DRIVING to 0f,
+            TransportModeLabel.SUBWAY to 0f,
+            TransportModeLabel.UNKNOWN to 0f
+        )
+        probabilities[mode] = confidence
+        val remaining = 1f - confidence
+        val otherModes = probabilities.keys.filter { it != mode && it != TransportModeLabel.UNKNOWN }
+        otherModes.forEach { probabilities[it] = remaining / otherModes.size }
+        return TransportModePrediction(mode = mode, confidence = confidence, probabilities = probabilities)
     }
 }
 

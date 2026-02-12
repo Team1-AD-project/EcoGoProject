@@ -33,7 +33,7 @@ class HybridTransportModeDetector(
 
     // Prediction history (for smoothing)
     private val predictionHistory = LinkedList<TransportModeLabel>()
-    private val historySize = 3
+    private val historySize = 5
 
     // GPS trajectory points (for Snap to Roads)
     private val gpsTrajectory = LinkedList<com.google.android.gms.maps.model.LatLng>()
@@ -211,8 +211,9 @@ class HybridTransportModeDetector(
             )
 
             if (prediction != null) {
-                _detectedMode.value = prediction
-                Log.d(TAG, "Snap to Roads detection: ${prediction.mode} (${prediction.confidence})")
+                val smoothed = smoothPrediction(prediction)
+                _detectedMode.value = smoothed
+                Log.d(TAG, "Snap to Roads detection: raw=${prediction.mode}, smoothed=${smoothed.mode} (${smoothed.confidence})")
             } else {
                 Log.w(TAG, "Snap to Roads detection returned null")
             }
