@@ -13,7 +13,7 @@ object ApiConfig {
      * - Physical device accessing localhost: http://192.168.x.x:8090/ (replace with your computer's IP)
      * - Production: https://your-domain.com/
      */
-    const val BASE_URL = "http://47.129.124.55:8090/"
+    const val BASE_URL = "http://10.0.2.2:8090/"
 
     /**
      * API version

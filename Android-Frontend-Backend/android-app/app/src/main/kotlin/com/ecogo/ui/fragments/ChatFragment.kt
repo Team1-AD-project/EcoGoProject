@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
+import android.view.inputmethod.EditorInfo
 import android.widget.EditText
 import android.widget.LinearLayout
 import androidx.fragment.app.Fragment
@@ -22,15 +23,18 @@ import com.ecogo.api.ApiConfig
 
 
 class ChatFragment : Fragment() {
-    
+
     private var _binding: FragmentChatBinding? = null
     private val binding get() = _binding!!
     private lateinit var adapter: ChatMessageAdapter
     private val repository = EcoGoRepository()
-    
+
     // Track conversation ID for multi-turn chat
     private var conversationId: String? = null
-    
+
+    // Prevent double-send while loading
+    private var isSending = false
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -39,25 +43,32 @@ class ChatFragment : Fragment() {
         _binding = FragmentChatBinding.inflate(inflater, container, false)
         return binding.root
     }
-    
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
         setupButtons()
         setupAnimations()
     }
-    
+
     private fun setupRecyclerView() {
         adapter = ChatMessageAdapter(
             mutableListOf(
                 ChatMessageAdapter.ChatMessage(
-                    "Hello! I'm the EcoGo Smart Assistant. I can help you with:\n" +
-                    "- 🌿 Green travel tips in Singapore\n" +
-                    "- 🚌 Bus arrival queries\n" +
-                    "- 📍 Trip booking\n" +
-                    "- 💡 Green travel Q&A\n\n" +
-                    "How can I help you?",
-                    false
+                    "Hi there! I'm LiNUS, your EcoGo campus assistant \uD83C\uDF3F\n\n" +
+                            "I can help you with:\n" +
+                            "\u2022 \uD83D\uDE8C Check bus arrivals\n" +
+                            "\u2022 \uD83D\uDCCD Get travel recommendations\n" +
+                            "\u2022 \uD83C\uDFAB Book a trip\n" +
+                            "\u2022 \u2753 Answer green travel questions\n\n" +
+                            "Try tapping a suggestion below, or type your question!",
+                    false,
+                    suggestions = listOf(
+                        "\uD83D\uDE8C Bus Arrivals",
+                        "\uD83D\uDCCD Travel Advice",
+                        "\uD83C\uDFAB Book a Trip",
+                        "\uD83D\uDCCB My Profile"
+                    )
                 )
             ),
             onSuggestionClick = { suggestion ->
@@ -67,54 +78,100 @@ class ChatFragment : Fragment() {
                 navigateToRoutePlanner(card)
             }
         )
-        
+
         binding.recyclerChat.apply {
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
             adapter = this@ChatFragment.adapter
         }
     }
-    
+
     private fun setupButtons() {
+        // Send button click
         binding.buttonSend.setOnClickListener {
-            val message = binding.editMessage.text.toString()
+            val message = binding.editMessage.text.toString().trim()
             if (message.isNotEmpty()) {
                 sendMessage(message)
             }
         }
+
+        // Keyboard "Send" action
+        binding.editMessage.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEND) {
+                val message = binding.editMessage.text.toString().trim()
+                if (message.isNotEmpty()) {
+                    sendMessage(message)
+                }
+                true
+            } else {
+                false
+            }
+        }
     }
-    
+
     private fun sendMessage(message: String) {
+        if (isSending) return
+        isSending = true
+
         // Add user message
         adapter.addMessage(ChatMessageAdapter.ChatMessage(message, true))
         binding.editMessage.text?.clear()
-        
+
+        // Hide keyboard
+        hideKeyboard()
+
         // Scroll to bottom
-        binding.recyclerChat.scrollToPosition(adapter.itemCount - 1)
-        
+        scrollToBottom()
+
+        // Show typing indicator
+        val typingMessage = ChatMessageAdapter.ChatMessage(
+            "\u2022\u2022\u2022",
+            false,
+            isTyping = true
+        )
+        adapter.addMessage(typingMessage)
+        scrollToBottom()
+
+        // Disable send button while loading
+        binding.buttonSend.isEnabled = false
+        binding.buttonSend.alpha = 0.5f
+
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 val result = repository.sendChat(
                     ChatRequest(conversationId = conversationId, message = message)
                 )
 
+                // Remove typing indicator
+                removeTypingIndicator()
+
                 val response = result.getOrNull()
                 if (response != null) {
                     // Update conversation ID for multi-turn
                     conversationId = response.conversationId ?: conversationId
-                    
+
                     // Build display text
                     val displayText = buildDisplayText(response)
                     adapter.addMessage(ChatMessageAdapter.ChatMessage(displayText, false))
-                    
+
                     // Handle UI actions
                     handleUiActions(response.uiActions)
                 } else {
                     val err = result.exceptionOrNull()
                     if (err != null) {
                         Log.e("ECOGO_CHAT", "sendChat failed. BASE_URL=${ApiConfig.BASE_URL}", err)
+                        val userFriendlyMsg = when {
+                            err.message?.contains("SocketTimeout") == true ||
+                            err.message?.contains("connect") == true ->
+                                "Unable to reach the server. Please check your network connection and try again."
+                            err.message?.contains("401") == true ||
+                            err.message?.contains("Unauthorized") == true ->
+                                "Session expired. Please log in again."
+                            else ->
+                                "Something went wrong. Please try again later."
+                        }
                         adapter.addMessage(
                             ChatMessageAdapter.ChatMessage(
-                                "(Debug) Request failed: ${err.javaClass.simpleName}: ${err.message}\nBASE_URL=${ApiConfig.BASE_URL}",
+                                "\u26A0\uFE0F $userFriendlyMsg",
                                 false
                             )
                         )
@@ -125,38 +182,71 @@ class ChatFragment : Fragment() {
                 }
             } catch (e: Exception) {
                 Log.e("ECOGO_CHAT", "sendMessage exception. BASE_URL=${ApiConfig.BASE_URL}", e)
+                removeTypingIndicator()
+                val userFriendlyMsg = when {
+                    e.message?.contains("SocketTimeout") == true ||
+                    e.message?.contains("connect") == true ->
+                        "Unable to reach the server. Please check your network connection and try again."
+                    else ->
+                        "Something went wrong. Please try again later."
+                }
                 adapter.addMessage(
                     ChatMessageAdapter.ChatMessage(
-                        "(Debug) Exception: ${e.javaClass.simpleName}: ${e.message}\nBASE_URL=${ApiConfig.BASE_URL}",
+                        "\u26A0\uFE0F $userFriendlyMsg",
                         false
                     )
                 )
+            } finally {
+                isSending = false
+                if (_binding != null) {
+                    binding.buttonSend.isEnabled = true
+                    binding.buttonSend.alpha = 1.0f
+                }
+                scrollToBottom()
             }
-            
-            binding.recyclerChat.scrollToPosition(adapter.itemCount - 1)
         }
     }
-    
+
+    private fun removeTypingIndicator() {
+        adapter.removeTypingIndicator()
+    }
+
+    private fun scrollToBottom() {
+        if (_binding == null) return
+        binding.recyclerChat.post {
+            if (_binding != null && adapter.itemCount > 0) {
+                binding.recyclerChat.smoothScrollToPosition(adapter.itemCount - 1)
+            }
+        }
+    }
+
+    private fun hideKeyboard() {
+        if (_binding == null) return
+        val imm = requireContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE)
+                as android.view.inputmethod.InputMethodManager
+        imm.hideSoftInputFromWindow(binding.editMessage.windowToken, 0)
+    }
+
     private fun buildDisplayText(response: com.ecogo.data.ChatResponse): String {
         val sb = StringBuilder()
-        
+
         val mainText = response.getDisplayText()
         sb.append(mainText)
-        
+
         val citations = response.assistant?.citations
         if (!citations.isNullOrEmpty()) {
-            sb.append("\n\n📚 Sources:")
+            sb.append("\n\n\uD83D\uDCDA Sources:")
             for (citation in citations) {
-                sb.append("\n• ${citation.title}")
+                sb.append("\n\u2022 ${citation.title}")
             }
         }
-        
+
         return sb.toString()
     }
-    
+
     private fun handleUiActions(actions: List<com.ecogo.data.UiAction>?) {
         if (actions.isNullOrEmpty()) return
-        
+
         for (action in actions) {
             when (action.type) {
                 "DEEPLINK" -> {
@@ -168,13 +258,12 @@ class ChatFragment : Fragment() {
                 "SUGGESTIONS" -> {
                     @Suppress("UNCHECKED_CAST")
                     val options = action.payload?.get("options") as? List<String>
-                    val filtered = options?.filter { !it.contains("Book a Trip") && !it.contains("My Profile") }
-                    if (!filtered.isNullOrEmpty()) {
+                    if (!options.isNullOrEmpty()) {
                         adapter.addMessage(
                             ChatMessageAdapter.ChatMessage(
                                 text = "",
                                 isUser = false,
-                                suggestions = filtered
+                                suggestions = options
                             )
                         )
                     }
@@ -190,9 +279,9 @@ class ChatFragment : Fragment() {
                 }
             }
         }
-        binding.recyclerChat.scrollToPosition(adapter.itemCount - 1)
+        scrollToBottom()
     }
-    
+
     private fun handleDeeplink(url: String) {
         when {
             url.startsWith("ecogo://booking/") -> {
@@ -224,10 +313,8 @@ class ChatFragment : Fragment() {
 
     /**
      * Safely navigate with a delay, respecting Fragment lifecycle.
-     * Uses viewLifecycleOwner.lifecycleScope instead of Handler.postDelayed
-     * to avoid IllegalStateException when Fragment is destroyed.
      */
-    private fun safeNavigateDelayed(delayMs: Long = 1000L, action: () -> Unit) {
+    private fun safeNavigateDelayed(delayMs: Long = 800L, action: () -> Unit) {
         viewLifecycleOwner.lifecycleScope.launch {
             delay(delayMs)
             try {
@@ -271,8 +358,6 @@ class ChatFragment : Fragment() {
             .setTitle(title)
             .setView(container)
             .setPositiveButton("Submit") { _, _ ->
-                // Use key=value format for consistent backend parsing.
-                // Backend handleBookingFlow checks text.contains("=") first.
                 val parts = editTexts.mapNotNull { (key, et) ->
                     val raw = et.text?.toString()?.trim().orEmpty()
                     if (raw.isEmpty()) return@mapNotNull null
@@ -295,14 +380,11 @@ class ChatFragment : Fragment() {
     private fun formatRouteForBackend(raw: String): String {
         val s = raw.trim()
         if (s.isEmpty()) return s
-        val lowered = s.lowercase()
-        // If user already used "from...to...", keep it.
         if (s.contains("from") && s.contains("to")) return s
-        // Normalize common separators to " to "
         val normalized = s
             .replace("->", " to ")
-            .replace("→", " to ")
-            .replace("—", " to ")
+            .replace("\u2192", " to ")
+            .replace("\u2014", " to ")
             .replace("-", " to ")
         return if (normalized.contains(" to ")) "from $normalized" else s
     }
@@ -310,7 +392,6 @@ class ChatFragment : Fragment() {
     private fun normalizePassengersForBackend(raw: String): String {
         val s = raw.trim()
         if (s.isEmpty()) return s
-        // Extract first digit 1-8; then append "person(s)" to satisfy backend regex.
         val m = Regex("[1-8]").find(s)
         val n = m?.value ?: s
         return "${n} person(s)"
@@ -321,7 +402,6 @@ class ChatFragment : Fragment() {
         if (s.isEmpty()) return s
         s = s.replace('/', '-')
         if (s.contains(" ") && !s.contains("T")) s = s.replace(' ', 'T')
-        // If only yyyy-MM-ddTHH:mm, append seconds
         if (Regex("^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}$").matches(s)) s += ":00"
         return s
     }
@@ -388,10 +468,10 @@ class ChatFragment : Fragment() {
             Log.w("ECOGO_CHAT", "Navigation to tripDetail failed", e)
         }
     }
-    
+
     private fun generateSmartReply(message: String): String {
         val lowerMessage = message.lowercase()
-        
+
         return when {
             lowerMessage.contains("activity") || lowerMessage.contains("event") -> {
                 safeNavigateDelayed(1500L) {
@@ -401,7 +481,7 @@ class ChatFragment : Fragment() {
                 "Found some campus activities, redirecting you..."
             }
             lowerMessage.contains("route") || lowerMessage.contains("navigate") ||
-            lowerMessage.contains("how to get") || lowerMessage.contains("directions") -> {
+                    lowerMessage.contains("how to get") || lowerMessage.contains("directions") -> {
                 safeNavigateDelayed(1500L) {
                     findNavController()
                         .navigate(com.ecogo.R.id.action_chat_to_routePlanner)
@@ -412,11 +492,11 @@ class ChatFragment : Fragment() {
                 "Map feature coming soon, stay tuned!"
             }
             lowerMessage.contains("recommend") || lowerMessage.contains("suggest") || lowerMessage.contains("advice") -> {
-                "🌿 Green Travel Tips:\n" +
-                "- Short distance (<2km): Walk or cycle\n" +
-                "- Medium distance (2-10km): MRT or bus\n" +
-                "- Long distance (>10km): MRT or carpool\n\n" +
-                "For detailed routes, tell me your origin and destination."
+                "\uD83C\uDF3F Green Travel Tips:\n" +
+                        "\u2022 Short distance (<2km): Walk or cycle\n" +
+                        "\u2022 Medium distance (2-10km): MRT or bus\n" +
+                        "\u2022 Long distance (>10km): MRT or carpool\n\n" +
+                        "For detailed routes, tell me your origin and destination."
             }
             else -> "Sorry, unable to connect to the server. Please try again later."
         }
@@ -427,7 +507,7 @@ class ChatFragment : Fragment() {
         binding.recyclerChat.startAnimation(slideUp)
         binding.inputContainer.startAnimation(slideUp)
     }
-    
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
