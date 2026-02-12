@@ -49,7 +49,7 @@ public class UserController {
         return ResponseMessage.success(userService.register(request));
     }
 
-    @PostMapping("/api/v1/mobile/users/login1")
+    @PostMapping("/api/v1/mobile/users/login")
     public ResponseMessage<AuthDto.LoginResponse> loginMobile(
             @RequestBody @Validated AuthDto.MobileLoginRequest request) {
         return ResponseMessage.success(userService.loginMobile(request));
