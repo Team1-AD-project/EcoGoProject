@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingVertical="8dp"
+    android:paddingHorizontal="4dp">
+
+    <!-- 步骤指示 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <!-- 步骤图标 -->
+        <ImageView
+            android:id="@+id/ivStepIcon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_walking"
+            android:contentDescription="步骤图标" />
+
+        <!-- 步骤说明文本 -->
+        <TextView
+            android:id="@+id/tvStepInstruction"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:textSize="13sp"
+            android:textColor="#000000"
+            tools:text="步行至公交站" />
+
+    </LinearLayout>
+
+    <!-- 距离和时长 -->
+    <TextView
+        android:id="@+id/tvStepDistance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="2dp"
+        android:textSize="11sp"
+        android:textColor="#666666"
+        tools:text="250 米 · 3 分钟" />
+
+    <!-- 公交详情（仅 TRANSIT 步骤显示） -->
+    <LinearLayout
+        android:id="@+id/layoutTransitDetails"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="4dp"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:paddingVertical="6dp"
+        android:paddingHorizontal="8dp"
+        android:background="#F0F0F0">
+
+        <!-- 线路名称 -->
+        <TextView
+            android:id="@+id/tvLineName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="#1976D2"
+            tools:text="地铁1号线" />
+
+        <!-- 上车站 -->
+        <TextView
+            android:id="@+id/tvDepartureStop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textSize="11sp"
+            android:textColor="#333333"
+            tools:text="上车: 天安门东站" />
+
+        <!-- 下车站 -->
+        <TextView
+            android:id="@+id/tvArrivalStop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="11sp"
+            android:textColor="#333333"
+            tools:text="下车: 王府井站 (经过 2 站)" />
+
+        <!-- 方向标识 -->
+        <TextView
+            android:id="@+id/tvHeadsign"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textSize="11sp"
+            android:textColor="#666666"
+            android:visibility="gone"
+            tools:text="往苹果园方向" />
+
+    </LinearLayout>
+
+    <!-- 分隔线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="8dp"
+        android:background="#E0E0E0" />
+
+</LinearLayout>
