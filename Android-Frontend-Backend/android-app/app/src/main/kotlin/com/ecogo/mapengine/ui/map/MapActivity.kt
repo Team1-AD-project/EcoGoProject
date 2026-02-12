@@ -78,6 +78,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     // Real-time track
     private var trackPolyline: Polyline? = null
     private var isFollowingUser = true  // Whether to follow user location
+    private var isVipUserFlag = false   // Whether current user is VIP (hide ads for VIP)
 
     // Navigation route (traveled/remaining)
     private var traveledPolyline: Polyline? = null    // Traveled route (gray)
@@ -234,6 +235,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 com.ecogo.auth.TokenManager.init(this@MapActivity)
 
                 if (isUserVipCached()) {
+                    isVipUserFlag = true
                     Log.d(TAG, "User is VIP (cached/pref), hiding advertisement carousel")
                     return@launch
                 }
@@ -246,6 +248,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
 
                 if (isProfileVip(profile)) {
+                    isVipUserFlag = true
                     Log.d(TAG, "User is VIP/Admin (network), hiding advertisement carousel")
                     updateVipCache(profile)
                     return@launch
@@ -1445,8 +1448,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             binding.layoutAdCarousel.visibility = View.GONE
             binding.cardBottomPanel.visibility = View.VISIBLE
         } else {
-            // Not fully selected: show ads, hide button
-            binding.layoutAdCarousel.visibility = View.VISIBLE
+            // Not fully selected: show ads only for non-VIP users, hide button
+            if (!isVipUserFlag) {
+                binding.layoutAdCarousel.visibility = View.VISIBLE
+            }
             binding.cardBottomPanel.visibility = View.GONE
         }
     }
@@ -1664,9 +1669,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         clearAllRoutePolylines()
         binding.cardRouteInfo.visibility = View.GONE
         binding.cardTransportModes.visibility = View.GONE
-        // Hide button; VIP users don't see ads
+        // Hide button; only show ads for non-VIP users
         binding.cardBottomPanel.visibility = View.GONE
-        binding.layoutAdCarousel.visibility = View.VISIBLE
+        if (!isVipUserFlag) {
+            binding.layoutAdCarousel.visibility = View.VISIBLE
+        }
         viewModel.clearDestination()
     }
 
