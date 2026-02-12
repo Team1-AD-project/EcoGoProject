@@ -1,13 +1,13 @@
 package com.ecogo.ui.fragments
 
 import android.content.Intent
+import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.ecogo.R
 import com.ecogo.data.MascotSize
 import com.ecogo.mapengine.ui.map.MapActivity
-import com.ecogo.data.MockData
 import com.ecogo.data.Outfit
 import com.ecogo.data.RecommendationRequest
 import com.ecogo.databinding.FragmentHomeBinding
@@ -26,7 +25,6 @@ import com.ecogo.repository.EcoGoRepository
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import com.ecogo.api.NextBusApiClient
-import com.ecogo.api.ShuttleServiceResponse
 import com.ecogo.utils.NotificationUtil
 
 
@@ -34,7 +32,6 @@ class HomeFragment : Fragment() {
 
     companion object {
         private const val TAG = "HomeFragment"
-        private const val DEFAULT_USER_ID = "user123"
         private const val STATUS_ON_TIME = "On Time"
     }
 
@@ -45,111 +42,96 @@ class HomeFragment : Fragment() {
     // User's current outfit (in production, fetch from user data)
     private val currentOutfit = Outfit(head = "none", face = "none", body = "shirt_nus", badge = "a1")
 
+    // ====== Local cache for instant UI display ======
+    private val cache: SharedPreferences by lazy {
+        requireContext().getSharedPreferences("home_cache", android.content.Context.MODE_PRIVATE)
+    }
+
+    private fun cached(key: String, fallback: String = "--"): String =
+        cache.getString(key, fallback) ?: fallback
+
+    private fun cachedInt(key: String, fallback: Int = 0): Int =
+        cache.getInt(key, fallback)
+
+    private fun save(vararg pairs: Pair<String, Any>) {
+        cache.edit().apply {
+            for ((k, v) in pairs) {
+                when (v) {
+                    is String -> putString(k, v)
+                    is Int -> putInt(k, v)
+                    else -> putString(k, v.toString())
+                }
+            }
+        }.apply()
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return try {
-            Log.d(TAG, "HomeFragment onCreateView - inflating binding")
-            Toast.makeText(context, "HomeFragment loading...", Toast.LENGTH_SHORT).show()
-            _binding = FragmentHomeBinding.inflate(inflater, container, false)
-            Log.d(TAG, "HomeFragment binding inflated successfully")
-            Toast.makeText(context, "HomeFragment loaded successfully!", Toast.LENGTH_SHORT).show()
-            binding.root
-        } catch (e: Exception) {
-            Log.e(TAG, "HomeFragment onCreateView FAILED: ${e.message}", e)
-            Toast.makeText(context, "HomeFragment creation failed: ${e.message}", Toast.LENGTH_LONG).show()
-            throw e
-        }
+        _binding = FragmentHomeBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        try {
-            Log.d(TAG, "HomeFragment onViewCreated - starting setup")
-
-            try {
-                setupUI()
-                Log.d(TAG, "setupUI completed")
-            } catch (e: Exception) {
-                Log.e(TAG, "setupUI FAILED: ${e.message}", e)
-                Toast.makeText(requireContext(), "setupUI failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-
-            try {
-                setupRecyclerView()
-                Log.d(TAG, "setupRecyclerView completed")
-            } catch (e: Exception) {
-                Log.e(TAG, "setupRecyclerView FAILED: ${e.message}", e)
-            }
-
-            try {
-                setupAnimations()
-                Log.d(TAG, "setupAnimations completed")
-            } catch (e: Exception) {
-                Log.e(TAG, "setupAnimations FAILED: ${e.message}", e)
-            }
-
-            try {
-                setupActions()
-                Log.d(TAG, "setupActions completed")
-            } catch (e: Exception) {
-                Log.e(TAG, "setupActions FAILED: ${e.message}", e)
-            }
-
-            try {
-                loadData()
-            } catch (e: Exception) {
-                Log.e(TAG, "loadData FAILED: ${e.message}", e)
-            }
-
-            Log.d(TAG, "HomeFragment onViewCreated completed")
-        } catch (e: Exception) {
-            Log.e(TAG, "HomeFragment onViewCreated FAILED: ${e.message}", e)
-            Toast.makeText(requireContext(), "HomeFragment initialization failed: ${e.message}", Toast.LENGTH_LONG).show()
-        }
+        setupUI()
+        setupRecyclerView()
+        setupAnimations()
+        setupActions()
+        loadData()
     }
 
     private fun setupUI() {
-        try {
-            // Immediately set greeting from cached username to avoid flicker
-            val cachedUsername = com.ecogo.auth.TokenManager.getUsername()
-            if (!cachedUsername.isNullOrBlank()) {
-                binding.textWelcome.text = "Hello, $cachedUsername"
-            }
+        // Immediately set greeting from cached data to avoid flicker
+        val cachedUsername = com.ecogo.auth.TokenManager.getUsername()
+        val welcomeText = cached("welcome_text", "")
+        if (welcomeText.isNotBlank()) {
+            binding.textWelcome.text = welcomeText
+        } else if (!cachedUsername.isNullOrBlank()) {
+            binding.textWelcome.text = "Hello, $cachedUsername"
+        }
 
-            binding.textBusNumber.text = "D1"
-            binding.textBusTime.text = "2 min"
-            binding.textBusRoute.text = "to UTown"
-            binding.textMonthlyPoints.text = "880"
-            binding.textPointsChange.text = "" // Removed "+150 this week" per user request
-            binding.textSocScore.text = "5,530 kg" // Added kg unit
-            binding.textSocRank.text = "" // Removed "Rank #1" per user request
-            binding.textLocation.text = java.time.LocalDate.now()
-                .format(java.time.format.DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", java.util.Locale.ENGLISH))
+        // Show CACHED data instantly — real data will overwrite from loadData()
+        // Bus info (not cached — changes too frequently, show "--" until fresh)
+        binding.textBusNumber.text = "--"
+        binding.textBusTime.text = "--"
+        binding.textBusRoute.text = ""
+        // Monthly points
+        binding.textMonthlyPoints.text = cached("monthly_points")
+        binding.textPointsChange.text = ""
+        // Community / Faculty score
+        binding.textSocScore.text = cached("soc_score")
+        binding.textSocScoreLabel.text = cached("soc_score_label", "SoC Score")
+        binding.textSocRank.text = ""
+        // Carbon footprint
+        binding.textCo2Saved.text = cached("co2_saved")
+        binding.textTreeEquivalent.text = cached("tree_equivalent")
+        binding.textCarbonPeriod.text = cached("carbon_period", "")
+        // Weather
+        binding.textTemperature.text = cached("weather_temp")
+        binding.textWeatherCondition.text = cached("weather_condition")
+        binding.textAqiValue.text = cached("weather_aqi")
+        binding.textHumidity.text = cached("weather_humidity")
+        // Daily goal
+        binding.progressSteps.progress = cachedInt("goal_step_pct")
+        binding.progressTrips.progress = cachedInt("goal_trip_pct")
+        binding.progressCo2.progress = cachedInt("goal_co2_pct")
+        binding.textStepsProgress.text = cached("goal_steps_text")
+        binding.textTripsProgress.text = cached("goal_trips_text")
+        binding.textCo2Progress.text = cached("goal_co2_text")
+        // Notification — hidden until loaded
+        binding.cardNotification.visibility = View.GONE
 
-            Log.d(TAG, "Basic UI setup completed, setting up mascot")
+        binding.textLocation.text = java.time.LocalDate.now()
+            .format(java.time.format.DateTimeFormatter.ofPattern("EEEE, MMMM d, yyyy", java.util.Locale.ENGLISH))
 
-            // Set up mascot avatar
-            try {
-                binding.mascotAvatar.apply {
-                    mascotSize = MascotSize.MEDIUM
-                    outfit = currentOutfit
-                    Log.d(TAG, "Mascot configured, starting wave animation")
-                    // Play wave animation on entry
-                    waveAnimation()
-                }
-                Log.d(TAG, "Mascot setup completed")
-            } catch (e: Exception) {
-                Log.e(TAG, "Mascot setup FAILED: ${e.message}", e)
-                Toast.makeText(requireContext(), "Mascot initialization failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "setupUI FAILED: ${e.message}", e)
-            Toast.makeText(requireContext(), "UI initialization failed: ${e.message}", Toast.LENGTH_SHORT).show()
-            throw e
+        // Set up mascot avatar
+        binding.mascotAvatar.apply {
+            mascotSize = MascotSize.MEDIUM
+            outfit = currentOutfit
+            waveAnimation()
         }
     }
 
@@ -194,80 +176,84 @@ class HomeFragment : Fragment() {
             kotlinx.coroutines.delay(200)
             launch { loadNotifications() }
             launch { loadDailyGoal() }
-            launch { loadCarbonFootprint() }
             launch { loadWeather() }
         }
     }
 
     private suspend fun loadUserProfile() {
-        // val userId = com.ecogo.auth.TokenManager.getUserId() ?: return // userId not needed for this call
         val result = repository.getMobileUserProfile()
-        val profile = result.getOrNull()
-        if (profile != null) {
-            val userInfo = profile.userInfo
-            // Update UI with real data on Main thread
+        if (_binding == null) return
+        if (result.isFailure) {
+            Log.w(TAG, "loadUserProfile failed", result.exceptionOrNull())
+            return
+        }
+        val profile = result.getOrNull() ?: return
+        val userInfo = profile.userInfo
 
-            // Dynamic Greeting
-            val isVip = (profile.vipInfo?.active == true) || 
-                        (profile.userInfo.vip?.active == true) || 
-                        (profile.vipInfo?.plan != null) ||
-                        (profile.userInfo.vip?.plan != null) ||
-                        (profile.userInfo.isAdmin == true)
-            
-            val displayNickname = if (isVip) "${userInfo.nickname} (VIP)" else userInfo.nickname
-            binding.textWelcome.text = "Hello, $displayNickname"
+        // Dynamic Greeting
+        val isVip = (profile.vipInfo?.active == true) ||
+                    (profile.userInfo.vip?.active == true) ||
+                    (profile.vipInfo?.plan != null) ||
+                    (profile.userInfo.vip?.plan != null) ||
+                    (profile.userInfo.isAdmin == true)
 
-            // Update Rank (Removed per user request)
-            /*
-            profile.stats?.let { stats ->
-                binding.textSocRank.text = "Rank #${stats.monthlyRank}"
-            }
-            */
+        val displayNickname = if (isVip) "${userInfo.nickname} (VIP)" else userInfo.nickname
+        val welcomeText = "Hello, $displayNickname"
+        binding.textWelcome.text = welcomeText
+        save("welcome_text" to welcomeText)
 
-            // Load SoC Score independently
-            loadSocScore()
+        // Load SoC Score independently
+        loadSocScore()
 
-            // Show churn toast after login
-            // Only show once, avoid showing on every home refresh
-            //if (shouldShowChurnToastToday()){
-                val userId = com.ecogo.auth.TokenManager.getUserId()
-                if (!userId.isNullOrBlank()) {
-                    val level = repository.fetchMyChurnRisk(userId)
-                    withContext(kotlinx.coroutines.Dispatchers.Main) {
-                        kotlinx.coroutines.delay(800)
-                        Log.d("CHURN", "TokenManager userId = ${com.ecogo.auth.TokenManager.getUserId()}")
-                        NotificationUtil.showChurnNotification(requireContext(), level)
-                    }
+        // Show churn toast after login
+        val userId = com.ecogo.auth.TokenManager.getUserId()
+        if (!userId.isNullOrBlank()) {
+            val level = repository.fetchMyChurnRisk(userId)
+            if (_binding == null || !isAdded) return
+            withContext(kotlinx.coroutines.Dispatchers.Main) {
+                kotlinx.coroutines.delay(800)
+                if (_binding != null && isAdded) {
+                    NotificationUtil.showChurnNotification(requireContext(), level)
                 }
-
-            //}
-
-
-            // Update Carbon Footprint (Added)
-            val carbon = userInfo.totalCarbon
-            val trees = if (carbon > 0) carbon / 18.0 else 0.0
-            binding.textCo2Saved.text = "%.1f kg".format(carbon)
-            binding.textTreeEquivalent.text = "%.1f trees".format(trees) // User asked for 1 decimal place
-
-            // Update Carbon Period if stats available
-            profile.stats?.let { stats ->
-                binding.textCarbonPeriod.text = "Total · ${stats.totalTrips} eco trips"
             }
+        }
+
+        if (_binding == null) return
+
+        // Update Carbon Footprint
+        val carbon = userInfo.totalCarbon
+        val trees = if (carbon > 0) carbon / 18.0 else 0.0
+        val co2Text = "%.1f kg".format(carbon)
+        val treeText = "%.1f trees".format(trees)
+        binding.textCo2Saved.text = co2Text
+        binding.textTreeEquivalent.text = treeText
+        save("co2_saved" to co2Text, "tree_equivalent" to treeText)
+
+        // Update Carbon Period if stats available
+        profile.stats?.let { stats ->
+            val periodText = "Total · ${stats.totalTrips} eco trips"
+            binding.textCarbonPeriod.text = periodText
+            save("carbon_period" to periodText)
         }
     }
 
     private suspend fun loadSocScore() {
         val scoreResult = repository.getFacultyTotalCarbon()
+        if (_binding == null) return
+        if (scoreResult.isFailure) {
+            Log.w(TAG, "loadSocScore failed", scoreResult.exceptionOrNull())
+        }
         val data = scoreResult.getOrNull()
         val score = data?.totalCarbon ?: 0.0
-        
-        // 1. Format Score to 2 decimal places with kg unit
-        binding.textSocScore.text = "%.2f kg".format(score)
 
-        // 2. Dynamic Faculty Abbreviation
-        val facultyName = data?.faculty ?: "School of Computing" // Default or fallback
+        val scoreText = "%.2f kg".format(score)
+        binding.textSocScore.text = scoreText
+
+        val facultyName = data?.faculty ?: "School of Computing"
         val abbreviation = getFacultyAbbreviation(facultyName)
-        binding.textSocScoreLabel.text = "$abbreviation Score"
+        val labelText = "$abbreviation Score"
+        binding.textSocScoreLabel.text = labelText
+        save("soc_score" to scoreText, "soc_score_label" to labelText)
     }
 
     private fun getFacultyAbbreviation(facultyName: String): String {
@@ -294,7 +280,11 @@ class HomeFragment : Fragment() {
     }
 
     private suspend fun loadMonthlyPoints() {
-        val historyResult = repository.getMobilePointsHistory().getOrElse { emptyList() }
+        val result = repository.getMobilePointsHistory()
+        if (result.isFailure) {
+            Log.w(TAG, "loadMonthlyPoints failed", result.exceptionOrNull())
+        }
+        val historyResult = result.getOrElse { emptyList() }
         val now = java.time.LocalDate.now()
         val currentMonth = now.month
         val currentYear = now.year
@@ -324,7 +314,10 @@ class HomeFragment : Fragment() {
             }
         }
 
-        binding.textMonthlyPoints.text = monthlyPoints.toString()
+        if (_binding == null) return
+        val pointsText = monthlyPoints.toString()
+        binding.textMonthlyPoints.text = pointsText
+        save("monthly_points" to pointsText)
     }
 
     private suspend fun loadBusInfo() {
@@ -347,13 +340,12 @@ class HomeFragment : Fragment() {
             Triple("-", -1, STATUS_ON_TIME)
         }
 
-        // 2) Update Home card UI (currently showing these three fields)
+        // Guard: view may be destroyed while coroutine was suspended
+        if (_binding == null) return
+
         binding.textBusNumber.text = routeName
         binding.textBusTime.text = if (etaMin >= 0) "$etaMin min" else "-"
         binding.textBusRoute.text = "from $stopLabel"
-
-        // If you also want to show status on Home (check if fragment_home.xml has a corresponding TextView)
-        // e.g.: binding.textBusStatus.text = status
     }
 
     private fun getPreferredStopForHome(): Pair<String, String> {
@@ -376,7 +368,7 @@ class HomeFragment : Fragment() {
 
 
     private suspend fun loadMonthlyHighlightsStats() {
-        val userId = com.ecogo.auth.TokenManager.getUserId() ?: DEFAULT_USER_ID
+        val userId = com.ecogo.auth.TokenManager.getUserId() ?: return
         val stats = mutableListOf<HomeStat>()
 
         // 1. Get points data
@@ -414,12 +406,17 @@ class HomeFragment : Fragment() {
             color = "#F97316"
         ))
 
+        if (_binding == null) return
         (binding.recyclerHighlights.adapter as? HomeStatAdapter)?.updateData(stats)
     }
 
     private suspend fun loadHomeActivities() {
-        val activitiesResult = repository.getAllActivities().getOrElse { MockData.ACTIVITIES }
-        // Display up to 5 activities on home page using horizontal scrolling cards
+        val result = repository.getAllActivities()
+        if (result.isFailure) {
+            Log.w(TAG, "loadHomeActivities failed", result.exceptionOrNull())
+        }
+        val activitiesResult = result.getOrElse { emptyList() }
+        if (_binding == null) return
         binding.recyclerActivities.adapter = HighlightAdapter(activitiesResult.take(5)) { activity ->
             val action = HomeFragmentDirections.actionHomeToActivityDetail(activity.id ?: "")
             findNavController().navigate(action)
@@ -537,6 +534,7 @@ class HomeFragment : Fragment() {
     private fun requestRecommendation(destination: String) {
         viewLifecycleOwner.lifecycleScope.launch {
             val response = repository.getRecommendation(RecommendationRequest(destination)).getOrElse { null }
+            if (_binding == null) return@launch
             if (response != null) {
                 val slideUp = AnimationUtils.loadAnimation(requireContext(), com.ecogo.R.anim.slide_up)
                 binding.layoutRecommendationResult.visibility = View.VISIBLE
@@ -555,7 +553,9 @@ class HomeFragment : Fragment() {
 
     private fun loadNotifications() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val notifications = repository.getNotifications(DEFAULT_USER_ID).getOrNull()
+            val userId = com.ecogo.auth.TokenManager.getUserId() ?: return@launch
+            val notifications = repository.getNotifications(userId).getOrNull()
+            if (_binding == null) return@launch
             val unreadNotif = notifications?.firstOrNull()
             if (unreadNotif != null) {
                 binding.cardNotification.visibility = View.VISIBLE
@@ -567,54 +567,79 @@ class HomeFragment : Fragment() {
 
     private fun loadDailyGoal() {
         viewLifecycleOwner.lifecycleScope.launch {
-            val goal = repository.getDailyGoal(DEFAULT_USER_ID).getOrNull()
-            if (goal != null) {
-                val stepProgress = (goal.currentSteps.toFloat() / goal.stepGoal * 100).toInt().coerceIn(0, 100)
-                val tripProgress = (goal.currentTrips.toFloat() / goal.tripGoal * 100).toInt().coerceIn(0, 100)
-                val co2Progress = (goal.currentCo2Saved / goal.co2SavedGoal * 100).toInt().coerceIn(0, 100)
-
-                binding.progressSteps.progress = stepProgress
-                binding.progressTrips.progress = tripProgress
-                binding.progressCo2.progress = co2Progress
-                binding.textStepsProgress.text = "✔ ${goal.currentTrips}/${goal.tripGoal} eco trips"
-                binding.textTripsProgress.text = "✔ ${"%.1f".format(goal.currentTrips.toFloat())}/${goal.tripGoal} eco trips"
-                binding.textCo2Progress.text = "✔ ${"%.2f".format(goal.currentCo2Saved)} kg saved"
+            val tripsResult = repository.getMyTripHistory()
+            if (tripsResult.isFailure) {
+                Log.w(TAG, "loadDailyGoal (trip history) failed", tripsResult.exceptionOrNull())
+                return@launch
             }
-        }
-    }
+            if (_binding == null) return@launch
 
-    private fun loadCarbonFootprint() {
-        // Deprecated: Carbon footprint is now loaded from UserProfile (totalCarbon)
-        // Kept empty to avoid breaking older calls if any, but removed from loadData()
+            val allTrips = tripsResult.getOrNull().orEmpty()
+            val todayStr = java.time.LocalDate.now().toString() // "2026-02-13"
+
+            // Filter today's trips by startTime (format: "2026-02-13T08:30:00")
+            val todayTrips = allTrips.filter { trip ->
+                trip.startTime?.startsWith(todayStr) == true
+            }
+
+            val totalDistance = todayTrips.sumOf { it.distance ?: 0.0 }
+            val ecoTripCount = todayTrips.count { it.isGreenTrip == true }
+            val totalCarbonSaved = todayTrips.sumOf { it.carbonSaved ?: 0.0 }
+
+            // Progress bars: use reasonable daily targets for percentage
+            val distTarget = 5.0   // 5 km daily target
+            val tripTarget = 3     // 3 eco trips daily target
+            val co2Target = 2.0    // 2 kg CO₂ daily target
+
+            val distPct = ((totalDistance / distTarget) * 100).toInt().coerceIn(0, 100)
+            val tripPct = ((ecoTripCount.toFloat() / tripTarget) * 100).toInt().coerceIn(0, 100)
+            val co2Pct = ((totalCarbonSaved / co2Target) * 100).toInt().coerceIn(0, 100)
+
+            val distText = "${"%.1f".format(totalDistance)} km"
+            val tripText = "$ecoTripCount eco trips"
+            val co2Text = "${"%.2f".format(totalCarbonSaved)} kg saved"
+
+            binding.progressSteps.progress = distPct
+            binding.progressTrips.progress = tripPct
+            binding.progressCo2.progress = co2Pct
+            binding.textStepsProgress.text = distText
+            binding.textTripsProgress.text = tripText
+            binding.textCo2Progress.text = co2Text
+            save(
+                "goal_step_pct" to distPct,
+                "goal_trip_pct" to tripPct,
+                "goal_co2_pct" to co2Pct,
+                "goal_steps_text" to distText,
+                "goal_trips_text" to tripText,
+                "goal_co2_text" to co2Text
+            )
+        }
     }
 
     private fun loadWeather() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // 1. Get Result
             val result = repository.getWeather()
+            if (_binding == null) return@launch
 
-            // 2. Check success or failure
+            if (result.isFailure) {
+                Log.w(TAG, "loadWeather failed", result.exceptionOrNull())
+            }
             if (result.isSuccess) {
                 val weather = result.getOrNull()
                 if (weather != null) {
-                    // --- Success: update text ---
-                    binding.textTemperature.text = "${weather.temperature}°C"
-                    binding.textWeatherCondition.text = weather.description
-                    binding.textAqiValue.text = "AQI ${weather.airQuality}"
-
-                    // Set weather icon
-                    // 1. Get the icon resource ID using the helper function
-                    val iconResId = getWeatherIcon(weather.description)
-
-                    // 2. Set the image on the ImageView
-                    binding.imageWeatherIcon.setImageResource(iconResId)
-
-                    android.util.Log.d("HomeFragment", "Weather loaded successfully: ${weather.description}")
+                    val tempText = "${weather.temperature}°C"
+                    val condText = weather.description
+                    val aqiText = "AQI ${weather.airQuality}"
+                    binding.textTemperature.text = tempText
+                    binding.textWeatherCondition.text = condText
+                    binding.textAqiValue.text = aqiText
+                    binding.imageWeatherIcon.setImageResource(getWeatherIcon(weather.description))
+                    save(
+                        "weather_temp" to tempText,
+                        "weather_condition" to condText,
+                        "weather_aqi" to aqiText
+                    )
                 }
-            } else {
-                // --- Failure: log error ---
-                val error = result.exceptionOrNull()
-                android.util.Log.e("HomeFragment", "Weather loading failed", error)
             }
         }
     }
