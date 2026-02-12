@@ -42,7 +42,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private val repository = EcoGoRepository()
 
-    // 用户当前装备（实际应用中从用户数据获取）
+    // User's current outfit (in production, fetch from user data)
     private val currentOutfit = Outfit(head = "none", face = "none", body = "shirt_nus", badge = "a1")
 
     override fun onCreateView(
@@ -52,14 +52,14 @@ class HomeFragment : Fragment() {
     ): View {
         return try {
             Log.d(TAG, "HomeFragment onCreateView - inflating binding")
-            Toast.makeText(context, "🏠 HomeFragment 正在加载...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "HomeFragment loading...", Toast.LENGTH_SHORT).show()
             _binding = FragmentHomeBinding.inflate(inflater, container, false)
             Log.d(TAG, "HomeFragment binding inflated successfully")
-            Toast.makeText(context, "✅ HomeFragment 加载成功！", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "HomeFragment loaded successfully!", Toast.LENGTH_SHORT).show()
             binding.root
         } catch (e: Exception) {
             Log.e(TAG, "HomeFragment onCreateView FAILED: ${e.message}", e)
-            Toast.makeText(context, "❌ HomeFragment 创建失败: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "HomeFragment creation failed: ${e.message}", Toast.LENGTH_LONG).show()
             throw e
         }
     }
@@ -75,7 +75,7 @@ class HomeFragment : Fragment() {
                 Log.d(TAG, "setupUI completed")
             } catch (e: Exception) {
                 Log.e(TAG, "setupUI FAILED: ${e.message}", e)
-                Toast.makeText(requireContext(), "setupUI 失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "setupUI failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
 
             try {
@@ -108,7 +108,7 @@ class HomeFragment : Fragment() {
             Log.d(TAG, "HomeFragment onViewCreated completed")
         } catch (e: Exception) {
             Log.e(TAG, "HomeFragment onViewCreated FAILED: ${e.message}", e)
-            Toast.makeText(requireContext(), "HomeFragment 初始化失败: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "HomeFragment initialization failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
@@ -126,23 +126,23 @@ class HomeFragment : Fragment() {
 
             Log.d(TAG, "Basic UI setup completed, setting up mascot")
 
-            // 设置小狮子头像
+            // Set up mascot avatar
             try {
                 binding.mascotAvatar.apply {
                     mascotSize = MascotSize.MEDIUM
                     outfit = currentOutfit
                     Log.d(TAG, "Mascot configured, starting wave animation")
-                    // 进入时播放挥手动画
+                    // Play wave animation on entry
                     waveAnimation()
                 }
                 Log.d(TAG, "Mascot setup completed")
             } catch (e: Exception) {
                 Log.e(TAG, "Mascot setup FAILED: ${e.message}", e)
-                Toast.makeText(requireContext(), "小狮子初始化失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Mascot initialization failed: ${e.message}", Toast.LENGTH_SHORT).show()
             }
         } catch (e: Exception) {
             Log.e(TAG, "setupUI FAILED: ${e.message}", e)
-            Toast.makeText(requireContext(), "UI初始化失败: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "UI initialization failed: ${e.message}", Toast.LENGTH_SHORT).show()
             throw e
         }
     }
@@ -168,23 +168,23 @@ class HomeFragment : Fragment() {
     }
 
     /**
-     * 优化：使用并发加载和懒加载策略
-     * 1. 关键数据立即加载（巴士信息）
-     * 2. 次要数据并发加载
-     * 3. 非关键数据延迟加载
+     * Optimization: use concurrent and lazy loading strategies
+     * 1. Critical data loaded immediately (bus info)
+     * 2. Secondary data loaded concurrently
+     * 3. Non-critical data loaded with delay
      */
     private fun loadData() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // 第一优先级：立即加载关键数据（巴士信息）
+            // Priority 1: Load critical data immediately (bus info)
             loadBusInfo()
 
-            // 第二优先级：并发加载次要数据
+            // Priority 2: Load secondary data concurrently
             launch { loadMonthlyHighlightsStats() }
             launch { loadHomeActivities() }
             launch { loadUserProfile() }
             launch { loadMonthlyPoints() }
 
-            // 第三优先级：延迟加载非关键数据（200ms后）
+            // Priority 3: Delayed loading for non-critical data (after 200ms)
             kotlinx.coroutines.delay(200)
             launch { loadNotifications() }
             launch { loadDailyGoal() }
@@ -221,8 +221,8 @@ class HomeFragment : Fragment() {
             // Load SoC Score independently
             loadSocScore()
 
-            // 登录后提示 churn toast
-            // 只弹一次，避免每次刷新 home 都弹
+            // Show churn toast after login
+            // Only show once, avoid showing on every home refresh
             //if (shouldShowChurnToastToday()){
                 val userId = com.ecogo.auth.TokenManager.getUserId()
                 if (!userId.isNullOrBlank()) {
@@ -322,7 +322,7 @@ class HomeFragment : Fragment() {
     }
 
     private suspend fun loadBusInfo() {
-        // 1) 默认 UTOWN；如果 Routes 选过，就用 Routes 保存的
+        // 1) Default to UTOWN; if a stop was selected in Routes, use that saved preference
         val (stopCode, stopLabel) = getPreferredStopForHome()
 
         val (routeName, etaMin, status) = runCatching {
@@ -341,13 +341,13 @@ class HomeFragment : Fragment() {
             Triple("-", -1, STATUS_ON_TIME)
         }
 
-        // 2) 更新 Home 卡片 UI（你现在 Home 只显示这三个字段）
+        // 2) Update Home card UI (currently showing these three fields)
         binding.textBusNumber.text = routeName
         binding.textBusTime.text = if (etaMin >= 0) "$etaMin min" else "-"
         binding.textBusRoute.text = "from $stopLabel"
 
-        // 如果你 Home 还想显示状态（看你 fragment_home.xml 有没有对应 TextView）
-        // 比如：binding.textBusStatus.text = status
+        // If you also want to show status on Home (check if fragment_home.xml has a corresponding TextView)
+        // e.g.: binding.textBusStatus.text = status
     }
 
     private fun getPreferredStopForHome(): Pair<String, String> {
@@ -373,7 +373,7 @@ class HomeFragment : Fragment() {
         val userId = com.ecogo.auth.TokenManager.getUserId() ?: DEFAULT_USER_ID
         val stats = mutableListOf<HomeStat>()
 
-        // 1. 获取积分数据
+        // 1. Get points data
         val pointsResult = repository.getCurrentPoints().getOrNull()
         val userProfile = repository.getMobileUserProfile().getOrNull()
         val currentPoints = pointsResult?.currentPoints
@@ -388,7 +388,7 @@ class HomeFragment : Fragment() {
             color = "#FCD34D"
         ))
 
-        // 2. 获取用户已加入的活动数量
+        // 2. Get count of activities user has joined
         val joinedActivitiesCount = repository.getJoinedActivitiesCount(userId).getOrNull() ?: 0
         stats.add(HomeStat(
             icon = "🎯",
@@ -398,7 +398,7 @@ class HomeFragment : Fragment() {
             color = "#A78BFA"
         ))
 
-        // 3. 获取用户已加入的挑战数量
+        // 3. Get count of challenges user has joined
         val joinedChallengesCount = repository.getJoinedChallengesCount(userId).getOrNull() ?: 0
         stats.add(HomeStat(
             icon = "🏆",
@@ -413,7 +413,7 @@ class HomeFragment : Fragment() {
 
     private suspend fun loadHomeActivities() {
         val activitiesResult = repository.getAllActivities().getOrElse { MockData.ACTIVITIES }
-        // 显示最多5个活动在首页，使用横向滑动小卡片样式
+        // Display up to 5 activities on home page using horizontal scrolling cards
         binding.recyclerActivities.adapter = HighlightAdapter(activitiesResult.take(5)) { activity ->
             val action = HomeFragmentDirections.actionHomeToActivityDetail(activity.id ?: "")
             findNavController().navigate(action)
@@ -428,25 +428,25 @@ class HomeFragment : Fragment() {
         binding.cardRecommendation.startAnimation(popIn)
         binding.cardNextBus.startAnimation(breathe)
         binding.cardMap.startAnimation(slideUp)
-        // 小狮子自带动画，不需要额外启动
+        // Mascot has built-in animation, no need to start extra
     }
 
     private fun setupActions() {
         binding.buttonOpenMap.setOnClickListener {
-            // 跳转到地图引擎页面
+            // Navigate to map engine page
             startActivity(Intent(requireContext(), MapActivity::class.java))
         }
         binding.textViewAll.setOnClickListener {
-            // 跳转到月度亮点页面
+            // Navigate to monthly highlights page
             findNavController().navigate(R.id.action_home_to_monthlyHighlights)
         }
 
         binding.textViewAllActivities.setOnClickListener {
-            // 跳转到活动列表页面
+            // Navigate to activities list page
             findNavController().navigate(R.id.action_home_to_activities)
         }
 
-        // 点击小狮子跳转到 Profile
+        // Click mascot to navigate to Profile
         binding.mascotAvatar.setOnClickListener {
             findNavController().navigate(com.ecogo.R.id.profileFragment)
         }
@@ -458,59 +458,59 @@ class HomeFragment : Fragment() {
             }
         }
         binding.buttonPlanMic?.setOnClickListener {
-            // 语音输入占位：可后续接入语音识别
+            // Voice input placeholder: can integrate voice recognition later
         }
 
-        // 月度积分卡片 -> 个人资料页
+        // Monthly points card -> Profile page
         binding.cardMonthlyPoints.setOnClickListener {
             findNavController().navigate(com.ecogo.R.id.profileFragment)
         }
 
-        // 社区分数卡片 -> 社区页
+        // Community score card -> Community page
         binding.cardCommunityScore.setOnClickListener {
             findNavController().navigate(com.ecogo.R.id.communityFragment)
         }
 
-        // 下一班巴士卡片 -> 路线页
+        // Next bus card -> Routes page
         binding.cardNextBus.setOnClickListener {
             findNavController().navigate(com.ecogo.R.id.routesFragment)
         }
 
-        // 地图预览卡片 -> 地图引擎页面（整个卡片可点击）
+        // Map preview card -> Map engine page (entire card is clickable)
         binding.cardMap.setOnClickListener {
             startActivity(Intent(requireContext(), MapActivity::class.java))
         }
 
-        // === 新功能点击事件 ===
+        // === New feature click events ===
 
-        // 通知横幅关闭按钮
+        // Notification banner close button
         binding.buttonCloseNotification.setOnClickListener {
             binding.cardNotification.visibility = View.GONE
         }
 
-        // 碳足迹卡片点击
+        // Carbon footprint card click
         binding.cardCarbonFootprint.setOnClickListener {
             findNavController().navigate(com.ecogo.R.id.profileFragment)
         }
 
-        // 天气卡片点击
+        // Weather card click
         binding.cardWeather.setOnClickListener {
-            // 可以跳转到天气详情或地图页
+            // Can navigate to weather details or map page
         }
 
-        // 今日目标卡片点击
+        // Daily goal card click
         binding.cardDailyGoal.setOnClickListener {
             findNavController().navigate(com.ecogo.R.id.profileFragment)
         }
 
-        // === 快捷入口点击事件 ===
+        // === Shortcut entry click events ===
 
-        // Voucher快捷入口
+        // Voucher shortcut entry
         binding.cardVoucherShortcut.setOnClickListener {
             findNavController().navigate(com.ecogo.R.id.action_home_to_voucher)
         }
 
-        // Challenges快捷入口
+        // Challenges shortcut entry
         binding.cardChallengesShortcut.setOnClickListener {
             findNavController().navigate(com.ecogo.R.id.action_home_to_challenges)
         }
@@ -533,7 +533,7 @@ class HomeFragment : Fragment() {
         }
     }
 
-    // === 新功能辅助方法 ===
+    // === New feature helper methods ===
 
     private fun loadNotifications() {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -572,78 +572,77 @@ class HomeFragment : Fragment() {
 
     private fun loadWeather() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // 1. 获取 Result
+            // 1. Get Result
             val result = repository.getWeather()
 
-            // 2. 判断成功还是失败
+            // 2. Check success or failure
             if (result.isSuccess) {
                 val weather = result.getOrNull()
                 if (weather != null) {
-                    // --- 成功：更新文字 ---
+                    // --- Success: update text ---
                     binding.textTemperature.text = "${weather.temperature}°C"
                     binding.textWeatherCondition.text = weather.description
                     binding.textAqiValue.text = "AQI ${weather.airQuality}"
 
-                    // 👇👇👇【新增的核心代码】设置图标 👇👇👇
-                    // 1. 调用刚才写的函数拿到图片 ID
+                    // Set weather icon
+                    // 1. Get the icon resource ID using the helper function
                     val iconResId = getWeatherIcon(weather.description)
 
-                    // 2. 将图片设置到 ImageView 上
-                    // (请确保你的 XML 布局里有个 ImageView 叫 imageWeatherIcon)
+                    // 2. Set the image on the ImageView
                     binding.imageWeatherIcon.setImageResource(iconResId)
 
-                    android.util.Log.d("HomeFragment", "天气获取成功: ${weather.description}")
+                    android.util.Log.d("HomeFragment", "Weather loaded successfully: ${weather.description}")
                 }
             } else {
-                // --- 失败：打印错误 ---
+                // --- Failure: log error ---
                 val error = result.exceptionOrNull()
-                android.util.Log.e("HomeFragment", "天气获取失败", error)
+                android.util.Log.e("HomeFragment", "Weather loading failed", error)
             }
         }
     }
 
-    // 根据描述返回对应的图标 ID
+    // Returns the corresponding weather icon resource ID based on description
     private fun getWeatherIcon(description: String): Int {
-        val desc = description.lowercase() // 转小写，方便匹配
+        val desc = description.lowercase() // Convert to lowercase for matching
 
         return when {
-            // --- 1. 雨天类 (只要包含 rain, thunder, storm 等词) ---
+            // --- 1. Rainy (contains rain, thunder, storm, etc.) ---
             desc.contains("rain") ||
                     desc.contains("shower") ||
                     desc.contains("drizzle") ||
                     desc.contains("thunder") ||
                     desc.contains("storm") -> {
-                R.drawable.ic_weather_rain // ☔ 你的雨天图标文件名
+                R.drawable.ic_weather_rain // Rain icon
             }
 
-            // --- 2. 多云类 (只要包含 cloud, fog, mist 等词) ---
+            // --- 2. Cloudy (contains cloud, fog, mist, etc.) ---
             desc.contains("cloud") ||
                     desc.contains("overcast") ||
                     desc.contains("fog") ||
                     desc.contains("mist") ||
                     desc.contains("haze") -> {
-                R.drawable.ic_weather_cloudy // ☁️ 你的多云图标文件名
+                R.drawable.ic_weather_cloudy // Cloudy icon
             }
 
-            // --- 3. 晴天类 (只要包含 sun, clear) ---
+            // --- 3. Sunny (contains sun, clear) ---
             desc.contains("sun") ||
                     desc.contains("clear") -> {
-                R.drawable.ic_weather_sunny // ☀️ 你的晴天图标文件名
+                R.drawable.ic_weather_sunny // Sunny icon
             }
 
-            // --- 4. 默认/未知情况 ---
+            // --- 4. Default/unknown ---
             else -> R.drawable.ic_weather_cloudy
         }
     }
 
-//------------------------预警相关，郑思远修改--------------------------------
+// ----------------------- Churn alert related ---------------------------------
     private fun churnToastMessage(riskLevel: String?): String {
         return when (riskLevel?.uppercase()) {
-            "LOW" -> "EcoGo：状态稳定！完成一次绿色出行还能多拿积分～"
-            "MEDIUM" -> "EcoGo：给你一个小挑战，完成即可获得奖励积分！"
-            "HIGH" -> "EcoGo：最近不太活跃，送你一张限时券，回来看看吧！"
-            "INSUFFICIENT_DATA" -> "EcoGo：再多用一会儿，我们能给你更精准的建议～"
-            else -> "EcoGo：欢迎回来！"
+            "LOW" -> "EcoGo: Steady state! Complete one green trip to earn extra points~"
+            "MEDIUM" -> "EcoGo: Here's a mini challenge - complete it to earn bonus points!"
+            "HIGH" -> "EcoGo: You've been less active lately. Here's a limited-time voucher, come check it out!"
+            "INSUFFICIENT_DATA" -> "EcoGo: Use a bit more and we can give you more accurate suggestions~"
+            else -> "EcoGo: Welcome back!"
         }
     }
 

@@ -6,12 +6,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * 使用 Google Snap to Roads API 识别交通方式
+ * Detect transport mode using Google Snap to Roads API
  *
- * 原理：
- * 1. 将 GPS 轨迹吸附到真实道路网络
- * 2. 获取道路类型（高速公路、街道、小路等）
- * 3. 结合 GPS 速度推断交通方式
+ * Principle:
+ * 1. Snap GPS trajectory to real road network
+ * 2. Obtain road types (motorway, street, path, etc.)
+ * 3. Infer transport mode combined with GPS speed
  */
 class SnapToRoadsDetector {
 
@@ -20,7 +20,7 @@ class SnapToRoadsDetector {
     }
 
     /**
-     * 根据 GPS 轨迹点和速度信息推断交通方式
+     * Infer transport mode from GPS trajectory points and speed information
      */
     suspend fun detectTransportMode(
         gpsPoints: List<LatLng>,
@@ -29,28 +29,28 @@ class SnapToRoadsDetector {
     ): TransportModePrediction? = withContext(Dispatchers.IO) {
         try {
             if (gpsPoints.size < 2) {
-                Log.w(TAG, "需要至少 2 个 GPS 点来进行检测")
+                Log.w(TAG, "At least 2 GPS points required for detection")
                 return@withContext null
             }
 
-            // 计算平均速度和加速度
+            // Calculate average speed and acceleration
             val avgSpeed = speeds.average()
             val avgSpeedKmh = (avgSpeed * 3.6).toFloat()
 
-            // 获取道路类型（通过 Snap to Roads）
+            // Get road types (via Snap to Roads)
             val roadTypes = snapToRoads(gpsPoints, apiKey)
             
-            Log.d(TAG, "平均速度: $avgSpeedKmh km/h")
-            Log.d(TAG, "道路类型: $roadTypes")
+            Log.d(TAG, "Average speed: $avgSpeedKmh km/h")
+            Log.d(TAG, "Road types: $roadTypes")
 
             // 基于道路类型和速度推断交通方式
             val prediction = inferTransportMode(roadTypes, avgSpeedKmh)
             
-            Log.d(TAG, "检测到交通方式: ${prediction.mode}, 置信度: ${prediction.confidence}")
+            Log.d(TAG, "Detected transport mode: ${prediction.mode}, confidence: ${prediction.confidence}")
             
             return@withContext prediction
         } catch (e: Exception) {
-            Log.e(TAG, "Snap to Roads 检测失败: ${e.message}", e)
+            Log.e(TAG, "Snap to Roads detection failed: ${e.message}", e)
             return@withContext null
         }
     }
@@ -67,7 +67,7 @@ class SnapToRoadsDetector {
             val snappedPoints = SnapToRoadsHttpClient.snapToRoads(points, apiKey)
             
             if (snappedPoints == null || snappedPoints.isEmpty()) {
-                Log.w(TAG, "Snap to Roads API 返回空结果")
+                Log.w(TAG, "Snap to Roads API returned empty result")
                 return@withContext emptyList()
             }
             
@@ -76,12 +76,12 @@ class SnapToRoadsDetector {
             // 这里基于点的密度和分布进行启发式推断
             val roadInfoList = inferRoadTypesFromSnappedPoints(snappedPoints, points)
             
-            Log.d(TAG, "Snap to Roads 返回 ${snappedPoints.size} 个对齐点，推断出 ${roadInfoList.size} 条道路")
+            Log.d(TAG, "Snap to Roads returned ${snappedPoints.size} snapped points, inferred ${roadInfoList.size} roads")
             
             return@withContext roadInfoList
             
         } catch (e: Exception) {
-            Log.e(TAG, "Snap to Roads API 调用失败: ${e.message}", e)
+            Log.e(TAG, "Snap to Roads API call failed: ${e.message}", e)
             return@withContext emptyList()
         }
     }

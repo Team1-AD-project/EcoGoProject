@@ -10,21 +10,21 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * 导航历史记录仓库
- * 单例模式，提供全局唯一的实例
+ * Navigation history repository
+ * Singleton pattern, provides a globally unique instance
  *
- * 使用方法：
+ * Usage:
  * ```kotlin
- * // 初始化（在Application中）
+ * // Initialize (in Application)
  * NavigationHistoryRepository.initialize(context)
  *
- * // 获取实例
+ * // Get instance
  * val repository = NavigationHistoryRepository.getInstance()
  *
- * // 保存导航记录
+ * // Save navigation history
  * repository.saveNavigationHistory(...)
  *
- * // 获取所有记录
+ * // Get all records
  * val histories = repository.getAllHistories()
  * ```
  */
@@ -34,29 +34,29 @@ class NavigationHistoryRepository private constructor(context: Context) {
     private val dao = database.navigationHistoryDao()
 
     /**
-     * 保存导航历史记录
+     * Save navigation history
      *
-     * @param tripId 行程ID（可选）
-     * @param userId 用户ID（可选）
-     * @param startTime 开始时间（时间戳）
-     * @param endTime 结束时间（时间戳）
-     * @param origin 起点坐标
-     * @param originName 起点名称
-     * @param destination 终点坐标
-     * @param destinationName 终点名称
-     * @param routePoints 规划的路线点列表
-     * @param trackPoints 实际轨迹点列表
-     * @param totalDistance 总距离（米）
-     * @param traveledDistance 实际行进距离（米）
-     * @param transportMode 交通方式
-     * @param detectedMode AI检测的交通方式（可选）
-     * @param totalCarbon 总碳排放（kg）
-     * @param carbonSaved 减少的碳排放（kg）
-     * @param isGreenTrip 是否为绿色出行
-     * @param greenPoints 绿色积分
-     * @param routeType 路线类型（可选）
-     * @param notes 备注（可选）
-     * @return 插入记录的ID
+     * @param tripId Trip ID (optional)
+     * @param userId User ID (optional)
+     * @param startTime Start time (timestamp)
+     * @param endTime End time (timestamp)
+     * @param origin Origin coordinates
+     * @param originName Origin name
+     * @param destination Destination coordinates
+     * @param destinationName Destination name
+     * @param routePoints Planned route point list
+     * @param trackPoints Actual track point list
+     * @param totalDistance Total distance (meters)
+     * @param traveledDistance Actual traveled distance (meters)
+     * @param transportMode Transport mode
+     * @param detectedMode AI-detected transport mode (optional)
+     * @param totalCarbon Total carbon emission (kg)
+     * @param carbonSaved Carbon emission saved (kg)
+     * @param isGreenTrip Whether it is a green trip
+     * @param greenPoints Green points earned
+     * @param routeType Route type (optional)
+     * @param notes Notes (optional)
+     * @return ID of the inserted record
      */
     suspend fun saveNavigationHistory(
         tripId: String? = null,
@@ -109,51 +109,51 @@ class NavigationHistoryRepository private constructor(context: Context) {
     }
 
     /**
-     * 获取所有导航历史记录
+     * Get all navigation history records
      */
     suspend fun getAllHistories(): List<NavigationHistory> {
         return dao.getAll()
     }
 
     /**
-     * 获取所有导航历史记录（Flow，实时更新）
+     * Get all navigation history records (Flow, real-time updates)
      */
     fun getAllHistoriesFlow(): Flow<List<NavigationHistory>> {
         return dao.getAllFlow()
     }
 
     /**
-     * 获取简化版历史记录列表
+     * Get simplified history record list
      */
     suspend fun getAllSummaries(): List<NavigationHistorySummary> {
         return dao.getAllSummaries()
     }
 
     /**
-     * 根据ID获取单条记录
+     * Get a single record by ID
      */
     suspend fun getHistoryById(id: Long): NavigationHistory? {
         return dao.getById(id)
     }
 
     /**
-     * 获取最近的N条记录
+     * Get the most recent N records
      */
     suspend fun getRecentHistories(limit: Int = 10): List<NavigationHistory> {
         return dao.getRecent(limit)
     }
 
     /**
-     * 根据时间范围查询
-     * @param startTime 开始时间（时间戳）
-     * @param endTime 结束时间（时间戳）
+     * Query by time range
+     * @param startTime Start time (timestamp)
+     * @param endTime End time (timestamp)
      */
     suspend fun getHistoriesByTimeRange(startTime: Long, endTime: Long): List<NavigationHistory> {
         return dao.getByTimeRange(startTime, endTime)
     }
 
     /**
-     * 获取今天的历史记录
+     * Get today's history records
      */
     suspend fun getTodayHistories(): List<NavigationHistory> {
         val calendar = Calendar.getInstance()
@@ -170,7 +170,7 @@ class NavigationHistoryRepository private constructor(context: Context) {
     }
 
     /**
-     * 获取本周的历史记录
+     * Get this week's history records
      */
     suspend fun getThisWeekHistories(): List<NavigationHistory> {
         val calendar = Calendar.getInstance()
@@ -188,63 +188,63 @@ class NavigationHistoryRepository private constructor(context: Context) {
     }
 
     /**
-     * 根据交通方式查询
+     * Query by transport mode
      */
     suspend fun getHistoriesByTransportMode(mode: String): List<NavigationHistory> {
         return dao.getByTransportMode(mode)
     }
 
     /**
-     * 获取所有绿色出行记录
+     * Get all green trip records
      */
     suspend fun getGreenTrips(): List<NavigationHistory> {
         return dao.getGreenTrips()
     }
 
     /**
-     * 根据用户ID查询
+     * Query by user ID
      */
     suspend fun getHistoriesByUserId(userId: String): List<NavigationHistory> {
         return dao.getByUserId(userId)
     }
 
     /**
-     * 搜索历史记录（根据起点或终点名称）
+     * Search history records (by origin or destination name)
      */
     suspend fun searchHistories(keyword: String): List<NavigationHistory> {
         return dao.search(keyword)
     }
 
     /**
-     * 更新历史记录
+     * Update history record
      */
     suspend fun updateHistory(history: NavigationHistory) {
         dao.update(history)
     }
 
     /**
-     * 删除历史记录
+     * Delete history record
      */
     suspend fun deleteHistory(history: NavigationHistory) {
         dao.delete(history)
     }
 
     /**
-     * 根据ID删除记录
+     * Delete record by ID
      */
     suspend fun deleteHistoryById(id: Long) {
         dao.deleteById(id)
     }
 
     /**
-     * 清空所有历史记录
+     * Delete all history records
      */
     suspend fun deleteAllHistories() {
         dao.deleteAll()
     }
 
     /**
-     * 统计数据
+     * Get statistics
      */
     suspend fun getStatistics(): NavigationStatistics {
         val totalCount = dao.getCount()
@@ -261,7 +261,7 @@ class NavigationHistoryRepository private constructor(context: Context) {
     }
 
     /**
-     * 将LatLng列表转换为JSON字符串（用于存储）
+     * Convert LatLng list to JSON string (for storage)
      */
     private fun convertLatLngListToJson(points: List<LatLng>): String {
         val simplified = points.map { mapOf("lat" to it.latitude, "lng" to it.longitude) }
@@ -269,7 +269,7 @@ class NavigationHistoryRepository private constructor(context: Context) {
     }
 
     /**
-     * 将JSON字符串转换为LatLng列表（用于读取）
+     * Convert JSON string to LatLng list (for reading)
      */
     fun parseLatLngListFromJson(json: String): List<LatLng> {
         val type = object : com.google.gson.reflect.TypeToken<List<Map<String, Double>>>() {}.type
@@ -282,7 +282,7 @@ class NavigationHistoryRepository private constructor(context: Context) {
         private var INSTANCE: NavigationHistoryRepository? = null
 
         /**
-         * 初始化仓库（建议在Application中调用）
+         * Initialize repository (recommended to call in Application)
          */
         fun initialize(context: Context) {
             if (INSTANCE == null) {
@@ -295,8 +295,8 @@ class NavigationHistoryRepository private constructor(context: Context) {
         }
 
         /**
-         * 获取仓库实例
-         * @throws IllegalStateException 如果未先调用initialize()
+         * Get repository instance
+         * @throws IllegalStateException if initialize() has not been called first
          */
         fun getInstance(): NavigationHistoryRepository {
             return INSTANCE ?: throw IllegalStateException(
@@ -305,7 +305,7 @@ class NavigationHistoryRepository private constructor(context: Context) {
         }
 
         /**
-         * 检查是否已初始化
+         * Check if initialized
          */
         fun isInitialized(): Boolean {
             return INSTANCE != null
@@ -314,22 +314,22 @@ class NavigationHistoryRepository private constructor(context: Context) {
 }
 
 /**
- * 导航统计数据
+ * Navigation statistics
  */
 data class NavigationStatistics(
-    val totalTrips: Int,               // 总行程数
-    val greenTrips: Int,               // 绿色出行次数
-    val totalDistanceMeters: Double,   // 总距离（米）
-    val totalCarbonSavedKg: Double     // 总减碳量（kg）
+    val totalTrips: Int,               // Total number of trips
+    val greenTrips: Int,               // Number of green trips
+    val totalDistanceMeters: Double,   // Total distance (meters)
+    val totalCarbonSavedKg: Double     // Total carbon saved (kg)
 ) {
     /**
-     * 总距离（公里）
+     * Total distance (km)
      */
     val totalDistanceKm: Double
         get() = totalDistanceMeters / 1000.0
 
     /**
-     * 绿色出行比例
+     * Green trip percentage
      */
     val greenTripPercentage: Double
         get() = if (totalTrips > 0) (greenTrips.toDouble() / totalTrips * 100) else 0.0

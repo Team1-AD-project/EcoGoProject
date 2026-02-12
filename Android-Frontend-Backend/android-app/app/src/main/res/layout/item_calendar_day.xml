@@ -8,7 +8,7 @@
     android:clickable="true"
     android:focusable="true">
 
-    <!-- 选中状态背景 -->
+    <!-- Selected State Background -->
     <View
         android:id="@+id/view_selected"
         android:layout_width="match_parent"
@@ -16,7 +16,7 @@
         android:background="@drawable/bg_calendar_selected"
         android:visibility="gone" />
 
-    <!-- 日期文字 -->
+    <!-- Date Text -->
     <TextView
         android:id="@+id/text_day"
         android:layout_width="wrap_content"
@@ -26,7 +26,7 @@
         android:textColor="@color/text_primary"
         android:textSize="15sp" />
 
-    <!-- 已签到标记 -->
+    <!-- Check-in Mark -->
     <ImageView
         android:id="@+id/icon_check"
         android:layout_width="16dp"

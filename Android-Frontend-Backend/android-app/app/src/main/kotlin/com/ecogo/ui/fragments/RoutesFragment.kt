@@ -27,7 +27,7 @@ class RoutesFragment : Fragment() {
     private var routeDescMap: Map<String, String> = emptyMap()
 
 
-    // ====== 站点：全量写死（从你 /BusStops 返回抄来的） ======
+    // ====== Bus stops: hardcoded (from /BusStops API response) ======
     data class BusStopOption(val code: String, val label: String)
 
     private val allStops: List<BusStopOption> = listOf(
@@ -84,7 +84,7 @@ class RoutesFragment : Fragment() {
         setupAnimations()
         setupBusStopSpinner()
 
-        // ✅ 默认加载 TCOMS
+        // Default: load selected stop
         loadRoutes(selectedStop)
     }
 
@@ -103,7 +103,7 @@ class RoutesFragment : Fragment() {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         binding.spinnerBusStop.adapter = adapter
 
-        // 默认选中 TCOMS
+        // Default selection
         val defaultIndex = allStops.indexOfFirst { it.code == selectedStop.code }.coerceAtLeast(0)
         binding.spinnerBusStop.setSelection(defaultIndex, false)
 
@@ -137,7 +137,7 @@ class RoutesFragment : Fragment() {
                 val resp = NextBusApiClient.api.getShuttleService(stop.code)
                 mapToBusRoutes(stop, resp)
             }.getOrElse {
-                // 不做 empty / loading：失败就显示空列表或保留旧列表
+                // On failure, show empty list or keep old list
                 emptyList()
             }
 
@@ -166,12 +166,12 @@ class RoutesFragment : Fragment() {
 
 
     /**
-     * ✅ 关键：ShuttleService 动态路线 → BusRoute 列表
+     * Key: Maps ShuttleService dynamic routes to BusRoute list
      * - route.name: shuttle.name (D1/K/R1/...)
      * - nextArrival: _etas[0].eta
-     * - status: ETA 推断
-     * - from/to: 默认值（from=站点名，to="-"）
-     * - color: routeName hash 到固定颜色
+     * - status: inferred from ETA
+     * - from/to: defaults (from=stop name, to="-")
+     * - color: hash of routeName to fixed color
      */
     private fun mapToBusRoutes(
         stop: BusStopOption,
@@ -186,7 +186,7 @@ class RoutesFragment : Fragment() {
             val etaMinutes = shuttle._etas?.firstOrNull()?.eta
             val etaSafe = etaMinutes ?: -1
 
-            // ✅ 用 ServiceDescription 的 RouteDescription 拆 from/to
+            // Use ServiceDescription RouteDescription to parse from/to
             val routeDesc = routeDescMap[routeName]
             val brief = formatBriefRoute(routeDesc, "${stop.label}")
 
@@ -207,7 +207,7 @@ class RoutesFragment : Fragment() {
             )
         }
 
-        // ✅ 没有 ETA 的排最后（避免 -1 排到最前）
+        // Routes without ETA go last (avoid -1 sorting to the top)
         return list.sortedBy { if (it.nextArrival <= 0) Int.MAX_VALUE else it.nextArrival }
     }
 
@@ -221,11 +221,11 @@ class RoutesFragment : Fragment() {
         val nodes = if (parts.size <= maxNodes) {
             parts
         } else {
-            // 前4 + … + 最后1
+            // First 4 + ... + last 1
             parts.take(4) + listOf("…") + parts.takeLast(1)
         }
 
-        // ✅ 关键：只用 join，不要额外 append 分隔符
+        // Key: only use join, no extra separators appended
         return nodes.joinToString(" → ")
     }
 
@@ -244,7 +244,7 @@ class RoutesFragment : Fragment() {
     }
 
 
-    // ✅ 稳定颜色：不同路线(D1/K/R1/...)也能有不同固定色
+    // Stable colors: different routes (D1/K/R1/...) get different fixed colors
     private fun colorForRoute(routeName: String): String {
         val palette = listOf(
             "#2563EB", // blue
@@ -263,7 +263,7 @@ class RoutesFragment : Fragment() {
     private val Int.absoluteValue: Int get() = if (this < 0) -this else this
 
     private fun handleRouteClick(route: BusRoute) {
-        // 维持你现有逻辑
+        // Keep existing navigation logic
         findNavController().navigate(R.id.action_routes_to_routePlanner)
     }
 

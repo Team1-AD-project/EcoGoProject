@@ -49,12 +49,12 @@ class ProfileFragment : Fragment() {
     private var shopItems = mutableListOf<BadgeDto>()
     private var userItems = mutableListOf<UserBadgeDto>()
 
-    // ✅ 所有状态都从服务器加载
+    // All state is loaded from the server
     private var currentPoints = 0
     private val inventory = mutableListOf<String>()
     private val currentOutfit = mutableMapOf<String, String>()
 
-    // ✅ 删除写死的 userFacultyId，从服务器获取
+    // Removed hardcoded userFacultyId; now fetched from server
     private var userFacultyId: String = ""
     private val ownedFaculties = mutableSetOf<String>()
 
@@ -113,7 +113,7 @@ class ProfileFragment : Fragment() {
                     binding.textPoints.text = currentPoints.toString()
                     binding.textName.text = userInfo.nickname
 
-                    // ✅ 从服务器获取 faculty
+                    // Faculty loaded from server
                     userInfo.faculty?.let { faculty ->
                         userFacultyId = faculty.lowercase()  // "SOC" -> "soc"
                         binding.textFaculty.text = "$faculty • Year 2"
@@ -543,7 +543,7 @@ class ProfileFragment : Fragment() {
                 userItems
             )
         } else {
-            // ✅ 如果没有服务器数据，返回空列表而不是 MockData
+            // If no server data, return empty list instead of MockData
             emptyList()
         }
 
@@ -751,14 +751,14 @@ class ProfileFragment : Fragment() {
         val totalBadges = if (shopItems.isNotEmpty()) {
             shopItems.count { it.category == "badge" }
         } else {
-            0  // ✅ 改为 0，从服务器加载
+            0  // Default to 0, loaded from server
         }
 
         val unlockedBadges = if (userItems.isNotEmpty()) {
             val badgeIds = shopItems.filter { it.category == "badge" }.map { it.badgeId }
             userItems.count { it.badgeId in badgeIds }
         } else {
-            0  // ✅ 改为 0，从服务器加载
+            0  // Default to 0, loaded from server
         }
 
         binding.textBadgeCount.text = "$unlockedBadges / $totalBadges unlocked"
@@ -817,7 +817,7 @@ class ProfileFragment : Fragment() {
                 userItems
             )
         } else {
-            // ✅ 如果没有服务器数据，返回空列表
+            // If no server data, return empty list
             emptyList()
         }
 
@@ -846,7 +846,7 @@ class ProfileFragment : Fragment() {
         val achievement = if (badgeDto != null) {
             DataMapper.mergeBadgeData(listOf(badgeDto), userItems).firstOrNull()
         } else {
-            null  // ✅ 如果没找到，返回 null
+            null  // If not found, return null
         }
 
         if (achievement != null) {

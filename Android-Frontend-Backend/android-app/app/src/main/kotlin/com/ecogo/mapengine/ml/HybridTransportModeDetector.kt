@@ -13,8 +13,8 @@ import java.util.LinkedList
 import kotlin.math.sqrt
 
 /**
- * 混合交通方式检测器
- * 优先使用 Google Snap to Roads API，回退到本地传感器检测
+ * Hybrid Transport Mode Detector
+ * Prioritizes Google Snap to Roads API, falls back to local sensor detection
  */
 class HybridTransportModeDetector(
     private val context: Context,
@@ -27,23 +27,23 @@ class HybridTransportModeDetector(
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
     private var isTFLiteLoaded = false
 
-    // 预测结果流
+    // Prediction result flow
     private val _detectedMode = MutableStateFlow<TransportModePrediction?>(null)
     val detectedMode: StateFlow<TransportModePrediction?> = _detectedMode
 
-    // 预测历史（用于平滑）
+    // Prediction history (for smoothing)
     private val predictionHistory = LinkedList<TransportModeLabel>()
     private val historySize = 3
 
-    // GPS 轨迹点（用于 Snap to Roads）
+    // GPS trajectory points (for Snap to Roads)
     private val gpsTrajectory = LinkedList<com.google.android.gms.maps.model.LatLng>()
     private val MAX_TRAJECTORY_SIZE = 100
 
-    // GPS 速度列表
+    // GPS speed list
     private val speedSequence = LinkedList<Float>()
     private val MAX_SPEED_SIZE = 100
 
-    // 检测方式
+    // Detection mode
     private var useSnapToRoads = !googleMapsApiKey.isNullOrEmpty()
     private var isDetecting = false
     private val isEmulator = detectEmulator()
@@ -53,7 +53,7 @@ class HybridTransportModeDetector(
         private const val TAG = "HybridTransportModeDetector"
 
         /**
-         * 检测是否运行在模拟器上
+         * Detect if running on an emulator
          */
         private fun detectEmulator(): Boolean {
             return (Build.FINGERPRINT.startsWith("generic")
@@ -71,11 +71,11 @@ class HybridTransportModeDetector(
     }
 
     /**
-     * 开始检测
+     * Start detection
      *
-     * 策略：
-     * - 模拟器：只用 Snap-to-Roads API（模拟器无真实传感器数据）
-     * - 真机：  只用 ML 本地检测（TFLite 模型 + 传感器 + GPS 速度）
+     * Strategy:
+     * - Emulator: Snap-to-Roads API only (emulator has no real sensor data)
+     * - Real device: ML local detection only (TFLite model + sensors + GPS speed)
      */
     fun startDetection() {
         if (isDetecting) {
@@ -87,7 +87,7 @@ class HybridTransportModeDetector(
         isDetecting = true
 
         if (isEmulator) {
-            // 模拟器：只用 Snap-to-Roads（基于 GPS 道路匹配）
+            // Emulator: Snap-to-Roads only (GPS road matching)
             Log.d(TAG, "Emulator detected → Snap-to-Roads only (no sensor ML)")
             if (useSnapToRoads) {
                 startSnapToRoadsDetection()
@@ -95,7 +95,7 @@ class HybridTransportModeDetector(
                 Log.w(TAG, "Emulator without API Key: no detection method available")
             }
         } else {
-            // 真机：只用 ML 本地检测（传感器 + GPS 速度）
+            // Real device: ML local detection only (sensors + GPS speed)
             Log.d(TAG, "Real device detected → ML local detection (TFLite + sensors)")
             isTFLiteLoaded = tfliteDetector.loadModel()
             Log.d(TAG, "TFLite model loaded: $isTFLiteLoaded")
@@ -104,7 +104,7 @@ class HybridTransportModeDetector(
     }
 
     /**
-     * 停止检测
+     * Stop detection
      */
     fun stopDetection() {
         if (!isDetecting) return
@@ -119,7 +119,7 @@ class HybridTransportModeDetector(
     }
 
     /**
-     * 启动本地传感器检测
+     * Start local sensor detection
      */
     private fun startLocalDetection() {
         sensorCollector.startCollecting()
@@ -134,15 +134,15 @@ class HybridTransportModeDetector(
     }
 
     /**
-     * 启动 Snap to Roads 检测
+     * Start Snap to Roads detection
      */
     private fun startSnapToRoadsDetection() {
-        // Snap to Roads 是被动检测：等待 GPS 更新时调用 API
+        // Snap to Roads is passive detection: calls API when GPS updates arrive
         Log.d(TAG, "Snap to Roads detection ready (waiting for GPS updates)")
     }
 
     /**
-     * 处理本地传感器窗口数据（真机专用）
+     * Process local sensor window data (real device only)
      */
     private suspend fun processLocalWindow(window: SensorWindow) = withContext(Dispatchers.Default) {
         try {
@@ -158,22 +158,22 @@ class HybridTransportModeDetector(
     }
 
     /**
-     * 更新 GPS 位置（应定期调用）
+     * Update GPS location (should be called periodically)
      */
     suspend fun updateLocation(location: Location) {
-        // 真机：更新传感器收集器的 GPS 速度（用于 ML 特征）
+        // Real device: update sensor collector GPS speed (for ML features)
         if (!isEmulator) {
             sensorCollector.updateGpsSpeed(location)
         }
 
-        // 添加速度（真机 ML 需要 GPS 速度统计）
+        // Add speed (real device ML needs GPS speed statistics)
         val speed = location.speed  // m/s
         speedSequence.add(speed)
         if (speedSequence.size > MAX_SPEED_SIZE) {
             speedSequence.removeFirst()
         }
 
-        // 模拟器：收集 GPS 轨迹用于 Snap-to-Roads
+        // Emulator: collect GPS trajectory for Snap-to-Roads
         if (isEmulator && useSnapToRoads) {
             val latLng = com.google.android.gms.maps.model.LatLng(location.latitude, location.longitude)
             gpsTrajectory.add(latLng)
@@ -181,7 +181,7 @@ class HybridTransportModeDetector(
                 gpsTrajectory.removeFirst()
             }
 
-            // 每采集 10 个点尝试一次 Snap to Roads 检测
+            // Attempt Snap to Roads detection every 10 collected points
             if (gpsTrajectory.size >= 10 && gpsTrajectory.size % 10 == 0) {
                 performSnapToRoadsDetection()
             }
@@ -189,7 +189,7 @@ class HybridTransportModeDetector(
     }
 
     /**
-     * 执行 Snap to Roads 检测
+     * Perform Snap to Roads detection
      */
     private suspend fun performSnapToRoadsDetection() {
         if (!isDetecting || googleMapsApiKey.isNullOrEmpty()) return
@@ -197,7 +197,7 @@ class HybridTransportModeDetector(
         try {
             Log.d(TAG, "Performing Snap to Roads detection with ${gpsTrajectory.size} points...")
 
-            // 只使用最近 15 个速度点（更快响应速度变化）
+            // Use only the most recent 15 speed points (faster response to speed changes)
             val recentSpeeds = if (speedSequence.size > 15) {
                 speedSequence.toList().takeLast(15)
             } else {
@@ -206,7 +206,7 @@ class HybridTransportModeDetector(
 
             val prediction = snapToRoadsDetector.detectTransportMode(
                 gpsPoints = gpsTrajectory.toList(),
-                speeds = recentSpeeds,  // m/s（SnapToRoadsDetector 内部会转 km/h）
+                speeds = recentSpeeds,  // m/s (SnapToRoadsDetector converts to km/h internally)
                 apiKey = googleMapsApiKey!!
             )
 
@@ -218,16 +218,16 @@ class HybridTransportModeDetector(
             }
         } catch (e: Exception) {
             Log.e(TAG, "Snap to Roads detection failed: ${e.message}", e)
-            // 自动回退到本地检测（已在运行）
+            // Automatically fall back to local detection (already running)
         }
     }
 
     /**
-     * 本地预测 - 使用 TFLite 模型 (传感器 + GPS 速度)
-     * 如果 TFLite 加载失败，回退到规则引擎
+     * Local prediction - using TFLite model (sensors + GPS speed)
+     * Falls back to rule engine if TFLite loading fails
      */
     private fun predictTransportMode(features: SensorFeatures): TransportModePrediction {
-        // 计算 GPS 速度统计
+        // Calculate GPS speed statistics
         val speeds = speedSequence.toList()
         val gpsSpeedMean = if (speeds.isNotEmpty()) speeds.average().toFloat() else 0f
         val gpsSpeedStd = if (speeds.size > 1) {
@@ -236,7 +236,7 @@ class HybridTransportModeDetector(
         } else 0f
         val gpsSpeedMax = speeds.maxOrNull() ?: 0f
 
-        // 尝试 TFLite 模型
+        // Try TFLite model
         if (isTFLiteLoaded) {
             val journeyFeatures = JourneyFeatures(
                 accelMeanX = features.accXMean,
@@ -252,7 +252,7 @@ class HybridTransportModeDetector(
                 gyroStdX = features.gyroXStd,
                 gyroStdY = features.gyroYStd,
                 gyroStdZ = features.gyroZStd,
-                journeyDuration = 120f, // 5秒窗口，归一化
+                journeyDuration = 120f, // 5-second window, normalized
                 gpsSpeedMean = gpsSpeedMean,
                 gpsSpeedStd = gpsSpeedStd,
                 gpsSpeedMax = gpsSpeedMax,
@@ -285,7 +285,7 @@ class HybridTransportModeDetector(
             }
         }
 
-        // 回退：规则引擎
+        // Fallback: rule engine
         val featureArray = features.toFloatArray()
         val (predictedClass, confidence) = SimpleDecisionTreeClassifier.predict(featureArray)
 
@@ -316,7 +316,7 @@ class HybridTransportModeDetector(
     }
 
     /**
-     * 平滑预测结果
+     * Smooth prediction results
      */
     private fun smoothPrediction(prediction: TransportModePrediction): TransportModePrediction {
         predictionHistory.add(prediction.mode)
@@ -340,12 +340,12 @@ class HybridTransportModeDetector(
     }
 
     /**
-     * 检查是否正在检测
+     * Check if detection is running
      */
     fun isDetecting(): Boolean = isDetecting
 
     /**
-     * 清理资源
+     * Clean up resources
      */
     fun cleanup() {
         stopDetection()

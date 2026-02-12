@@ -7,7 +7,7 @@ import android.widget.TextView
 import com.ecogo.R
 
 /**
- * Loading Dialog 工具类
+ * Loading Dialog utility class
  */
 class LoadingDialog(private val context: Context) {
 

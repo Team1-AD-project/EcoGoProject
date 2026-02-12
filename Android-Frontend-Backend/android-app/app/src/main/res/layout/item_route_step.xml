@@ -8,7 +8,7 @@
     android:paddingHorizontal="16dp"
     android:gravity="center_vertical">
 
-    <!-- 步骤编号 -->
+    <!-- Step Number -->
     <TextView
         android:id="@+id/textStepNumber"
         android:layout_width="28dp"
@@ -20,7 +20,7 @@
         android:textStyle="bold"
         tools:text="1" />
 
-    <!-- 交通方式图标 -->
+    <!-- Transport Mode Icon -->
     <TextView
         android:id="@+id/textIcon"
         android:layout_width="wrap_content"
@@ -29,7 +29,7 @@
         android:textSize="20sp"
         tools:text="🚶" />
 
-    <!-- 内容区域 -->
+    <!-- Content Area -->
     <LinearLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -37,16 +37,16 @@
         android:layout_marginStart="12dp"
         android:orientation="vertical">
 
-        <!-- 指令说明 -->
+        <!-- Instruction -->
         <TextView
             android:id="@+id/textInstruction"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textSize="15sp"
             android:textColor="@android:color/black"
-            tools:text="步行至公交站" />
+            tools:text="Walk to bus stop" />
 
-        <!-- 详细信息 -->
+        <!-- Details -->
         <TextView
             android:id="@+id/textDetails"
             android:layout_width="match_parent"
@@ -54,7 +54,7 @@
             android:layout_marginTop="4dp"
             android:textSize="13sp"
             android:textColor="@android:color/darker_gray"
-            tools:text="500m • 6分钟" />
+            tools:text="500m • 6 min" />
 
     </LinearLayout>
 

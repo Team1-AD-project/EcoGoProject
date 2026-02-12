@@ -20,8 +20,8 @@ import com.ecogo.ui.adapters.RouteStepAdapter
 import com.ecogo.viewmodel.NavigationViewModel
 
 /**
- * 行程进行中页面 - 游戏化重点
- * 实时显示进度、动态反馈、积分累积等
+ * Trip in progress page - Gamification focus
+ * Real-time progress display, dynamic feedback, points accumulation, etc.
  */
 class TripInProgressFragment : Fragment() {
 
@@ -75,14 +75,14 @@ class TripInProgressFragment : Fragment() {
         }
         
         binding.btnCancelTrip.setOnClickListener {
-            // 取消行程
+            // Cancel trip
             viewModel.cancelNavigation()
             findNavController().navigateUp()
         }
     }
     
     private fun observeViewModel() {
-        // 观察导航状态
+        // Observe navigation state
         viewModel.navigationState.observe(viewLifecycleOwner) { state ->
             when (state) {
                 NavigationState.NAVIGATING -> {
@@ -95,19 +95,19 @@ class TripInProgressFragment : Fragment() {
             }
         }
         
-        // 观察当前路线
+        // Observe current route
         viewModel.currentRoute.observe(viewLifecycleOwner) { route ->
             route?.let {
                 binding.textDestination.text = it.destination.name
-                // 更新步骤列表（只显示前3步）
+                // Update step list (show only first 3 steps)
                 stepAdapter.updateSteps(it.steps.take(3))
             }
         }
         
-        // 观察当前行程
+        // Observe current trip
         viewModel.currentTrip.observe(viewLifecycleOwner) { trip ->
             trip?.let {
-                // 更新进度条
+                // Update progress bar
                 val progress = if (it.route.distance > 0) {
                     ((it.actualDistance / it.route.distance) * 100).toInt()
                 } else 0
@@ -115,17 +115,17 @@ class TripInProgressFragment : Fragment() {
                 binding.progressTrip.progress = progress
                 binding.textProgress.text = "$progress%"
                 
-                // 更新距离
+                // Update distance
                 binding.textDistanceCovered.text = String.format("%.2f km", it.actualDistance)
                 binding.textDistanceRemaining.text = String.format("%.2f km", 
                     it.route.distance - it.actualDistance)
                 
-                // 检查里程碑
+                // Check milestone
                 checkMilestone(it.actualDistance)
             }
         }
         
-        // 观察实时碳减排
+        // Observe real-time carbon reduction
         viewModel.realTimeCarbonSaved.observe(viewLifecycleOwner) { carbon ->
             val points = (carbon * 0.5).toInt()
             if (points > currentPoints) {
@@ -141,13 +141,13 @@ class TripInProgressFragment : Fragment() {
     }
     
     private fun showOffRouteAlert() {
-        // 偏离路线提示
+        // Off-route alert
         binding.mascotLive.setEmotion(MascotEmotion.CONFUSED)
-        Toast.makeText(requireContext(), "您似乎偏离了路线", Toast.LENGTH_SHORT).show()
+        Toast.makeText(requireContext(), "You seem to have gone off route", Toast.LENGTH_SHORT).show()
     }
     
     private fun checkMilestone(distance: Double) {
-        // 每1公里显示一个里程碑弹窗
+        // Show milestone popup every 1 km
         val currentKm = distance.toInt()
         val lastKm = lastMilestoneDistance.toInt()
         
@@ -158,12 +158,12 @@ class TripInProgressFragment : Fragment() {
     }
     
     private fun showMilestoneDialog(km: Int) {
-        // 小狮子跳跃庆祝
+        // Mascot celebration animation
         binding.mascotLive.celebrateAnimation()
         
         Toast.makeText(
             requireContext(),
-            "坚持得很好！已完成 $km 公里\n当前积分 +$currentPoints",
+            "Great job! Completed $km km\nCurrent points +$currentPoints",
             Toast.LENGTH_LONG
         ).show()
     }
@@ -177,13 +177,13 @@ class TripInProgressFragment : Fragment() {
         }
         animator.start()
         
-        // 添加闪烁效果
+        // Add blink effect
         val popIn = AnimationUtils.loadAnimation(requireContext(), R.anim.pop_in)
         binding.textPointsRealtime.startAnimation(popIn)
     }
     
     private fun completeTrip() {
-        // 完成行程
+        // Complete trip
         viewModel.endNavigation()
         navigateToSummary()
     }

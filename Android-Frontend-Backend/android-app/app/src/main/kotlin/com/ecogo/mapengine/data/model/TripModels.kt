@@ -2,13 +2,13 @@ package com.ecogo.mapengine.data.model
 
 /**
  * ========================================
- * 行程追踪相关模型
- * 对应 TripService 微服务接口
+ * Trip tracking related models
+ * Corresponding to TripService microservice API
  * ========================================
  */
 
 /**
- * 开启行程追踪请求
+ * Start trip tracking request
  * POST /api/mobile/trips/track
  */
 data class TripTrackRequest(
@@ -18,7 +18,7 @@ data class TripTrackRequest(
 )
 
 /**
- * 开启行程追踪响应
+ * Start trip tracking response
  */
 data class TripTrackData(
     val trip_id: String,
@@ -28,7 +28,7 @@ data class TripTrackData(
 )
 
 /**
- * 取消行程请求
+ * Cancel trip request
  * PUT /api/mobile/trips/{trip_id}/cancel
  */
 data class TripCancelRequest(
@@ -37,7 +37,7 @@ data class TripCancelRequest(
 )
 
 /**
- * 取消行程响应
+ * Cancel trip response
  */
 data class TripCancelData(
     val trip_id: String,
@@ -47,7 +47,7 @@ data class TripCancelData(
 )
 
 /**
- * 轨迹点
+ * Track point
  */
 data class TrackPoint(
     val latitude: Double,
@@ -57,7 +57,7 @@ data class TrackPoint(
 )
 
 /**
- * 实时地图响应
+ * Real-time map response
  * GET /api/mobile/trips/{trip_id}/map
  */
 data class TripMapData(
@@ -66,13 +66,13 @@ data class TripMapData(
     val current_distance: Double = 0.0,
     val duration_seconds: Int = 0,
     val status: String = "tracking",
-    // 兼容旧字段
+    // Legacy field compatibility
     val polyline_points: List<GeoPoint>? = null,
     val current_point: GeoPoint? = null
 )
 
 /**
- * 保存行程请求
+ * Save trip request
  * POST /api/mobile/trips/save
  */
 data class TripSaveRequest(
@@ -85,7 +85,7 @@ data class TripSaveRequest(
 )
 
 /**
- * 保存行程响应
+ * Save trip response
  */
 data class TripSaveData(
     val trip_id: String,
@@ -96,7 +96,7 @@ data class TripSaveData(
 )
 
 /**
- * 碳足迹计算请求
+ * Carbon footprint calculation request
  * POST /api/mobile/trips/carbon/calculate
  */
 data class CarbonCalculateRequest(
@@ -105,7 +105,7 @@ data class CarbonCalculateRequest(
 )
 
 /**
- * 碳足迹计算响应
+ * Carbon footprint calculation response
  */
 data class CarbonCalculateData(
     val trip_id: String? = null,
@@ -117,7 +117,7 @@ data class CarbonCalculateData(
 )
 
 /**
- * 行程状态枚举
+ * Trip status enum
  */
 enum class TripStatus(val value: String) {
     TRACKING("tracking"),

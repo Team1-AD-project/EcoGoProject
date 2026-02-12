@@ -57,14 +57,14 @@ class LoginFragment : Fragment() {
         
         binding.buttonRegister.setOnClickListener {
             Log.d("DEBUG_LOGIN", "Register button clicked - attempting navigate")
-            Toast.makeText(requireContext(), "🔄 正在跳转到注册页面...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Navigating to registration page...", Toast.LENGTH_SHORT).show()
             try {
                 findNavController().navigate(R.id.action_login_to_signup)
                 Log.d("DEBUG_LOGIN", "Navigate to signup completed successfully")
-                Toast.makeText(requireContext(), "✅ 导航命令已执行", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Navigation command executed", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 Log.e("DEBUG_LOGIN", "Navigation to signup FAILED: ${e.message}", e)
-                Toast.makeText(requireContext(), "❌ 导航错误: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }

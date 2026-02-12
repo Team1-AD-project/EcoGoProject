@@ -3,20 +3,20 @@ package com.ecogo.mapengine.ml
 import kotlin.math.sqrt
 
 /**
- * 传感器特征提取器
- * 从原始传感器数据窗口中提取统计特征
+ * Sensor Feature Extractor
+ * Extracts statistical features from raw sensor data windows
  */
 object SensorFeatureExtractor {
 
     /**
-     * 从数据窗口中提取特征
+     * Extract features from data window
      */
     fun extractFeatures(window: SensorWindow): SensorFeatures {
         if (window.data.isEmpty()) {
             return createZeroFeatures()
         }
 
-        // 提取各轴数据
+        // Extract per-axis data
         val accX = window.data.map { it.accelerometerX }
         val accY = window.data.map { it.accelerometerY }
         val accZ = window.data.map { it.accelerometerZ }
@@ -28,14 +28,14 @@ object SensorFeatureExtractor {
         val gpsSpeed = window.data.map { it.gpsSpeed }
         val pressure = window.data.map { it.pressure }
 
-        // 计算加速度幅值
+        // Calculate accelerometer magnitude
         val accMagnitude = window.data.map { data ->
             sqrt(data.accelerometerX * data.accelerometerX +
                  data.accelerometerY * data.accelerometerY +
                  data.accelerometerZ * data.accelerometerZ)
         }
 
-        // 计算陀螺仪幅值
+        // Calculate gyroscope magnitude
         val gyroMagnitude = window.data.map { data ->
             sqrt(data.gyroscopeX * data.gyroscopeX +
                  data.gyroscopeY * data.gyroscopeY +
@@ -43,7 +43,7 @@ object SensorFeatureExtractor {
         }
 
         return SensorFeatures(
-            // 加速度计 X 轴特征
+            // Accelerometer X-axis features
             accXMean = accX.mean(),
             accXStd = accX.std(),
             accXMax = accX.maxOrNull() ?: 0f,
@@ -52,7 +52,7 @@ object SensorFeatureExtractor {
             accXMedian = accX.median(),
             accXSma = accX.sma(),
 
-            // 加速度计 Y 轴特征
+            // Accelerometer Y-axis features
             accYMean = accY.mean(),
             accYStd = accY.std(),
             accYMax = accY.maxOrNull() ?: 0f,
@@ -61,7 +61,7 @@ object SensorFeatureExtractor {
             accYMedian = accY.median(),
             accYSma = accY.sma(),
 
-            // 加速度计 Z 轴特征
+            // Accelerometer Z-axis features
             accZMean = accZ.mean(),
             accZStd = accZ.std(),
             accZMax = accZ.maxOrNull() ?: 0f,
@@ -70,7 +70,7 @@ object SensorFeatureExtractor {
             accZMedian = accZ.median(),
             accZSma = accZ.sma(),
 
-            // 陀螺仪 X 轴特征
+            // Gyroscope X-axis features
             gyroXMean = gyroX.mean(),
             gyroXStd = gyroX.std(),
             gyroXMax = gyroX.maxOrNull() ?: 0f,
@@ -79,7 +79,7 @@ object SensorFeatureExtractor {
             gyroXMedian = gyroX.median(),
             gyroXSma = gyroX.sma(),
 
-            // 陀螺仪 Y 轴特征
+            // Gyroscope Y-axis features
             gyroYMean = gyroY.mean(),
             gyroYStd = gyroY.std(),
             gyroYMax = gyroY.maxOrNull() ?: 0f,
@@ -88,7 +88,7 @@ object SensorFeatureExtractor {
             gyroYMedian = gyroY.median(),
             gyroYSma = gyroY.sma(),
 
-            // 陀螺仪 Z 轴特征
+            // Gyroscope Z-axis features
             gyroZMean = gyroZ.mean(),
             gyroZStd = gyroZ.std(),
             gyroZMax = gyroZ.maxOrNull() ?: 0f,
@@ -97,29 +97,29 @@ object SensorFeatureExtractor {
             gyroZMedian = gyroZ.median(),
             gyroZSma = gyroZ.sma(),
 
-            // 加速度幅值特征
+            // Accelerometer magnitude features
             accMagnitudeMean = accMagnitude.mean(),
             accMagnitudeStd = accMagnitude.std(),
             accMagnitudeMax = accMagnitude.maxOrNull() ?: 0f,
 
-            // 陀螺仪幅值特征
+            // Gyroscope magnitude features
             gyroMagnitudeMean = gyroMagnitude.mean(),
             gyroMagnitudeStd = gyroMagnitude.std(),
             gyroMagnitudeMax = gyroMagnitude.maxOrNull() ?: 0f,
 
-            // GPS 特征
+            // GPS features
             gpsSpeedMean = gpsSpeed.mean(),
             gpsSpeedStd = gpsSpeed.std(),
             gpsSpeedMax = gpsSpeed.maxOrNull() ?: 0f,
 
-            // 气压特征
+            // Barometric pressure features
             pressureMean = pressure.mean(),
             pressureStd = pressure.std()
         )
     }
 
     /**
-     * 创建零特征（用于空数据的情况）
+     * Create zero features (for empty data cases)
      */
     private fun createZeroFeatures(): SensorFeatures {
         return SensorFeatures(
@@ -136,7 +136,7 @@ object SensorFeatureExtractor {
         )
     }
 
-    // ============ 统计函数扩展 ============
+    // ============ Statistical Extension Functions ============
 
     private fun List<Float>.mean(): Float {
         return if (isEmpty()) 0f else sum() / size
@@ -160,7 +160,7 @@ object SensorFeatureExtractor {
     }
 
     private fun List<Float>.sma(): Float {
-        // Signal Magnitude Area: 信号幅度面积
+        // Signal Magnitude Area
         return if (isEmpty()) 0f else map { kotlin.math.abs(it) }.sum() / size
     }
 }

@@ -14,7 +14,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 顶部：图标、标题、状态 -->
+        <!-- Top: Icon, Title, Status -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -75,7 +75,7 @@
                 android:visibility="gone" />
         </LinearLayout>
 
-        <!-- 描述 -->
+        <!-- Description -->
         <TextView
             android:id="@+id/text_description"
             android:layout_width="match_parent"
@@ -85,7 +85,7 @@
             android:textColor="@color/text_muted"
             android:textSize="13sp" />
 
-        <!-- 进度条 -->
+        <!-- Progress Bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -114,7 +114,7 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- 底部：奖励和参与人数 -->
+        <!-- Bottom: Rewards and Participants -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

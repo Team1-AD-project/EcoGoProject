@@ -8,7 +8,7 @@
     android:orientation="vertical"
     android:padding="24dp">
 
-    <!-- 图标 -->
+    <!-- Icon -->
     <TextView
         android:id="@+id/text_icon"
         android:layout_width="wrap_content"
@@ -17,19 +17,19 @@
         android:text="👕"
         android:textSize="48sp" />
 
-    <!-- 标题 -->
+    <!-- Title -->
     <TextView
         android:id="@+id/text_title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:fontFamily="sans-serif-medium"
-        android:text="购买服饰"
+        android:text="Purchase Outfit"
         android:textColor="@color/text_primary"
         android:textSize="18sp"
         android:textStyle="bold" />
 
-    <!-- 消息内容 -->
+    <!-- Message content -->
     <TextView
         android:id="@+id/text_message"
         android:layout_width="match_parent"
@@ -37,11 +37,11 @@
         android:layout_marginBottom="20dp"
         android:gravity="center"
         android:lineSpacingExtra="4dp"
-        android:text="价格：100 pts\n\n是否购买并立即装备？"
+        android:text="Price: 100 pts\n\nPurchase and equip now?"
         android:textColor="@color/text_secondary"
         android:textSize="14sp" />
 
-    <!-- 按钮组 -->
+    <!-- Button group -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

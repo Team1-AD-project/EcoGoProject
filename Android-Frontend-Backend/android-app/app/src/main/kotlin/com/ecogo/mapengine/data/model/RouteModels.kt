@@ -2,13 +2,13 @@ package com.ecogo.mapengine.data.model
 
 /**
  * ========================================
- * 路线推荐相关模型
- * 对应 RecommendService 微服务接口
+ * Route recommendation related models
+ * Corresponding to RecommendService microservice API
  * ========================================
  */
 
 /**
- * 路线推荐请求
+ * Route recommendation request
  * POST /api/mobile/route/recommend/low-carbon
  * POST /api/mobile/route/recommend/balance
  */
@@ -19,39 +19,39 @@ data class RouteRecommendRequest(
 )
 
 /**
- * 路线推荐响应
+ * Route recommendation response
  */
 data class RouteRecommendData(
     val route_id: String? = null,
     val route_type: String? = null,
     val total_distance: Double = 0.0,
-    val estimated_duration: Int = 0,  // 分钟
+    val estimated_duration: Int = 0,  // minutes
     val total_carbon: Double = 0.0,
     val carbon_saved: Double = 0.0,
     val route_segments: List<RouteSegment>? = null,
     val route_points: List<GeoPoint>? = null,
-    val route_steps: List<RouteStep>? = null,  // 详细步骤（用于公交等多模式路线）
-    val route_alternatives: List<RouteAlternative>? = null,  // 多条路线选项（仅公交模式）
-    // 兼容旧字段
+    val route_steps: List<RouteStep>? = null,  // Detailed steps (for transit and multi-mode routes)
+    val route_alternatives: List<RouteAlternative>? = null,  // Multiple route options (transit mode only)
+    // Legacy field compatibility
     val green_route: List<GeoPoint>? = null,
     val duration: Int? = null
 )
 
 /**
- * 路线选项（用于显示多条路线供用户选择）
+ * Route alternative (for displaying multiple routes for user selection)
  */
 data class RouteAlternative(
-    val index: Int,                      // 路线索引
-    val total_distance: Double,          // 总距离（公里）
-    val estimated_duration: Int,         // 预计时长（分钟）
-    val total_carbon: Double,            // 碳排放
-    val route_points: List<GeoPoint>,    // 路线点
-    val route_steps: List<RouteStep>,    // 详细步骤
-    val summary: String                  // 路线摘要（如"地铁1号线 → 公交46路"）
+    val index: Int,                      // Route index
+    val total_distance: Double,          // Total distance (km)
+    val estimated_duration: Int,         // Estimated duration (minutes)
+    val total_carbon: Double,            // Carbon emission
+    val route_points: List<GeoPoint>,    // Route points
+    val route_steps: List<RouteStep>,    // Detailed steps
+    val summary: String                  // Route summary (e.g. "Metro Line 1 -> Bus 46")
 )
 
 /**
- * 路线段（多段式路线中的单段）
+ * Route segment (a single segment in a multi-segment route)
  */
 data class RouteSegment(
     val transport_mode: String,
@@ -63,15 +63,15 @@ data class RouteSegment(
 )
 
 /**
- * 路线推荐类型
+ * Route recommendation type
  */
 enum class RouteType(val value: String) {
-    LOW_CARBON("low-carbon"),      // 碳排最低
-    BALANCE("balance")              // 时间-碳排平衡
+    LOW_CARBON("low-carbon"),      // Lowest carbon emission
+    BALANCE("balance")              // Time-carbon balanced
 }
 
 /**
- * 路线缓存数据
+ * Route cache data
  * GET /api/mobile/route/cache/{user_id}
  */
 data class RouteCacheData(
@@ -80,37 +80,37 @@ data class RouteCacheData(
 )
 
 /**
- * 交通方式
+ * Transport mode
  */
 enum class TransportMode(val value: String, val displayName: String) {
-    WALKING("walk", "步行"),
-    CYCLING("bike", "骑行"),
-    BUS("bus", "公交"),
-    SUBWAY("subway", "地铁"),
-    DRIVING("car", "驾车")
+    WALKING("walk", "Walking"),
+    CYCLING("bike", "Cycling"),
+    BUS("bus", "Bus"),
+    SUBWAY("subway", "Subway"),
+    DRIVING("car", "Driving")
 }
 
 /**
- * 路线详细步骤（用于显示公交换乘等详细信息）
+ * Route detailed step (for displaying transit transfer details, etc.)
  */
 data class RouteStep(
-    val instruction: String,           // 步骤说明（如"步行至公交站"、"乘坐X路公交"）
-    val distance: Double,               // 距离（米）
-    val duration: Int,                  // 时长（秒）
-    val travel_mode: String,            // 出行方式（WALKING, TRANSIT, DRIVING等）
-    val transit_details: TransitDetails? = null,  // 公交详情（仅 TRANSIT 模式有）
-    val polyline_points: List<GeoPoint>? = null   // 该步骤的路线点（用于分段绘制不同颜色）
+    val instruction: String,           // Step instruction (e.g. "Walk to bus stop", "Take Bus X")
+    val distance: Double,               // Distance (meters)
+    val duration: Int,                  // Duration (seconds)
+    val travel_mode: String,            // Travel mode (WALKING, TRANSIT, DRIVING, etc.)
+    val transit_details: TransitDetails? = null,  // Transit details (TRANSIT mode only)
+    val polyline_points: List<GeoPoint>? = null   // Route points for this step (for drawing segments in different colors)
 )
 
 /**
- * 公交详情
+ * Transit details
  */
 data class TransitDetails(
-    val line_name: String,              // 线路名称（如"地铁1号线"、"公交46路"）
-    val line_short_name: String? = null, // 线路简称（如"1号线"、"46路"）
-    val departure_stop: String,         // 上车站点
-    val arrival_stop: String,           // 下车站点
-    val num_stops: Int,                 // 经过站数
-    val vehicle_type: String,           // 车辆类型（BUS, SUBWAY, RAIL等）
-    val headsign: String? = null        // 方向标识（如"往XX方向"）
+    val line_name: String,              // Line name (e.g. "Metro Line 1", "Bus 46")
+    val line_short_name: String? = null, // Line short name (e.g. "Line 1", "46")
+    val departure_stop: String,         // Departure stop
+    val arrival_stop: String,           // Arrival stop
+    val num_stops: Int,                 // Number of stops
+    val vehicle_type: String,           // Vehicle type (BUS, SUBWAY, RAIL, etc.)
+    val headsign: String? = null        // Direction sign (e.g. "Towards XX")
 )

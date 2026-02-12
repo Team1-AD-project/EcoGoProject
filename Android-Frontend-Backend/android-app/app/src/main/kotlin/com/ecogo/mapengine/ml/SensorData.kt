@@ -1,7 +1,7 @@
 package com.ecogo.mapengine.ml
 
 /**
- * 传感器原始数据
+ * Sensor raw data
  */
 data class SensorRawData(
     val timestamp: Long,
@@ -11,22 +11,22 @@ data class SensorRawData(
     val gyroscopeX: Float,
     val gyroscopeY: Float,
     val gyroscopeZ: Float,
-    val gpsSpeed: Float,  // 单位：m/s
-    val pressure: Float   // 气压，单位：hPa
+    val gpsSpeed: Float,  // Unit: m/s
+    val pressure: Float   // Barometric pressure, unit: hPa
 )
 
 /**
- * 传感器数据窗口（5秒窗口）
+ * Sensor data window (5-second window)
  */
 data class SensorWindow(
     val startTime: Long,
     val endTime: Long,
     val data: List<SensorRawData>,
-    val label: TransportModeLabel? = null  // 用于训练时的标签
+    val label: TransportModeLabel? = null  // Label for training
 )
 
 /**
- * 交通方式标签（用于数据标注）
+ * Transport mode label (for data annotation)
  */
 enum class TransportModeLabel {
     WALKING,
@@ -38,10 +38,10 @@ enum class TransportModeLabel {
 }
 
 /**
- * 提取的特征
+ * Extracted features
  */
 data class SensorFeatures(
-    // 加速度计统计特征 (3轴 × 7特征 = 21)
+    // Accelerometer statistical features (3 axes x 7 features = 21)
     val accXMean: Float,
     val accXStd: Float,
     val accXMax: Float,
@@ -66,7 +66,7 @@ data class SensorFeatures(
     val accZMedian: Float,
     val accZSma: Float,
 
-    // 陀螺仪统计特征 (3轴 × 7特征 = 21)
+    // Gyroscope statistical features (3 axes x 7 features = 21)
     val gyroXMean: Float,
     val gyroXStd: Float,
     val gyroXMax: Float,
@@ -91,8 +91,8 @@ data class SensorFeatures(
     val gyroZMedian: Float,
     val gyroZSma: Float,
 
-    // 组合特征
-    val accMagnitudeMean: Float,      // sqrt(x² + y² + z²) 的均值
+    // Combined features
+    val accMagnitudeMean: Float,      // Mean of sqrt(x² + y² + z²)
     val accMagnitudeStd: Float,
     val accMagnitudeMax: Float,
 
@@ -100,21 +100,21 @@ data class SensorFeatures(
     val gyroMagnitudeStd: Float,
     val gyroMagnitudeMax: Float,
 
-    // GPS特征
+    // GPS features
     val gpsSpeedMean: Float,
     val gpsSpeedStd: Float,
     val gpsSpeedMax: Float,
 
-    // 气压特征
+    // Barometric pressure features
     val pressureMean: Float,
     val pressureStd: Float,
 
-    // 频域特征（可选，暂时不实现）
+    // Frequency domain features (optional, not implemented yet)
     // val dominantFrequency: Float,
     // val spectralEntropy: Float
 ) {
     /**
-     * 转换为浮点数组（用于模型输入）
+     * Convert to float array (for model input)
      */
     fun toFloatArray(): FloatArray {
         return floatArrayOf(
@@ -132,15 +132,15 @@ data class SensorFeatures(
     }
 
     companion object {
-        const val FEATURE_SIZE = 53  // 总特征数
+        const val FEATURE_SIZE = 53  // Total feature count
     }
 }
 
 /**
- * 预测结果
+ * Prediction result
  */
 data class TransportModePrediction(
     val mode: TransportModeLabel,
-    val confidence: Float,  // 置信度 0-1
-    val probabilities: Map<TransportModeLabel, Float>  // 每个类别的概率
+    val confidence: Float,  // Confidence 0-1
+    val probabilities: Map<TransportModeLabel, Float>  // Probability for each class
 )

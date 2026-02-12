@@ -7,7 +7,7 @@
     android:orientation="vertical"
     android:padding="24dp">
 
-    <!-- 关闭按钮 -->
+    <!-- Close button -->
     <ImageView
         android:id="@+id/btn_close"
         android:layout_width="28dp"
@@ -18,7 +18,7 @@
         android:src="@drawable/ic_close"
         app:tint="@color/text_secondary" />
 
-    <!-- 徽章图标 -->
+    <!-- Badge icon -->
     <TextView
         android:id="@+id/text_badge_icon"
         android:layout_width="wrap_content"
@@ -27,7 +27,7 @@
         android:text="🏅"
         android:textSize="48sp" />
 
-    <!-- 徽章名称 -->
+    <!-- Badge name -->
     <TextView
         android:id="@+id/text_badge_name"
         android:layout_width="wrap_content"
@@ -40,7 +40,7 @@
         android:textSize="18sp"
         android:textStyle="bold" />
 
-    <!-- 状态标签 -->
+    <!-- Status label -->
     <TextView
         android:id="@+id/text_badge_status"
         android:layout_width="wrap_content"
@@ -57,7 +57,7 @@
         android:textSize="12sp"
         android:textStyle="bold" />
 
-    <!-- 描述 -->
+    <!-- Description -->
     <TextView
         android:id="@+id/text_badge_desc"
         android:layout_width="match_parent"
@@ -68,7 +68,7 @@
         android:textColor="@color/text_secondary"
         android:textSize="14sp" />
 
-    <!-- 解锁方式标题 -->
+    <!-- How to unlock title -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -79,7 +79,7 @@
         android:textSize="14sp"
         android:textStyle="bold" />
 
-    <!-- 解锁方式描述 -->
+    <!-- How to unlock description -->
     <TextView
         android:id="@+id/text_how_to_unlock"
         android:layout_width="match_parent"
@@ -90,7 +90,7 @@
         android:textColor="@color/text_secondary"
         android:textSize="13sp" />
 
-    <!-- 佩戴/卸下按钮（仅已解锁的徽章可见） -->
+    <!-- Equip/unequip button (only visible for unlocked badges) -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/button_equip"
         android:layout_width="match_parent"

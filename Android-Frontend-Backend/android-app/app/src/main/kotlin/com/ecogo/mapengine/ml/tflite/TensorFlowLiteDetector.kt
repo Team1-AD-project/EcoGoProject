@@ -48,7 +48,7 @@ class TensorFlowLiteDetector(private val context: Context) {
     fun loadModel(): Boolean {
         return try {
             if (interpreter != null) {
-                Log.d(TAG, "模型已加载")
+                Log.d(TAG, "Model already loaded")
                 return true
             }
             
@@ -57,10 +57,10 @@ class TensorFlowLiteDetector(private val context: Context) {
             interpreter = Interpreter(modelBuffer)
             isModelLoaded = true
             
-            Log.d(TAG, "TensorFlow Lite模型加载成功")
+            Log.d(TAG, "TensorFlow Lite model loaded successfully")
             true
         } catch (e: Exception) {
-            Log.e(TAG, "模型加载失败: ${e.message}", e)
+            Log.e(TAG, "Model loading failed: ${e.message}", e)
             isModelLoaded = false
             false
         }
@@ -74,7 +74,7 @@ class TensorFlowLiteDetector(private val context: Context) {
      */
     fun predict(features: JourneyFeatures): TransportModePrediction? {
         if (!isModelLoaded || interpreter == null) {
-            Log.w(TAG, "模型未加载，无法预测")
+            Log.w(TAG, "Model not loaded, cannot predict")
             return null
         }
         
@@ -109,7 +109,7 @@ class TensorFlowLiteDetector(private val context: Context) {
             
             // 步骤2：验证特征维度
             if (inputFeatures.size != INPUT_FEATURES) {
-                Log.e(TAG, "特征维度不匹配: ${inputFeatures.size} != $INPUT_FEATURES")
+                Log.e(TAG, "Feature dimension mismatch: ${inputFeatures.size} != $INPUT_FEATURES")
                 return null
             }
             
@@ -134,7 +134,7 @@ class TensorFlowLiteDetector(private val context: Context) {
             val maxProb = maxEntry?.value ?: 0f
             val predictedMode = TRANSPORT_MODES[maxIndex]
             
-            Log.d(TAG, "预测结果: $predictedMode (概率: $maxProb)")
+            Log.d(TAG, "Prediction result: $predictedMode (probability: $maxProb)")
             
             // 步骤8：构建返回结果
             TransportModePrediction(
@@ -150,7 +150,7 @@ class TensorFlowLiteDetector(private val context: Context) {
                 inputFeatures = inputFeatures
             )
         } catch (e: Exception) {
-            Log.e(TAG, "推理失败: ${e.message}", e)
+            Log.e(TAG, "Inference failed: ${e.message}", e)
             null
         }
     }
@@ -167,11 +167,11 @@ class TensorFlowLiteDetector(private val context: Context) {
      */
     fun getModelInfo(): String {
         return """
-            TensorFlow Lite 模型信息：
-            - 输入维度: ${INPUT_FEATURES}个特征
-            - 输出类别: $OUTPUT_CLASSES (WALKING, CYCLING, BUS, DRIVING, SUBWAY)
-            - 模型文件: $MODEL_FILE
-            - 加载状态: ${if (isModelLoaded) "已加载" else "未加载"}
+            TensorFlow Lite Model Info:
+            - Input dimensions: ${INPUT_FEATURES} features
+            - Output classes: $OUTPUT_CLASSES (WALKING, CYCLING, BUS, DRIVING, SUBWAY)
+            - Model file: $MODEL_FILE
+            - Load status: ${if (isModelLoaded) "Loaded" else "Not loaded"}
         """.trimIndent()
     }
     
@@ -183,9 +183,9 @@ class TensorFlowLiteDetector(private val context: Context) {
             interpreter?.close()
             interpreter = null
             isModelLoaded = false
-            Log.d(TAG, "模型资源已释放")
+            Log.d(TAG, "Model resources released")
         } catch (e: Exception) {
-            Log.e(TAG, "释放资源失败: ${e.message}", e)
+            Log.e(TAG, "Resource release failed: ${e.message}", e)
         }
     }
 }
@@ -206,10 +206,10 @@ data class TransportModePrediction(
             .joinToString(", ") { "${it.key}: ${String.format("%.1f%%", it.value * 100)}" }
         
         return """
-            预测结果：
-            - 模式: $predictedMode
-            - 置信度: ${String.format("%.1f%%", confidence * 100)}
-            - 概率分布: $probStr
+            Prediction Result:
+            - Mode: $predictedMode
+            - Confidence: ${String.format("%.1f%%", confidence * 100)}
+            - Probability Distribution: $probStr
         """.trimIndent()
     }
     

@@ -12,7 +12,7 @@
         android:orientation="vertical"
         android:padding="0dp">
 
-        <!-- Header (浅绿背景) -->
+        <!-- Header (light green background) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -74,7 +74,7 @@
             
         </LinearLayout>
 
-        <!-- 主内容区 padding -->
+        <!-- Main content area padding -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -270,7 +270,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Eco-Trip Progress (三圆环横向) -->
+        <!-- Eco-Trip Progress (three rings horizontal) -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_daily_goal"
             android:layout_width="match_parent"
@@ -287,7 +287,7 @@
                 android:orientation="horizontal"
                 android:padding="16dp">
 
-                <!-- 左：Steps / Today -->
+                <!-- Left: Steps / Today -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -337,7 +337,7 @@
                         android:textSize="10sp" />
                 </LinearLayout>
 
-                <!-- 中：Trips -->
+                <!-- Center: Trips -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -387,7 +387,7 @@
                         android:textSize="10sp" />
                 </LinearLayout>
 
-                <!-- 右：CO2 saved -->
+                <!-- Right: CO2 saved -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -439,14 +439,14 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 左：Monthly + SOC Score 上下排序的绑定组件  右：Carbon Footprint 左右排序 -->
+        <!-- Left: Monthly + SOC Score stacked vertically  Right: Carbon Footprint side by side -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:orientation="horizontal">
 
-            <!-- 左侧：Monthly 与 SOC Score 上下排序的组件 -->
+            <!-- Left side: Monthly and SOC Score stacked vertically -->
             <LinearLayout
                 android:id="@+id/layout_monthly_soc_group"
                 android:layout_width="0dp"
@@ -455,7 +455,7 @@
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <!-- Monthly Points Card (上) -->
+                <!-- Monthly Points Card (Top) -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_monthly_points"
                     android:layout_width="match_parent"
@@ -519,7 +519,7 @@
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- SOC Score Card (下) -->
+                <!-- SOC Score Card (Bottom) -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_community_score"
                     android:layout_width="match_parent"
@@ -578,7 +578,7 @@
                 </com.google.android.material.card.MaterialCardView>
             </LinearLayout>
 
-            <!-- 右侧：Carbon Footprint Card -->
+            <!-- Right side: Carbon Footprint Card -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_carbon_footprint"
                 android:layout_width="0dp"
@@ -819,14 +819,14 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- Next Arrival 与 地图 并列 -->
+        <!-- Next Arrival and Map side by side -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:orientation="horizontal">
 
-            <!-- Next Arrival Card (左) -->
+            <!-- Next Arrival Card (left) -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_next_bus"
                 android:layout_width="0dp"
@@ -911,7 +911,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Map Preview (右) -->
+            <!-- Map Preview (right) -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_map"
                 android:layout_width="0dp"
@@ -956,14 +956,14 @@
             </com.google.android.material.card.MaterialCardView>
         </LinearLayout>
 
-        <!-- 快捷入口 (Vouchers & Challenges) -->
+        <!-- Quick access (Vouchers & Challenges) -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:orientation="horizontal">
 
-            <!-- Voucher 快捷入口 -->
+            <!-- Voucher shortcut -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_voucher_shortcut"
                 android:layout_width="0dp"
@@ -1009,7 +1009,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Challenges 快捷入口 -->
+            <!-- Challenges shortcut -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_challenges_shortcut"
                 android:layout_width="0dp"

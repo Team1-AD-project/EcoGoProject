@@ -159,7 +159,7 @@ class EditProfileFragment : Fragment() {
         binding.switchFriendActivity.isChecked = prefs?.friendActivity ?: false
     }
 
-    // 保留本地偏好加载方法（API无数据时兜底，不直接删除）
+    // Keep local preferences loading method (fallback when API has no data)
     private fun loadLocalPreferences() {
         val prefs = requireContext().getSharedPreferences("ecogo_profile", android.content.Context.MODE_PRIVATE)
         binding.editDormitory.setText(prefs.getString("dormitoryOrResidence", "") ?: "")
@@ -167,13 +167,13 @@ class EditProfileFragment : Fragment() {
         binding.editStudySpot.setText(prefs.getString("favoriteStudySpot", "") ?: "")
     }
 
-    // 保留本地偏好获取方法（兜底用）
+    // Keep local preference getter method (for fallback)
     private fun getLocalPref(key: String, default: Boolean): Boolean {
         val prefs = requireContext().getSharedPreferences("ecogo_profile", android.content.Context.MODE_PRIVATE)
         return prefs.getBoolean(key, default)
     }
 
-    // 保留本地int偏好获取方法（weeklyGoals兜底用）
+    // Keep local int preference getter method (fallback for weeklyGoals)
     private fun getLocalPrefInt(key: String, default: Int): Int {
         val prefs = requireContext().getSharedPreferences("ecogo_profile", android.content.Context.MODE_PRIVATE)
         return prefs.getInt(key, default)

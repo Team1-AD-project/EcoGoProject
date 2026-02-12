@@ -15,7 +15,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 徽章/推荐标签 -->
+        <!-- Badge / Recommendation Label -->
         <TextView
             android:id="@+id/textBadge"
             android:layout_width="wrap_content"
@@ -26,9 +26,9 @@
             android:textColor="@android:color/white"
             android:textSize="12sp"
             android:visibility="gone"
-            tools:text="推荐" />
+            tools:text="Recommended" />
 
-        <!-- 交通方式 -->
+        <!-- Transport Mode -->
         <TextView
             android:id="@+id/textMode"
             android:layout_width="wrap_content"
@@ -36,9 +36,9 @@
             android:layout_marginTop="4dp"
             android:textSize="16sp"
             android:textStyle="bold"
-            tools:text="🚶 步行" />
+            tools:text="🚶 Walking" />
 
-        <!-- 时间和距离 -->
+        <!-- Time and Distance -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -51,7 +51,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textSize="14sp"
-                tools:text="15分钟" />
+                tools:text="15 min" />
 
             <TextView
                 android:id="@+id/textDistance"
@@ -59,11 +59,11 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textSize="14sp"
-                tools:text="1.2km" />
+                tools:text="1.2 km" />
 
         </LinearLayout>
 
-        <!-- 环保数据 -->
+        <!-- Eco Data -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -77,7 +77,7 @@
                 android:layout_weight="1"
                 android:textColor="@color/green_primary"
                 android:textSize="13sp"
-                tools:text="减碳0.5kg" />
+                tools:text="Save 0.5kg CO₂" />
 
             <TextView
                 android:id="@+id/textPoints"
@@ -85,7 +85,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textSize="13sp"
-                tools:text="+10积分" />
+                tools:text="+10 pts" />
 
             <TextView
                 android:id="@+id/textSavings"
@@ -93,7 +93,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:textSize="13sp"
-                tools:text="节省$2.0" />
+                tools:text="Save $2.0" />
 
         </LinearLayout>
 

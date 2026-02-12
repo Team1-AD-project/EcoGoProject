@@ -77,12 +77,12 @@ object GreenTravelStats {
         return if (trips > 0) {
             val treeEquiv = calculateTreeEquivalent(carbonSaved)
             if (treeEquiv >= 0.1) {
-                String.format("🌱 本周绿色出行 %d 次，累计减碳 %.2f kg (≈ %.1f 棵树)", trips, carbonSaved, treeEquiv)
+                String.format("🌱 %d green trips this week, total carbon reduction %.2f kg (≈ %.1f trees)", trips, carbonSaved, treeEquiv)
             } else {
-                String.format("🌱 本周绿色出行 %d 次，累计减碳 %.2f kg", trips, carbonSaved)
+                String.format("🌱 %d green trips this week, total carbon reduction %.2f kg", trips, carbonSaved)
             }
         } else {
-            "🌱 开始您的第一次绿色出行吧"
+            "🌱 Start your first green trip!"
         }
     }
 

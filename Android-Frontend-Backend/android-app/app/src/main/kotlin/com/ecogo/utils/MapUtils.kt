@@ -1,38 +1,38 @@
 package com.ecogo.utils
 
 /**
- * 地图工具类
- * 注意：地图功能临时禁用，需要配置 Google Maps SDK
+ * Map utility class
+ * Note: Map functionality is temporarily disabled; Google Maps SDK configuration required
  */
 object MapUtils {
-    
+
     /**
-     * 格式化时长（秒转为分钟或小时）
+     * Format duration (seconds to minutes or hours)
      */
     fun formatDuration(seconds: Int): String {
         return when {
-            seconds < 60 -> "${seconds}秒"
-            seconds < 3600 -> "${seconds / 60}分钟"
+            seconds < 60 -> "${seconds}s"
+            seconds < 3600 -> "${seconds / 60}min"
             else -> {
                 val hours = seconds / 3600
                 val minutes = (seconds % 3600) / 60
                 if (minutes > 0) {
-                    "${hours}小时${minutes}分钟"
+                    "${hours}h ${minutes}min"
                 } else {
-                    "${hours}小时"
+                    "${hours}h"
                 }
             }
         }
     }
-    
+
     /**
-     * 格式化距离（米转为米或公里）
+     * Format distance (meters to meters or kilometers)
      */
     fun formatDistance(meters: Double): String {
         return if (meters < 1000) {
-            "${meters.toInt()}米"
+            "${meters.toInt()}m"
         } else {
-            String.format("%.1f公里", meters / 1000)
+            String.format("%.1fkm", meters / 1000)
         }
     }
 }

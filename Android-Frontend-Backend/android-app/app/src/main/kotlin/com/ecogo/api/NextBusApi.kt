@@ -23,7 +23,7 @@ interface NextBusApi {
     suspend fun getServiceDescription(): ServiceDescriptionResponse
 }
 
-// ====== 2) Response Models（只建我们用到的字段） ======
+// ====== 2) Response Models (only fields we use) ======
 
 data class ShuttleServiceResponse(
     val ShuttleServiceResult: ShuttleServiceResult?

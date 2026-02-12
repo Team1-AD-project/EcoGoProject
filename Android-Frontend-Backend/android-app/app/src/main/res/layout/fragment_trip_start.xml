@@ -12,7 +12,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 顶部导航栏 -->
+        <!-- Top Navigation Bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -25,13 +25,13 @@
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_close"
-                android:contentDescription="返回" />
+                android:contentDescription="Back" />
 
             <TextView
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="准备出发"
+                android:text="Ready to Go"
                 android:textAlignment="center"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
@@ -42,7 +42,7 @@
                 android:layout_height="40dp" />
         </LinearLayout>
 
-        <!-- 小狮子 -->
+        <!-- Mascot -->
         <com.ecogo.ui.views.MascotLionView
             android:id="@+id/mascot_start"
             android:layout_width="120dp"
@@ -54,12 +54,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="让我们一起出发吧！"
+            android:text="Let\'s go on an adventure!"
             android:textColor="@color/text_primary"
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <!-- 路线信息卡片 -->
+        <!-- Route Info Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_route_info"
             android:layout_width="match_parent"
@@ -75,7 +75,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- 推荐标签 -->
+                <!-- Recommended Tag -->
                 <TextView
                     android:id="@+id/badge_recommended"
                     android:layout_width="wrap_content"
@@ -83,7 +83,7 @@
                     android:background="@drawable/bg_recommendation_tag"
                     android:paddingHorizontal="12dp"
                     android:paddingVertical="4dp"
-                    android:text="最环保"
+                    android:text="Most Eco-Friendly"
                     android:textColor="@color/primary"
                     android:textSize="12sp"
                     android:textStyle="bold"
@@ -94,12 +94,12 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:text="步行路线"
+                    android:text="Walking Route"
                     android:textColor="@color/text_primary"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
-                <!-- 起点终点 -->
+                <!-- Origin and Destination -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -148,7 +148,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 预计信息卡片 -->
+        <!-- Estimated Info Card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_estimates"
             android:layout_width="match_parent"
@@ -167,11 +167,11 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="预计信息"
+                    android:text="Estimates"
                     android:textColor="@color/text_muted"
                     android:textSize="12sp" />
 
-                <!-- 时间和距离 -->
+                <!-- Time and Distance -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -196,7 +196,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="15 分钟"
+                            android:text="15 min"
                             android:textColor="@color/text_primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -204,7 +204,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="预计时间"
+                            android:text="Est. Time"
                             android:textColor="@color/text_muted"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -232,7 +232,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="1.2 公里"
+                            android:text="1.2 km"
                             android:textColor="@color/text_primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -240,7 +240,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="预计距离"
+                            android:text="Est. Distance"
                             android:textColor="@color/text_muted"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -252,7 +252,7 @@
                     android:layout_marginVertical="16dp"
                     android:background="@color/border" />
 
-                <!-- 碳减排和积分 -->
+                <!-- Carbon Saved and Points -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -284,7 +284,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="减少排放"
+                            android:text="CO₂ Saved"
                             android:textColor="@color/text_muted"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -312,7 +312,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="4dp"
-                            android:text="+120 积分"
+                            android:text="+120 pts"
                             android:textColor="@color/primary"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -320,7 +320,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="可获积分"
+                            android:text="Points Earned"
                             android:textColor="@color/text_muted"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -333,13 +333,13 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!-- 开始行程按钮 -->
+        <!-- Start Trip Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_start_trip"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:layout_marginTop="24dp"
-            android:text="开始行程"
+            android:text="Start Trip"
             android:textSize="16sp"
             android:textStyle="bold"
             app:backgroundTint="@color/primary"

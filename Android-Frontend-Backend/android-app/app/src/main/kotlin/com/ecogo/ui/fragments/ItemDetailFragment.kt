@@ -19,8 +19,8 @@ import com.ecogo.databinding.FragmentItemDetailBinding
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 
 /**
- * 商品详情页面
- * 支持预览试穿效果和购买
+ * Item detail page
+ * Supports preview/try-on and purchase
  */
 class ItemDetailFragment : Fragment() {
 
@@ -74,33 +74,33 @@ class ItemDetailFragment : Fragment() {
         
         if (item == null) {
             MaterialAlertDialogBuilder(requireContext())
-                .setTitle("错误")
-                .setMessage("找不到该商品")
-                .setPositiveButton("确定") { _, _ ->
+                .setTitle("Error")
+                .setMessage("Item not found")
+                .setPositiveButton("OK") { _, _ ->
                     findNavController().navigateUp()
                 }
                 .show()
             return
         }
         
-        // 显示商品信息
+        // Display item info
         binding.textName.text = item.name
         binding.textType.text = when (item.type) {
-            "head" -> "头饰"
-            "face" -> "面部"
-            "body" -> "身体"
-            "badge" -> "徽章"
+            "head" -> "Headwear"
+            "face" -> "Face"
+            "body" -> "Body"
+            "badge" -> "Badge"
             else -> item.type
         }
-        binding.textCost.text = "${item.cost} 积分"
-        
-        // 设置小狮子显示当前装备
+        binding.textCost.text = "${item.cost} pts"
+
+        // Set mascot to display current outfit
         binding.mascotPreview.apply {
             mascotSize = MascotSize.XLARGE
             outfit = currentOutfit
         }
         
-        // 检查是否已拥有
+        // Check if already owned
         isOwned = item.owned
         updateButtonStates()
     }
@@ -109,11 +109,11 @@ class ItemDetailFragment : Fragment() {
         if (isOwned) {
             binding.btnPurchase.visibility = View.GONE
             binding.btnEquip.visibility = View.VISIBLE
-            binding.btnTryOn.text = "预览装备"
+            binding.btnTryOn.text = "Preview Outfit"
         } else {
             binding.btnPurchase.visibility = View.VISIBLE
             binding.btnEquip.visibility = View.GONE
-            binding.btnTryOn.text = "试穿预览"
+            binding.btnTryOn.text = "Try On Preview"
         }
     }
     
@@ -151,9 +151,9 @@ class ItemDetailFragment : Fragment() {
 
     private fun getPreviewButtonText(isPreviewing: Boolean): String {
         return if (isPreviewing) {
-            if (isOwned) "取消预览" else "取消试穿"
+            if (isOwned) "Cancel Preview" else "Cancel Try-On"
         } else {
-            if (isOwned) "预览装备" else "试穿预览"
+            if (isOwned) "Preview Outfit" else "Try On Preview"
         }
     }
     
@@ -161,21 +161,21 @@ class ItemDetailFragment : Fragment() {
         val item = MockData.SHOP_ITEMS.find { it.id == itemId } ?: return
         
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("购买确认")
-            .setMessage("确定要使用 ${item.cost} 积分购买 ${item.name} 吗？")
-            .setPositiveButton("确定") { _, _ ->
+            .setTitle("Confirm Purchase")
+            .setMessage("Use ${item.cost} pts to purchase ${item.name}?")
+            .setPositiveButton("OK") { _, _ ->
                 performPurchase(item.cost)
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton("Cancel", null)
             .show()
     }
     
     private fun performPurchase(cost: Int) {
-        // TODO: 调用API购买
+        // TODO: Call API to purchase
         isOwned = true
         updateButtonStates()
-        
-        // 显示购买成功对话框
+
+        // Show purchase success dialog
         val dialog = Dialog(requireContext())
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
         dialog.setContentView(R.layout.dialog_purchase_success)
@@ -185,8 +185,8 @@ class ItemDetailFragment : Fragment() {
         val message = dialog.findViewById<TextView>(R.id.text_message)
         val button = dialog.findViewById<com.google.android.material.button.MaterialButton>(R.id.button_ok)
         
-        title?.text = "购买成功"
-        message?.text = "已添加到你的衣橱\n剩余积分：-$cost"
+        title?.text = "Purchase Successful"
+        message?.text = "Added to your closet\nPoints spent: -$cost"
         button?.setOnClickListener {
             dialog.dismiss()
         }
@@ -195,10 +195,10 @@ class ItemDetailFragment : Fragment() {
     }
     
     private fun equipItem() {
-        // 装备物品（返回到Profile并应用装备）
+        // Equip item (return to Profile and apply outfit)
         android.widget.Toast.makeText(
             requireContext(),
-            "已装备",
+            "Equipped",
             android.widget.Toast.LENGTH_SHORT
         ).show()
         

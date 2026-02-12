@@ -10,15 +10,15 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.TimeUnit
 
 /**
- * 自动标记服务 - 使用Snap to Roads自动为GPS轨迹标记交通方式
- * 这是数据集生成的关键步骤
+ * Auto Labeling Service - Automatically labels GPS trajectories with transport mode using Snap to Roads
+ * This is a key step in dataset generation
  *
- * 工作流程：
- * 1. 收集GPS点和传感器数据
- * 2. 调用Snap to Roads API进行匹配
- * 3. 根据道路类型+速度推断交通方式
- * 4. 保存到数据库为"AUTO_SNAP"标签
- * 5. 用户可以验证（改为"VERIFIED"）或拒绝
+ * Workflow:
+ * 1. Collect GPS points and sensor data
+ * 2. Call Snap to Roads API for road matching
+ * 3. Infer transport mode based on road type + speed
+ * 4. Save to database with "AUTO_SNAP" label
+ * 5. User can verify (change to "VERIFIED") or reject
  */
 class AutoLabelingService(
     private val labelingDao: ActivityLabelingDao,
@@ -27,20 +27,20 @@ class AutoLabelingService(
     
     companion object {
         private const val TAG = "AutoLabelingService"
-        private const val MIN_GPS_POINTS = 20          // 最少GPS点数
-        private const val MIN_JOURNEY_DURATION = 60000L // 最少1分钟
-        private const val CONFIDENCE_THRESHOLD = 0.65f // 最低置信度
+        private const val MIN_GPS_POINTS = 20          // Minimum GPS point count
+        private const val MIN_JOURNEY_DURATION = 60000L // Minimum 1 minute
+        private const val CONFIDENCE_THRESHOLD = 0.65f // Minimum confidence
     }
     
     /**
-     * 主方法：将原始轨迹数据自动标记并保存
+     * Main method: automatically label and save raw trajectory data
      *
-     * @param gpsTrajectory GPS轨迹列表 [(lat, lng, timestamp)]
-     * @param accelerometerData 加速度计数据JSON
-     * @param gyroscopeData 陀螺仪数据JSON
-     * @param barometerData 气压计数据JSON
+     * @param gpsTrajectory GPS trajectory list [(lat, lng, timestamp)]
+     * @param accelerometerData Accelerometer data JSON
+     * @param gyroscopeData Gyroscope data JSON
+     * @param barometerData Barometer data JSON
      * @param apiKey Google Maps API Key
-     * @return 生成的LabeledJourney对象，或null如果标记失败或置信度不足
+     * @return Generated LabeledJourney object, or null if labeling fails or confidence is insufficient
      */
     suspend fun autoLabelTrajectory(
         gpsTrajectory: List<Triple<Double, Double, Long>>, // (lat, lng, timestamp)
@@ -50,9 +50,9 @@ class AutoLabelingService(
         apiKey: String
     ): LabeledJourney? = withContext(Dispatchers.Default) {
         try {
-            // 步骤1：验证轨迹数据
+            // Step 1: Validate trajectory data
             if (gpsTrajectory.size < MIN_GPS_POINTS) {
-                Log.w(TAG, "GPS点数不足: ${gpsTrajectory.size} < $MIN_GPS_POINTS")
+                Log.w(TAG, "Insufficient GPS points: ${gpsTrajectory.size} < $MIN_GPS_POINTS")
                 return@withContext null
             }
             
@@ -61,17 +61,17 @@ class AutoLabelingService(
             val duration = endTime - startTime
             
             if (duration < MIN_JOURNEY_DURATION) {
-                Log.w(TAG, "出行时间太短: $duration ms < $MIN_JOURNEY_DURATION ms")
+                Log.w(TAG, "Journey duration too short: $duration ms < $MIN_JOURNEY_DURATION ms")
                 return@withContext null
             }
             
-            // 步骤2：转换为LatLng列表
+            // Step 2: Convert to LatLng list
             val latLngPoints = gpsTrajectory.map { LatLng(it.first, it.second) }
             
-            // 步骤3：计算速度统计
+            // Step 3: Calculate speed statistics
             val speeds = calculateSpeeds(gpsTrajectory)
             if (speeds.isEmpty()) {
-                Log.w(TAG, "无法计算速度")
+                Log.w(TAG, "Unable to calculate speed")
                 return@withContext null
             }
             
@@ -80,9 +80,9 @@ class AutoLabelingService(
             val minSpeed = speeds.minOrNull()?.toFloat() ?: 0f
             val speedVariance = calculateVariance(speeds).toFloat()
             
-            Log.d(TAG, "速度统计 - 平均: $avgSpeed m/s, 最大: $maxSpeed m/s, 方差: $speedVariance")
+            Log.d(TAG, "Speed statistics - avg: $avgSpeed m/s, max: $maxSpeed m/s, variance: $speedVariance")
             
-            // 步骤4：调用Snap to Roads API
+            // Step 4: Call Snap to Roads API
             val snapResult = withContext(Dispatchers.IO) {
                 try {
                     snapDetector.detectTransportMode(
@@ -91,46 +91,46 @@ class AutoLabelingService(
                         apiKey = apiKey
                     )
 
-                    // 返回Snap to Roads的结果
+                    // Return Snap to Roads result
                     Triple<List<Any>, List<Any>, String>(
                         listOf(),  // roads
                         listOf(),  // snappedPoints
                         ""         // roadTypes
                     )
                 } catch (e: Exception) {
-                    Log.e(TAG, "Snap to Roads API调用失败: ${e.message}")
+                    Log.e(TAG, "Snap to Roads API call failed: ${e.message}")
                     null
                 }
             } ?: return@withContext null
             val roadTypes = snapResult.third
             
-            // 步骤5：推断交通方式
+            // Step 5: Infer transport mode
             val (predictedMode, confidence) = inferTransportModeWithConfidence(
                 speeds = speeds,
                 roadTypes = roadTypes,
                 duration = duration
             )
             
-            Log.d(TAG, "推断交通方式: $predictedMode (置信度: $confidence)")
+            Log.d(TAG, "Inferred transport mode: $predictedMode (confidence: $confidence)")
             
-            // 步骤6：验证置信度
+            // Step 6: Validate confidence
             if (confidence < CONFIDENCE_THRESHOLD) {
-                Log.w(TAG, "置信度过低: $confidence < $CONFIDENCE_THRESHOLD，跳过标记")
+                Log.w(TAG, "Confidence too low: $confidence < $CONFIDENCE_THRESHOLD, skipping labeling")
                 return@withContext null
             }
             
-            // 步骤7：计算GPS精度平均值
+            // Step 7: Calculate average GPS accuracy
             val gpsAccuracy = gpsTrajectory.mapIndexed { index, _ ->
-                // 这里应该从location对象获取accuracy，现在用估计值
-                5f + (Math.random() * 10).toFloat() // 5-15米范围
+                // Should get accuracy from location object, using estimated values for now
+                5f + (Math.random() * 10).toFloat() // 5-15 meter range
             }.average().toFloat()
             
-            // 步骤8：构建LabeledJourney对象
+            // Step 8: Build LabeledJourney object
             val labeledJourney = LabeledJourney(
                 startTime = startTime,
                 endTime = endTime,
                 transportMode = predictedMode,
-                labelSource = "AUTO_SNAP",  // 标记为自动标记
+                labelSource = "AUTO_SNAP",  // Marked as auto-labeled
                 gpsTrajectory = gpsTrajectory.joinToString("|") { "${it.first},${it.second},${it.third}" },
                 gpsPointCount = gpsTrajectory.size,
                 avgSpeed = avgSpeed,
@@ -143,23 +143,23 @@ class AutoLabelingService(
                 roadTypes = roadTypes,
                 snapConfidence = confidence,
                 gpsAccuracy = gpsAccuracy,
-                isVerified = false  // 自动标记的数据需要人工验证
+                isVerified = false  // Auto-labeled data requires manual verification
             )
             
-            // 步骤9：保存到数据库
+            // Step 9: Save to database
             val journeyId = labelingDao.insert(labeledJourney)
-            Log.d(TAG, "成功保存标记的出行记录: ID=$journeyId")
+            Log.d(TAG, "Successfully saved labeled journey: ID=$journeyId")
             
             labeledJourney.copy(id = journeyId)
             
         } catch (e: Exception) {
-            Log.e(TAG, "自动标记过程异常: ${e.message}", e)
+            Log.e(TAG, "Auto labeling process error: ${e.message}", e)
             null
         }
     }
     
     /**
-     * 计算GPS轨迹的速度列表
+     * Calculate speed list from GPS trajectory
      */
     private fun calculateSpeeds(gpsTrajectory: List<Triple<Double, Double, Long>>): List<Double> {
         if (gpsTrajectory.size < 2) return emptyList()
@@ -172,14 +172,14 @@ class AutoLabelingService(
             val distance = haversineDistance(
                 prev.first, prev.second,
                 curr.first, curr.second
-            ) // 米
-            
-            val timeInterval = (curr.third - prev.third) / 1000.0 // 秒
+            ) // meters
+
+            val timeInterval = (curr.third - prev.third) / 1000.0 // seconds
             
             if (timeInterval > 0) {
                 val speed = distance / timeInterval // m/s
-                // 过滤异常速度 (GPS抖动)
-                if (speed < 50) { // 50 m/s = 180 km/h，合理上限
+                // Filter abnormal speeds (GPS jitter)
+                if (speed < 50) { // 50 m/s = 180 km/h, reasonable upper limit
                     speeds.add(speed)
                 }
             }
@@ -188,10 +188,10 @@ class AutoLabelingService(
     }
     
     /**
-     * Haversine公式 - 计算两点间大圆距离
+     * Haversine formula - Calculate great-circle distance between two points
      */
     private fun haversineDistance(lat1: Double, lng1: Double, lat2: Double, lng2: Double): Double {
-        val R = 6371000.0 // 地球半径（米）
+        val R = 6371000.0 // Earth radius (meters)
         val dLat = Math.toRadians(lat2 - lat1)
         val dLng = Math.toRadians(lng2 - lng1)
         val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
@@ -202,7 +202,7 @@ class AutoLabelingService(
     }
     
     /**
-     * 计算方差
+     * Calculate variance
      */
     private fun calculateVariance(values: List<Double>): Double {
         if (values.isEmpty()) return 0.0
@@ -211,10 +211,10 @@ class AutoLabelingService(
     }
     
     /**
-     * 推断交通方式并返回置信度
-     * 这是一个简化版本，基于速度和道路类型的启发式规则
+     * Infer transport mode and return confidence
+     * This is a simplified version based on heuristic rules using speed and road type
      *
-     * 返回: Pair(交通方式, 置信度 0-1)
+     * Returns: Pair(transport mode, confidence 0-1)
      */
     private fun inferTransportModeWithConfidence(
         speeds: List<Double>,
@@ -224,38 +224,38 @@ class AutoLabelingService(
         val avgSpeed = speeds.average()
         val speedStd = Math.sqrt(calculateVariance(speeds))
         
-        // 规则1：高速行驶 + 高速公路 → 驾车
+        // Rule 1: High speed + motorway -> Driving
         if (avgSpeed > 15 && roadTypes.contains("motorway|trunk")) {
             return Pair("DRIVING", 0.95f)
         }
         
-        // 规则2：中等速度 + 干线道路 → 公交
+        // Rule 2: Medium speed + trunk road -> Bus
         if (avgSpeed in 8.0..15.0 && roadTypes.contains("trunk|primary")) {
             return Pair("BUS", 0.85f)
         }
         
-        // 规则3：低速 + 自行车道 → 骑行
+        // Rule 3: Low speed + cycleway -> Cycling
         if (speedStd < 3 && roadTypes.contains("cycleway")) {
             return Pair("CYCLING", 0.90f)
         }
         
-        // 规则4：极低速 → 步行
+        // Rule 4: Very low speed -> Walking
         if (avgSpeed < 3) {
             return Pair("WALKING", 0.85f)
         }
         
-        // 规则5：变速较大，中等速度 → 地铁（难以判断）
+        // Rule 5: High speed variance, medium speed -> Subway (hard to determine)
         if (speedStd > 3 && avgSpeed in 5.0..12.0) {
-            return Pair("SUBWAY", 0.75f)  // 置信度较低，需要人工验证
+            return Pair("SUBWAY", 0.75f)  // Low confidence, requires manual verification
         }
         
-        // 默认
+        // Default
         return Pair("UNKNOWN", 0.55f)
     }
     
     /**
-     * 验证自动标记的数据
-     * 用户可以确认或修正Snap to Roads的标记
+     * Verify auto-labeled data
+     * User can confirm or correct the Snap to Roads label
      */
     suspend fun verifyLabel(
         journeyId: Long,
@@ -267,16 +267,16 @@ class AutoLabelingService(
             if (journey != null) {
                 val updated = journey.copy(
                     transportMode = correctTransportMode,
-                    labelSource = "VERIFIED",  // 改为人工验证标记
+                    labelSource = "VERIFIED",  // Changed to manually verified label
                     isVerified = true,
                     verificationTime = System.currentTimeMillis(),
                     verificationNotes = notes
                 )
                 labelingDao.update(updated)
-                Log.d(TAG, "已验证出行记录: $journeyId -> $correctTransportMode")
+                Log.d(TAG, "Verified journey: $journeyId -> $correctTransportMode")
             }
         } catch (e: Exception) {
-            Log.e(TAG, "验证标记时出错: ${e.message}", e)
+            Log.e(TAG, "Error verifying label: ${e.message}", e)
         }
     }
 }

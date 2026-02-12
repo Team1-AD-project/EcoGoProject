@@ -22,7 +22,7 @@ object MockData {
     
     /**
      * Campus Location Data
-     * 使用 lazy 延迟初始化，避免启动时加载
+     * Uses lazy initialization to avoid loading at startup
      */
     val CAMPUS_LOCATIONS by lazy { listOf(
         NavLocation(
@@ -139,7 +139,7 @@ object MockData {
     
     /**
      * Sample Bus Information
-     * 使用 lazy 延迟初始化
+     * Uses lazy initialization
      */
     val BUS_INFO_LIST by lazy { listOf(
         BusInfo(
@@ -289,7 +289,7 @@ object MockData {
     val SHOP_ITEMS by lazy { listOf(
         // === LiNUS Avatar Items ===
 
-        // Face Items (眼镜/配饰) - 9 items (ISS glasses at front)
+        // Face Items (glasses/accessories) - 9 items (ISS glasses at front)
         ShopItem(
             id = "face_glasses_square",
             name = "Square Glasses 👓",
@@ -299,7 +299,7 @@ object MockData {
             equipped = false
         ),
 
-        // Head Items (帽子/头饰) - 10 items
+        // Head Items (hats/headwear) - 10 items
         ShopItem(
             id = "hat_grad",
             name = "Graduation Cap 🎓",
@@ -447,7 +447,7 @@ object MockData {
             equipped = false
         ),
 
-        // Body Items (服装) - 15 items (ISS white shirt at front)
+        // Body Items (clothing) - 15 items (ISS white shirt at front)
         ShopItem(
             id = "body_white_shirt",
             name = "White Shirt 👔",
@@ -569,7 +569,7 @@ object MockData {
             equipped = false
         ),
 
-        // Badge Items (徽章/成就) - 10 items
+        // Badge Items (badges/achievements) - 10 items
         ShopItem(
             id = "badge_eco_warrior",
             name = "Eco Warrior Badge 🌿",
@@ -937,7 +937,7 @@ object MockData {
     ) }
 
     val ACHIEVEMENTS by lazy { listOf(
-        // ── 新人入门 (Newcomer) ──────────────────
+        // ── Newcomer ──────────────────
         Achievement(
             id = "a1",
             name = "First Ride",
@@ -966,7 +966,7 @@ object MockData {
             unlocked = true,
             howToUnlock = "Complete your profile by setting a nickname, choosing a faculty, and customizing your mascot outfit."
         ),
-        // ── 连续打卡 (Streak) ────────────────────
+        // ── Streak ────────────────────
         Achievement(
             id = "a5",
             name = "Week Warrior",
@@ -995,7 +995,7 @@ object MockData {
             unlocked = false,
             howToUnlock = "Log at least one eco-friendly trip every single day for 60 consecutive days. True commitment!"
         ),
-        // ── 积分里程碑 (Points Milestone) ─────────
+        // ── Points Milestone ─────────
         Achievement(
             id = "a9",
             name = "Century Club",
@@ -1017,7 +1017,7 @@ object MockData {
             unlocked = false,
             howToUnlock = "Reach a lifetime total of 2000 EcoGo points. You are a true eco legend!"
         ),
-        // ── 出行方式 (Transport) ─────────────────
+        // ── Transport ─────────────────
         Achievement(
             id = "a12",
             name = "Cycling Champion",
@@ -1046,7 +1046,7 @@ object MockData {
             unlocked = false,
             howToUnlock = "By choosing eco-friendly transport, reduce your carbon footprint by a total of 10kg CO₂ compared to driving."
         ),
-        // ── 社交社区 (Social) ────────────────────
+        // ── Social ────────────────────
         Achievement(
             id = "a16",
             name = "Social Butterfly",
@@ -1068,7 +1068,7 @@ object MockData {
             unlocked = false,
             howToUnlock = "Create and host a community eco-event (e.g. campus cleanup, tree planting) through the app with at least 5 participants."
         ),
-        // ── 特殊成就 (Special) ──────────────────
+        // ── Special ──────────────────
         Achievement(
             id = "a19",
             name = "Master Saver",
@@ -1655,7 +1655,7 @@ object MockData {
             type = TYPE_GOODS,
             category = "merchandise",
             description = "Official EcoGo merchandise",
-            pointsPrice = null,  // 只支持现金
+            pointsPrice = null,  // Cash only
             cashPrice = 20.00,
             available = true,
             stock = 30,
@@ -1669,9 +1669,9 @@ object MockData {
             category = "digital",
             description = "Digital certificate - Plant a tree in your name",
             pointsPrice = 300,
-            cashPrice = null,  // 只支持积分
+            cashPrice = null,  // Points only
             available = true,
-            stock = null,  // 无限库存
+            stock = null,  // Unlimited stock
             tags = listOf("eco", "digital")
         ),
         Product(
@@ -1745,8 +1745,8 @@ object MockData {
         )
     )
     
-    // Challenges Mock Data (匹配后端数据结构，用于离线/备用)
-    // 注意：正式数据从后端API获取，这里仅作为备用
+    // Challenges Mock Data (matches backend data structure, used for offline/fallback)
+    // Note: Production data is fetched from backend API; this is only a fallback
     val CHALLENGES = listOf(
         Challenge(
             id = "ch1",

@@ -8,16 +8,16 @@ import kotlinx.coroutines.withContext
 
 /**
  * Badge & Cloth Repository
- * 统一处理徽章和服饰的数据请求
+ * Unified data requests for badges and clothes
  */
 class BadgeClothRepository(
     private val apiService: BadgeApiService
 ) {
 
-    // ========== 通用方法 ==========
+    // ========== Common Methods ==========
 
     /**
-     * 获取商店列表（包含 badge 和 cloth）
+     * Get shop list (includes badges and clothes)
      */
     suspend fun getShopList(): Result<List<BadgeDto>> = withContext(Dispatchers.IO) {
         try {
@@ -33,7 +33,7 @@ class BadgeClothRepository(
     }
 
     /**
-     * 获取用户背包（包含 badge 和 cloth）
+     * Get user's inventory (includes badges and clothes)
      */
     suspend fun getMyItems(userId: String): Result<List<UserBadgeDto>> = withContext(Dispatchers.IO) {
         try {
@@ -49,7 +49,7 @@ class BadgeClothRepository(
     }
 
     /**
-     * 购买物品（badge 或 cloth）
+     * Purchase an item (badge or cloth)
      */
     suspend fun purchaseItem(userId: String, badgeId: String): Result<UserBadgeDto> = withContext(Dispatchers.IO) {
         try {
@@ -66,7 +66,7 @@ class BadgeClothRepository(
     }
 
     /**
-     * 切换佩戴状态（badge 或 cloth）
+     * Toggle display status (badge or cloth)
      */
     suspend fun toggleDisplay(userId: String, badgeId: String, isDisplay: Boolean): Result<UserBadgeDto> = withContext(Dispatchers.IO) {
         try {
@@ -82,10 +82,10 @@ class BadgeClothRepository(
         }
     }
 
-    // ========== Badge 专用方法 ==========
+    // ========== Badge-Specific Methods ==========
 
     /**
-     * 获取 Badge 列表（仅徽章）
+     * Get badge list (badges only)
      */
     suspend fun getBadgeList(): Result<List<BadgeDto>> = withContext(Dispatchers.IO) {
         try {
@@ -102,7 +102,7 @@ class BadgeClothRepository(
     }
 
     /**
-     * 获取用户的 Badge 背包（仅徽章）
+     * Get user's badge inventory (badges only)
      */
     suspend fun getMyBadges(userId: String): Result<List<UserBadgeDto>> = withContext(Dispatchers.IO) {
         try {
@@ -117,24 +117,24 @@ class BadgeClothRepository(
         }
     }
 
-    // ========== Cloth 专用方法（保持不变）==========
+    // ========== Cloth-Specific Methods ==========
 
     /**
-     * 装备物品（Cloth）
+     * Equip an item (Cloth)
      */
     suspend fun equipItem(userId: String, badgeId: String): Result<UserBadgeDto> {
         return toggleDisplay(userId, badgeId, true)
     }
 
     /**
-     * 卸下物品（Cloth）
+     * Unequip an item (Cloth)
      */
     suspend fun unequipItem(userId: String, badgeId: String): Result<UserBadgeDto> {
         return toggleDisplay(userId, badgeId, false)
     }
 
     /**
-     * 获取用户装备信息
+     * Get user outfit info
      */
     suspend fun getUserOutfit(userId: String): Result<UserOutfitDto> = withContext(Dispatchers.IO) {
         try {
@@ -165,7 +165,7 @@ class BadgeClothRepository(
                     "head" -> head = userItem.badgeId
                     "face" -> face = userItem.badgeId
                     "body" -> body = userItem.badgeId
-                    "rank" -> badge = userItem.badgeId // ⚠️ 注意：badge 的 subCategory 是 "rank"
+                    "rank" -> badge = userItem.badgeId // Note: badge's subCategory is "rank"
                 }
             }
 

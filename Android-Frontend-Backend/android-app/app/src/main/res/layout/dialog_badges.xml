@@ -6,7 +6,7 @@
     android:background="@color/background"
     android:orientation="vertical">
 
-    <!-- ═══════ 上方：小狮子预览区（自适应高度） ═══════ -->
+    <!-- ═══════ Top: Mascot lion preview area (adaptive height) ═══════ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
             android:textSize="12sp" />
     </LinearLayout>
 
-    <!-- ═══════ 下方：徽章列表（占满剩余空间） ═══════ -->
+    <!-- ═══════ Bottom: Badge list (fill remaining space) ═══════ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

@@ -55,14 +55,14 @@ class TensorFlowLiteHybridDetector(
             
             if (success) {
                 isInitialized = true
-                Log.d(TAG, "TensorFlow Lite检测器初始化成功")
+                Log.d(TAG, "TensorFlow Lite detector initialized successfully")
             } else {
-                Log.w(TAG, "TensorFlow Lite模型加载失败，将回退到Snap to Roads")
+                Log.w(TAG, "TensorFlow Lite model loading failed, falling back to Snap to Roads")
             }
             
             success
         } catch (e: Exception) {
-            Log.e(TAG, "初始化失败: ${e.message}", e)
+            Log.e(TAG, "Initialization failed: ${e.message}", e)
             false
         }
     }
@@ -75,7 +75,7 @@ class TensorFlowLiteHybridDetector(
      */
     suspend fun predictWithTFLite(features: JourneyFeatures): TransportModePrediction? {
         if (!isInitialized || tfliteDetector == null) {
-            Log.w(TAG, "TFLite检测器未初始化")
+            Log.w(TAG, "TFLite detector not initialized")
             return null
         }
         
@@ -83,11 +83,11 @@ class TensorFlowLiteHybridDetector(
             try {
                 val prediction = tfliteDetector?.predict(features)
                 if (prediction != null) {
-                    Log.d(TAG, "TFLite预测: ${prediction.predictedMode} (${prediction.confidence})")
+                    Log.d(TAG, "TFLite prediction: ${prediction.predictedMode} (${prediction.confidence})")
                 }
                 prediction
             } catch (e: Exception) {
-                Log.e(TAG, "推理失败: ${e.message}", e)
+                Log.e(TAG, "Inference failed: ${e.message}", e)
                 null
             }
         }
@@ -114,13 +114,13 @@ class TensorFlowLiteHybridDetector(
         
         // 如果TFLite预测不可用，直接使用Snap to Roads
         if (tflitePrediction == null) {
-            Log.d(TAG, "TFLite预测不可用，使用Snap to Roads: $snapPrediction")
+            Log.d(TAG, "TFLite prediction unavailable, using Snap to Roads: $snapPrediction")
             return@withContext Pair(snapPrediction, 0.8f)
         }
         
         // 策略1：TFLite置信度很高，直接使用
         if (tflitePrediction.confidence >= HIGH_CONFIDENCE_THRESHOLD) {
-            Log.d(TAG, "TFLite置信度高，直接使用: ${tflitePrediction.predictedMode}")
+            Log.d(TAG, "High TFLite confidence, using directly: ${tflitePrediction.predictedMode}")
             return@withContext Pair(tflitePrediction.predictedMode, tflitePrediction.confidence)
         }
         
@@ -128,7 +128,7 @@ class TensorFlowLiteHybridDetector(
         if (tflitePrediction.predictedMode == snapPrediction) {
             // 两者一致，提升置信度
             val boostedConfidence = (tflitePrediction.confidence + 0.8f) / 2
-            Log.d(TAG, "两个模型一致，提升置信度到 ${String.format("%.2f", boostedConfidence)}")
+            Log.d(TAG, "Both models agree, boosting confidence to ${String.format("%.2f", boostedConfidence)}")
             return@withContext Pair(tflitePrediction.predictedMode, boostedConfidence)
         }
         
@@ -141,14 +141,14 @@ class TensorFlowLiteHybridDetector(
                 avgSpeed
             )
             
-            Log.d(TAG, "低置信度融合: TFLite=${tflitePrediction.predictedMode}, " +
+            Log.d(TAG, "Low confidence fusion: TFLite=${tflitePrediction.predictedMode}, " +
                     "Snap=$snapPrediction -> $finalMode")
             
             return@withContext Pair(finalMode, tflitePrediction.confidence)
         }
         
         // 策略4：TFLite置信度低，使用Snap to Roads为主
-        Log.d(TAG, "TFLite置信度低 (${tflitePrediction.confidence}), 使用Snap to Roads")
+        Log.d(TAG, "Low TFLite confidence (${tflitePrediction.confidence}), using Snap to Roads")
         return@withContext Pair(snapPrediction, 0.75f)
     }
     
@@ -176,10 +176,10 @@ class TensorFlowLiteHybridDetector(
      */
     fun getModelStatus(): String {
         return """
-            TensorFlow Lite混合检测器状态：
-            - 初始化: ${if (isInitialized) "✓ 已初始化" else "✗ 未初始化"}
-            - 模型加载: ${if (tfliteDetector != null) "✓ 已加载" else "✗ 未加载"}
-            - 可用状态: ${if (isInitialized && tfliteDetector != null) "✓ 可用" else "✗ 不可用"}
+            TensorFlow Lite Hybrid Detector Status:
+            - Initialized: ${if (isInitialized) "✓ Yes" else "✗ No"}
+            - Model loaded: ${if (tfliteDetector != null) "✓ Yes" else "✗ No"}
+            - Available: ${if (isInitialized && tfliteDetector != null) "✓ Yes" else "✗ No"}
         """.trimIndent()
     }
     
@@ -190,9 +190,9 @@ class TensorFlowLiteHybridDetector(
         try {
             tfliteDetector?.release()
             isInitialized = false
-            Log.d(TAG, "TFLite检测器资源已释放")
+            Log.d(TAG, "TFLite detector resources released")
         } catch (e: Exception) {
-            Log.e(TAG, "释放资源失败: ${e.message}", e)
+            Log.e(TAG, "Resource release failed: ${e.message}", e)
         }
     }
 }

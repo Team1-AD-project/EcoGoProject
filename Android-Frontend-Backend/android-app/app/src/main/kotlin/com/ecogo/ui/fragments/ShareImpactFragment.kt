@@ -21,8 +21,8 @@ import java.io.File
 import java.io.FileOutputStream
 
 /**
- * 分享影响力页面
- * 生成分享卡片并分享到社交平台
+ * Share impact page
+ * Generates share cards and shares to social platforms
  */
 class ShareImpactFragment : Fragment() {
 
@@ -62,17 +62,17 @@ class ShareImpactFragment : Fragment() {
             findNavController().navigateUp()
         }
         
-        // 周期选择
+        // Period selection
         binding.chipToday.setOnClickListener { selectPeriod(PERIOD_TODAY) }
         binding.chipWeek.setOnClickListener { selectPeriod(PERIOD_WEEK) }
         binding.chipMonth.setOnClickListener { selectPeriod(PERIOD_MONTH) }
         
-        // 分享按钮
+        // Share button
         binding.btnShare.setOnClickListener {
             shareImpact()
         }
         
-        // 保存图片按钮
+        // Save image button
         binding.btnSave.setOnClickListener {
             saveToGallery()
         }
@@ -81,7 +81,7 @@ class ShareImpactFragment : Fragment() {
     private fun selectPeriod(period: String) {
         selectedPeriod = period
         
-        // 更新Chip选中状态
+        // Update chip selection state
         binding.chipToday.isChecked = period == PERIOD_TODAY
         binding.chipWeek.isChecked = period == PERIOD_WEEK
         binding.chipMonth.isChecked = period == PERIOD_MONTH
@@ -90,24 +90,24 @@ class ShareImpactFragment : Fragment() {
     }
     
     private fun loadStatistics() {
-        // 根据选择的周期加载不同的统计数据（模拟）
+        // Load different statistics based on selected period (mock)
         when (selectedPeriod) {
             PERIOD_TODAY -> {
-                binding.textPeriod.text = "今日影响力"
+                binding.textPeriod.text = "Today's Impact"
                 binding.textTrips.text = "3"
                 binding.textDistance.text = "5.2"
                 binding.textCarbonSaved.text = "580"
                 binding.textPoints.text = "290"
             }
             PERIOD_WEEK -> {
-                binding.textPeriod.text = "本周影响力"
+                binding.textPeriod.text = "This Week's Impact"
                 binding.textTrips.text = "15"
                 binding.textDistance.text = "24.5"
                 binding.textCarbonSaved.text = "2,750"
                 binding.textPoints.text = "1,375"
             }
             PERIOD_MONTH -> {
-                binding.textPeriod.text = "本月影响力"
+                binding.textPeriod.text = "This Month's Impact"
                 binding.textTrips.text = "52"
                 binding.textDistance.text = "98.3"
                 binding.textCarbonSaved.text = "11,200"
@@ -115,7 +115,7 @@ class ShareImpactFragment : Fragment() {
             }
         }
         
-        // 设置小狮子装扮（应该从用户数据获取）
+        // Set mascot outfit (should be fetched from user data)
         binding.mascotShare.apply {
             mascotSize = MascotSize.LARGE
             setEmotion(com.ecogo.data.MascotEmotion.CELEBRATING)
@@ -124,16 +124,16 @@ class ShareImpactFragment : Fragment() {
     }
     
     private fun shareImpact() {
-        // 生成分享图片
+        // Generate share image
         val bitmap = generateShareCard()
         
-        // 保存到临时文件
+        // Save to temp file
         val file = File(requireContext().cacheDir, "ecogo_impact_${System.currentTimeMillis()}.png")
         FileOutputStream(file).use { out ->
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
         }
         
-        // 创建分享Intent
+        // Create share Intent
         val uri = FileProvider.getUriForFile(
             requireContext(),
             "${requireContext().packageName}.fileprovider",
@@ -143,24 +143,24 @@ class ShareImpactFragment : Fragment() {
         val shareIntent = Intent(Intent.ACTION_SEND).apply {
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, uri)
-            putExtra(Intent.EXTRA_TEXT, "我在EcoGo上的绿色出行成就！🌱 #EcoGo #绿色出行")
+            putExtra(Intent.EXTRA_TEXT, "My green travel achievements on EcoGo! #EcoGo #GreenTravel")
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
         
-        startActivity(Intent.createChooser(shareIntent, "分享到"))
+        startActivity(Intent.createChooser(shareIntent, "Share to"))
     }
     
     private fun saveToGallery() {
-        // TODO: 实现保存到相册功能
+        // TODO: Implement save to gallery functionality
         android.widget.Toast.makeText(
             requireContext(),
-            "图片已保存到相册",
+            "Image saved to gallery",
             android.widget.Toast.LENGTH_SHORT
         ).show()
     }
     
     private fun generateShareCard(): Bitmap {
-        // 创建分享卡片Bitmap（800x600）
+        // Create share card Bitmap (800x600)
         val width = 800
         val height = 600
         val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -169,22 +169,22 @@ class ShareImpactFragment : Fragment() {
         val primaryColor = Color.parseColor(COLOR_PRIMARY)
         val secondaryColor = Color.parseColor(COLOR_SECONDARY)
 
-        // 背景
+        // Background
         val bgPaint = Paint().apply {
             color = Color.parseColor(COLOR_BG)
         }
         canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), bgPaint)
 
-        // 标题
+        // Title
         val titlePaint = Paint().apply {
             color = primaryColor
             textSize = 48f
             typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
             textAlign = Paint.Align.CENTER
         }
-        canvas.drawText("我的绿色出行", width / 2f, 80f, titlePaint)
+        canvas.drawText("My Green Travel", width / 2f, 80f, titlePaint)
 
-        // 周期
+        // Period
         val periodPaint = Paint().apply {
             color = secondaryColor
             textSize = 32f
@@ -192,7 +192,7 @@ class ShareImpactFragment : Fragment() {
         }
         canvas.drawText(binding.textPeriod.text.toString(), width / 2f, 130f, periodPaint)
 
-        // 统计数据
+        // Statistics
         val labelPaint = Paint().apply {
             color = secondaryColor
             textSize = 24f
@@ -205,29 +205,29 @@ class ShareImpactFragment : Fragment() {
             textAlign = Paint.Align.CENTER
         }
         
-        // 行程数
-        canvas.drawText("行程次数", width / 4f, 250f, labelPaint)
+        // Trip count
+        canvas.drawText("Trips", width / 4f, 250f, labelPaint)
         canvas.drawText(binding.textTrips.text.toString(), width / 4f, 300f, valuePaint)
-        
-        // 距离
-        canvas.drawText("总里程(km)", width * 3 / 4f, 250f, labelPaint)
+
+        // Distance
+        canvas.drawText("Distance (km)", width * 3 / 4f, 250f, labelPaint)
         canvas.drawText(binding.textDistance.text.toString(), width * 3 / 4f, 300f, valuePaint)
-        
-        // 碳减排
-        canvas.drawText("碳减排(g)", width / 4f, 400f, labelPaint)
+
+        // Carbon reduction
+        canvas.drawText("CO2 Saved (g)", width / 4f, 400f, labelPaint)
         canvas.drawText(binding.textCarbonSaved.text.toString(), width / 4f, 450f, valuePaint)
-        
-        // 积分
-        canvas.drawText("获得积分", width * 3 / 4f, 400f, labelPaint)
+
+        // Points
+        canvas.drawText("Points Earned", width * 3 / 4f, 400f, labelPaint)
         canvas.drawText(binding.textPoints.text.toString(), width * 3 / 4f, 450f, valuePaint)
         
-        // 底部信息
+        // Footer
         val footerPaint = Paint().apply {
             color = primaryColor
             textSize = 28f
             textAlign = Paint.Align.CENTER
         }
-        canvas.drawText("🌱 EcoGo - 一起绿色出行", width / 2f, 550f, footerPaint)
+        canvas.drawText("EcoGo - Green Travel Together", width / 2f, 550f, footerPaint)
         
         return bitmap
     }

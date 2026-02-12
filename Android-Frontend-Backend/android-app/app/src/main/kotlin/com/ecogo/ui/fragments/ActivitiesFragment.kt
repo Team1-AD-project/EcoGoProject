@@ -71,7 +71,7 @@ class ActivitiesFragment : Fragment() {
             }
         })
 
-        // 如果从 MonthlyHighlights 的 View All 进来，默认选中 Joined tab
+        // If navigating from MonthlyHighlights "View All", default to the Joined tab
         if (args.showJoinedOnly) {
             binding.tabLayout.getTabAt(1)?.select()
         }

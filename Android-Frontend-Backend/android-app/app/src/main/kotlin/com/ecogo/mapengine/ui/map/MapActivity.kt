@@ -49,8 +49,8 @@ import com.google.android.libraries.places.widget.AutocompleteActivity
 import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 
 /**
- * 地图主页面
- * 实现 Google Maps 集成、行程追踪、路线推荐、地点搜索
+ * Main map page
+ * Implements Google Maps integration, trip tracking, route recommendation, place search
  */
 class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -61,60 +61,60 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var transportModeDetector: HybridTransportModeDetector
 
-    // 地图标记
+    // Map markers
     private var originMarker: Marker? = null
     private var destinationMarker: Marker? = null
     private var routePolyline: Polyline? = null
 
-    // 公交多段路线（每段不同颜色）
+    // Transit multi-segment route (different color per segment)
     private var transitSegmentPolylines: MutableList<Polyline> = mutableListOf()
 
-    // 当前公交路线的步骤数据（导航模式下用于保持多色显示）
+    // Current transit route step data (used to maintain multi-color display in navigation mode)
     private var currentTransitSteps: List<com.ecogo.mapengine.data.model.RouteStep>? = null
 
-    // 标记是否正在处理路线选择（防止 observer 重复绘制）
+    // Flag indicating whether route selection is being handled (prevents observer from re-drawing)
     private var isHandlingRouteSelection = false
 
-    // 实时轨迹
+    // Real-time track
     private var trackPolyline: Polyline? = null
-    private var isFollowingUser = true  // 是否跟随用户位置
+    private var isFollowingUser = true  // Whether to follow user location
 
-    // 导航路线（已走/未走）
-    private var traveledPolyline: Polyline? = null    // 已走过的路线（灰色）
-    private var remainingPolyline: Polyline? = null   // 剩余路线（蓝色）
-    private var isNavigationMode = false              // 是否在导航模式
+    // Navigation route (traveled/remaining)
+    private var traveledPolyline: Polyline? = null    // Traveled route (gray)
+    private var remainingPolyline: Polyline? = null   // Remaining route (blue)
+    private var isNavigationMode = false              // Whether in navigation mode
 
-    // 路线步骤适配器
+    // Route step adapter
     private val routeStepAdapter = RouteStepAdapter()
 
-    // 路线选择适配器
+    // Route option adapter
     private val routeOptionAdapter = RouteOptionAdapter { selectedRoute ->
         onRouteSelected(selectedRoute)
     }
 
-    // 起点和终点位置
+    // Origin and destination locations
     private var originLatLng: LatLng? = null
     private var destinationLatLng: LatLng? = null
-    private var originName: String = "我的位置"
+    private var originName: String = "My Location"
     private var destinationName: String = ""
 
-    // 标记当前搜索的是起点还是终点
+    // Flag indicating whether searching for origin or destination
     private var isSearchingOrigin = false
 
-    // 里程碑追踪（用于显示鼓励信息）
-    private val milestones = listOf(1000f, 2000f, 3000f, 5000f, 10000f) // 单位：米
+    // Milestone tracking (for displaying encouragement messages)
+    private val milestones = listOf(1000f, 2000f, 3000f, 5000f, 10000f) // Unit: meters
     private var reachedMilestones = mutableSetOf<Float>()
 
-    // 导航记录相关
-    private var navigationStartTime: Long = 0  // 导航开始时间
-    private var detectedTransportMode: String? = null  // AI检测到的交通方式（主要方式）
-    private var backendTripId: String? = null  // 后端真实 tripId（由 TripRepository.startTrip 返回）
+    // Navigation record related
+    private var navigationStartTime: Long = 0  // Navigation start time
+    private var detectedTransportMode: String? = null  // AI-detected transport mode (dominant mode)
+    private var backendTripId: String? = null  // Backend real tripId (returned by TripRepository.startTrip)
 
-    // 交通方式段记录（UI 显示什么就记什么，直接传给数据库）
+    // Transport mode segment records (records exactly what the UI displays, passed directly to database)
     private val modeSegments = mutableListOf<MapActivityHelper.ModeSegment>()
-    private var lastMlConfidence: Float = 0f  // 最近一次 ML 置信度
+    private var lastMlConfidence: Float = 0f  // Most recent ML confidence
 
-    // 行程计时器
+    // Trip timer
     private val timerHandler = Handler(Looper.getMainLooper())
     private var timerStartTime = 0L
     private val timerRunnable = object : Runnable {
@@ -133,7 +133,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         const val EXTRA_DEST_NAME = "extra_dest_name"
     }
 
-    /** 读取本地 VIP 状态 */
+    /** Read local VIP status */
     private fun isVipUser(): Boolean {
         val prefs = getSharedPreferences("EcoGoPrefs", MODE_PRIVATE)
         return prefs.getBoolean("is_vip", false)
@@ -151,7 +151,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun buildTransportModeSegments(totalDistanceMeters: Double): List<com.ecogo.mapengine.data.model.TransportModeSegment> =
         MapActivityHelper.buildTransportModeSegments(modeSegments, totalDistanceMeters)
 
-    // 定位权限请求
+    // Location permission request
     private val locationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -168,16 +168,16 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    // 通知权限请求 (Android 13+)
+    // Notification permission request (Android 13+)
     private val notificationPermissionRequest = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
         if (!granted) {
-            Toast.makeText(this, "需要通知权限来显示追踪状态", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Notification permission is required to display tracking status", Toast.LENGTH_SHORT).show()
         }
     }
 
-    // Places Autocomplete 启动器
+    // Places Autocomplete launcher
     private val autocompleteLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result: ActivityResult ->
@@ -189,23 +189,23 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         binding = ActivityMapBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 初始化 Places SDK
+        // Initialize Places SDK
         initPlaces()
 
-        // 初始化 Directions API
+        // Initialize Directions API
         DirectionsService.init(this)
 
-        // 初始化定位客户端
+        // Initialize location client
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
-        // 初始化交通方式检测器（混合方案：优先 Snap to Roads，备用本地传感器）
+        // Initialize transport mode detector (hybrid: Snap to Roads preferred, local sensors as fallback)
         val apiKey = getGoogleMapsApiKey()
         transportModeDetector = HybridTransportModeDetector(
             context = this,
             googleMapsApiKey = apiKey
         )
 
-        // 初始化地图
+        // Initialize map
         val mapFragment = supportFragmentManager
             .findFragmentById(R.id.mapFragment) as? SupportMapFragment
         mapFragment?.getMapAsync(this)
@@ -216,13 +216,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         observeNavigationManager()
         observeTransportModeDetector()
 
-        // 请求通知权限 (Android 13+)
+        // Request notification permission (Android 13+)
         requestNotificationPermission()
 
         setupAdCarousel()
     }
 
-    // ==================== 广告轮播逻辑 ====================
+    // ==================== Ad carousel logic ====================
     private val adHandler = Handler(Looper.getMainLooper())
     private var adRunnable: Runnable? = null
     private var currentAdIndex = 0
@@ -290,45 +290,45 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun setupAdViewPager(ads: List<com.ecogo.data.Advertisement>) {
         val adapter = AdAdapter(ads) { ad ->
-            // 点击广告跳转
+            // Navigate on ad click
             if (ad.linkUrl.isNotEmpty()) {
                 try {
                     val intent = Intent(Intent.ACTION_VIEW, android.net.Uri.parse(ad.linkUrl))
                     startActivity(intent)
                 } catch (e: Exception) {
                     Log.e(TAG, "Error opening ad link: ${ad.linkUrl}", e)
-                    Toast.makeText(this, "无法打开链接", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Unable to open link", Toast.LENGTH_SHORT).show()
                 }
             }
         }
 
         binding.viewPagerAd.adapter = adapter
         
-        // 绑定 TabLayout 指示器
+        // Bind TabLayout indicator
         com.google.android.material.tabs.TabLayoutMediator(
             binding.tabLayoutAdIndicator, binding.viewPagerAd
         ) { _, _ -> }.attach()
 
-        // 自动轮播逻辑
+        // Auto carousel logic
         adRunnable = Runnable {
             if (ads.size > 1) {
                 currentAdIndex = (currentAdIndex + 1) % ads.size
                 binding.viewPagerAd.setCurrentItem(currentAdIndex, true)
-                adHandler.postDelayed(adRunnable!!, 5000) // 5秒切换
+                adHandler.postDelayed(adRunnable!!, 5000) // Switch every 5 seconds
             }
         }
         
-        // 注册页面切换回调，处理手动滑动与自动轮播的冲突
+        // Register page change callback, handle conflict between manual swipe and auto carousel
         binding.viewPagerAd.registerOnPageChangeCallback(object : androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 currentAdIndex = position
-                // 重置计时器，避免手动滑动后立即自动切换
+                // Reset timer to avoid immediate auto-switch after manual swipe
                 adHandler.removeCallbacks(adRunnable!!)
                 adHandler.postDelayed(adRunnable!!, 5000)
             }
         })
 
-        // 开始轮播
+        // Start carousel
         adHandler.postDelayed(adRunnable!!, 5000)
     }
 
@@ -351,10 +351,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         override fun onBindViewHolder(holder: AdViewHolder, position: Int) {
             val ad = ads[position]
-            // 使用 Glide 加载图片 (假设项目已集成 Glide)
+            // Load image using Glide (assuming Glide is integrated in the project)
             com.bumptech.glide.Glide.with(holder.itemView.context)
                 .load(ad.imageUrl)
-                .placeholder(R.drawable.placeholder_image) // 需要确保有此资源或替换为其他默认图
+                .placeholder(R.drawable.placeholder_image) // Ensure this resource exists or replace with another default image
                 .centerCrop()
                 .into(holder.imageView)
 
@@ -365,7 +365,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 请求通知权限
+     * Request notification permission
      */
     private fun requestNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -379,12 +379,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 初始化 Places SDK
+     * Initialize Places SDK
      */
     private fun initPlaces() {
         try {
             if (!Places.isInitialized()) {
-                // 从 AndroidManifest.xml 获取 API Key
+                // Get API Key from AndroidManifest.xml
                 val appInfo = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA)
                 val apiKey = appInfo.metaData?.getString("com.google.android.geo.API_KEY") ?: ""
                 if (apiKey.isNotEmpty()) {
@@ -392,53 +392,53 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     Log.d(TAG, "Places SDK initialized with key: ${apiKey.take(10)}...")
                 } else {
                     Log.e(TAG, "Google Maps API Key not found in manifest")
-                    Toast.makeText(this, "API密钥未配置", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "API key not configured", Toast.LENGTH_SHORT).show()
                 }
             }
         } catch (e: Exception) {
             Log.e(TAG, "Failed to initialize Places SDK: ${e.message}", e)
-            Toast.makeText(this, "地点服务初始化失败: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Place service initialization failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
     /**
-     * 设置 UI 事件监听
+     * Set up UI event listeners
      */
     private fun setupUI() {
-        // 初始化底部区域：显示广告占位(现改为轮播)，默认隐藏防闪烁
+        // Initialize bottom area: show ad placeholder (now changed to carousel), hidden by default to prevent flicker
         // binding.layoutAdCarousel.visibility = View.GONE // Handled by XML
         binding.cardBottomPanel.visibility = View.GONE
 
-        // 起点输入框点击
+        // Origin input field click
         binding.etOrigin.setOnClickListener {
             isSearchingOrigin = true
             launchPlaceAutocomplete()
         }
 
-        // 终点输入框点击
+        // Destination input field click
         binding.etDestination.setOnClickListener {
             isSearchingOrigin = false
             launchPlaceAutocomplete()
         }
 
-        // 交换起点终点按钮
+        // Swap origin and destination button
         binding.btnSwap.setOnClickListener {
             swapOriginAndDestination()
         }
 
-        // 交通方式选择监听器
+        // Transport mode selection listener
         binding.chipGroupTransport.setOnCheckedStateChangeListener { _, checkedIds ->
             if (checkedIds.isEmpty()) return@setOnCheckedStateChangeListener
 
-            // 检查是否选择了目的地
+            // Check if destination has been selected
             if (destinationLatLng == null) {
-                Toast.makeText(this, "请先选择目的地", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "Please select a destination first", Toast.LENGTH_SHORT).show()
                 binding.chipGroupTransport.clearCheck()
-                binding.chipWalking.isChecked = true  // 重置为默认
+                binding.chipWalking.isChecked = true  // Reset to default
                 return@setOnCheckedStateChangeListener
             }
 
-            // 根据选中的 Chip 确定交通方式
+            // Determine transport mode based on selected Chip
             val mode = when (checkedIds.first()) {
                 R.id.chipDriving -> TransportMode.DRIVING
                 R.id.chipTransit -> TransportMode.BUS
@@ -449,17 +449,17 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
             Log.d(TAG, "Transport mode selected: ${mode.displayName} (${mode.value})")
 
-            // 调用 ViewModel 获取路线
+            // Call ViewModel to fetch route
             viewModel.fetchRouteByMode(mode)
         }
 
-        // 初始化路线步骤 RecyclerView
+        // Initialize route steps RecyclerView
         binding.rvRouteSteps.apply {
             adapter = routeStepAdapter
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this@MapActivity)
         }
 
-        // 初始化路线选择 RecyclerView（横向滚动）
+        // Initialize route option RecyclerView (horizontal scroll)
         binding.rvRouteOptions.apply {
             adapter = routeOptionAdapter
             layoutManager = androidx.recyclerview.widget.LinearLayoutManager(
@@ -469,17 +469,17 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             )
         }
 
-        // 行程追踪按钮
+        // Trip tracking button
         binding.btnTracking.setOnClickListener {
             when (viewModel.tripState.value) {
                 is TripState.Idle, is TripState.Completed -> {
-                    // 检查是否有路线
+                    // Check if a route exists
                     val hasRoute = !viewModel.routePoints.value.isNullOrEmpty()
                     if (!hasRoute) {
-                        // 提示用户先获取路线
+                        // Prompt user to get a route first
                         Toast.makeText(
                             this,
-                            "提示：请先点击\"低碳路线\"或\"平衡路线\"获取导航路线",
+                            "Tip: Please select a transport mode to get a navigation route first",
                             Toast.LENGTH_LONG
                         ).show()
                     }
@@ -490,21 +490,21 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     stopLocationTracking()
                     viewModel.stopTracking()
                 }
-                else -> { /* 忽略其他状态 */ }
+                else -> { /* Ignore other states */ }
             }
         }
 
-        // 定位按钮
+        // Location button
         binding.fabMyLocation.setOnClickListener {
             isFollowingUser = true
             moveToCurrentLocation()
-            // 重置起点为当前位置
+            // Reset origin to current location
             resetOriginToMyLocation()
         }
     }
 
     /**
-     * 启动位置追踪服务
+     * Start location tracking service
      */
     private fun startLocationTracking() {
         Log.d(TAG, "Starting location tracking service")
@@ -517,7 +517,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             startService(intent)
         }
 
-        // 检查是否有路线，如果有则进入导航模式
+        // Check if a route exists; if so, enter navigation mode
         val routePoints = viewModel.routePoints.value
         if (!routePoints.isNullOrEmpty()) {
             isNavigationMode = true
@@ -530,34 +530,34 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             Log.d(TAG, "Track recording mode started (no route)")
         }
 
-        // 保存当前公交路线步骤数据
+        // Save current transit route step data
         val route = viewModel.recommendedRoute.value
         val steps = route?.route_steps
         val hasTransitSteps = steps?.any { it.travel_mode == "TRANSIT" } == true
         val hasStepPolylines = steps?.any { !it.polyline_points.isNullOrEmpty() } == true
 
         if (hasTransitSteps && hasStepPolylines) {
-            // 公交路线（有步骤polyline）：清除后重绘多色路线
+            // Transit route (with step polylines): clear and redraw multi-color route
             currentTransitSteps = steps
             clearAllRoutePolylines()
             drawTransitRoute(steps!!)
             Log.d(TAG, "Transit navigation: drew ${steps.size} colored segments (with step polylines)")
         } else if (hasTransitSteps && !steps.isNullOrEmpty() && !routePoints.isNullOrEmpty()) {
-            // 公交路线（无步骤polyline）：按距离比例切割overview路线
+            // Transit route (without step polylines): split overview route by distance ratio
             currentTransitSteps = steps
             clearAllRoutePolylines()
             drawTransitRouteFallback(routePoints, steps)
             Log.d(TAG, "Transit navigation: drew ${steps.size} colored segments (fallback)")
         } else {
-            // 非公交路线：清除所有
+            // Non-transit route: clear all
             currentTransitSteps = null
             clearAllRoutePolylines()
         }
 
-        // 重置里程碑追踪
+        // Reset milestone tracking
         reachedMilestones.clear()
 
-        // 记录导航开始时间
+        // Record navigation start time
         navigationStartTime = System.currentTimeMillis()
         detectedTransportMode = null
         backendTripId = null
@@ -567,20 +567,20 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         isFollowingUser = true
 
-        // 移除旧的位置更新回调
+        // Remove old location update callback
         removeLocationUpdates()
 
-        // 启动混合交通方式检测（优先 Snap to Roads，备用本地传感器）
+        // Start hybrid transport mode detection (Snap to Roads preferred, local sensors as fallback)
         transportModeDetector.startDetection()
         Log.d(TAG, "Hybrid transport mode detection started (Snap to Roads preferred)")
 
-        // 请求 GPS 位置更新
+        // Request GPS location updates
         @SuppressLint("MissingPermission")
         val locationRequest = LocationRequest.create().apply {
             priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-            interval = 2000  // 2秒更新一次
+            interval = 2000  // Update every 2 seconds
             fastestInterval = 1000
-            smallestDisplacement = 5f  // 5米触发一次更新
+            smallestDisplacement = 5f  // Trigger update every 5 meters
         }
 
         fusedLocationClient.requestLocationUpdates(
@@ -590,15 +590,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         )
         Log.d(TAG, "GPS location updates requested (2s interval, 5m displacement)")
 
-        // 启动计时器
+        // Start timer
         startTimer()
 
-        // 调用后端 API 开始行程，获取真实 tripId
+        // Call backend API to start trip, obtain real tripId
         startTripOnBackend()
     }
 
     /**
-     * 启动行程计时器
+     * Start trip timer
      */
     private fun startTimer() {
         timerStartTime = SystemClock.elapsedRealtime()
@@ -608,14 +608,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 停止行程计时器
+     * Stop trip timer
      */
     private fun stopTimer() {
         timerHandler.removeCallbacks(timerRunnable)
     }
 
     /**
-     * 隐藏计时器
+     * Hide timer
      */
     private fun hideTimer() {
         timerHandler.removeCallbacks(timerRunnable)
@@ -623,7 +623,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 停止位置追踪服务
+     * Stop location tracking service
      */
     private fun stopLocationTracking() {
         Log.d(TAG, "Stopping location tracking service")
@@ -632,22 +632,22 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         }
         startService(intent)
 
-        // 停止计时器（保留显示最终用时）
+        // Stop timer (keep displaying final elapsed time)
         stopTimer()
 
-        // 保存导航历史记录（如果有有效数据）
+        // Save navigation history (if valid data exists)
         saveNavigationHistory()
 
-        // 调用后端 API 完成行程（将 tracking→completed）
+        // Call backend API to complete trip (tracking -> completed)
         completeTripOnBackend()
 
-        // 停止导航
+        // Stop navigation
         if (isNavigationMode) {
             NavigationManager.stopNavigation()
             isNavigationMode = false
             currentTransitSteps = null
 
-            // 清除导航路线
+            // Clear navigation route
             transitSegmentPolylines.forEach { it.remove() }
             transitSegmentPolylines.clear()
             traveledPolyline?.remove()
@@ -656,20 +656,20 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             remainingPolyline = null
         }
 
-        // 移除 GPS 位置更新回调
+        // Remove GPS location update callback
         removeLocationUpdates()
         Log.d(TAG, "GPS location updates removed")
 
-        // 停止交通方式检测
+        // Stop transport mode detection
         transportModeDetector.stopDetection()
         Log.d(TAG, "Transport mode detection stopped")
     }
 
     /**
-     * 保存导航历史记录
+     * Save navigation history
      */
     private fun saveNavigationHistory() {
-        // 检查是否有有效的导航数据
+        // Check if there is valid navigation data
         if (navigationStartTime == 0L) {
             Log.w(TAG, "Navigation start time not set, skipping history save")
             return
@@ -683,7 +683,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             return
         }
 
-        // 获取路线数据
+        // Get route data
         val routePoints = viewModel.routePoints.value ?: emptyList()
         val trackPoints = if (isNavigationMode) {
             NavigationManager.traveledPoints.value ?: emptyList()
@@ -691,15 +691,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             LocationManager.trackPoints.value ?: emptyList()
         }
 
-        // 如果没有轨迹点，跳过保存
+        // If no track points, skip saving
         if (trackPoints.isEmpty()) {
             Log.w(TAG, "No track points recorded, skipping history save")
             return
         }
 
-        // 获取距离数据
+        // Get distance data
         val totalDistance = viewModel.routePoints.value?.let { points ->
-            // 计算路线总距离（如果有规划路线）
+            // Calculate total route distance (if a planned route exists)
             viewModel.recommendedRoute.value?.total_distance?.times(1000) ?: 0.0
         } ?: 0.0
 
@@ -709,29 +709,29 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             LocationManager.totalDistance.value?.toDouble() ?: 0.0
         }
 
-        // 获取交通方式
+        // Get transport mode
         val transportMode = viewModel.selectedTransportMode.value?.value ?: "walk"
 
-        // 获取环保数据（优先使用本地检测结果）
+        // Get eco data (prefer local detection results)
         val dominantLabel = getDominantMode()
         val dominantDictMode = mlLabelToDictMode(dominantLabel)
         val carbonResult = viewModel.carbonResult.value
         val totalCarbon = carbonResult?.total_carbon_emission ?: 0.0
         val carbonSaved = carbonResult?.carbon_saved
-            ?: (calculateRealTimeCarbonSaved(traveledDistance.toFloat()) / 1000.0) // 转为 kg
+            ?: (calculateRealTimeCarbonSaved(traveledDistance.toFloat()) / 1000.0) // Convert to kg
         val isGreenTrip = isGreenMode(dominantDictMode)
         val greenPoints = carbonResult?.green_points ?: 0
 
-        // 获取路线类型
+        // Get route type
         val routeType = viewModel.recommendedRoute.value?.route_type
 
-        // 在后台线程保存数据
+        // Save data on background thread
         lifecycleScope.launch {
             try {
                 val repository = NavigationHistoryRepository.getInstance()
                 val historyId = repository.saveNavigationHistory(
-                    tripId = null, // 如果有后端trip_id可以传入
-                    userId = null, // 如果有用户系统可以传入用户ID
+                    tripId = null, // Pass backend trip_id if available
+                    userId = null, // Pass user ID if user system is available
                     startTime = navigationStartTime,
                     endTime = System.currentTimeMillis(),
                     origin = origin,
@@ -753,9 +753,9 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
                 Log.d(TAG, "Navigation history saved successfully with ID: $historyId")
 
-                // 可以在这里显示保存成功的提示（可选）
+                // Optionally show a save success prompt here
                 // runOnUiThread {
-                //     Toast.makeText(this@MapActivity, "行程已保存", Toast.LENGTH_SHORT).show()
+                //     Toast.makeText(this@MapActivity, "Trip saved", Toast.LENGTH_SHORT).show()
                 // }
             } catch (e: Exception) {
                 Log.e(TAG, "Failed to save navigation history", e)
@@ -764,14 +764,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 调用 TripRepository.startTrip() 在后端创建行程记录，获取真实 tripId
+     * Call TripRepository.startTrip() to create a trip record on the backend and obtain the real tripId
      */
     private fun startTripOnBackend() {
         val startLocation = viewModel.currentLocation.value
         if (startLocation == null) {
             Log.w(TAG, "No current location, skipping startTrip API call")
-            Toast.makeText(this, "GPS定位中，行程将在获取位置后创建...", Toast.LENGTH_SHORT).show()
-            // 延迟重试：等待GPS定位后再创建行程
+            Toast.makeText(this, "GPS positioning in progress, trip will be created after location is acquired...", Toast.LENGTH_SHORT).show()
+            // Delayed retry: wait for GPS fix before creating trip
             lifecycleScope.launch {
                 kotlinx.coroutines.delay(3000)
                 val retryLocation = viewModel.currentLocation.value
@@ -794,8 +794,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 val result = tripRepo.startTrip(
                     startLat = lat,
                     startLng = lng,
-                    startPlaceName = originName.ifEmpty { "起点" },
-                    startAddress = originName.ifEmpty { "未知地址" }
+                    startPlaceName = originName.ifEmpty { "Origin" },
+                    startAddress = originName.ifEmpty { "Unknown address" }
                 )
 
                 result.fold(
@@ -803,46 +803,46 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         backendTripId = tripId
                         Log.d(TAG, "Trip started on backend: tripId=$tripId")
                         runOnUiThread {
-                            Toast.makeText(this@MapActivity, "行程已创建: $tripId", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@MapActivity, "Trip created: $tripId", Toast.LENGTH_SHORT).show()
                         }
                     },
                     onFailure = { error ->
                         Log.e(TAG, "Failed to start trip on backend: ${error.message}", error)
                         runOnUiThread {
-                            Toast.makeText(this@MapActivity, "行程创建失败: ${error.message}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@MapActivity, "Trip creation failed: ${error.message}", Toast.LENGTH_LONG).show()
                         }
                     }
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "Error starting trip on backend", e)
                 runOnUiThread {
-                    Toast.makeText(this@MapActivity, "行程创建异常: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@MapActivity, "Trip creation error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }
     }
 
     /**
-     * 调用 TripRepository.completeTrip() 将后端行程状态从 tracking→completed
-     * 包含：主要交通方式、is_green_trip、全程 polyline_points、ML 置信度
+     * Call TripRepository.completeTrip() to change backend trip status from tracking to completed
+     * Includes: dominant transport mode, is_green_trip, full polyline_points, ML confidence
      */
     private fun completeTripOnBackend() {
-        // 优先使用后端真实 tripId，回退到 ViewModel 的 tripId
+        // Prefer backend real tripId, fall back to ViewModel's tripId
         val tripId = backendTripId ?: viewModel.currentTripId.value
         if (tripId == null || tripId.startsWith("MOCK_") || tripId == "restored-trip") {
             Log.w(TAG, "No valid backend tripId ($tripId), skipping completeTrip API call")
-            Toast.makeText(this, "行程ID无效，无法同步到服务器", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Invalid trip ID, unable to sync to server", Toast.LENGTH_SHORT).show()
             return
         }
 
         val endLocation = viewModel.currentLocation.value
         if (endLocation == null) {
             Log.w(TAG, "No current location, skipping completeTrip API call")
-            Toast.makeText(this, "无法获取当前位置，行程未同步", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Unable to get current location, trip not synced", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 收集全程轨迹点（polyline_points）
+        // Collect all track points (polyline_points)
         val trackPoints: List<LatLng> = if (isNavigationMode) {
             NavigationManager.traveledPoints.value ?: emptyList()
         } else {
@@ -851,24 +851,24 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         if (trackPoints.isEmpty()) {
             Log.w(TAG, "No track points, skipping completeTrip API call")
-            Toast.makeText(this, "未收集到轨迹点，行程未同步", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "No track points collected, trip not synced", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // 计算行驶距离（米）
+        // Calculate traveled distance (meters)
         val distanceMeters = if (isNavigationMode) {
             NavigationManager.traveledDistance.value?.toDouble() ?: 0.0
         } else {
             LocationManager.totalDistance.value?.toDouble() ?: 0.0
         }
 
-        // 结束最后一段的时间
+        // Set end time for the last segment
         modeSegments.lastOrNull()?.endTime = System.currentTimeMillis()
 
-        // 构建交通方式段列表（UI 显示什么就传什么）
+        // Build transport mode segment list (pass exactly what the UI displays)
         val segments = buildTransportModeSegments(distanceMeters)
 
-        // 使用 Helper 准备行程完成数据
+        // Use Helper to prepare trip completion data
         val completionData = MapActivityHelper.prepareTripCompletionData(
             modeSegments = modeSegments,
             lastMlConfidence = lastMlConfidence,
@@ -896,8 +896,8 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                     tripId = tripId,
                     endLat = endLocation.latitude,
                     endLng = endLocation.longitude,
-                    endPlaceName = destinationName.ifEmpty { "终点" },
-                    endAddress = destinationName.ifEmpty { "未知地址" },
+                    endPlaceName = destinationName.ifEmpty { "Destination" },
+                    endAddress = destinationName.ifEmpty { "Unknown address" },
                     distance = distanceMeters,
                     trackPoints = trackPoints,
                     transportMode = userSelectedMode,
@@ -913,42 +913,42 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                         backendTripId = null
                         Log.d(TAG, "Trip completed on backend: ${response.tripId}, status=${response.status}")
                         runOnUiThread {
-                            Toast.makeText(this@MapActivity, "行程已同步到服务器", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this@MapActivity, "Trip synced to server", Toast.LENGTH_SHORT).show()
                         }
                     },
                     onFailure = { error ->
                         Log.e(TAG, "Failed to complete trip on backend: ${error.message}", error)
                         runOnUiThread {
-                            Toast.makeText(this@MapActivity, "行程同步失败: ${error.message}", Toast.LENGTH_LONG).show()
+                            Toast.makeText(this@MapActivity, "Trip sync failed: ${error.message}", Toast.LENGTH_LONG).show()
                         }
                     }
                 )
             } catch (e: Exception) {
                 Log.e(TAG, "Error completing trip on backend", e)
                 runOnUiThread {
-                    Toast.makeText(this@MapActivity, "行程同步异常: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this@MapActivity, "Trip sync error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }
     }
 
     /**
-     * 观察 LocationManager 的位置更新
+     * Observe LocationManager location updates
      */
     private fun observeLocationManager() {
-        // 观察当前位置
+        // Observe current location
         LocationManager.currentLocation.observe(this) { latLng ->
             onCurrentLocationUpdated(latLng)
         }
 
-        // 观察轨迹点（仅在非导航模式下绘制）
+        // Observe track points (draw only in non-navigation mode)
         LocationManager.trackPoints.observe(this) { points ->
             if (points.isNotEmpty() && !isNavigationMode) {
                 drawTrackPolyline(points)
             }
         }
 
-        // 观察总距离
+        // Observe total distance
         LocationManager.totalDistance.observe(this) { distance ->
             if (LocationManager.isTracking.value == true && !isNavigationMode) {
                 updateTrackingInfo(distance)
@@ -957,18 +957,18 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 处理当前位置更新（从 observeLocationManager 提取，降低认知复杂度）
+     * Handle current location update (extracted from observeLocationManager to reduce cognitive complexity)
      */
     private fun onCurrentLocationUpdated(latLng: LatLng) {
-        // 更新 ViewModel
+        // Update ViewModel
         viewModel.updateCurrentLocation(latLng)
 
-        // 如果正在追踪且开启了跟随模式，移动相机
+        // If tracking and follow mode is enabled, move camera
         if (LocationManager.isTracking.value == true && isFollowingUser) {
             googleMap?.animateCamera(CameraUpdateFactory.newLatLng(latLng))
         }
 
-        // 更新交通方式检测器的位置（用于 GPS 速度）
+        // Update transport mode detector location (for GPS speed)
         if (LocationManager.isTracking.value == true) {
             val location = android.location.Location("gps").apply {
                 latitude = latLng.latitude
@@ -981,7 +981,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             Log.d(TAG, "Location updated for detector: lat=${latLng.latitude}, lng=${latLng.longitude}")
         }
 
-        // 导航模式下检查是否接近目的地（备用检查，防止 currentRouteIndex observer 未触发）
+        // In navigation mode, check if approaching destination (backup check in case currentRouteIndex observer didn't trigger)
         if (isNavigationMode && NavigationManager.isNavigating.value == true) {
             if (NavigationManager.hasReachedDestination()) {
                 onReachedDestination()
@@ -990,20 +990,20 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 观察 NavigationManager 的导航状态
+     * Observe NavigationManager navigation state
      */
     private fun observeNavigationManager() {
-        // 观察已走过的路线
+        // Observe traveled route
         NavigationManager.traveledPoints.observe(this) { points ->
             if (isNavigationMode && points.isNotEmpty()) {
                 drawTraveledRoute(points)
             }
         }
 
-        // 观察剩余路线
+        // Observe remaining route
         NavigationManager.remainingPoints.observe(this) { points ->
             if (isNavigationMode && points.isNotEmpty()) {
-                // 公交路线导航时，多色分段已经显示了路线，不需要单独画剩余路线
+                // During transit navigation, multi-color segments already display the route, no need to draw remaining route separately
                 if (currentTransitSteps != null) {
                     return@observe
                 }
@@ -1011,14 +1011,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        // 观察已行进距离
+        // Observe traveled distance
         NavigationManager.traveledDistance.observe(this) { distance ->
             if (isNavigationMode) {
                 updateNavigationInfo(distance)
             }
         }
 
-        // 观察是否到达目的地
+        // Observe whether destination has been reached
         NavigationManager.currentRouteIndex.observe(this) { _ ->
             if (NavigationManager.hasReachedDestination()) {
                 onReachedDestination()
@@ -1027,7 +1027,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 获取 Google Maps API Key
+     * Get Google Maps API Key
      */
     private fun getGoogleMapsApiKey(): String? {
         return try {
@@ -1040,16 +1040,16 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * GPS 位置回调（用于传递给混合检测器）
+     * GPS location callback (used to pass to hybrid detector)
      */
     private val locationCallback = object : LocationCallback() {
         override fun onLocationResult(locationResult: LocationResult) {
             for (location in locationResult.locations) {
-                // 传递 GPS 位置给混合检测器
+                // Pass GPS location to hybrid detector
                 lifecycleScope.launch {
                     transportModeDetector.updateLocation(location)
                 }
-                // 更新当前位置（用于 ViewModel）
+                // Update current location (for ViewModel)
                 val latLng = LatLng(location.latitude, location.longitude)
                 viewModel.updateCurrentLocation(latLng)
             }
@@ -1057,14 +1057,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 移除位置更新
+     * Remove location updates
      */
     private fun removeLocationUpdates() {
         fusedLocationClient.removeLocationUpdates(locationCallback)
     }
 
     /**
-     * 观察交通方式检测器
+     * Observe transport mode detector
      */
     private fun observeTransportModeDetector() {
         lifecycleScope.launch {
@@ -1079,7 +1079,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 处理检测到的交通方式
+     * Handle detected transport mode
      */
     private fun onTransportModeDetected(prediction: com.ecogo.mapengine.ml.TransportModePrediction) {
         if (!LocationManager.isTracking.value!!) return
@@ -1087,7 +1087,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val now = System.currentTimeMillis()
         lastMlConfidence = prediction.confidence
 
-        // 按段记录：UI 显示什么就记什么
+        // Record by segment: record exactly what the UI displays
         val lastSegment = modeSegments.lastOrNull()
         if (lastSegment == null || lastSegment.mode != prediction.mode) {
             lastSegment?.endTime = now
@@ -1103,31 +1103,31 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         val confidencePercent = (prediction.confidence * 100).toInt()
 
-        // 更新 UI 显示检测到的交通方式（在顶部显著位置）
+        // Update UI to display detected transport mode (at a prominent top position)
         runOnUiThread {
             if (binding.cardRouteInfo.visibility == View.VISIBLE) {
-                // 在路线类型位置显示当前交通方式
+                // Display current transport mode at route type position
                 if (isNavigationMode) {
-                    binding.tvRouteType.text = "$modeIcon 当前交通: $modeText ($confidencePercent%)"
+                    binding.tvRouteType.text = "$modeIcon Current: $modeText ($confidencePercent%)"
                 } else {
-                    binding.tvRouteType.text = "$modeIcon 检测到: $modeText ($confidencePercent%)"
+                    binding.tvRouteType.text = "$modeIcon Detected: $modeText ($confidencePercent%)"
                 }
             }
         }
 
-        Log.d(TAG, "检测到交通方式: $modeText, 置信度: ${prediction.confidence}")
+        Log.d(TAG, "Detected transport mode: $modeText, confidence: ${prediction.confidence}")
     }
 
     /**
-     * 检测是否运行在模拟器上
-     * 检查多个设备属性以提高可靠性
+     * Detect whether running on an emulator
+     * Checks multiple device properties for reliability
      */
     private fun isRunningOnEmulator(): Boolean {
         return MapActivityHelper.isRunningOnEmulator()
     }
 
     /**
-     * 绘制已走过的路线（灰色）
+     * Draw traveled route (gray)
      */
     private fun drawTraveledRoute(points: List<LatLng>) {
         traveledPolyline?.remove()
@@ -1147,7 +1147,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 绘制剩余路线（蓝色）
+     * Draw remaining route (blue)
      */
     private fun drawRemainingRoute(points: List<LatLng>) {
         remainingPolyline?.remove()
@@ -1167,7 +1167,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 更新导航信息显示
+     * Update navigation info display
      */
     private fun updateNavigationInfo(traveledMeters: Float) {
         val traveledKm = traveledMeters / 1000f
@@ -1175,12 +1175,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         val remainingKm = remainingMeters / 1000f
 
         if (binding.cardRouteInfo.visibility == View.VISIBLE) {
-            // 获取实时碳排放信息和鼓励消息
+            // Get real-time carbon emission info and encouragement message
             val encouragementMessage = generateEncouragementMessage(traveledMeters)
             binding.tvCarbonSaved.text = encouragementMessage
-            binding.tvDuration.text = String.format("剩余: %.2f 公里", remainingKm)
+            binding.tvDuration.text = String.format("Remaining: %.2f km", remainingKm)
 
-            // 检查是否到达里程碑
+            // Check if a milestone has been reached
             checkMilestones(traveledMeters)
         }
     }
@@ -1204,24 +1204,24 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
-    // 防止 onReachedDestination 重复触发
+    // Prevent onReachedDestination from triggering repeatedly
     private var hasTriggeredArrival = false
 
     /**
-     * 到达目的地
+     * Reached destination
      */
     private fun onReachedDestination() {
         if (hasTriggeredArrival) return
         hasTriggeredArrival = true
 
-        Toast.makeText(this, "您已到达目的地！", Toast.LENGTH_LONG).show()
-        // 自动停止行程
+        Toast.makeText(this, "You have arrived at your destination!", Toast.LENGTH_LONG).show()
+        // Automatically stop trip
         stopLocationTracking()
         viewModel.stopTracking()
     }
 
     /**
-     * 绘制实时轨迹
+     * Draw real-time track
      */
     private fun drawTrackPolyline(points: List<LatLng>) {
         trackPolyline?.remove()
@@ -1241,32 +1241,32 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 更新追踪信息显示
+     * Update tracking info display
      */
     private fun updateTrackingInfo(distanceMeters: Float) {
         val distanceKm = distanceMeters / 1000f
-        // 可以在路线信息卡片显示实时距离
+        // Display real-time distance on route info card
         if (binding.cardRouteInfo.visibility == View.VISIBLE) {
-            // 使用与导航相同的鼓励消息
+            // Use the same encouragement message as navigation
             val encouragementMessage = generateEncouragementMessage(distanceMeters)
             binding.tvCarbonSaved.text = encouragementMessage
 
-            // 检查是否到达里程碑
+            // Check if a milestone has been reached
             checkMilestones(distanceMeters)
         }
     }
 
     /**
-     * 启动 Places Autocomplete
+     * Launch Places Autocomplete
      */
     private fun launchPlaceAutocomplete() {
         try {
-            // 确保 Places SDK 已初始化
+            // Ensure Places SDK is initialized
             if (!Places.isInitialized()) {
                 initPlaces()
                 if (!Places.isInitialized()) {
                     Log.e(TAG, "Places SDK failed to initialize")
-                    Toast.makeText(this, "地点搜索服务未初始化，请检查API密钥配置", Toast.LENGTH_LONG).show()
+                    Toast.makeText(this, "Place search service not initialized, please check API key configuration", Toast.LENGTH_LONG).show()
                     return
                 }
             }
@@ -1284,12 +1284,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             autocompleteLauncher.launch(intent)
         } catch (e: Exception) {
             Log.e(TAG, "Error launching autocomplete: ${e.message}", e)
-            Toast.makeText(this, "搜索服务暂不可用: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Search service temporarily unavailable: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
     /**
-     * 处理 Autocomplete 返回结果
+     * Handle Autocomplete result
      */
     private fun handleAutocompleteResult(result: ActivityResult) {
         when (result.resultCode) {
@@ -1298,7 +1298,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 result.data?.let { data ->
                     val status = Autocomplete.getStatusFromIntent(data)
                     Log.e(TAG, "Autocomplete error: ${status.statusMessage}")
-                    Toast.makeText(this, "搜索出错: ${status.statusMessage}", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "Search error: ${status.statusMessage}", Toast.LENGTH_SHORT).show()
                 }
             }
             Activity.RESULT_CANCELED -> {
@@ -1308,7 +1308,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 处理用户选择的地点（从 handleAutocompleteResult 提取，降低认知复杂度）
+     * Handle user-selected place (extracted from handleAutocompleteResult to reduce cognitive complexity)
      */
     private fun handlePlaceSelected(result: ActivityResult) {
         val data = result.data ?: return
@@ -1328,7 +1328,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun applyOriginFromPlace(latLng: LatLng, place: com.google.android.libraries.places.api.model.Place) {
         originLatLng = latLng
-        originName = place.name ?: place.address ?: "起点"
+        originName = place.name ?: place.address ?: "Origin"
         binding.etOrigin.setText(originName)
         updateOriginMarker(latLng, originName)
         viewModel.setOrigin(latLng)
@@ -1342,7 +1342,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private fun applyDestinationFromPlace(latLng: LatLng, place: com.google.android.libraries.places.api.model.Place) {
         destinationLatLng = latLng
-        destinationName = place.name ?: place.address ?: "目的地"
+        destinationName = place.name ?: place.address ?: "Destination"
         binding.etDestination.setText(destinationName)
         updateDestinationMarker(latLng, destinationName)
         viewModel.setDestination(latLng)
@@ -1356,10 +1356,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 交换起点和终点
+     * Swap origin and destination
      */
     private fun swapOriginAndDestination() {
-        // 交换位置
+        // Swap locations
         val tempLatLng = originLatLng
         val tempName = originName
 
@@ -1369,36 +1369,36 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         destinationLatLng = tempLatLng
         destinationName = tempName
 
-        // 更新 UI
-        binding.etOrigin.setText(if (originLatLng != null) originName else "我的位置")
+        // Update UI
+        binding.etOrigin.setText(if (originLatLng != null) originName else "My Location")
         binding.etDestination.setText(destinationName)
 
-        // 更新标记
+        // Update markers
         originLatLng?.let {
             updateOriginMarker(it, originName)
-            viewModel.setOrigin(it)  // 交换后更新起点
+            viewModel.setOrigin(it)  // Update origin after swap
         }
         destinationLatLng?.let {
             updateDestinationMarker(it, destinationName)
             viewModel.setDestination(it)
         }
 
-        // 清除路线
+        // Clear route
         clearAllRoutePolylines()
         binding.cardRouteInfo.visibility = View.GONE
 
-        // 自动获取默认驾车路线（如果起点和终点都已设置）
+        // Automatically fetch default driving route (if both origin and destination are set)
         if (originLatLng != null && destinationLatLng != null) {
             binding.chipDriving.isChecked = true
             viewModel.fetchRouteByMode(TransportMode.DRIVING)
         }
 
-        // 更新开始按钮可见性
+        // Update start button visibility
         updateStartButtonVisibility()
     }
 
     /**
-     * 重置起点为当前位置
+     * Reset origin to current location
      */
     @SuppressLint("MissingPermission")
     private fun resetOriginToMyLocation() {
@@ -1406,18 +1406,18 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             location?.let {
                 val latLng = LatLng(it.latitude, it.longitude)
                 originLatLng = latLng
-                originName = "我的位置"
+                originName = "My Location"
                 binding.etOrigin.setText(originName)
                 originMarker?.remove()
                 originMarker = null
-                viewModel.setOrigin(latLng)  // 重置起点为当前位置
-                updateStartButtonVisibility()  // 更新开始按钮可见性
+                viewModel.setOrigin(latLng)  // Reset origin to current location
+                updateStartButtonVisibility()  // Update start button visibility
             }
         }
     }
 
     /**
-     * 如果起点和终点都设置了，调整相机显示两点
+     * If both origin and destination are set, adjust camera to show both points
      */
     private fun fitBoundsIfReady() {
         val origin = originLatLng ?: viewModel.currentLocation.value
@@ -1433,62 +1433,62 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 更新开始行程按钮的可见性
-     * 只有当起点和终点都设置后才显示按钮，同时隐藏广告占位
+     * Update start trip button visibility
+     * Only show the button when both origin and destination are set, and hide the ad placeholder
      */
     private fun updateStartButtonVisibility() {
         val hasOrigin = originLatLng != null || viewModel.currentLocation.value != null
         val hasDestination = destinationLatLng != null
 
         if (hasOrigin && hasDestination) {
-            // 选择了起点和终点：隐藏广告，显示按钮
+            // Origin and destination selected: hide ads, show button
             binding.layoutAdCarousel.visibility = View.GONE
             binding.cardBottomPanel.visibility = View.VISIBLE
         } else {
-            // 未选择完：显示广告，隐藏按钮
+            // Not fully selected: show ads, hide button
             binding.layoutAdCarousel.visibility = View.VISIBLE
             binding.cardBottomPanel.visibility = View.GONE
         }
     }
 
     /**
-     * 观察 ViewModel 数据变化
+     * Observe ViewModel data changes
      */
     private fun observeViewModel() {
-        // 观察当前位置
+        // Observe current location
         viewModel.currentLocation.observe(this) { location ->
-            if (originName == "我的位置" && originLatLng == null) {
+            if (originName == "My Location" && originLatLng == null) {
                 originLatLng = location
             }
         }
 
-        // 观察目的地
+        // Observe destination
         viewModel.destination.observe(this) { destination ->
             destination?.let { destinationLatLng = it }
         }
 
-        // 观察行程状态
+        // Observe trip state
         viewModel.tripState.observe(this) { state -> updateTrackingUI(state) }
 
-        // 观察推荐路线
+        // Observe recommended route
         viewModel.recommendedRoute.observe(this) { route ->
             route?.let { updateRouteInfo(it) }
         }
 
-        // 观察路线点
+        // Observe route points
         viewModel.routePoints.observe(this) { points -> handleRoutePointsUpdate(points) }
 
-        // 观察碳足迹结果
+        // Observe carbon footprint result
         viewModel.carbonResult.observe(this) { result ->
             result?.let { handleCarbonResult(it) }
         }
 
-        // 观察加载状态
+        // Observe loading state
         viewModel.isLoading.observe(this) { isLoading ->
             binding.progressBar.visibility = if (isLoading) View.VISIBLE else View.GONE
         }
 
-        // 观察错误消息
+        // Observe error messages
         viewModel.errorMessage.observe(this) { message ->
             message?.let {
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
@@ -1496,7 +1496,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        // 观察成功消息
+        // Observe success messages
         viewModel.successMessage.observe(this) { message ->
             message?.let {
                 Toast.makeText(this, it, Toast.LENGTH_SHORT).show()
@@ -1506,7 +1506,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 处理路线点更新（从 observeViewModel 提取，降低认知复杂度）
+     * Handle route points update (extracted from observeViewModel to reduce cognitive complexity)
      */
     private fun handleRoutePointsUpdate(points: List<LatLng>) {
         if (isHandlingRouteSelection) {
@@ -1532,7 +1532,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 处理碳足迹计算结果（从 observeViewModel 提取，降低认知复杂度）
+     * Handle carbon footprint calculation result (extracted from observeViewModel to reduce cognitive complexity)
      */
     private fun handleCarbonResult(result: com.ecogo.mapengine.data.model.CarbonCalculateData) {
         if (result.carbon_saved > 0) {
@@ -1548,64 +1548,64 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 地图准备就绪回调
+     * Map ready callback
      */
     override fun onMapReady(map: GoogleMap) {
         googleMap = map
 
-        // 配置地图
+        // Configure map
         map.apply {
             uiSettings.isZoomControlsEnabled = false
             uiSettings.isCompassEnabled = true
             uiSettings.isMapToolbarEnabled = false
 
-            // 地图点击也可以设置目的地
+            // Map click can also set destination
             setOnMapClickListener { latLng ->
-                // 如果正在追踪，禁止修改目的地
+                // If tracking, prevent modifying destination
                 if (viewModel.tripState.value is TripState.Tracking) {
                     return@setOnMapClickListener
                 }
 
-                // 显示确认对话框
+                // Show confirmation dialog
                 androidx.appcompat.app.AlertDialog.Builder(this@MapActivity)
-                    .setTitle("设置目的地")
-                    .setMessage("是否将此位置设置为目的地？")
-                    .setPositiveButton("确定") { dialog, _ ->
+                    .setTitle("Set Destination")
+                    .setMessage("Set this location as destination?")
+                    .setPositiveButton("OK") { dialog, _ ->
                         destinationLatLng = latLng
-                        destinationName = "地图上的位置"
+                        destinationName = "Location on map"
                         binding.etDestination.setText(destinationName)
                         updateDestinationMarker(latLng, destinationName)
                         viewModel.setDestination(latLng)
 
-                        // 显示交通方式选择卡片
+                        // Show transport mode selection card
                         binding.cardTransportModes.visibility = View.VISIBLE
 
-                        // 自动获取默认路线（驾车）
+                        // Automatically fetch default route (driving)
                         if (originLatLng != null || viewModel.currentLocation.value != null) {
                             binding.chipDriving.isChecked = true
                             viewModel.fetchRouteByMode(TransportMode.DRIVING)
                         }
 
-                        // 更新开始按钮可见性
+                        // Update start button visibility
                         updateStartButtonVisibility()
 
                         fitBoundsIfReady()
                         dialog.dismiss()
                     }
-                    .setNegativeButton("取消") { dialog, _ ->
+                    .setNegativeButton("Cancel") { dialog, _ ->
                         dialog.dismiss()
                     }
                     .show()
             }
 
-            // 长按清除目的地
+            // Long press to clear destination
             setOnMapLongClickListener {
                 if (viewModel.tripState.value !is TripState.Tracking) {
                     clearDestination()
                 }
             }
 
-            // 地图移动时停止跟随
+            // Stop following when map is moved
             setOnCameraMoveStartedListener { reason ->
                 if (reason == GoogleMap.OnCameraMoveStartedListener.REASON_GESTURE) {
                     isFollowingUser = false
@@ -1613,28 +1613,28 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        // 请求定位权限
+        // Request location permission
         checkLocationPermission()
 
-        // 如果有正在进行的行程，恢复路线显示
+        // If there is an ongoing trip, restore route display
         if (LocationManager.isTracking.value == true) {
             Log.d(TAG, "Map ready - restoring routes for ongoing trip")
             restoreRoutesOnMap()
         }
 
-        // 检查是否从活动详情跳转过来，自动设置目的地
+        // Check if navigated from activity details, auto-set destination
         handleActivityDestination()
     }
 
     /**
-     * 从 Intent extras 中读取活动目的地坐标，自动设置到地图
+     * Read activity destination coordinates from Intent extras and auto-set on the map
      */
     private fun handleActivityDestination() {
         val lat = intent.getDoubleExtra(EXTRA_DEST_LAT, Double.NaN)
         val lng = intent.getDoubleExtra(EXTRA_DEST_LNG, Double.NaN)
         if (lat.isNaN() || lng.isNaN()) return
 
-        val name = intent.getStringExtra(EXTRA_DEST_NAME) ?: "活动地点"
+        val name = intent.getStringExtra(EXTRA_DEST_NAME) ?: "Event Location"
         val latLng = LatLng(lat, lng)
 
         destinationLatLng = latLng
@@ -1643,17 +1643,17 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         updateDestinationMarker(latLng, name)
         viewModel.setDestination(latLng)
 
-        // 显示交通方式选择卡片
+        // Show transport mode selection card
         binding.cardTransportModes.visibility = View.VISIBLE
 
-        // 移动相机到目的地
+        // Move camera to destination
         googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
 
         Log.d(TAG, "Activity destination set: $name ($lat, $lng)")
     }
 
     /**
-     * 清除目的地
+     * Clear destination
      */
     private fun clearDestination() {
         destinationLatLng = null
@@ -1664,14 +1664,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         clearAllRoutePolylines()
         binding.cardRouteInfo.visibility = View.GONE
         binding.cardTransportModes.visibility = View.GONE
-        // 隐藏按钮；VIP 用户不显示广告
+        // Hide button; VIP users don't see ads
         binding.cardBottomPanel.visibility = View.GONE
         binding.layoutAdCarousel.visibility = View.VISIBLE
         viewModel.clearDestination()
     }
 
     /**
-     * 检查定位权限
+     * Check location permission
      */
     private fun checkLocationPermission() {
         when {
@@ -1692,27 +1692,27 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 启用我的位置图层
+     * Enable my location layer
      */
     @SuppressLint("MissingPermission")
     private fun enableMyLocation() {
         googleMap?.isMyLocationEnabled = true
         googleMap?.uiSettings?.isMyLocationButtonEnabled = false
 
-        // 获取当前位置
+        // Get current location
         fusedLocationClient.lastLocation.addOnSuccessListener { location ->
             location?.let {
                 val latLng = LatLng(it.latitude, it.longitude)
                 originLatLng = latLng
                 viewModel.updateCurrentLocation(latLng)
                 moveToCurrentLocation()
-                updateStartButtonVisibility()  // 更新开始按钮可见性
+                updateStartButtonVisibility()  // Update start button visibility
             }
         }
     }
 
     /**
-     * 移动相机到当前位置
+     * Move camera to current location
      */
     private fun moveToCurrentLocation() {
         val location = LocationManager.currentLocation.value
@@ -1725,7 +1725,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 更新起点标记
+     * Update origin marker
      */
     private fun updateOriginMarker(location: LatLng, title: String) {
         originMarker?.remove()
@@ -1738,7 +1738,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 更新目的地标记
+     * Update destination marker
      */
     private fun updateDestinationMarker(location: LatLng, title: String) {
         destinationMarker?.remove()
@@ -1751,15 +1751,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 绘制路线（根据交通方式使用不同颜色和样式）
+     * Draw route (use different colors and styles based on transport mode)
      */
     private fun drawRoute(points: List<LatLng>) {
-        // 清除之前的所有路线
+        // Clear all previous routes
         clearAllRoutePolylines()
 
         if (points.isEmpty()) return
 
-        // 根据当前交通方式选择颜色和样式
+        // Choose color and style based on current transport mode
         val mode = viewModel.selectedTransportMode.value
         val color = when (mode) {
             TransportMode.DRIVING -> ContextCompat.getColor(this, R.color.route_driving)
@@ -1780,7 +1780,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             .startCap(RoundCap())
             .endCap(RoundCap())
 
-        // 步行使用虚线
+        // Walking uses dashed line
         if (mode == TransportMode.WALKING) {
             polylineOptions.pattern(listOf(Dot(), Gap(10f)))
         }
@@ -1789,7 +1789,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         routePolyline = googleMap?.addPolyline(polylineOptions)
 
-        // 调整相机显示完整路线
+        // Adjust camera to show full route
         if (points.size >= 2) {
             val boundsBuilder = LatLngBounds.Builder()
             points.forEach { boundsBuilder.include(it) }
@@ -1799,12 +1799,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 绘制公交/地铁多段路线（每段交通方式不同颜色）
+     * Draw transit/subway multi-segment route (different color per segment)
      *
-     * @param steps 路线步骤列表（包含 polyline_points 和 travel_mode）
+     * @param steps route step list (containing polyline_points and travel_mode)
      */
     private fun drawTransitRoute(steps: List<com.ecogo.mapengine.data.model.RouteStep>) {
-        // 清除之前的所有路线
+        // Clear all previous routes
         clearAllRoutePolylines()
 
         Log.d(TAG, "drawTransitRoute: ${steps.size} steps total")
@@ -1826,10 +1826,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             segmentCount++
             allPoints.addAll(stepPoints)
 
-            // 根据交通方式和车辆类型选择颜色
+            // Select color based on transport mode and vehicle type
             val color = getColorForTransitStep(step)
 
-            // 步行段用虚线，其他用实线
+            // Walking segments use dashed line, others use solid line
             val isWalking = step.travel_mode == "WALKING"
 
             val polylineOptions = PolylineOptions()
@@ -1841,7 +1841,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 .startCap(RoundCap())
                 .endCap(RoundCap())
 
-            // 步行段使用虚线样式
+            // Walking segments use dashed line style
             if (isWalking) {
                 polylineOptions.pattern(listOf(Dot(), Gap(10f)))
             }
@@ -1853,7 +1853,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         Log.d(TAG, "drawTransitRoute: drew $segmentCount colored segments, ${allPoints.size} total points")
 
-        // 调整相机显示完整路线
+        // Adjust camera to show full route
         if (allPoints.size >= 2) {
             val boundsBuilder = LatLngBounds.Builder()
             allPoints.forEach { boundsBuilder.include(it) }
@@ -1863,10 +1863,10 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 回退方案：当步骤没有 polyline_points 时，按距离比例切割 overview 路线并着色
+     * Fallback: when steps lack polyline_points, split overview route by distance ratio and color
      *
-     * @param overviewPoints overview polyline 的所有点
-     * @param steps 路线步骤（包含 travel_mode 和 distance）
+     * @param overviewPoints all points of the overview polyline
+     * @param steps route steps (containing travel_mode and distance)
      */
     private fun drawTransitRouteFallback(overviewPoints: List<LatLng>, steps: List<com.ecogo.mapengine.data.model.RouteStep>) {
         clearAllRoutePolylines()
@@ -1889,15 +1889,15 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             pointIndex = drawFallbackSegment(overviewPoints, step, stepIdx, steps.size, totalStepDistance, pointIndex)
         }
 
-        // 调整相机
+        // Adjust camera
         val boundsBuilder = LatLngBounds.Builder()
         overviewPoints.forEach { boundsBuilder.include(it) }
         googleMap?.animateCamera(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 120))
     }
 
     /**
-     * 绘制回退模式下的单个步骤分段（从 drawTransitRouteFallback 提取，降低认知复杂度）
-     * @return 更新后的 pointIndex
+     * Draw a single step segment in fallback mode (extracted from drawTransitRouteFallback to reduce complexity)
+     * @return updated pointIndex
      */
     private fun drawFallbackSegment(
         overviewPoints: List<LatLng>,
@@ -1941,7 +1941,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 获取交通步骤对应的颜色
+     * Get color for transit step
      */
     private fun getColorForTransitStep(step: com.ecogo.mapengine.data.model.RouteStep): Int {
         val colorName = MapActivityHelper.getTransitStepColorName(step.travel_mode, step.transit_details?.vehicle_type)
@@ -1958,7 +1958,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 清除所有路线 Polyline
+     * Clear all route Polylines
      */
     private fun clearAllRoutePolylines() {
         routePolyline?.remove()
@@ -1974,12 +1974,12 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 更新路线信息卡片
+     * Update route info card
      */
     private fun updateRouteInfo(route: com.ecogo.mapengine.data.model.RouteRecommendData) {
         binding.cardRouteInfo.visibility = View.VISIBLE
 
-        // 使用 Helper 构建路线信息文本
+        // Use Helper to build route info text
         val hasTransitSteps = route.route_steps?.any { it.travel_mode == "TRANSIT" } == true
         val infoTexts = MapActivityHelper.buildRouteInfoTexts(
             routeType = route.route_type,
@@ -2000,7 +2000,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         binding.tvDuration.text = infoTexts.durationText
 
-        // 显示累计环保贡献（仅绿色出行方式显示）
+        // Show cumulative eco contribution (only for green travel modes)
         if (infoTexts.showCumulativeImpact) {
             binding.tvCumulativeImpact.visibility = View.VISIBLE
             binding.tvCumulativeImpact.text = com.ecogo.mapengine.util.GreenTravelStats.formatWeeklyImpact(this)
@@ -2008,7 +2008,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             binding.tvCumulativeImpact.visibility = View.GONE
         }
 
-        // 显示路线选择列表（仅公交模式且有多条路线）
+        // Show route selection list (transit mode only and with alternatives)
         if (infoTexts.showRouteOptions) {
             binding.rvRouteOptions.visibility = View.VISIBLE
             routeOptionAdapter.setRoutes(route.route_alternatives!!)
@@ -2016,7 +2016,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             binding.rvRouteOptions.visibility = View.GONE
         }
 
-        // 显示详细步骤列表（仅公交模式显示详细步骤）
+        // Show detailed step list (transit mode only)
         if (infoTexts.showRouteSteps && !route.route_steps.isNullOrEmpty()) {
             binding.rvRouteSteps.visibility = View.VISIBLE
             routeStepAdapter.setSteps(route.route_steps)
@@ -2029,37 +2029,37 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         MapActivityHelper.calculateEcoRating(totalCarbon, distance)
 
     /**
-     * 处理用户选择路线
+     * Handle user route selection
      */
     private fun onRouteSelected(route: com.ecogo.mapengine.data.model.RouteAlternative) {
         Log.d(TAG, "Route selected: ${route.summary}")
 
-        // 检查是否有步骤级别的 polyline 数据用于多色绘制
+        // Check if step-level polyline data is available for multi-color rendering
         val hasTransitSteps = route.route_steps.any { it.travel_mode == "TRANSIT" }
         val hasStepPolylines = route.route_steps.any { !it.polyline_points.isNullOrEmpty() }
         val points = route.route_points.map { com.google.android.gms.maps.model.LatLng(it.lat, it.lng) }
 
         if (hasTransitSteps && hasStepPolylines) {
-            // 使用步骤级别的 polyline 多色绘制
+            // Use step-level polyline for multi-color rendering
             drawTransitRoute(route.route_steps)
         } else if (hasTransitSteps && route.route_steps.isNotEmpty()) {
-            // 回退：按距离比例切割 overview 路线并着色
+            // Fallback: split overview route by distance ratio and color
             drawTransitRouteFallback(points, route.route_steps)
         } else {
-            // 非公交：单色绘制
+            // Non-transit: single color rendering
             drawRoute(points)
         }
 
-        // 更新 ViewModel 的路线点（用于导航），设置标记避免 observer 重复绘制
+        // Update ViewModel route points (for navigation), set flag to avoid observer re-drawing
         isHandlingRouteSelection = true
         val allPoints = route.route_points.map { LatLng(it.lat, it.lng) }
         viewModel.updateRoutePointsForSelectedAlternative(allPoints)
 
-        // 更新路线信息
-        binding.tvCarbonSaved.text = String.format("减碳: %.2f kg", route.total_carbon)
-        binding.tvDuration.text = "预计: ${route.estimated_duration} 分钟"
+        // Update route info
+        binding.tvCarbonSaved.text = String.format("Carbon saved: %.2f kg", route.total_carbon)
+        binding.tvDuration.text = "Estimated: ${route.estimated_duration} min"
 
-        // 更新详细步骤
+        // Update detailed steps
         if (hasTransitSteps) {
             binding.rvRouteSteps.visibility = View.VISIBLE
             routeStepAdapter.setSteps(route.route_steps)
@@ -2067,11 +2067,11 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             binding.rvRouteSteps.visibility = View.GONE
         }
 
-        Toast.makeText(this, "已切换到: ${route.summary}", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "Switched to: ${route.summary}", Toast.LENGTH_SHORT).show()
     }
 
     /**
-     * 更新行程追踪 UI
+     * Update trip tracking UI
      */
     private fun updateTrackingUI(state: TripState) {
         when (state) {
@@ -2081,14 +2081,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.chipGroupTransport.visibility = View.VISIBLE
                 binding.cardSearch.visibility = View.VISIBLE
                 hideTimer()
-                // 清除追踪轨迹
+                // Clear tracking trajectory
                 trackPolyline?.remove()
                 trackPolyline = null
                 transitSegmentPolylines.forEach { it.remove() }
                 transitSegmentPolylines.clear()
             }
             is TripState.Starting -> {
-                binding.btnTracking.text = "正在开始..."
+                binding.btnTracking.text = "Starting..."
                 binding.btnTracking.isEnabled = false
             }
             is TripState.Tracking -> {
@@ -2096,25 +2096,25 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 binding.btnTracking.isEnabled = true
                 binding.chipGroupTransport.visibility = View.GONE
                 binding.cardSearch.visibility = View.GONE
-                // 显示追踪信息卡片
+                // Show tracking info card
                 binding.cardRouteInfo.visibility = View.VISIBLE
 
-                // 显示正在检测交通方式
-                binding.tvRouteType.text = "🔄 正在检测交通方式..."
+                // Show detecting transport mode
+                binding.tvRouteType.text = "🔄 Detecting transport mode..."
 
                 if (isNavigationMode) {
-                    // 导航模式
-                    binding.tvCarbonSaved.text = "已行进: 0.00 公里"
+                    // Navigation mode
+                    binding.tvCarbonSaved.text = "Traveled: 0.00 km"
                     val remainingKm = (NavigationManager.remainingDistance.value ?: 0f) / 1000f
-                    binding.tvDuration.text = String.format("剩余: %.2f 公里", remainingKm)
+                    binding.tvDuration.text = String.format("Remaining: %.2f km", remainingKm)
                 } else {
-                    // 纯轨迹记录模式
-                    binding.tvCarbonSaved.text = "已行进: 0.00 公里"
-                    binding.tvDuration.text = "实时记录GPS轨迹"
+                    // Pure track recording mode
+                    binding.tvCarbonSaved.text = "Traveled: 0.00 km"
+                    binding.tvDuration.text = "Recording GPS track in real time"
                 }
             }
             is TripState.Stopping -> {
-                binding.btnTracking.text = "正在结束..."
+                binding.btnTracking.text = "Stopping..."
                 binding.btnTracking.isEnabled = false
             }
             is TripState.Completed -> {
@@ -2130,40 +2130,40 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onResume() {
         super.onResume()
-        // 检查是否有正在进行的行程，恢复UI状态
-        // 注意：地图可能还没准备好，所以这里只恢复非地图相关的状态
+        // Check if there's an ongoing trip and restore UI state
+        // Note: map may not be ready yet, so only restore non-map-related state here
         restoreTrackingStateIfNeeded()
     }
 
     /**
-     * 恢复追踪状态（如果有正在进行的行程）
+     * Restore tracking state (if there's an ongoing trip)
      */
     private fun restoreTrackingStateIfNeeded() {
         if (LocationManager.isTracking.value == true) {
             Log.d(TAG, "Restoring tracking state - trip is in progress")
 
-            // 恢复 ViewModel 状态
+            // Restore ViewModel state
             viewModel.restoreTrackingState()
 
-            // 恢复导航模式标志
+            // Restore navigation mode flag
             if (NavigationManager.isNavigating.value == true) {
                 isNavigationMode = true
             }
 
-            // 如果地图已准备好，恢复路线显示
+            // If map is ready, restore route display
             if (googleMap != null) {
                 restoreRoutesOnMap()
             }
 
-            // 恢复计时器（使用保存的开始时间）
+            // Restore timer (using saved start time)
             if (timerStartTime == 0L) {
-                // 如果没有计时器开始时间，使用当前时间（会导致时间重置，但比没有好）
+                // If no timer start time, use current time (will reset timer, but better than nothing)
                 timerStartTime = SystemClock.elapsedRealtime()
             }
             binding.tvTimer.visibility = View.VISIBLE
             timerHandler.post(timerRunnable)
 
-            // 恢复交通方式检测
+            // Restore transport mode detection
             if (!transportModeDetector.isDetecting()) {
                 transportModeDetector.startDetection()
             }
@@ -2173,13 +2173,13 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     }
 
     /**
-     * 在地图上恢复路线显示
+     * Restore route display on map
      */
     private fun restoreRoutesOnMap() {
         Log.d(TAG, "Restoring routes on map, isNavigationMode=$isNavigationMode")
 
         if (isNavigationMode && NavigationManager.isNavigating.value == true) {
-            // 导航模式：绘制已走过的路线和剩余路线
+            // Navigation mode: draw traveled route and remaining route
             NavigationManager.traveledPoints.value?.let { points ->
                 if (points.isNotEmpty()) {
                     Log.d(TAG, "Drawing traveled route with ${points.size} points")
@@ -2193,7 +2193,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         } else {
-            // 纯轨迹记录模式：绘制轨迹
+            // Pure track recording mode: draw track
             LocationManager.trackPoints.value?.let { points ->
                 if (points.isNotEmpty()) {
                     Log.d(TAG, "Drawing track polyline with ${points.size} points")
@@ -2202,14 +2202,14 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
 
-        // 如果有目的地标记，重新绘制
+        // If there's a destination marker, re-draw it
         destinationLatLng?.let { latLng ->
             updateDestinationMarker(latLng, destinationName)
         }
 
-        // 如果有起点标记且不是"我的位置"，重新绘制
+        // If there's an origin marker and it's not "My Location", re-draw it
         originLatLng?.let { latLng ->
-            if (originName != "我的位置") {
+            if (originName != "My Location") {
                 updateOriginMarker(latLng, originName)
             }
         }
@@ -2217,20 +2217,20 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onDestroy() {
         super.onDestroy()
-        // 清除计时器，防止内存泄漏
+        // Clear timer to prevent memory leaks
         timerHandler.removeCallbacks(timerRunnable)
         
-        // 停止广告轮播
+        // Stop ad rotation
         adRunnable?.let { adHandler.removeCallbacks(it) }
 
-        // 移除位置更新回调
+        // Remove location update callbacks
         removeLocationUpdates()
 
-        // 注意：不再自动停止追踪！
-        // 前台服务会继续运行，用户需要手动停止行程
-        // 只有在用户明确点击停止按钮时才会停止追踪
+        // Note: No longer automatically stopping tracking!
+        // Foreground service will continue running, user needs to manually stop the trip
+        // Tracking only stops when user explicitly clicks the stop button
 
-        // 清除交通方式检测器（Activity销毁时暂停，但服务继续追踪）
+        // Clear transport mode detector (paused when Activity is destroyed, but service continues tracking)
         if (this::transportModeDetector.isInitialized) {
             transportModeDetector.stopDetection()
             transportModeDetector.cleanup()

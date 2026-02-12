@@ -11,8 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * 交通方式检测器集成示例
- * 展示如何在 MapActivity 中使用传感器采集和交通方式检测
+ * Transport Mode Detector Integration Example
+ * Demonstrates how to use sensor collection and transport mode detection in MapActivity
  */
 class TransportModeDetectorIntegration(
     private val context: Context,
@@ -27,13 +27,13 @@ class TransportModeDetectorIntegration(
     }
 
     /**
-     * 开始检测（在导航开始时调用）
+     * Start detection (called when navigation starts)
      */
     fun start() {
         Log.d(TAG, "Starting transport mode detection")
         detector.startDetection()
 
-        // 监听检测结果
+        // Listen for detection results
         scope.launch {
             detector.detectedMode.collect { prediction ->
                 prediction?.let {
@@ -45,7 +45,7 @@ class TransportModeDetectorIntegration(
     }
 
     /**
-     * 停止检测（在导航结束时调用）
+     * Stop detection (called when navigation ends)
      */
     fun stop() {
         Log.d(TAG, "Stopping transport mode detection")
@@ -53,14 +53,14 @@ class TransportModeDetectorIntegration(
     }
 
     /**
-     * 更新位置（在 LocationManager 更新时调用）
+     * Update location (called when LocationManager updates)
      */
     fun updateLocation(location: Location) {
         detector.updateLocation(location)
     }
 
     /**
-     * 清理资源
+     * Clean up resources
      */
     @OnLifecycleEvent(Lifecycle.Event.ON_DESTROY)
     fun cleanup() {
@@ -69,7 +69,7 @@ class TransportModeDetectorIntegration(
 }
 
 /**
- * 在 MapActivity 中的使用示例：
+ * Usage example in MapActivity:
  *
  * ```kotlin
  * class MapActivity : AppCompatActivity() {
@@ -79,34 +79,34 @@ class TransportModeDetectorIntegration(
  *     override fun onCreate(savedInstanceState: Bundle?) {
  *         super.onCreate(savedInstanceState)
  *
- *         // 初始化交通方式检测器
+ *         // Initialize transport mode detector
  *         modeDetector = TransportModeDetectorIntegration(this) { prediction ->
- *             // 检测到交通方式改变
+ *             // Transport mode change detected
  *             handleModeChange(prediction)
  *         }
  *
- *         // 将检测器绑定到生命周期
+ *         // Bind detector to lifecycle
  *         lifecycle.addObserver(modeDetector)
  *     }
  *
  *     private fun startLocationTracking() {
- *         // ... 原有的定位逻辑 ...
+ *         // ... existing location logic ...
  *
- *         // 启动交通方式检测
+ *         // Start transport mode detection
  *         modeDetector.start()
  *     }
  *
  *     private fun stopLocationTracking() {
- *         // ... 原有的定位逻辑 ...
+ *         // ... existing location logic ...
  *
- *         // 停止交通方式检测
+ *         // Stop transport mode detection
  *         modeDetector.stop()
  *     }
  *
  *     private fun onLocationChanged(location: Location) {
- *         // ... 原有的位置更新逻辑 ...
+ *         // ... existing location update logic ...
  *
- *         // 更新检测器的位置（用于 GPS 速度）
+ *         // Update detector location (for GPS speed)
  *         modeDetector.updateLocation(location)
  *     }
  *
@@ -114,13 +114,13 @@ class TransportModeDetectorIntegration(
  *         val currentMode = viewModel.selectedTransportMode.value
  *         val detectedMode = prediction.mode
  *
- *         // 检查是否与用户选择的交通方式不符
+ *         // Check if detected mode differs from user's selected mode
  *         if (isModeMismatch(currentMode, detectedMode) && prediction.confidence > 0.7f) {
- *             // 弹窗询问用户是否切换
+ *             // Show dialog asking user whether to switch
  *             showModeSwitchDialog(detectedMode)
  *         }
  *
- *         // 更新实时碳排放计算（使用检测到的交通方式）
+ *         // Update real-time carbon calculation (using detected transport mode)
  *         updateRealTimeCarbonCalculation(detectedMode)
  *     }
  *
@@ -128,7 +128,7 @@ class TransportModeDetectorIntegration(
  *         userSelected: TransportMode?,
  *         detected: TransportModeLabel
  *     ): Boolean {
- *         // 判断是否明显不符
+ *         // Determine if there is a clear mismatch
  *         return when {
  *             userSelected == TransportMode.WALKING && detected == TransportModeLabel.DRIVING -> true
  *             userSelected == TransportMode.CYCLING && detected == TransportModeLabel.BUS -> true
@@ -139,17 +139,17 @@ class TransportModeDetectorIntegration(
  *
  *     private fun showModeSwitchDialog(detectedMode: TransportModeLabel) {
  *         AlertDialog.Builder(this)
- *             .setTitle("检测到交通方式变化")
- *             .setMessage("系统检测到您可能在使用${detectedMode.displayName()}，是否切换？")
- *             .setPositiveButton("切换") { _, _ ->
+ *             .setTitle("Transport Mode Change Detected")
+ *             .setMessage("It appears you are using ${detectedMode.displayName()}. Would you like to switch?")
+ *             .setPositiveButton("Switch") { _, _ ->
  *                 switchToDetectedMode(detectedMode)
  *             }
- *             .setNegativeButton("保持当前", null)
+ *             .setNegativeButton("Keep Current", null)
  *             .show()
  *     }
  *
  *     private fun switchToDetectedMode(mode: TransportModeLabel) {
- *         // 更新 ViewModel 中的交通方式
+ *         // Update transport mode in ViewModel
  *         val transportMode = when (mode) {
  *             TransportModeLabel.WALKING -> TransportMode.WALKING
  *             TransportModeLabel.CYCLING -> TransportMode.CYCLING
@@ -161,15 +161,15 @@ class TransportModeDetectorIntegration(
  *     }
  * }
  *
- * // 辅助扩展函数
+ * // Helper extension function
  * fun TransportModeLabel.displayName(): String {
  *     return when (this) {
- *         TransportModeLabel.WALKING -> "步行"
- *         TransportModeLabel.CYCLING -> "骑行"
- *         TransportModeLabel.BUS -> "公交"
- *         TransportModeLabel.SUBWAY -> "地铁"
- *         TransportModeLabel.DRIVING -> "驾车"
- *         TransportModeLabel.UNKNOWN -> "未知"
+ *         TransportModeLabel.WALKING -> "Walking"
+ *         TransportModeLabel.CYCLING -> "Cycling"
+ *         TransportModeLabel.BUS -> "Bus"
+ *         TransportModeLabel.SUBWAY -> "Subway"
+ *         TransportModeLabel.DRIVING -> "Driving"
+ *         TransportModeLabel.UNKNOWN -> "Unknown"
  *     }
  * }
  * ```

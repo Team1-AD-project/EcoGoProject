@@ -37,7 +37,7 @@
             android:id="@+id/tvSkipText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="跳过 3"
+            android:text="Skip 3"
             android:textSize="14sp"
             android:textColor="#FFFFFF"
             android:textStyle="bold" />

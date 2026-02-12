@@ -8,33 +8,33 @@ import java.util.Locale
 
 object TripTimeFormat {
 
-    // 你想显示成什么样可以改这里
-    // 例：2026-02-10 12:26
+    // Modify the display format here as needed
+    // Example: 2026-02-10 12:26
     private val outFmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm", Locale.getDefault())
 
     private val sgZone = ZoneId.of("Asia/Singapore")
 
     /**
-     * 兼容两种后端时间：
-     * 1) 2026-02-06T14:26:36.736+00:00 (带 offset)
-     * 2) 2026-02-10T04:26:43.034       (不带 offset)
+     * Compatible with two backend time formats:
+     * 1) 2026-02-06T14:26:36.736+00:00 (with offset)
+     * 2) 2026-02-10T04:26:43.034       (without offset)
      */
     fun toSgTime(raw: String?): String {
         if (raw.isNullOrBlank()) return "--"
 
         return try {
             if (raw.contains("+") || raw.endsWith("Z")) {
-                // 带时区 offset：转成新加坡时间显示
+                // With timezone offset: convert to Singapore time for display
                 OffsetDateTime.parse(raw)
                     .atZoneSameInstant(sgZone)
                     .format(outFmt)
             } else {
-                // 不带 offset：按 LocalDateTime 解析（默认就当它是后端给的“本地时间”）
+                // Without offset: parse as LocalDateTime (treat as backend-provided local time)
                 LocalDateTime.parse(raw)
                     .format(outFmt)
             }
         } catch (e: Exception) {
-            raw // 兜底：解析失败就原样显示
+            raw // Fallback: display as-is if parsing fails
         }
     }
 

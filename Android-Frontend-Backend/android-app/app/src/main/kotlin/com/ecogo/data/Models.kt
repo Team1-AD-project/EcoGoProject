@@ -76,7 +76,7 @@ data class ShopItem(
 //ALL Voucher Related
 // Voucher (from backend goods/coupons)
 data class Voucher(
-    val id: String,                 // 继续保留：列表点击用的“主 id”
+    val id: String,                 // Retained: primary id used for list item clicks
     val name: String,
     val description: String,
     @SerializedName("redemptionPoints") val cost: Int = 0,
@@ -85,15 +85,15 @@ data class Voucher(
     val stock: Int? = null,
     @SerializedName("vipLevelRequired") val vipLevelRequired: Int = 0,
 
-    // ✅ 新增两个字段：Gson 不会报错，因为都有默认值
-    val goodsId: String? = null,         // marketplace: goodsId=id；owned: goodsId=uv.goodsId
-    val userVoucherId: String? = null,   // owned 才有
-    val status: String? = null           // ACTIVE/USED/EXPIRED（owned 才有）
+    // Two additional fields: Gson won't error since both have default values
+    val goodsId: String? = null,         // marketplace: goodsId=id; owned: goodsId=uv.goodsId
+    val userVoucherId: String? = null,   // Only present for owned vouchers
+    val status: String? = null           // ACTIVE/USED/EXPIRED (only for owned vouchers)
 )
 
 
 // UserVoucher (from backend /api/v1/vouchers)
-// User Voucher (来自后端 user_vouchers 集合)
+// User Voucher (from backend user_vouchers collection)
 data class UserVoucher(
     val id: String,
     val userId: String,
@@ -417,7 +417,7 @@ data class Product(
     val id: String,
     val name: String,
     val description: String,
-    val type: String,  // "voucher" 或 "goods"
+    val type: String,  // "voucher" or "goods"
     val category: String,  // "food", "transport", "eco_product", "merchandise", "digital"
     
     // Dual pricing
@@ -503,31 +503,31 @@ data class Challenge(
     val title: String,
     val description: String,
     val type: String, // GREEN_TRIPS_DISTANCE, CARBON_SAVED, GREEN_TRIPS_COUNT
-    val target: Double,  // 目标值
-    val reward: Int,  // 奖励积分
-    val badge: String? = null, // 徽章ID
+    val target: Double,  // Target value
+    val reward: Int,  // Reward points
+    val badge: String? = null, // Badge ID
     val icon: String = "🏆",
     val status: String = "ACTIVE", // ACTIVE, EXPIRED
-    val participants: Int = 0, // 参与人数（从后端实时计算）
+    val participants: Int = 0, // Number of participants (calculated in real-time from backend)
     val startTime: String? = null,
     val endTime: String? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null
 )
 
-// 用户挑战进度DTO（从后端API获取，进度从Trip表实时计算）
+// User challenge progress DTO (fetched from backend API, progress calculated in real-time from Trip table)
 data class UserChallengeProgress(
     val id: String,
     val challengeId: String,
     val userId: String,
     val status: String, // IN_PROGRESS, COMPLETED
-    val current: Double, // 实时计算的进度值
+    val current: Double, // Real-time calculated progress value
     val target: Double,
     val progressPercent: Double,
     val joinedAt: String,
     val completedAt: String? = null,
     val rewardClaimed: Boolean = false,
-    // 用户信息
+    // User information
     val userNickname: String? = null,
     val userEmail: String? = null,
     val userAvatar: String? = null

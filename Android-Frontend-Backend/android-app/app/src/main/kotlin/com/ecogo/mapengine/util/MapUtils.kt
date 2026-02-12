@@ -5,16 +5,16 @@ import com.google.android.gms.maps.model.LatLng
 import kotlin.math.*
 
 /**
- * 地图工具类
+ * Map Utility Class
  */
 object MapUtils {
 
     /**
-     * 计算两点之间的距离 (米)
-     * 使用 Haversine 公式
+     * Calculate distance between two points (meters)
+     * Using Haversine formula
      */
     fun calculateDistance(start: LatLng, end: LatLng): Double {
-        val earthRadius = 6371000.0 // 地球半径 (米)
+        val earthRadius = 6371000.0 // Earth radius (meters)
 
         val lat1 = Math.toRadians(start.latitude)
         val lat2 = Math.toRadians(end.latitude)
@@ -29,7 +29,7 @@ object MapUtils {
     }
 
     /**
-     * 计算路线总距离 (米)
+     * Calculate total route distance (meters)
      */
     fun calculateTotalDistance(points: List<LatLng>): Double {
         if (points.size < 2) return 0.0
@@ -42,29 +42,29 @@ object MapUtils {
     }
 
     /**
-     * 米转换为公里
+     * Convert meters to kilometers
      */
     fun metersToKilometers(meters: Double): Double {
         return meters / 1000.0
     }
 
     /**
-     * 格式化距离显示
+     * Format distance for display
      */
     fun formatDistance(meters: Double): String {
         return if (meters < 1000) {
-            "${meters.toInt()} 米"
+            "${meters.toInt()} m"
         } else {
-            String.format("%.2f 公里", meters / 1000)
+            String.format("%.2f km", meters / 1000)
         }
     }
 
     /**
-     * 估算碳排放 (kg)
-     * 基于交通方式和距离
+     * Estimate carbon emission (kg)
+     * Based on transport mode and distance
      */
     fun estimateCarbonEmission(distanceKm: Double, transportMode: String): Double {
-        // 碳排放因子 (kg CO2/km)
+        // Carbon emission factor (kg CO2/km)
         val carbonFactor = when (transportMode) {
             "walk" -> 0.0
             "bike" -> 0.0
@@ -77,7 +77,7 @@ object MapUtils {
     }
 
     /**
-     * 计算碳减排 (相比驾车)
+     * Calculate carbon reduction (compared to driving)
      */
     fun calculateCarbonSaved(distanceKm: Double, transportMode: String): Double {
         val drivingEmission = estimateCarbonEmission(distanceKm, "car")
@@ -86,7 +86,7 @@ object MapUtils {
     }
 
     /**
-     * Location 转 LatLng
+     * Convert Location to LatLng
      */
     fun locationToLatLng(location: Location): LatLng {
         return LatLng(location.latitude, location.longitude)

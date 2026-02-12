@@ -4,41 +4,41 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parcelize
 
 /**
- * 地点类型枚举
+ * Location type enum
  */
 enum class LocationType {
-    FACULTY,      // 学院
-    CANTEEN,      // 食堂
-    LIBRARY,      // 图书馆
-    RESIDENCE,    // 宿舍
-    FACILITY,     // 设施
-    BUS_STOP,     // 公交站
-    OTHER         // 其他
+    FACULTY,      // College
+    CANTEEN,      // Cafeteria
+    LIBRARY,      // Library
+    RESIDENCE,    // Dormitory
+    FACILITY,     // Facility
+    BUS_STOP,     // Bus stop
+    OTHER         // Other
 }
 
 /**
- * 交通方式枚举
+ * Transport mode enum
  */
 enum class TransportMode {
-    WALK,         // 步行
-    CYCLE,        // 骑行
-    BUS,          // 公交
-    MIXED         // 混合
+    WALK,         // Walking
+    CYCLE,        // Cycling
+    BUS,          // Bus/Transit
+    MIXED         // Mixed
 }
 
 /**
- * 行程状态枚举
+ * Trip status enum
  */
 enum class TripStatus {
-    PLANNING,     // 规划中
-    ACTIVE,       // 进行中
-    PAUSED,       // 已暂停
-    COMPLETED,    // 已完成
-    CANCELLED     // 已取消
+    PLANNING,     // Planning
+    ACTIVE,       // In progress
+    PAUSED,       // Paused
+    COMPLETED,    // Completed
+    CANCELLED     // Cancelled
 }
 
 /**
- * 地点模型
+ * Location model
  */
 @Parcelize
 data class NavLocation(
@@ -55,13 +55,13 @@ data class NavLocation(
 ) : Parcelable
 
 /**
- * 路线步骤
+ * Route step
  */
 @Parcelize
 data class RouteStep(
     val instruction: String,
-    val distance: Double,        // 米
-    val duration: Int,            // 秒
+    val distance: Double,        // meters
+    val duration: Int,            // seconds
     val mode: TransportMode,
     val startLat: Double,
     val startLng: Double,
@@ -71,7 +71,7 @@ data class RouteStep(
 ) : Parcelable
 
 /**
- * 路线模型
+ * Route model
  */
 @Parcelize
 data class NavRoute(
@@ -79,19 +79,19 @@ data class NavRoute(
     val origin: NavLocation,
     val destination: NavLocation,
     val mode: TransportMode,
-    val distance: Double,         // 千米
-    val duration: Int,            // 分钟
+    val distance: Double,         // kilometers
+    val duration: Int,            // minutes
     val carbonEmission: Double,   // g CO2
     val carbonSaved: Double,      // g CO2
-    val points: Int,              // 绿色积分
+    val points: Int,              // green points
     val steps: List<RouteStep>,
     val polyline: String,
     val isRecommended: Boolean = false,
-    val badge: String = ""        // 标签：最环保、最快等
+    val badge: String = ""        // Label: most eco-friendly, fastest, etc.
 ) : Parcelable
 
 /**
- * 行程记录
+ * Trip record
  */
 @Parcelize
 data class Trip(
@@ -107,7 +107,7 @@ data class Trip(
 ) : Parcelable
 
 /**
- * 公交车信息
+ * Bus information
  */
 @Parcelize
 data class BusInfo(
@@ -118,14 +118,14 @@ data class BusInfo(
     val currentLng: Double,
     val etaMinutes: Int,
     val stopsAway: Int,
-    val crowdLevel: String,      // 低、中、高
+    val crowdLevel: String,      // Low, Medium, High
     val plateNumber: String,
     val status: String,           // arriving, coming, delayed
     val color: String = "#DB2777"
 ) : Parcelable
 
 /**
- * 地图设置
+ * Map settings
  */
 @Parcelize
 data class MapSettings(
@@ -141,18 +141,18 @@ data class MapSettings(
 ) : Parcelable
 
 /**
- * 导航状态
+ * Navigation state
  */
 enum class NavigationState {
-    IDLE,         // 空闲
-    SEARCHING,    // 搜索中
-    PLANNING,     // 规划中
-    NAVIGATING,   // 导航中
-    COMPLETED     // 已完成
+    IDLE,         // Idle
+    SEARCHING,    // Searching
+    PLANNING,     // Planning
+    NAVIGATING,   // Navigating
+    COMPLETED     // Completed
 }
 
 /**
- * 搜索历史
+ * Search history
  */
 @Parcelize
 data class SearchHistory(
@@ -162,12 +162,12 @@ data class SearchHistory(
 ) : Parcelable
 
 /**
- * 路线选项对比
+ * Route option comparison
  */
 @Parcelize
 data class RouteOption(
     val route: NavRoute,
-    val carbonComparison: Double,  // 与开车相比节省的碳排放
-    val moneySaved: Double,         // 节省的金额
-    val healthBenefit: String       // 健康益处描述
+    val carbonComparison: Double,  // Carbon emissions saved compared to driving
+    val moneySaved: Double,         // Money saved
+    val healthBenefit: String       // Health benefit description
 ) : Parcelable

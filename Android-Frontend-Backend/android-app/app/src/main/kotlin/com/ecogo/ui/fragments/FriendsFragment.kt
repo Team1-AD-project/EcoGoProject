@@ -43,11 +43,11 @@ class FriendsFragment : Fragment() {
             layoutManager = LinearLayoutManager(context)
             adapter = FriendAdapter(emptyList(), 
                 onMessageClick = { friend ->
-                    // 跳转到聊天页面
+                    // Navigate to chat page
                     findNavController().navigate(com.ecogo.R.id.action_friends_to_chat)
                 },
                 onFriendClick = { friend ->
-                    // 跳转到好友详情（个人资料页）
+                    // Navigate to friend details (profile page)
                     findNavController().navigate(com.ecogo.R.id.action_friends_to_profile)
                 }
             )
@@ -62,11 +62,11 @@ class FriendsFragment : Fragment() {
             layoutManager = LinearLayoutManager(context)
             adapter = FriendAdapter(emptyList(),
                 onMessageClick = { friend ->
-                    // 接受好友请求
+                    // Accept friend request
                     acceptFriendRequest(friend)
                 },
                 onFriendClick = { friend ->
-                    // 查看请求详情
+                    // View request details
                     findNavController().navigate(com.ecogo.R.id.action_friends_to_profile)
                 }
             )
@@ -75,14 +75,14 @@ class FriendsFragment : Fragment() {
 
     private fun setupActions() {
         binding.buttonAddFriend.setOnClickListener {
-            // 打开添加好友对话框或页面
-            // TODO: 实现添加好友功能
+            // Open add friend dialog or page
+            // TODO: Implement add friend functionality
         }
     }
 
     private fun loadData() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // 加载好友列表
+            // Load friends list
             val friends = repository.getFriends("user123").getOrElse { MockData.FRIENDS }
             binding.recyclerFriends.adapter = FriendAdapter(friends,
                 onMessageClick = { friend ->
@@ -93,10 +93,10 @@ class FriendsFragment : Fragment() {
                 }
             )
 
-            // 更新好友数量
+            // Update friend count
             binding.textFriendCount.text = "${friends.size} friends"
 
-            // 显示/隐藏空状态
+            // Show/hide empty state
             if (friends.isEmpty()) {
                 binding.layoutEmptyState.visibility = View.VISIBLE
                 binding.recyclerFriends.visibility = View.GONE
@@ -105,7 +105,7 @@ class FriendsFragment : Fragment() {
                 binding.recyclerFriends.visibility = View.VISIBLE
             }
 
-            // 加载好友动态
+            // Load friend activities
             val activities = repository.getFriendActivities("user123").getOrElse { MockData.FRIEND_ACTIVITIES }
             binding.recyclerFriendActivities.adapter = FriendActivityAdapter(activities)
         }
@@ -113,8 +113,8 @@ class FriendsFragment : Fragment() {
 
     private fun acceptFriendRequest(friend: com.ecogo.data.Friend) {
         viewLifecycleOwner.lifecycleScope.launch {
-            // TODO: 调用API接受好友请求
-            loadData() // 重新加载数据
+            // TODO: Call API to accept friend request
+            loadData() // Reload data
         }
     }
 

@@ -17,8 +17,8 @@ import com.ecogo.ui.dialogs.AchievementUnlockDialog
 import com.ecogo.viewmodel.NavigationViewModel
 
 /**
- * 行程结算页面 - 奖励仪式
- * 展示行程统计、获得的积分和成就
+ * Trip summary page - Reward ceremony
+ * Shows trip statistics, earned points and achievements
  */
 class TripSummaryFragment : Fragment() {
 
@@ -51,7 +51,7 @@ class TripSummaryFragment : Fragment() {
         binding.mascotCelebrate.apply {
             mascotSize = MascotSize.LARGE
             setEmotion(MascotEmotion.CELEBRATING)
-            // 播放庆祝动画
+            // Play celebration animation
             celebrateAnimation()
             
             val spin = AnimationUtils.loadAnimation(requireContext(), R.anim.spin)
@@ -73,16 +73,16 @@ class TripSummaryFragment : Fragment() {
         }
         
         binding.btnAgain.setOnClickListener {
-            // 返回到路线规划
+            // Return to route planner
             findNavController().navigate(R.id.routePlannerFragment)
         }
         
         binding.btnShare.setOnClickListener {
-            // TODO: 分享功能（将在阶段三实现）
-            // 暂时显示提示
+            // TODO: Share feature (to be implemented in phase 3)
+            // Show temporary message
             android.widget.Toast.makeText(
                 requireContext(),
-                "分享功能将在后续版本实现",
+                "Share feature coming in a future update",
                 android.widget.Toast.LENGTH_SHORT
             ).show()
         }
@@ -91,23 +91,23 @@ class TripSummaryFragment : Fragment() {
     private fun displaySummary() {
         viewModel.currentTrip.observe(viewLifecycleOwner) { trip ->
             trip?.let {
-                // 只在行程完成时显示统计
+                // Only show stats when trip is completed
                 if (it.status != com.ecogo.data.TripStatus.COMPLETED) return@observe
                 
-                // 显示行程统计
+                // Display trip statistics
                 binding.textDistance.text = String.format("%.2f", it.actualDistance)
                 binding.textDuration.text = formatDuration(it.endTime!! - it.startTime)
                 binding.textCarbonSaved.text = String.format("%.0f", it.actualCarbonSaved)
                 
-                // 动画显示积分
+                // Animate points display
                 animatePointsIncrease(0, it.pointsEarned)
                 
-                // 如果有成就解锁
+                // If there's an achievement unlock
                 if (it.achievementUnlocked != null) {
                     showAchievementDialog(it.achievementUnlocked!!)
                 }
                 
-                // 计算环保等级
+                // Calculate eco rating
                 val rating = calculateEcoRating(it.actualCarbonSaved)
                 binding.textEcoRating.text = rating
                 updateRatingColor(rating)
@@ -116,7 +116,7 @@ class TripSummaryFragment : Fragment() {
     }
     
     private fun setupAnimations() {
-        // 逐个展示统计卡片
+        // Show stat cards one by one
         val popIn = AnimationUtils.loadAnimation(requireContext(), R.anim.pop_in)
         
         binding.root.postDelayed({
@@ -151,7 +151,7 @@ class TripSummaryFragment : Fragment() {
     }
     
     private fun showAchievementDialog(achievementId: String) {
-        // 延迟显示成就解锁对话框
+        // Delay showing achievement unlock dialog
         binding.root.postDelayed({
             val achievement = com.ecogo.data.MockData.ACHIEVEMENTS.find { it.id == achievementId }
             achievement?.let {

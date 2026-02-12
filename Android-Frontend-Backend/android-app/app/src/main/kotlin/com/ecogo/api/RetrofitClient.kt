@@ -7,13 +7,13 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 /**
- * Retrofit 客户端单例
+ * Retrofit client singleton
  */
 object RetrofitClient {
-    
+
     /**
-     * OkHttp 客户端
-     * 优化：仅在 Debug 模式启用日志，且使用 BASIC 级别提升性能
+     * OkHttp client
+     * Optimized: logging enabled only in Debug mode, using BASIC level for better performance
      */
     private val okHttpClient: OkHttpClient by lazy {
         val builder = OkHttpClient.Builder()
@@ -21,18 +21,18 @@ object RetrofitClient {
             .readTimeout(ApiConfig.READ_TIMEOUT, TimeUnit.SECONDS)
             .writeTimeout(ApiConfig.WRITE_TIMEOUT, TimeUnit.SECONDS)
         
-        // 添加日志拦截器（开发环境）
+        // Add logging interceptor (development environment)
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY // Changed to BODY to see full response/request details for debugging
         }
         builder.addInterceptor(loggingInterceptor)
 
-        // 添加认证拦截器
+        // Add authentication interceptor
         builder.addInterceptor { chain ->
             val original = chain.request()
             val requestBuilder = original.newBuilder()
             
-            // 自动注入 Token
+            // Auto-inject Token
             val token = com.ecogo.auth.TokenManager.getToken()
             if (!token.isNullOrEmpty()) {
                 requestBuilder.header("Authorization", "Bearer $token")
@@ -57,7 +57,7 @@ object RetrofitClient {
     }
     
     /**
-     * Retrofit 实例
+     * Retrofit instance
      */
     private val retrofit: Retrofit by lazy {
         Retrofit.Builder()
@@ -68,7 +68,7 @@ object RetrofitClient {
     }
     
     /**
-     * API 服务实例
+     * API service instance
      */
     val apiService: ApiService by lazy {
         retrofit.create(ApiService::class.java)

@@ -16,14 +16,14 @@ import com.ecogo.data.Outfit
 import kotlin.math.min
 
 /**
- * MascotLionView - 小狮子吉祥物自定义View
+ * MascotLionView - Lion mascot custom View
  *
- * 功能:
- * - 绘制小狮子基础形状(身体、头部、尾巴、五官)
- * - 根据 Outfit 动态渲染装备
- * - 支持动画: 呼吸、眨眼、点击跳跃、尾巴摆动
- * - 支持 11 种服装 + 徽章系统
- * - 支持多种表情状态和尺寸变体
+ * Features:
+ * - Draws lion base shapes (body, head, tail, facial features)
+ * - Dynamically renders outfits based on Outfit data
+ * - Supports animations: breathing, blinking, tap-to-jump, tail wag
+ * - Supports 11 clothing types + badge system
+ * - Supports multiple emotion states and size variants
  */
 class MascotLionView @JvmOverloads constructor(
     context: Context,
@@ -44,40 +44,40 @@ class MascotLionView @JvmOverloads constructor(
         private const val COLOR_TOMATO = "#EF4444"
     }
 
-    // 当前装备
+    // Current outfit
     var outfit: Outfit = Outfit()
         set(value) {
             field = value
             invalidate()
         }
 
-    // 表情状态
+    // Emotion state
     var currentEmotion: MascotEmotion = MascotEmotion.NORMAL
         private set
 
-    // 尺寸模式
+    // Size mode
     var mascotSize: MascotSize = MascotSize.LARGE
         set(value) {
             field = value
             requestLayout()
         }
 
-    // 简化模式（小尺寸时减少细节）
+    // Simplified mode (reduce details at small sizes)
     var simplifiedMode: Boolean = false
         set(value) {
             field = value
             invalidate()
         }
 
-    // 动画状态
+    // Animation state
     private var breatheScale = 1f
     private var isBlinking = false
     private var isHappy = false
     private var jumpOffset = 0f
     private var tailRotation = 0f
-    private var armRotation = 0f  // 新增：手臂旋转（挥手动画）
+    private var armRotation = 0f  // Arm rotation (wave animation)
 
-    // 画笔
+    // Paints
     private val lionBodyPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = Color.parseColor(COLOR_BODY)
         style = Paint.Style.FILL
@@ -121,7 +121,7 @@ class MascotLionView @JvmOverloads constructor(
     // Handler for animations
     private val handler = Handler(Looper.getMainLooper())
 
-    // 呼吸动画
+    // Breathing animation
     private val breatheAnimator = ValueAnimator.ofFloat(1f, 1.02f).apply {
         duration = 3000
         repeatMode = ValueAnimator.REVERSE
@@ -150,7 +150,7 @@ class MascotLionView @JvmOverloads constructor(
     private fun triggerHappyAnimation() {
         isHappy = true
 
-        // 跳跃动画
+        // Jump animation
         val jumpAnimator = ValueAnimator.ofFloat(0f, -20f, 0f).apply {
             duration = 500
             interpolator = AccelerateDecelerateInterpolator()
@@ -160,7 +160,7 @@ class MascotLionView @JvmOverloads constructor(
             }
         }
 
-        // 尾巴摆动动画
+        // Tail wag animation
         val waveAnimator = ValueAnimator.ofFloat(0f, -10f, 10f, -10f, 10f, 0f).apply {
             duration = 1000
             interpolator = AccelerateDecelerateInterpolator()
@@ -181,7 +181,7 @@ class MascotLionView @JvmOverloads constructor(
     }
 
     /**
-     * 设置小狮子表情
+     * Set lion mascot emotion
      */
     fun setEmotion(emotion: MascotEmotion) {
         currentEmotion = emotion
@@ -189,7 +189,7 @@ class MascotLionView @JvmOverloads constructor(
     }
 
     /**
-     * 庆祝动画 - 跳跃 + 尾巴摆动 + 庆祝表情
+     * Celebrate animation - jump + tail wag + celebrating emotion
      */
     fun celebrateAnimation() {
         currentEmotion = MascotEmotion.CELEBRATING
@@ -224,7 +224,7 @@ class MascotLionView @JvmOverloads constructor(
     }
 
     /**
-     * 挥手动画
+     * Wave animation
      */
     fun waveAnimation() {
         currentEmotion = MascotEmotion.WAVING
@@ -269,21 +269,21 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawPath(tailPath, tailPaint)
 
-        // 尾巴尖
+        // Tail tip
         canvas.drawCircle(170f * scale, 80f * scale, 10f * scale, nosePaint)
 
         canvas.restore()
     }
 
     private fun drawBody(canvas: Canvas, scale: Float) {
-        // 身体矩形
+        // Body rectangle
         val bodyRect = RectF(
             60f * scale, 100f * scale,
             140f * scale, 170f * scale
         )
         canvas.drawRoundRect(bodyRect, 20f * scale, 20f * scale, lionBodyPaint)
 
-        // 腹部渐变
+        // Belly gradient
         val bellyPath = Path().apply {
             moveTo(60f * scale, 100f * scale)
             quadTo(100f * scale, 120f * scale, 140f * scale, 100f * scale)
@@ -293,7 +293,7 @@ class MascotLionView @JvmOverloads constructor(
     }
 
     private fun drawLegs(canvas: Canvas, scale: Float) {
-        // 左腿
+        // Left leg
         val leftLeg = Path().apply {
             moveTo(70f * scale, 160f * scale)
             lineTo(70f * scale, 180f * scale)
@@ -306,7 +306,7 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawPath(leftLeg, lionBodyPaint)
 
-        // 右腿
+        // Right leg
         val rightLeg = Path().apply {
             moveTo(120f * scale, 160f * scale)
             lineTo(120f * scale, 180f * scale)
@@ -321,13 +321,13 @@ class MascotLionView @JvmOverloads constructor(
     }
 
     private fun drawHead(canvas: Canvas, scale: Float) {
-        // 主头部圆
+        // Main head circle
         canvas.drawCircle(100f * scale, 80f * scale, 45f * scale, lionBodyPaint)
 
-        // 内脸部圆
+        // Inner face circle
         canvas.drawCircle(100f * scale, 80f * scale, 35f * scale, lionFacePaint)
 
-        // 耳朵
+        // Ears
         canvas.drawCircle(65f * scale, 55f * scale, 12f * scale, lionBodyPaint)
         canvas.drawCircle(65f * scale, 55f * scale, 8f * scale, lionFacePaint)
         canvas.drawCircle(135f * scale, 55f * scale, 12f * scale, lionBodyPaint)
@@ -335,7 +335,7 @@ class MascotLionView @JvmOverloads constructor(
     }
 
     private fun drawFace(canvas: Canvas, scale: Float) {
-        // 根据表情绘制不同的脸部
+        // Draw different facial expressions based on emotion
         when (currentEmotion) {
             MascotEmotion.SAD -> drawSadFace(canvas, scale)
             MascotEmotion.THINKING -> drawThinkingFace(canvas, scale)
@@ -349,7 +349,7 @@ class MascotLionView @JvmOverloads constructor(
     private fun drawNormalFace(canvas: Canvas, scale: Float) {
         canvas.save()
 
-        // 眼睛 (眨眼时压扁)
+        // Eyes (squashed when blinking)
         if (isBlinking) {
             canvas.scale(1f, 0.1f, 100f * scale, 75f * scale)
         }
@@ -358,7 +358,7 @@ class MascotLionView @JvmOverloads constructor(
 
         canvas.restore()
 
-        // 嘴巴 (开心时弧度更大)
+        // Mouth (wider curve when happy)
         val mouthPath = Path()
         if (isHappy || currentEmotion == MascotEmotion.HAPPY) {
             mouthPath.moveTo(90f * scale, 90f * scale)
@@ -369,45 +369,45 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawPath(mouthPath, strokePaint)
 
-        // 鼻子
+        // Nose
         canvas.drawCircle(100f * scale, 85f * scale, 4f * scale, nosePaint)
     }
 
     private fun drawSadFace(canvas: Canvas, scale: Float) {
-        // 眼睛
+        // Eyes
         canvas.drawCircle(85f * scale, 75f * scale, 5f * scale, eyePaint)
         canvas.drawCircle(115f * scale, 75f * scale, 5f * scale, eyePaint)
 
-        // 伤心的嘴巴（向下弯曲）
+        // Sad mouth (curved downward)
         val mouthPath = Path().apply {
             moveTo(90f * scale, 95f * scale)
             quadTo(100f * scale, 85f * scale, 110f * scale, 95f * scale)
         }
         canvas.drawPath(mouthPath, strokePaint)
 
-        // 眼泪
+        // Tear
         val tearPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#60A5FA")
             style = Paint.Style.FILL
         }
         canvas.drawCircle(88f * scale, 82f * scale, 2f * scale, tearPaint)
 
-        // 鼻子
+        // Nose
         canvas.drawCircle(100f * scale, 85f * scale, 4f * scale, nosePaint)
     }
 
     private fun drawThinkingFace(canvas: Canvas, scale: Float) {
-        // 眼睛向上看
+        // Eyes looking up
         canvas.drawCircle(85f * scale, 73f * scale, 5f * scale, eyePaint)
         canvas.drawCircle(115f * scale, 73f * scale, 5f * scale, eyePaint)
 
-        // 思考的嘴巴（小圆形）
+        // Thinking mouth (small circle)
         canvas.drawCircle(100f * scale, 92f * scale, 3f * scale, strokePaint)
 
-        // 鼻子
+        // Nose
         canvas.drawCircle(100f * scale, 85f * scale, 4f * scale, nosePaint)
 
-        // 思考泡泡
+        // Thought bubble
         if (!simplifiedMode) {
             val bubblePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = Color.WHITE
@@ -420,24 +420,24 @@ class MascotLionView @JvmOverloads constructor(
     }
 
     private fun drawSleepingFace(canvas: Canvas, scale: Float) {
-        // 闭着的眼睛（横线）
+        // Closed eyes (horizontal lines)
         val sleepPaint = Paint(strokePaint).apply {
             strokeWidth = 4f * scale
         }
         canvas.drawLine(80f * scale, 75f * scale, 90f * scale, 75f * scale, sleepPaint)
         canvas.drawLine(110f * scale, 75f * scale, 120f * scale, 75f * scale, sleepPaint)
 
-        // 微笑的嘴巴
+        // Smiling mouth
         val mouthPath = Path().apply {
             moveTo(93f * scale, 90f * scale)
             quadTo(100f * scale, 93f * scale, 107f * scale, 90f * scale)
         }
         canvas.drawPath(mouthPath, strokePaint)
 
-        // 鼻子
+        // Nose
         canvas.drawCircle(100f * scale, 85f * scale, 4f * scale, nosePaint)
 
-        // ZZZ 睡眠符号
+        // ZZZ sleep symbol
         if (!simplifiedMode) {
             val zzzPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = Color.parseColor("#9CA3AF")
@@ -450,11 +450,11 @@ class MascotLionView @JvmOverloads constructor(
     }
 
     private fun drawConfusedFace(canvas: Canvas, scale: Float) {
-        // 一个眼睛大一个眼睛小
+        // One eye bigger, one eye smaller
         canvas.drawCircle(85f * scale, 75f * scale, 6f * scale, eyePaint)
         canvas.drawCircle(115f * scale, 75f * scale, 4f * scale, eyePaint)
 
-        // 波浪形嘴巴
+        // Wavy mouth
         val mouthPath = Path().apply {
             moveTo(90f * scale, 90f * scale)
             quadTo(95f * scale, 93f * scale, 100f * scale, 90f * scale)
@@ -462,10 +462,10 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawPath(mouthPath, strokePaint)
 
-        // 鼻子
+        // Nose
         canvas.drawCircle(100f * scale, 85f * scale, 4f * scale, nosePaint)
 
-        // 问号
+        // Question mark
         if (!simplifiedMode) {
             val questionPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = Color.parseColor(COLOR_BODY)
@@ -478,21 +478,21 @@ class MascotLionView @JvmOverloads constructor(
     }
 
     private fun drawCelebratingFace(canvas: Canvas, scale: Float) {
-        // 星星眼睛
+        // Star eyes
         canvas.drawCircle(85f * scale, 75f * scale, 6f * scale, eyePaint)
         canvas.drawCircle(115f * scale, 75f * scale, 6f * scale, eyePaint)
 
-        // 超大笑容
+        // Extra wide smile
         val mouthPath = Path().apply {
             moveTo(85f * scale, 90f * scale)
             quadTo(100f * scale, 105f * scale, 115f * scale, 90f * scale)
         }
         canvas.drawPath(mouthPath, strokePaint)
 
-        // 鼻子
+        // Nose
         canvas.drawCircle(100f * scale, 85f * scale, 4f * scale, nosePaint)
 
-        // 火花效果
+        // Sparkle effect
         if (!simplifiedMode) {
             val sparklePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
                 color = Color.parseColor(COLOR_GOLD)
@@ -524,14 +524,14 @@ class MascotLionView @JvmOverloads constructor(
             canvas.scale(breatheScale, breatheScale, 100f * scale, 100f * scale)
         }
 
-        // 绘制顺序: 尾巴 → 身体 → 腿 → 头部 → 脸部 → 身体装备 → 徽章 → 头部装备 → 脸部装备
+        // Draw order: tail -> body -> legs -> head -> face -> body outfit -> badge -> head outfit -> face outfit
         drawTail(canvas, scale)
         drawBody(canvas, scale)
         drawLegs(canvas, scale)
         drawHead(canvas, scale)
         drawFace(canvas, scale)
 
-        // 装备渲染
+        // Outfit rendering
         drawBodyOutfit(canvas, scale)
         drawBadge(canvas, scale)
         drawHeadOutfit(canvas, scale)
@@ -540,7 +540,7 @@ class MascotLionView @JvmOverloads constructor(
         canvas.restore()
     }
 
-    // ==================== 身体装备渲染 ====================
+    // ==================== Body Outfit Rendering ====================
 
     private fun drawBodyOutfit(canvas: Canvas, scale: Float) {
         when (outfit.body) {
@@ -568,14 +568,14 @@ class MascotLionView @JvmOverloads constructor(
             style = Paint.Style.FILL
         }
 
-        // 衬衫主体
+        // Shirt body
         val shirtRect = RectF(
             60f * scale, 103f * scale,
             140f * scale, 158f * scale
         )
         canvas.drawRoundRect(shirtRect, 8f * scale, 8f * scale, shirtPaint)
 
-        // 领子
+        // Collar
         val collarPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             style = Paint.Style.FILL
@@ -596,7 +596,7 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawPath(collarPath2, collarPaint)
 
-        // 纽扣线
+        // Button line
         val buttonPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#E5E7EB")
             style = Paint.Style.STROKE
@@ -604,7 +604,7 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawLine(100f * scale, 110f * scale, 100f * scale, 148f * scale, buttonPaint)
 
-        // 纽扣
+        // Buttons
         val buttonCirclePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor(COLOR_LIGHT_GRAY)
             style = Paint.Style.FILL
@@ -626,7 +626,7 @@ class MascotLionView @JvmOverloads constructor(
         )
         canvas.drawRoundRect(teeRect, 10f * scale, 10f * scale, teePaint)
 
-        // "NUS" 文字
+        // "NUS" text
         val nusPaint = Paint(textPaint).apply {
             color = Color.parseColor("#F97316")
             textSize = 32f * scale
@@ -646,7 +646,7 @@ class MascotLionView @JvmOverloads constructor(
         )
         canvas.drawRoundRect(hoodieRect, 15f * scale, 15f * scale, hoodiePaint)
 
-        // 拉链线
+        // Zipper line
         val zipperPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor(COLOR_NAVY)
             alpha = 25
@@ -668,7 +668,7 @@ class MascotLionView @JvmOverloads constructor(
         )
         canvas.drawRoundRect(plaidRect, 20f * scale, 20f * scale, plaidPaint)
 
-        // 格子线
+        // Plaid lines
         val linePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK
             alpha = 51
@@ -676,19 +676,19 @@ class MascotLionView @JvmOverloads constructor(
             strokeWidth = 8f * scale
         }
 
-        // 竖线
+        // Vertical lines
         listOf(70f, 90f, 110f, 130f).forEach { x ->
             canvas.drawLine(x * scale, 100f * scale, x * scale, 170f * scale, linePaint)
         }
 
-        // 横线
+        // Horizontal lines
         listOf(120f, 140f).forEach { y ->
             canvas.drawLine(60f * scale, y * scale, 140f * scale, y * scale, linePaint)
         }
     }
 
     private fun drawSuit(canvas: Canvas, scale: Float) {
-        // 黑色西装
+        // Black suit
         val suitPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor(COLOR_NAVY)
             style = Paint.Style.FILL
@@ -703,7 +703,7 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawPath(suitPath, suitPaint)
 
-        // 红色领带
+        // Red tie
         val tiePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor(COLOR_RED)
             style = Paint.Style.FILL
@@ -718,7 +718,7 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawPath(tiePath, tiePaint)
 
-        // 白色翻领
+        // White lapel
         val collarPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             alpha = 25
@@ -761,7 +761,7 @@ class MascotLionView @JvmOverloads constructor(
         canvas.drawRoundRect(coatRect, 15f * scale, 15f * scale, coatPaint)
         canvas.drawRoundRect(coatRect, 15f * scale, 15f * scale, coatStrokePaint)
 
-        // 中线
+        // Center line
         val centerLinePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor(COLOR_SLATE)
             style = Paint.Style.STROKE
@@ -769,7 +769,7 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawLine(100f * scale, 100f * scale, 100f * scale, 175f * scale, centerLinePaint)
 
-        // 领口
+        // Neckline
         val collarPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor("#CBD5E1")
             style = Paint.Style.STROKE
@@ -1078,7 +1078,7 @@ class MascotLionView @JvmOverloads constructor(
         canvas.drawRect(98f * scale, 123f * scale, 102f * scale, 130f * scale, crossPaint)
     }
 
-    // ==================== 徽章渲染 ====================
+    // ==================== Badge Rendering ====================
 
     private fun drawBadge(canvas: Canvas, scale: Float) {
         if (outfit.badge == "none" || outfit.badge.isEmpty()) return
@@ -1087,7 +1087,7 @@ class MascotLionView @JvmOverloads constructor(
         val badgeY = 140f * scale
         val badgeRadius = 14f * scale
 
-        // 白色圆形背景
+        // White circular background
         val badgeBgPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.WHITE
             style = Paint.Style.FILL
@@ -1095,7 +1095,7 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawCircle(badgeX, badgeY, badgeRadius, badgeBgPaint)
 
-        // 边框
+        // Border
         val badgeBorderPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor(COLOR_SLATE)
             style = Paint.Style.STROKE
@@ -1103,7 +1103,7 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawCircle(badgeX, badgeY, badgeRadius, badgeBorderPaint)
 
-        // 徽章图标 (emoji)
+        // Badge icon (emoji)
         val badgeIcon = getBadgeIcon(outfit.badge)
         val badgeTextPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             textAlign = Paint.Align.CENTER
@@ -1116,7 +1116,7 @@ class MascotLionView @JvmOverloads constructor(
 
     private fun getBadgeIcon(badgeId: String): String {
         return when (badgeId) {
-            // 支持数据库 ID
+            // Database ID support
             "badge_c1" -> "🌱"   // Eco Starter
             "badge_c2" -> "🚶"   // Green Walker
             "badge_c3" -> "♻️"   // Carbon Cutter
@@ -1128,7 +1128,7 @@ class MascotLionView @JvmOverloads constructor(
             "badge_c9" -> "👑"   // Sustainability King
             "badge_c10" -> "🏆"  // Legend of Earth
 
-            // 兼容旧 ID
+            // Legacy ID compatibility
             "a1", "1" -> "🌱"
             "a2", "2" -> "🚶"
             "a3", "3" -> "♻️"
@@ -1143,7 +1143,7 @@ class MascotLionView @JvmOverloads constructor(
         }
     }
 
-    // ==================== 头部装备渲染 ====================
+    // ==================== Head Outfit Rendering ====================
 
     private fun drawHeadOutfit(canvas: Canvas, scale: Float) {
         when (outfit.head) {
@@ -1166,11 +1166,11 @@ class MascotLionView @JvmOverloads constructor(
             style = Paint.Style.FILL
         }
 
-        // 帽顶
+        // Cap top
         val capTop = RectF(60f * scale, 35f * scale, 140f * scale, 45f * scale)
         canvas.drawRect(capTop, capPaint)
 
-        // 三角帽身
+        // Triangular cap body
         val capPath = Path().apply {
             moveTo(70f * scale, 35f * scale)
             lineTo(130f * scale, 35f * scale)
@@ -1179,7 +1179,7 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawPath(capPath, capPaint)
 
-        // 流苏
+        // Tassel
         val tasselPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor(COLOR_FACE)
             style = Paint.Style.STROKE
@@ -1194,14 +1194,14 @@ class MascotLionView @JvmOverloads constructor(
             style = Paint.Style.FILL
         }
 
-        // 帽子主体
+        // Hat body
         val capPath = Path().apply {
             moveTo(60f * scale, 50f * scale)
             quadTo(100f * scale, 20f * scale, 140f * scale, 50f * scale)
         }
         canvas.drawPath(capPath, capPaint)
 
-        // 帽舌
+        // Visor
         val visorRect = RectF(130f * scale, 45f * scale, 150f * scale, 50f * scale)
         canvas.drawRoundRect(visorRect, 2f * scale, 2f * scale, capPaint)
     }
@@ -1218,7 +1218,7 @@ class MascotLionView @JvmOverloads constructor(
             strokeWidth = 4f * scale
         }
 
-        // 帽子主体
+        // Hat body
         val helmetPath = Path().apply {
             moveTo(55f * scale, 55f * scale)
             quadTo(100f * scale, 20f * scale, 145f * scale, 55f * scale)
@@ -1226,7 +1226,7 @@ class MascotLionView @JvmOverloads constructor(
         canvas.drawPath(helmetPath, helmetPaint)
         canvas.drawPath(helmetPath, helmetStroke)
 
-        // 帽檐
+        // Brim
         val brimRect = RectF(55f * scale, 55f * scale, 145f * scale, 65f * scale)
         canvas.drawRoundRect(brimRect, 2f * scale, 2f * scale, helmetPaint)
         canvas.drawRoundRect(brimRect, 2f * scale, 2f * scale, helmetStroke)
@@ -1238,7 +1238,7 @@ class MascotLionView @JvmOverloads constructor(
             style = Paint.Style.FILL
         }
 
-        // 贝雷帽主体
+        // Beret body
         val beretPath = Path().apply {
             moveTo(150f * scale, 40f * scale)
             quadTo(120f * scale, 20f * scale, 70f * scale, 45f * scale)
@@ -1247,7 +1247,7 @@ class MascotLionView @JvmOverloads constructor(
         }
         canvas.drawPath(beretPath, beretPaint)
 
-        // 顶部小球
+        // Top pompom
         val pompomRect = RectF(98f * scale, 20f * scale, 102f * scale, 28f * scale)
         canvas.drawRect(pompomRect, beretPaint)
     }
@@ -1430,7 +1430,7 @@ class MascotLionView @JvmOverloads constructor(
         canvas.drawCircle(80f * scale, 42f * scale, 2f * scale, starPaint)
     }
 
-    // ==================== 脸部装备渲染 ====================
+    // ==================== Face Outfit Rendering ====================
 
     private fun drawFaceOutfit(canvas: Canvas, scale: Float) {
         when (outfit.face) {
@@ -1453,18 +1453,18 @@ class MascotLionView @JvmOverloads constructor(
             strokeWidth = 3f * scale
         }
 
-        // 左镜框（方形）
+        // Left frame (square)
         val leftFrame = RectF(75f * scale, 68f * scale, 95f * scale, 82f * scale)
         canvas.drawRect(leftFrame, glassesPaint)
 
-        // 右镜框（方形）
+        // Right frame (square)
         val rightFrame = RectF(105f * scale, 68f * scale, 125f * scale, 82f * scale)
         canvas.drawRect(rightFrame, glassesPaint)
 
-        // 鼻梁
+        // Nose bridge
         canvas.drawLine(95f * scale, 75f * scale, 105f * scale, 75f * scale, glassesPaint)
 
-        // 镜腿
+        // Temple arms
         val framePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK
             style = Paint.Style.STROKE
@@ -1480,15 +1480,15 @@ class MascotLionView @JvmOverloads constructor(
             style = Paint.Style.FILL
         }
 
-        // 左镜片
+        // Left lens
         val leftLens = RectF(75f * scale, 70f * scale, 95f * scale, 80f * scale)
         canvas.drawRoundRect(leftLens, 2f * scale, 2f * scale, glassesPaint)
 
-        // 右镜片
+        // Right lens
         val rightLens = RectF(105f * scale, 70f * scale, 125f * scale, 80f * scale)
         canvas.drawRoundRect(rightLens, 2f * scale, 2f * scale, glassesPaint)
 
-        // 鼻梁
+        // Nose bridge
         val bridgePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.BLACK
             style = Paint.Style.STROKE
@@ -1510,20 +1510,20 @@ class MascotLionView @JvmOverloads constructor(
             strokeWidth = 4f * scale
         }
 
-        // 左镜片
+        // Left lens
         val leftGoggles = RectF(70f * scale, 65f * scale, 95f * scale, 80f * scale)
         canvas.drawRoundRect(leftGoggles, 5f * scale, 5f * scale, goggleLensPaint)
         canvas.drawRoundRect(leftGoggles, 5f * scale, 5f * scale, goggleStrokePaint)
 
-        // 右镜片
+        // Right lens
         val rightGoggles = RectF(105f * scale, 65f * scale, 130f * scale, 80f * scale)
         canvas.drawRoundRect(rightGoggles, 5f * scale, 5f * scale, goggleLensPaint)
         canvas.drawRoundRect(rightGoggles, 5f * scale, 5f * scale, goggleStrokePaint)
 
-        // 连接鼻梁
+        // Connecting nose bridge
         canvas.drawLine(95f * scale, 72f * scale, 105f * scale, 72f * scale, goggleStrokePaint)
 
-        // 侧边带子
+        // Side straps
         val strapPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = Color.parseColor(COLOR_NAVY)
             style = Paint.Style.STROKE
@@ -1697,10 +1697,10 @@ class MascotLionView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        // 使用预设尺寸
+        // Use preset size
         val desiredSize = (mascotSize.dp * resources.displayMetrics.density).toInt()
 
-        // 小尺寸时自动启用简化模式
+        // Auto-enable simplified mode at small sizes
         simplifiedMode = mascotSize == MascotSize.SMALL || mascotSize == MascotSize.MEDIUM
 
         val widthMode = MeasureSpec.getMode(widthMeasureSpec)

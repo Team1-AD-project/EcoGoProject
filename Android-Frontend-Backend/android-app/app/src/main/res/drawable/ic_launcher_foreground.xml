@@ -4,11 +4,11 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- 背景圆形 -->
+    <!-- Background circle -->
     <path
         android:fillColor="#4CAF50"
         android:pathData="M54,54m-40,0a40,40 0,1 1,80 0a40,40 0,1 1,-80 0" />
-    <!-- 叶子图标 -->
+    <!-- Leaf icon -->
     <path
         android:fillColor="#FFFFFF"
         android:pathData="M54,30 Q70,45 54,70 Q38,45 54,30 Z" />

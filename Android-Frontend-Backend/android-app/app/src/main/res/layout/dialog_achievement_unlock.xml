@@ -28,7 +28,7 @@
                 android:textColor="@color/primary"
                 android:layout_marginBottom="24dp" />
 
-            <!-- 大尺寸小狮子展示 -->
+            <!-- Large mascot lion display -->
             <FrameLayout
                 android:layout_width="200dp"
                 android:layout_height="200dp"
@@ -39,7 +39,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
-                <!-- 徽章动画层 -->
+                <!-- Badge animation layer -->
                 <ImageView
                     android:id="@+id/image_badge_drop"
                     android:layout_width="32dp"
@@ -50,7 +50,7 @@
 
             </FrameLayout>
 
-            <!-- 成就信息 -->
+            <!-- Achievement info -->
             <TextView
                 android:id="@+id/text_achievement_name"
                 android:layout_width="wrap_content"
@@ -71,7 +71,7 @@
                 android:gravity="center"
                 android:layout_marginBottom="20dp" />
 
-            <!-- 积分奖励 -->
+            <!-- Points reward -->
             <LinearLayout
                 android:id="@+id/layout_points_reward"
                 android:layout_width="wrap_content"
@@ -111,7 +111,7 @@
 
             </LinearLayout>
 
-            <!-- 确认按钮 -->
+            <!-- Confirm button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_awesome"
                 android:layout_width="match_parent"

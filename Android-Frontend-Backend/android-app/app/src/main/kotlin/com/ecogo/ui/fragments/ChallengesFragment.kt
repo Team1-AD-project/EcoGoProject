@@ -23,7 +23,7 @@ import kotlinx.coroutines.launch
 /**
  * Challenges List Page
  * Display all available challenge tasks
- * 从后端API获取挑战数据
+ * Fetches challenge data from backend API
  */
 class ChallengesFragment : Fragment() {
 
@@ -73,7 +73,7 @@ class ChallengesFragment : Fragment() {
 
     private fun setupRecyclerView() {
         challengeAdapter = ChallengeAdapter(emptyList()) { challenge ->
-            // 点击挑战导航到详情页
+            // Navigate to challenge detail on click
             val action = ChallengesFragmentDirections
                 .actionChallengesToChallengeDetail(challengeId = challenge.id)
             findNavController().navigate(action)
@@ -86,7 +86,7 @@ class ChallengesFragment : Fragment() {
     }
 
     /**
-     * 从后端API获取挑战数据
+     * Fetch challenge data from backend API
      */
     private fun fetchChallengesFromApi() {
         showLoading(true)
@@ -142,7 +142,7 @@ class ChallengesFragment : Fragment() {
     }
 
     /**
-     * 根据当前筛选条件显示挑战
+     * Display challenges based on current filter
      */
     private fun filterAndDisplayChallenges() {
         val filtered = when (currentFilter) {
@@ -164,7 +164,7 @@ class ChallengesFragment : Fragment() {
     }
 
     private fun showLoading(show: Boolean) {
-        // 如果有loading指示器可以在这里显示/隐藏
+        // Show/hide loading indicator if available
         if (show) {
             binding.recyclerChallenges.visibility = View.GONE
         }

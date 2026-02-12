@@ -44,7 +44,7 @@ class ShopGoodsDetailFragment : Fragment() {
         binding.btnBack.setOnClickListener { findNavController().navigateUp() }
         binding.btnUse.visibility = View.GONE
 
-        // Shop 详情页不展示 voucher code 区
+        // Shop detail page does not show voucher code section
         binding.layoutVoucherInfo.visibility = View.GONE
         binding.layoutRedeemAction.visibility = View.VISIBLE
 
@@ -66,7 +66,7 @@ class ShopGoodsDetailFragment : Fragment() {
                 binding.textName.text = g.name
                 binding.textDescription.text = g.description ?: ""
 
-                // ✅ 这里改为显示积分
+                // Display points cost
                 binding.textCost.text = "$goodsPoints pts"
 
                 binding.textInstructions.text =
@@ -109,7 +109,7 @@ class ShopGoodsDetailFragment : Fragment() {
     private fun performRedeem() {
         binding.btnRedeem.isEnabled = false
 
-        // ✅ 你们是积分兑换单：price/subtotal 建议固定 0，避免前端/后端出现“现金购买”的误导
+        // Points redemption order: price/subtotal set to 0 to avoid confusion with cash purchase
         val order = OrderCreateRequest(
             userId = currentUserId,
             items = listOf(

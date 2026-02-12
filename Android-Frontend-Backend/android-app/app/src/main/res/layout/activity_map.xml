@@ -17,7 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 顶部搜索卡片 -->
+    <!-- Top search card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardSearch"
         android:layout_width="match_parent"
@@ -35,7 +35,7 @@
             android:orientation="horizontal"
             android:padding="8dp">
 
-            <!-- 左侧图标列 -->
+            <!-- Left icon column -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -43,20 +43,20 @@
                 android:orientation="vertical"
                 android:paddingHorizontal="8dp">
 
-                <!-- 起点圆点 (蓝色) -->
+                <!-- Origin dot (blue) -->
                 <View
                     android:layout_width="12dp"
                     android:layout_height="12dp"
                     android:background="@drawable/circle_blue" />
 
-                <!-- 连接线 -->
+                <!-- Connector line -->
                 <View
                     android:layout_width="2dp"
                     android:layout_height="20dp"
                     android:layout_marginVertical="4dp"
                     android:background="#CCCCCC" />
 
-                <!-- 终点圆点 (绿色) -->
+                <!-- Destination dot (green) -->
                 <View
                     android:layout_width="12dp"
                     android:layout_height="12dp"
@@ -64,20 +64,20 @@
 
             </LinearLayout>
 
-            <!-- 搜索输入框列 -->
+            <!-- Search input column -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <!-- 起点输入框 -->
+                <!-- Origin input -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilOrigin"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="起点"
+                    android:hint="Origin"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
@@ -90,19 +90,19 @@
                         android:layout_height="wrap_content"
                         android:focusable="false"
                         android:clickable="true"
-                        android:text="我的位置"
+                        android:text="My Location"
                         android:textSize="14sp" />
 
                 </com.google.android.material.textfield.TextInputLayout>
 
-                <!-- 终点输入框 -->
+                <!-- Destination input -->
                 <com.google.android.material.textfield.TextInputLayout
                     android:id="@+id/tilDestination"
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
-                    android:hint="目的地"
+                    android:hint="Destination"
                     app:boxCornerRadiusBottomEnd="8dp"
                     app:boxCornerRadiusBottomStart="8dp"
                     app:boxCornerRadiusTopEnd="8dp"
@@ -121,7 +121,7 @@
 
             </LinearLayout>
 
-            <!-- 交换按钮 -->
+            <!-- Swap button -->
             <ImageButton
                 android:id="@+id/btnSwap"
                 android:layout_width="40dp"
@@ -129,7 +129,7 @@
                 android:layout_gravity="center"
                 android:layout_marginStart="4dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="交换起点终点"
+                android:contentDescription="Swap origin and destination"
                 android:src="@android:drawable/stat_notify_sync"
                 app:tint="#666666" />
 
@@ -137,7 +137,7 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 交通方式选择卡片 -->
+    <!-- Transport mode selection card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardTransportModes"
         android:layout_width="match_parent"
@@ -201,7 +201,7 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 路线信息卡片 -->
+    <!-- Route info card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardRouteInfo"
         android:layout_width="match_parent"
@@ -242,7 +242,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textSize="13sp"
-                    tools:text="减碳: 0.5 kg" />
+                    tools:text="Carbon saved: 0.5 kg" />
 
                 <TextView
                     android:id="@+id/tvDuration"
@@ -250,7 +250,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:textSize="13sp"
-                    tools:text="预计: 15 分钟" />
+                    tools:text="Estimated: 15 min" />
 
             </LinearLayout>
 
@@ -262,9 +262,9 @@
                 android:textSize="13sp"
                 android:textColor="#FF5722"
                 android:visibility="gone"
-                tools:text="用时: 00:00" />
+                tools:text="Elapsed: 00:00" />
 
-            <!-- 累计环保贡献 -->
+            <!-- Cumulative eco contribution -->
             <TextView
                 android:id="@+id/tvCumulativeImpact"
                 android:layout_width="wrap_content"
@@ -273,9 +273,9 @@
                 android:textSize="12sp"
                 android:textColor="#4CAF50"
                 android:visibility="gone"
-                tools:text="🌱 本周绿色出行 5 次，累计减碳 2.5 kg" />
+                tools:text="🌱 5 green trips this week, total CO2 saved 2.5 kg" />
 
-            <!-- 路线选择列表（仅公交模式显示） -->
+            <!-- Route selection list (transit mode only) -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvRouteOptions"
                 android:layout_width="match_parent"
@@ -287,7 +287,7 @@
                 tools:itemCount="3"
                 tools:listitem="@layout/item_route_option" />
 
-            <!-- 详细步骤列表 -->
+            <!-- Detailed steps list -->
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rvRouteSteps"
                 android:layout_width="match_parent"
@@ -302,7 +302,7 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 加载指示器 -->
+    <!-- Loading indicator -->
     <ProgressBar
         android:id="@+id/progressBar"
         android:layout_width="wrap_content"
@@ -313,7 +313,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 广告轮播区域 -->
+    <!-- Ad carousel area -->
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/layoutAdCarousel"
         android:layout_width="0dp"
@@ -354,7 +354,7 @@
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- 底部操作面板（开始行程按钮） -->
+    <!-- Bottom action panel (start trip button) -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardBottomPanel"
         android:layout_width="match_parent"
@@ -374,7 +374,7 @@
             android:orientation="vertical"
             android:padding="12dp">
 
-            <!-- 行程控制按钮 -->
+            <!-- Trip control button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnTracking"
                 android:layout_width="match_parent"
@@ -386,14 +386,14 @@
 
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 定位按钮 -->
+    <!-- Location button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fabMyLocation"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
         android:layout_marginBottom="100dp"
-        android:contentDescription="我的位置"
+        android:contentDescription="My location"
         android:src="@android:drawable/ic_menu_mylocation"
         app:fabSize="normal"
         app:layout_constraintBottom_toBottomOf="parent"

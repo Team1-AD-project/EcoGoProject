@@ -34,7 +34,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- 统计卡片 -->
+            <!-- Statistics card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -50,7 +50,7 @@
                     android:orientation="horizontal"
                     android:padding="20dp">
 
-                    <!-- 连续签到 -->
+                    <!-- Consecutive check-ins -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -86,7 +86,7 @@
                         android:alpha="0.3"
                         android:background="@color/text_white" />
 
-                    <!-- 累计签到 -->
+                    <!-- Total check-ins -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -122,7 +122,7 @@
                         android:alpha="0.3"
                         android:background="@color/text_white" />
 
-                    <!-- 本月签到 -->
+                    <!-- This month check-ins -->
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
@@ -152,7 +152,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 日历卡片 -->
+            <!-- Calendar card -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -168,7 +168,7 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- 月份导航 -->
+                    <!-- Month navigation -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -191,11 +191,11 @@
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
                             android:gravity="center"
-                            android:text="二月 2026"
+                            android:text="February 2026"
                             android:textColor="@color/text_primary"
                             android:textSize="18sp"
                             android:textStyle="bold"
-                            tools:text="二月 2026" />
+                            tools:text="February 2026" />
 
                         <ImageButton
                             android:id="@+id/button_next_month"
@@ -209,7 +209,7 @@
                             app:tint="@color/text_secondary" />
                     </LinearLayout>
 
-                    <!-- 日历网格 -->
+                    <!-- Calendar grid -->
                     <LinearLayout
                         android:id="@+id/calendar_grid"
                         android:layout_width="match_parent"
@@ -219,7 +219,7 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- 选中日期信息 -->
+            <!-- Selected date info -->
             <LinearLayout
                 android:id="@+id/layout_date_info"
                 android:layout_width="match_parent"
@@ -249,11 +249,11 @@
                         android:layout_height="wrap_content"
                         android:layout_marginStart="12dp"
                         android:layout_weight="1"
-                        android:text="二月 15日"
+                        android:text="February 15"
                         android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold"
-                        tools:text="二月 15日" />
+                        tools:text="February 15" />
 
                     <TextView
                         android:id="@+id/text_check_in_info"
@@ -266,7 +266,7 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 签到按钮 -->
+            <!-- Check-in button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/button_check_in"
                 android:layout_width="match_parent"
@@ -281,7 +281,7 @@
                 app:iconGravity="textStart"
                 app:iconSize="24dp" />
 
-            <!-- 签到规则说明 -->
+            <!-- Check-in rules -->
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -317,7 +317,7 @@
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- 签到成功提示 -->
+    <!-- Check-in success notification -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/layout_success"
         android:layout_width="match_parent"

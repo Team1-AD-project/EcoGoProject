@@ -41,7 +41,7 @@ class OnboardingFragment : Fragment() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
                 updateProgressDots(position)
-                if (position == 4) {  // 改为4，因为现在有5页（0-4）
+                if (position == 4) {  // Changed to 4 since there are now 5 pages (0-4)
                     binding.buttonNext.text = getString(R.string.onboarding_get_started)
                     binding.buttonNext.icon = null
                 } else {
@@ -55,18 +55,18 @@ class OnboardingFragment : Fragment() {
         
         binding.buttonNext.setOnClickListener {
             val currentItem = binding.viewPager.currentItem
-            if (currentItem < 4) {  // 改为4
+            if (currentItem < 4) {  // Changed to 4
                 binding.viewPager.setCurrentItem(currentItem + 1, true)
             } else {
                 Log.d("DEBUG_ONBOARDING", "Next button clicked - attempting navigate to home")
-                Toast.makeText(requireContext(), "🔄 正在跳转到主页...", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "Navigating to home...", Toast.LENGTH_SHORT).show()
                 try {
                     findNavController().navigate(R.id.action_onboarding_to_home)
                     Log.d("DEBUG_ONBOARDING", "Navigate to home completed successfully")
-                    Toast.makeText(requireContext(), "✅ 导航命令已执行", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(requireContext(), "Navigation command executed", Toast.LENGTH_SHORT).show()
                 } catch (e: Exception) {
                     Log.e("DEBUG_ONBOARDING", "Navigation to home FAILED: ${e.message}", e)
-                    Toast.makeText(requireContext(), "❌ 导航错误: ${e.message}", Toast.LENGTH_LONG).show()
+                    Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_LONG).show()
                 }
             }
         }
@@ -78,17 +78,17 @@ class OnboardingFragment : Fragment() {
                 Log.d("DEBUG_ONBOARDING", "Navigate to home completed from skip")
             } catch (e: Exception) {
                 Log.e("DEBUG_ONBOARDING", "Navigation to home from skip FAILED: ${e.message}", e)
-                Toast.makeText(requireContext(), "导航错误: ${e.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), "Navigation error: ${e.message}", Toast.LENGTH_LONG).show()
             }
         }
     }
     
     private fun updateProgressDots(position: Int) {
-        // 注意：布局中只有3个点，但我们有5页内容
-        // 这里可以保持原样，或者动态更新。为了简单起见，先保持原样
+        // Note: layout only has 3 dots but we have 5 pages of content
+        // Keeping as-is for simplicity; could be dynamically updated
         val dots = listOf(binding.dot1, binding.dot2, binding.dot3)
         
-        // 将5页映射到3个点：页0-1→点0，页2→点1，页3-4→点2
+        // Map 5 pages to 3 dots: pages 0-1 -> dot 0, page 2 -> dot 1, pages 3-4 -> dot 2
         val dotPosition = when (position) {
             0, 1 -> 0
             2 -> 1

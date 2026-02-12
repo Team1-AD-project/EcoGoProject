@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- 商品图标 -->
+        <!-- Product Icon -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_image"
             android:layout_width="72dp"
@@ -38,7 +38,7 @@
                 android:textSize="40sp" />
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 商品标签（左上角） -->
+        <!-- Product Label (Top Left) -->
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_stock"
             android:layout_width="wrap_content"
@@ -56,7 +56,7 @@
             app:layout_constraintStart_toStartOf="@id/card_image"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <!-- 商品信息 -->
+        <!-- Product Info -->
         <LinearLayout
             android:id="@+id/layout_info"
             android:layout_width="0dp"
@@ -69,7 +69,7 @@
             app:layout_constraintStart_toEndOf="@id/card_image"
             app:layout_constraintTop_toTopOf="@id/card_image">
 
-            <!-- 商品名称 -->
+            <!-- Product Name -->
             <TextView
                 android:id="@+id/text_goods_name"
                 android:layout_width="match_parent"
@@ -82,7 +82,7 @@
                 android:textSize="17sp"
                 android:textStyle="bold" />
 
-            <!-- 分类标签 -->
+            <!-- Category Label -->
             <com.google.android.material.chip.Chip
                 android:id="@+id/chip_category"
                 android:layout_width="wrap_content"
@@ -96,7 +96,7 @@
                 app:chipStartPadding="6dp"
                 app:chipEndPadding="6dp" />
 
-            <!-- 商品描述 -->
+            <!-- Product Description -->
             <TextView
                 android:id="@+id/text_goods_description"
                 android:layout_width="match_parent"
@@ -110,7 +110,7 @@
                 android:textSize="13sp" />
         </LinearLayout>
 
-        <!-- 价格和按钮 -->
+        <!-- Price and Buttons -->
         <LinearLayout
             android:id="@+id/layout_price"
             android:layout_width="wrap_content"
@@ -121,7 +121,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/card_image">
 
-            <!-- 价格显示 -->
+            <!-- Price Display -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -149,7 +149,7 @@
                     android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- 兑换按钮 -->
+            <!-- Redeem Button -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_redeem_goods"
                 android:layout_width="wrap_content"

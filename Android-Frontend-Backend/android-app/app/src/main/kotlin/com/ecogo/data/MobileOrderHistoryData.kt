@@ -4,13 +4,13 @@ import com.ecogo.api.PaginationDto
 import com.google.gson.annotations.SerializedName
 
 /**
- * 对齐后端 OrderController 返回的 data:
+ * Aligned with backend OrderController response data:
  * {
  *   "orders": [ { ... } ],
  *   "pagination": { ... }
  * }
  *
- * 同时兼容你旧写法如果 data 里叫 data: [ ... ]
+ * Also backward-compatible if the data field is named "data: [ ... ]"
  */
 data class MobileOrderHistoryData(
     @SerializedName(value = "orders", alternate = ["data"])

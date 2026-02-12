@@ -14,9 +14,9 @@ import com.ecogo.databinding.FragmentTripStartBinding
 import com.ecogo.viewmodel.NavigationViewModel
 
 /**
- * 行程开始确认页面
- * 展示选择的路线信息，预计时间、距离、积分等
- * 包含小狮子准备出发动画
+ * Trip start confirmation page
+ * Shows selected route info, estimated time, distance, points, etc.
+ * Includes mascot ready-to-go animation
  */
 class TripStartFragment : Fragment() {
 
@@ -48,7 +48,7 @@ class TripStartFragment : Fragment() {
     private fun setupMascot() {
         binding.mascotStart.apply {
             mascotSize = MascotSize.LARGE
-            // 挥手准备出发动画
+            // Waving ready-to-go animation
             waveAnimation()
         }
     }
@@ -59,11 +59,11 @@ class TripStartFragment : Fragment() {
         }
         
         binding.btnStartTrip.setOnClickListener {
-            // 开始按钮点击动画
+            // Start button click animation
             val jump = AnimationUtils.loadAnimation(requireContext(), R.anim.jump)
             binding.btnStartTrip.startAnimation(jump)
             
-            // 延迟一点启动行程，让动画完成
+            // Delay trip start slightly to let animation finish
             binding.root.postDelayed({
                 startTrip()
             }, 300)
@@ -73,24 +73,24 @@ class TripStartFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.currentRoute.observe(viewLifecycleOwner) { route ->
             route?.let {
-                // 显示路线信息
+                // Display route info
                 binding.textRouteName.text = when (it.mode) {
-                    com.ecogo.data.TransportMode.WALK -> "步行路线"
-                    com.ecogo.data.TransportMode.CYCLE -> "骑行路线"
-                    com.ecogo.data.TransportMode.BUS -> "公交路线"
-                    com.ecogo.data.TransportMode.MIXED -> "混合路线"
+                    com.ecogo.data.TransportMode.WALK -> "Walking Route"
+                    com.ecogo.data.TransportMode.CYCLE -> "Cycling Route"
+                    com.ecogo.data.TransportMode.BUS -> "Bus Route"
+                    com.ecogo.data.TransportMode.MIXED -> "Mixed Route"
                 }
                 
                 binding.textOrigin.text = it.origin.name
                 binding.textDestination.text = it.destination.name
                 
-                // 预计信息
-                binding.textEstimatedTime.text = "${it.duration} 分钟"
-                binding.textEstimatedDistance.text = String.format("%.1f 公里", it.distance)
+                // Estimated info
+                binding.textEstimatedTime.text = "${it.duration} min"
+                binding.textEstimatedDistance.text = String.format("%.1f km", it.distance)
                 binding.textCarbonSaved.text = String.format("%.0f g CO₂", it.carbonSaved)
-                binding.textPointsEarn.text = "+${it.points} 积分"
+                binding.textPointsEarn.text = "+${it.points} points"
                 
-                // 如果有推荐标签
+                // If there's a recommendation tag
                 if (it.badge.isNotEmpty()) {
                     binding.badgeRecommended.visibility = View.VISIBLE
                     binding.badgeRecommended.text = it.badge
@@ -110,7 +110,7 @@ class TripStartFragment : Fragment() {
     }
     
     private fun startTrip() {
-        // 开始行程，导航到进行中页面
+        // Start trip, navigate to in-progress page
         val action = TripStartFragmentDirections.actionTripStartToInProgress()
         findNavController().navigate(action)
     }

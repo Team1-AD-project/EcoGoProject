@@ -10,89 +10,89 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 /**
- * 导航ViewModel
- * 管理导航相关的状态和数据
+ * Navigation ViewModel
+ * Manages navigation-related state and data
  */
 class NavigationViewModel : ViewModel() {
     
-    // 导航状态
+    // Navigation state
     private val _navigationState = MutableLiveData(NavigationState.IDLE)
     val navigationState: LiveData<NavigationState> = _navigationState
-    
-    // 当前路线
+
+    // Current route
     private val _currentRoute = MutableLiveData<NavRoute?>()
     val currentRoute: LiveData<NavRoute?> = _currentRoute
-    
-    // 路线选项列表
+
+    // Route options list
     private val _routeOptions = MutableLiveData<List<NavRoute>>()
     val routeOptions: LiveData<List<NavRoute>> = _routeOptions
-    
-    // 当前行程
+
+    // Current trip
     private val _currentTrip = MutableLiveData<Trip?>()
     val currentTrip: LiveData<Trip?> = _currentTrip
-    
-    // 行程状态
+
+    // Trip status
     private val _tripStatus = MutableLiveData<TripStatus>()
     val tripStatus: LiveData<TripStatus> = _tripStatus
-    
-    // 历史行程列表
+
+    // Trip history list
     private val _tripHistory = MutableLiveData<List<Trip>>(emptyList())
     val tripHistory: LiveData<List<Trip>> = _tripHistory
-    
-    // 选中的起点和终点
+
+    // Selected origin and destination
     private val _selectedOrigin = MutableLiveData<NavLocation?>()
     val selectedOrigin: LiveData<NavLocation?> = _selectedOrigin
-    
+
     private val _selectedDestination = MutableLiveData<NavLocation?>()
     val selectedDestination: LiveData<NavLocation?> = _selectedDestination
-    
-    // 选中的交通方式
+
+    // Selected transport mode
     private val _selectedMode = MutableLiveData(TransportMode.WALK)
     val selectedMode: LiveData<TransportMode> = _selectedMode
-    
-    // 实时碳排放节省
+
+    // Real-time carbon emission savings
     private val _realTimeCarbonSaved = MutableLiveData(0.0)
     val realTimeCarbonSaved: LiveData<Double> = _realTimeCarbonSaved
-    
-    // 实时积分
+
+    // Real-time points
     private val _realTimePoints = MutableLiveData(0)
     val realTimePoints: LiveData<Int> = _realTimePoints
     
     /**
-     * 设置起点
+     * Set origin
      */
     fun setOrigin(location: NavLocation) {
         _selectedOrigin.value = location
-        // 如果起点和终点都已选择，自动计算路线
+        // Auto-calculate routes if both origin and destination are selected
         if (_selectedDestination.value != null) {
             calculateRoutes()
         }
     }
-    
+
     /**
-     * 设置终点
+     * Set destination
      */
     fun setDestination(location: NavLocation) {
         _selectedDestination.value = location
-        // 如果起点和终点都已选择，自动计算路线
+        // Auto-calculate routes if both origin and destination are selected
         if (_selectedOrigin.value != null) {
             calculateRoutes()
         }
     }
-    
+
     /**
-     * 设置交通方式
+     * Set transport mode
      */
     fun setTransportMode(mode: TransportMode) {
         _selectedMode.value = mode
-        // 重新计算路线
+        // Recalculate routes
         if (_selectedOrigin.value != null && _selectedDestination.value != null) {
             calculateRoutes()
         }
     }
-    
+
     /**
-     * 计算路线（多种方案）
+     * Calculate routes (multiple options)
      */
     fun calculateRoutes() {
         val origin = _selectedOrigin.value ?: return
@@ -103,12 +103,12 @@ class NavigationViewModel : ViewModel() {
         
         viewModelScope.launch {
             try {
-                // TODO: 调用真实的路线计算API
-                // 现在使用模拟数据
+                // TODO: Call real route calculation API
+                // Currently using mock data
                 val routes = generateMockRoutes(origin, destination, mode)
                 _routeOptions.value = routes
-                
-                // 设置推荐路线为当前路线
+
+                // Set recommended route as current route
                 routes.firstOrNull { it.isRecommended }?.let {
                     _currentRoute.value = it
                 }
@@ -120,14 +120,14 @@ class NavigationViewModel : ViewModel() {
     }
     
     /**
-     * 选择路线
+     * Select route
      */
     fun selectRoute(route: NavRoute) {
         _currentRoute.value = route
     }
     
     /**
-     * 开始导航
+     * Start navigation
      */
     fun startNavigation() {
         val route = _currentRoute.value ?: return
@@ -151,7 +151,7 @@ class NavigationViewModel : ViewModel() {
     }
     
     /**
-     * 暂停导航
+     * Pause navigation
      */
     fun pauseNavigation() {
         _currentTrip.value?.let { trip ->
@@ -161,7 +161,7 @@ class NavigationViewModel : ViewModel() {
     }
     
     /**
-     * 恢复导航
+     * Resume navigation
      */
     fun resumeNavigation() {
         _currentTrip.value?.let { trip ->
@@ -171,7 +171,7 @@ class NavigationViewModel : ViewModel() {
     }
     
     /**
-     * 结束导航
+     * End navigation
      */
     fun endNavigation() {
         _currentTrip.value?.let { trip ->
@@ -186,13 +186,13 @@ class NavigationViewModel : ViewModel() {
             _tripStatus.value = TripStatus.COMPLETED
             _navigationState.value = NavigationState.COMPLETED
             
-            // 保存到历史记录
+            // Save to history
             saveTripToHistory(completedTrip)
         }
     }
     
     /**
-     * 取消导航
+     * Cancel navigation
      */
     fun cancelNavigation() {
         _currentTrip.value?.let { trip ->
@@ -207,7 +207,7 @@ class NavigationViewModel : ViewModel() {
     }
     
     /**
-     * 重置导航状态
+     * Reset navigation state
      */
     fun resetNavigation() {
         _navigationState.value = NavigationState.IDLE
@@ -220,7 +220,7 @@ class NavigationViewModel : ViewModel() {
     }
     
     /**
-     * 更新实时碳排放节省
+     * Update real-time carbon emission savings
      */
     fun updateRealTimeCarbonSaved(distance: Double) {
         val mode = _currentRoute.value?.mode ?: TransportMode.WALK
@@ -230,28 +230,28 @@ class NavigationViewModel : ViewModel() {
     }
     
     /**
-     * 保存行程到历史记录
+     * Save trip to history
      */
     private fun saveTripToHistory(trip: Trip) {
         val currentHistory = _tripHistory.value?.toMutableList() ?: mutableListOf()
-        currentHistory.add(0, trip) // 添加到列表开头
+        currentHistory.add(0, trip) // Add to the beginning of the list
         _tripHistory.value = currentHistory
-        
-        // TODO: 持久化到数据库或SharedPreferences
+
+        // TODO: Persist to database or SharedPreferences
     }
-    
+
     /**
-     * 获取行程历史记录
+     * Load trip history
      */
     fun loadTripHistory() {
         viewModelScope.launch {
-            // TODO: 从数据库或SharedPreferences加载
-            // 现在使用空列表
+            // TODO: Load from database or SharedPreferences
+            // Currently using an empty list
         }
     }
-    
+
     /**
-     * 生成模拟路线数据
+     * Generate mock route data
      */
     private fun generateMockRoutes(
         origin: NavLocation,
@@ -260,20 +260,20 @@ class NavigationViewModel : ViewModel() {
     ): List<NavRoute> {
         val routes = mutableListOf<NavRoute>()
         
-        // 计算直线距离（粗略估算）
+        // Calculate straight-line distance (rough estimate)
         val distance = calculateMockDistance(
             origin.latitude, origin.longitude,
             destination.latitude, destination.longitude
         )
         
-        // 生成步行路线
-        routes.add(generateRoute(origin, destination, TransportMode.WALK, distance, "🌿 最环保"))
-        
-        // 生成骑行路线
-        routes.add(generateRoute(origin, destination, TransportMode.CYCLE, distance, "⚡ 最快"))
-        
-        // 生成公交路线
-        routes.add(generateRoute(origin, destination, TransportMode.BUS, distance * 1.2, "⚖️ 平衡"))
+        // Generate walking route
+        routes.add(generateRoute(origin, destination, TransportMode.WALK, distance, "🌿 Eco-friendly"))
+
+        // Generate cycling route
+        routes.add(generateRoute(origin, destination, TransportMode.CYCLE, distance, "⚡ Fastest"))
+
+        // Generate bus route
+        routes.add(generateRoute(origin, destination, TransportMode.BUS, distance * 1.2, "⚖️ Balanced"))
         
         return routes
     }
@@ -303,20 +303,20 @@ class NavigationViewModel : ViewModel() {
             points = points,
             steps = emptyList(),
             polyline = "",
-            isRecommended = mode == TransportMode.WALK || badge.contains("环保"),
+            isRecommended = mode == TransportMode.WALK || badge.contains("Eco"),
             badge = badge
         )
     }
     
     private fun calculateMockDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        // 简化的距离计算（米）
+        // Simplified distance calculation (meters)
         val latDiff = Math.abs(lat2 - lat1) * 111000
         val lonDiff = Math.abs(lon2 - lon1) * 111000 * Math.cos(Math.toRadians(lat1))
         return Math.sqrt(latDiff * latDiff + lonDiff * lonDiff)
     }
     
     private fun calculateDuration(mode: TransportMode, distanceKm: Double): Int {
-        // 根据交通方式估算时间（分钟）
+        // Estimate time based on transport mode (minutes)
         val speed = when (mode) {
             TransportMode.WALK -> 5.0    // 5 km/h
             TransportMode.CYCLE -> 15.0  // 15 km/h

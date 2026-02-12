@@ -112,7 +112,7 @@ class CheckInCalendarFragment : Fragment() {
         }
         binding.calendarGrid.addView(weekHeaderRow)
         
-        // 获取当月第一天
+        // Get first day of the month
         val firstDayOfMonth = currentMonth.atDay(1)
         val dayOfWeek = firstDayOfMonth.dayOfWeek.value // 1 = Monday, 7 = Sunday
         
@@ -181,7 +181,7 @@ class CheckInCalendarFragment : Fragment() {
         
         textDay.text = date.dayOfMonth.toString()
         
-        // 今天高亮
+        // Highlight today
         val today = LocalDate.now()
         if (date == today) {
             textDay.setTextColor(ContextCompat.getColor(requireContext(), R.color.primary))
@@ -233,7 +233,7 @@ class CheckInCalendarFragment : Fragment() {
     
     private fun loadCheckInData() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // 加载签到历史
+            // Load check-in history
             val history = repository.getCheckInHistory("user123").getOrNull()
             if (history != null) {
                 checkedInDates.clear()
@@ -248,7 +248,7 @@ class CheckInCalendarFragment : Fragment() {
                 buildCalendar()
             }
             
-            // 加载签到状态
+            // Load check-in status
             val status = repository.getCheckInStatus("user123").getOrNull()
             if (status != null) {
                 consecutiveDays = status.consecutiveDays
@@ -260,11 +260,11 @@ class CheckInCalendarFragment : Fragment() {
                 val isCheckedInToday = status.lastCheckInDate == today.toString()
                 
                 if (isCheckedInToday) {
-                    binding.buttonCheckIn.text = "今日已签到"
+                    binding.buttonCheckIn.text = "Checked In Today"
                     binding.buttonCheckIn.isEnabled = false
                     binding.buttonCheckIn.alpha = 0.6f
                 } else {
-                    binding.buttonCheckIn.text = "立即签到"
+                    binding.buttonCheckIn.text = "Check In Now"
                     binding.buttonCheckIn.isEnabled = true
                     binding.buttonCheckIn.alpha = 1f
                 }
@@ -287,7 +287,7 @@ class CheckInCalendarFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val response = repository.checkIn("user123").getOrNull()
             if (response != null && response.success) {
-                // 添加今天到已签到日期
+                // Add today to checked-in dates
                 val today = LocalDate.now()
                 checkedInDates.add(today)
                 
@@ -296,7 +296,7 @@ class CheckInCalendarFragment : Fragment() {
                 totalCheckIns = checkedInDates.size
                 updateStats()
                 
-                // 刷新日历
+                // Refresh calendar
                 buildCalendar()
                 
                 // Show success animation

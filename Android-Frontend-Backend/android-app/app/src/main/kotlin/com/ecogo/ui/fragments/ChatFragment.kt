@@ -51,12 +51,12 @@ class ChatFragment : Fragment() {
         adapter = ChatMessageAdapter(
             mutableListOf(
                 ChatMessageAdapter.ChatMessage(
-                    "你好！我是 EcoGo 智能助手，可以帮你：\n" +
-                    "- 🌿 新加坡绿色出行建议\n" +
-                    "- 🚌 公交到站查询\n" +
-                    "- 📍 行程预订\n" +
-                    "- 💡 绿色出行问答\n\n" +
-                    "请问有什么可以帮你的？",
+                    "Hello! I'm the EcoGo Smart Assistant. I can help you with:\n" +
+                    "- 🌿 Green travel tips in Singapore\n" +
+                    "- 🚌 Bus arrival queries\n" +
+                    "- 📍 Trip booking\n" +
+                    "- 💡 Green travel Q&A\n\n" +
+                    "How can I help you?",
                     false
                 )
             ),
@@ -269,7 +269,7 @@ class ChatFragment : Fragment() {
         val dialog = MaterialAlertDialogBuilder(context)
             .setTitle(title)
             .setView(container)
-            .setPositiveButton("提交") { _, _ ->
+            .setPositiveButton("Submit") { _, _ ->
                 // Use key=value format for consistent backend parsing.
                 // Backend handleBookingFlow checks text.contains("=") first.
                 val parts = editTexts.mapNotNull { (key, et) ->
@@ -285,7 +285,7 @@ class ChatFragment : Fragment() {
                 }
                 if (parts.isNotEmpty()) sendMessage(parts.joinToString(", "))
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton("Cancel", null)
             .create()
 
         dialog.show()
@@ -295,25 +295,24 @@ class ChatFragment : Fragment() {
         val s = raw.trim()
         if (s.isEmpty()) return s
         val lowered = s.lowercase()
-        // If user already used "从...到...", keep it.
-        if (s.contains("从") && s.contains("到")) return s
-        // Normalize common separators to "到"
+        // If user already used "from...to...", keep it.
+        if (s.contains("from") && s.contains("to")) return s
+        // Normalize common separators to " to "
         val normalized = s
-            .replace("->", "到")
-            .replace("→", "到")
-            .replace("—", "到")
-            .replace("-", "到")
-            .replace(" to ", "到", ignoreCase = true)
-        return if (normalized.contains("到")) "从$normalized" else s
+            .replace("->", " to ")
+            .replace("→", " to ")
+            .replace("—", " to ")
+            .replace("-", " to ")
+        return if (normalized.contains(" to ")) "from $normalized" else s
     }
 
     private fun normalizePassengersForBackend(raw: String): String {
         val s = raw.trim()
         if (s.isEmpty()) return s
-        // Extract first digit 1-8; then append "人" to satisfy backend regex.
+        // Extract first digit 1-8; then append "person(s)" to satisfy backend regex.
         val m = Regex("[1-8]").find(s)
         val n = m?.value ?: s
-        return "${n}人"
+        return "${n} person(s)"
     }
 
     private fun normalizeDepartAtForBackend(raw: String): String {
@@ -328,17 +327,17 @@ class ChatFragment : Fragment() {
 
     private fun handleShowConfirm(payload: Map<String, Any>?) {
         if (payload == null) return
-        val title = payload["title"] as? String ?: "确认"
+        val title = payload["title"] as? String ?: "Confirm"
         val body = payload["body"] as? String ?: ""
 
         val context = context ?: return
         MaterialAlertDialogBuilder(context)
             .setTitle(title)
             .setMessage(body)
-            .setPositiveButton("确认") { _, _ ->
-                sendMessage("确认")
+            .setPositiveButton("Confirm") { _, _ ->
+                sendMessage("Confirm")
             }
-            .setNegativeButton("取消", null)
+            .setNegativeButton("Cancel", null)
             .show()
     }
 
@@ -393,32 +392,32 @@ class ChatFragment : Fragment() {
         val lowerMessage = message.lowercase()
         
         return when {
-            lowerMessage.contains("activity") || lowerMessage.contains("活动") || lowerMessage.contains("event") -> {
+            lowerMessage.contains("activity") || lowerMessage.contains("event") -> {
                 safeNavigateDelayed(1500L) {
                     findNavController()
                         .navigate(com.ecogo.R.id.action_chat_to_activities)
                 }
-                "找到了一些校园活动，正在为你跳转..."
+                "Found some campus activities, redirecting you..."
             }
-            lowerMessage.contains("route") || lowerMessage.contains("路线") || lowerMessage.contains("导航") || 
-            lowerMessage.contains("how to get") || lowerMessage.contains("去哪里") -> {
+            lowerMessage.contains("route") || lowerMessage.contains("navigate") ||
+            lowerMessage.contains("how to get") || lowerMessage.contains("directions") -> {
                 safeNavigateDelayed(1500L) {
                     findNavController()
                         .navigate(com.ecogo.R.id.action_chat_to_routePlanner)
                 }
-                "正在为你规划绿色出行路线..."
+                "Planning a green travel route for you..."
             }
-            lowerMessage.contains("map") || lowerMessage.contains("地图") || lowerMessage.contains("位置") -> {
-                "地图功能即将上线，敬请期待！"
+            lowerMessage.contains("map") || lowerMessage.contains("location") -> {
+                "Map feature coming soon, stay tuned!"
             }
-            lowerMessage.contains("推荐") || lowerMessage.contains("建议") || lowerMessage.contains("怎么去") -> {
-                "🌿 绿色出行建议：\n" +
-                "• 短途(<2km)：步行或骑行\n" +
-                "• 中途(2-10km)：地铁或公交\n" +
-                "• 长途(>10km)：地铁或拼车\n\n" +
-                "如需详细路线，请告诉我出发地和目的地。"
+            lowerMessage.contains("recommend") || lowerMessage.contains("suggest") || lowerMessage.contains("advice") -> {
+                "🌿 Green Travel Tips:\n" +
+                "- Short distance (<2km): Walk or cycle\n" +
+                "- Medium distance (2-10km): MRT or bus\n" +
+                "- Long distance (>10km): MRT or carpool\n\n" +
+                "For detailed routes, tell me your origin and destination."
             }
-            else -> "抱歉，暂时无法连接服务器，请稍后再试。"
+            else -> "Sorry, unable to connect to the server. Please try again later."
         }
     }
 

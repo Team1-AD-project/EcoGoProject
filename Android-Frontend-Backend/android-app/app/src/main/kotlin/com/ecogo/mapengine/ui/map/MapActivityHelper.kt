@@ -6,13 +6,13 @@ import com.ecogo.mapengine.data.model.TransportModeSegment
 import com.ecogo.mapengine.ml.TransportModeLabel
 
 /**
- * MapActivity 纯业务逻辑提取类
- * 将不依赖 Android 框架的计算/映射/格式化逻辑抽取到此处以便单元测试
+ * MapActivity pure business logic extraction class
+ * Extracts computation/mapping/formatting logic independent of Android framework for unit testing
  */
 object MapActivityHelper {
 
     /**
-     * 交通方式段记录（用于行程中按段记录交通方式）
+     * Transport mode segment record (for recording transport mode per segment during a trip)
      */
     data class ModeSegment(
         val mode: TransportModeLabel,
@@ -21,7 +21,7 @@ object MapActivityHelper {
     )
 
     /**
-     * ML 标签 → transport_modes_dict 的值映射
+     * ML label → transport_modes_dict value mapping
      */
     fun mlLabelToDictMode(label: TransportModeLabel): String {
         return when (label) {
@@ -35,15 +35,15 @@ object MapActivityHelper {
     }
 
     /**
-     * 判断是否为绿色出行
-     * walk/bike/bus/subway → true，car → false
+     * Determine if it's a green travel mode
+     * walk/bike/bus/subway → true, car → false
      */
     fun isGreenMode(dictMode: String): Boolean {
         return dictMode != "car"
     }
 
     /**
-     * 获取行程中持续时间最长的交通方式
+     * Get the transport mode with the longest duration in a trip
      */
     fun getDominantMode(modeSegments: List<ModeSegment>): TransportModeLabel {
         if (modeSegments.isEmpty()) {
@@ -56,7 +56,7 @@ object MapActivityHelper {
     }
 
     /**
-     * 将记录的交通方式段转换为 API 所需的 TransportModeSegment 列表
+     * Convert recorded transport mode segments to the TransportModeSegment list required by the API
      */
     fun buildTransportModeSegments(
         modeSegments: List<ModeSegment>,
@@ -78,7 +78,7 @@ object MapActivityHelper {
     }
 
     /**
-     * 计算实时碳排放减少量（单位：克）
+     * Calculate real-time carbon emission reduction (in grams)
      */
     fun calculateRealTimeCarbonSaved(distanceMeters: Float, mode: TransportMode?): Double {
         val distanceKm = distanceMeters / 1000.0
@@ -97,7 +97,7 @@ object MapActivityHelper {
     }
 
     /**
-     * 计算环保评级（星级）
+     * Calculate eco rating (star rating)
      */
     fun calculateEcoRating(totalCarbon: Double, distance: Double): String {
         val carbonPerKm = if (distance > 0) totalCarbon / distance else totalCarbon
@@ -112,7 +112,7 @@ object MapActivityHelper {
     }
 
     /**
-     * 生成鼓励消息
+     * Generate encouragement message
      */
     fun generateEncouragementMessage(distanceMeters: Float, mode: TransportMode?): String {
         val carbonSavedGrams = calculateRealTimeCarbonSaved(distanceMeters, mode)
@@ -120,48 +120,48 @@ object MapActivityHelper {
         return when (mode) {
             TransportMode.WALKING, TransportMode.CYCLING -> {
                 if (carbonSavedGrams >= 1) {
-                    String.format("已减碳 %.0f g | 继续加油 💪", carbonSavedGrams)
+                    String.format("Carbon reduced %.0f g | Keep it up 💪", carbonSavedGrams)
                 } else {
-                    "绿色出行 | 继续加油 💪"
+                    "Green travel | Keep it up 💪"
                 }
             }
             TransportMode.BUS, TransportMode.SUBWAY -> {
                 if (carbonSavedGrams >= 1) {
-                    String.format("绿色出行进行中 🚌 | 已减碳 %.0f g", carbonSavedGrams)
+                    String.format("Green travel in progress 🚌 | Carbon reduced %.0f g", carbonSavedGrams)
                 } else {
-                    "绿色出行进行中 🚌"
+                    "Green travel in progress 🚌"
                 }
             }
             else -> {
-                String.format("已行进: %.2f 公里", distanceMeters / 1000f)
+                String.format("Traveled: %.2f km", distanceMeters / 1000f)
             }
         }
     }
 
     /**
-     * 生成里程碑消息
+     * Generate milestone message
      */
     fun generateMilestoneMessage(milestoneMeters: Float, mode: TransportMode?): String {
         val carbonSavedGrams = calculateRealTimeCarbonSaved(milestoneMeters, mode)
 
         return when (mode) {
             TransportMode.WALKING -> {
-                String.format("恭喜！您已步行 %.0f 米，减碳 %.0f g 🎉", milestoneMeters, carbonSavedGrams)
+                String.format("Congrats! You've walked %.0f m, carbon reduced %.0f g 🎉", milestoneMeters, carbonSavedGrams)
             }
             TransportMode.CYCLING -> {
-                String.format("恭喜！您已骑行 %.0f 米，减碳 %.0f g 🚴", milestoneMeters, carbonSavedGrams)
+                String.format("Congrats! You've cycled %.0f m, carbon reduced %.0f g 🚴", milestoneMeters, carbonSavedGrams)
             }
             TransportMode.BUS, TransportMode.SUBWAY -> {
-                String.format("恭喜！您已出行 %.0f 米，减碳 %.0f g 🌱", milestoneMeters, carbonSavedGrams)
+                String.format("Congrats! You've traveled %.0f m, carbon reduced %.0f g 🌱", milestoneMeters, carbonSavedGrams)
             }
             else -> {
-                String.format("恭喜！您已出行 %.0f 米", milestoneMeters)
+                String.format("Congrats! You've traveled %.0f m", milestoneMeters)
             }
         }
     }
 
     /**
-     * 格式化计时器显示
+     * Format timer display
      */
     fun formatElapsedTime(elapsedMs: Long): String {
         val seconds = (elapsedMs / 1000) % 60
@@ -174,8 +174,8 @@ object MapActivityHelper {
     }
 
     /**
-     * 检查是否达到新里程碑
-     * @return 达到的里程碑值，未达到返回 null
+     * Check if a new milestone has been reached
+     * @return the milestone value reached, or null if none
      */
     fun checkMilestone(
         distanceMeters: Float,
@@ -191,7 +191,7 @@ object MapActivityHelper {
     }
 
     /**
-     * 获取交通方式图标
+     * Get transport mode icon
      */
     fun getModeIcon(mode: TransportModeLabel): String {
         return when (mode) {
@@ -205,33 +205,33 @@ object MapActivityHelper {
     }
 
     /**
-     * 获取交通方式文本
+     * Get transport mode text
      */
     fun getModeText(mode: TransportModeLabel): String {
         return when (mode) {
-            TransportModeLabel.WALKING -> "步行"
-            TransportModeLabel.CYCLING -> "骑行"
-            TransportModeLabel.BUS -> "公交"
-            TransportModeLabel.SUBWAY -> "地铁"
-            TransportModeLabel.DRIVING -> "驾车"
-            else -> "未知"
+            TransportModeLabel.WALKING -> "Walking"
+            TransportModeLabel.CYCLING -> "Cycling"
+            TransportModeLabel.BUS -> "Bus"
+            TransportModeLabel.SUBWAY -> "Subway"
+            TransportModeLabel.DRIVING -> "Driving"
+            else -> "Unknown"
         }
     }
 
     /**
-     * 获取路线类型显示文本
+     * Get route type display text
      */
     fun getRouteTypeText(routeType: String?): String {
         return when (routeType) {
-            "low_carbon" -> "低碳路线"
-            "balanced" -> "平衡路线"
-            else -> "推荐路线"
+            "low_carbon" -> "Low Carbon Route"
+            "balanced" -> "Balanced Route"
+            else -> "Recommended Route"
         }
     }
 
     /**
-     * 获取碳排放颜色编码
-     * @return 颜色的十六进制字符串
+     * Get carbon emission color code
+     * @return hex color string
      */
     fun getCarbonColorHex(totalCarbon: Double): String {
         return when {
@@ -243,20 +243,20 @@ object MapActivityHelper {
     }
 
     /**
-     * 格式化碳减排显示文本
+     * Format carbon reduction display text
      */
     fun formatCarbonSavedText(carbonSaved: Double, totalCarbon: Double): String {
         return if (carbonSaved > 0) {
-            String.format("🌍 比驾车减少 %.2f kg 碳排放", carbonSaved)
+            String.format("🌍 Reduced %.2f kg CO₂ vs driving", carbonSaved)
         } else {
-            String.format("碳排放: %.2f kg", totalCarbon)
+            String.format("Carbon emission: %.2f kg", totalCarbon)
         }
     }
 
     // ===== Extracted from MapActivity =====
 
     /**
-     * 检测是否运行在模拟器上
+     * Detect if running on an emulator
      */
     fun isRunningOnEmulator(): Boolean {
         return (android.os.Build.FINGERPRINT.startsWith("generic")
@@ -270,7 +270,7 @@ object MapActivityHelper {
     }
 
     /**
-     * 获取交通步骤对应的颜色名称（不依赖 Context）
+     * Get color name for transit step (Context-independent)
      */
     fun getTransitStepColorName(travelMode: String, vehicleType: String?): String {
         return when (travelMode) {
@@ -291,7 +291,7 @@ object MapActivityHelper {
     }
 
     /**
-     * 分析路线步骤是否包含公交步骤和步骤级polyline
+     * Analyze whether route steps contain transit steps and step-level polylines
      */
     data class RouteAnalysis(
         val hasTransitSteps: Boolean,
@@ -305,7 +305,7 @@ object MapActivityHelper {
     }
 
     /**
-     * 生成追踪UI状态文本
+     * Generate tracking UI state text
      */
     data class TrackingUIState(
         val buttonText: String,
@@ -333,7 +333,7 @@ object MapActivityHelper {
                 isIdle = true
             )
             is TripState.Starting -> TrackingUIState(
-                buttonText = "正在开始...",
+                buttonText = "Starting...",
                 buttonEnabled = false,
                 chipGroupVisible = false,
                 searchVisible = false,
@@ -351,7 +351,7 @@ object MapActivityHelper {
                 isIdle = false
             )
             is TripState.Stopping -> TrackingUIState(
-                buttonText = "正在结束...",
+                buttonText = "Stopping...",
                 buttonEnabled = false,
                 chipGroupVisible = false,
                 searchVisible = false,
@@ -372,7 +372,7 @@ object MapActivityHelper {
     }
 
     /**
-     * 准备行程完成数据
+     * Prepare trip completion data
      */
     data class TripCompletionData(
         val detectedMode: String?,
@@ -414,7 +414,7 @@ object MapActivityHelper {
     }
 
     /**
-     * 构建路线信息文本
+     * Build route info text
      */
     data class RouteInfoTexts(
         val routeTypeText: String,
@@ -442,9 +442,9 @@ object MapActivityHelper {
         val carbonSavedText = formatCarbonSavedText(carbonSaved, totalCarbon)
         val carbonColorHex = getCarbonColorHex(totalCarbon)
         val ecoRating = calculateEcoRating(totalCarbon, totalDistance)
-        val headerText = "$routeTypeText  环保指数: $ecoRating"
+        val headerText = "$routeTypeText  Eco Rating: $ecoRating"
         val durationMinutes = estimatedDuration.takeIf { it > 0 } ?: duration ?: 0
-        val durationText = "预计: $durationMinutes 分钟"
+        val durationText = "Estimated: $durationMinutes min"
         val showCumulative = carbonSaved > 0
 
         return RouteInfoTexts(
@@ -461,7 +461,7 @@ object MapActivityHelper {
     }
 
     /**
-     * 确定行程记录模式
+     * Determine trip recording mode
      */
     data class TrackingMode(
         val isNavigationMode: Boolean,
@@ -484,7 +484,7 @@ object MapActivityHelper {
     }
 
     /**
-     * 处理交通方式检测结果
+     * Process transport mode detection result
      */
     data class TransportModeUpdate(
         val detectedTransportMode: String,
@@ -509,32 +509,32 @@ object MapActivityHelper {
             modeIcon = icon,
             modeText = text,
             confidencePercent = pct,
-            navigationModeText = "$icon 当前交通: $text ($pct%)",
-            trackingModeText = "$icon 检测到: $text ($pct%)"
+            navigationModeText = "$icon Current transport: $text ($pct%)",
+            trackingModeText = "$icon Detected: $text ($pct%)"
         )
     }
 
     /**
-     * 计算起止点是否都已设置
+     * Check if both origin and destination are set
      */
     fun shouldShowStartButton(hasOrigin: Boolean, hasDestination: Boolean): Boolean {
         return hasOrigin && hasDestination
     }
 
     /**
-     * 里程碑列表常量
+     * Milestone list constants
      */
     val MILESTONES = listOf(1000f, 2000f, 3000f, 5000f, 10000f)
 
     /**
-     * 过滤有效广告
+     * Filter active advertisements
      */
     fun filterActiveAds(ads: List<Advertisement>?): List<Advertisement> {
         return ads?.filter { it.position == "banner" && it.status == "Active" } ?: emptyList()
     }
 
     /**
-     * 判断是否为VIP用户
+     * Determine if user is VIP
      */
     fun isVipFromProfile(
         vipInfoActive: Boolean?,
@@ -551,40 +551,40 @@ object MapActivityHelper {
     }
 
     /**
-     * 生成行程完成消息
+     * Generate trip completion message
      */
     fun generateTripCompletionMessage(isGreenTrip: Boolean, carbonSaved: Double, greenPoints: Int): String {
         val carbonSavedStr = String.format("%.2f", carbonSaved)
         return if (isGreenTrip) {
-            "🎉 绿色出行完成！减碳 $carbonSavedStr kg，获得 $greenPoints 积分"
+            "🎉 Green trip completed! Carbon reduced $carbonSavedStr kg, earned $greenPoints points"
         } else {
-            "行程完成，碳排放 $carbonSavedStr kg"
+            "Trip completed, carbon emission $carbonSavedStr kg"
         }
     }
 
     /**
-     * 验证tripId是否有效
+     * Validate if tripId is valid
      */
     fun isValidTripId(tripId: String?): Boolean {
         return tripId != null && !tripId.startsWith("MOCK_") && tripId != "restored-trip"
     }
 
     /**
-     * 获取路线绘制宽度
+     * Get route drawing width
      */
     fun getRouteWidth(mode: TransportMode?): Float {
         return if (mode == TransportMode.WALKING) 8f else 12f
     }
 
     /**
-     * 判断是否使用虚线
+     * Determine if dashed line should be used
      */
     fun shouldUseDashedLine(mode: TransportMode?): Boolean {
         return mode == TransportMode.WALKING
     }
 
     /**
-     * 计算回退模式下的每步骤分配点数
+     * Calculate allocated points per step in fallback mode
      */
     fun calculateFallbackPointsPerStep(
         totalPoints: Int,
@@ -602,18 +602,18 @@ object MapActivityHelper {
     }
 
     /**
-     * 格式化导航信息文本
+     * Format navigation info text
      */
     fun formatNavigationInfoText(traveledMeters: Float, remainingMeters: Float): Pair<String, String> {
         val remainingKm = remainingMeters / 1000f
-        val durationText = String.format("剩余: %.2f 公里", remainingKm)
+        val durationText = String.format("Remaining: %.2f km", remainingKm)
         return Pair("navigation", durationText)
     }
 
     /**
-     * 格式化追踪信息文本
+     * Format tracking info text
      */
     fun formatTrackingInfoText(distanceMeters: Float): Pair<String, String> {
-        return Pair("tracking", "实时记录GPS轨迹")
+        return Pair("tracking", "Recording GPS track in real time")
     }
 }

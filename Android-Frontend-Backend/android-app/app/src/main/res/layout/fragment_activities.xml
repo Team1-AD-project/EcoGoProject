@@ -6,7 +6,7 @@
     android:background="@color/background"
     android:orientation="vertical">
 
-    <!-- 顶部标题 -->
+    <!-- Top title -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
             android:text="Joined" />
     </com.google.android.material.tabs.TabLayout>
 
-    <!-- 活动列表 -->
+    <!-- Activities list -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_activities"
         android:layout_width="match_parent"
@@ -67,7 +67,7 @@
         android:clipToPadding="false"
         android:padding="16dp" />
 
-    <!-- 空状态 -->
+    <!-- Empty state -->
     <LinearLayout
         android:id="@+id/empty_state"
         android:layout_width="match_parent"

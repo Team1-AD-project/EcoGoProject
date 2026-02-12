@@ -10,7 +10,7 @@ import com.ecogo.R
 import com.ecogo.mapengine.data.model.RouteStep
 
 /**
- * 路线步骤 RecyclerView 适配器
+ * Route Step RecyclerView Adapter
  */
 class RouteStepAdapter : RecyclerView.Adapter<RouteStepAdapter.StepViewHolder>() {
 
@@ -38,7 +38,7 @@ class RouteStepAdapter : RecyclerView.Adapter<RouteStepAdapter.StepViewHolder>()
         private val tvStepInstruction: TextView = itemView.findViewById(R.id.tvStepInstruction)
         private val tvStepDistance: TextView = itemView.findViewById(R.id.tvStepDistance)
 
-        // 公交详情视图
+        // Transit detail views
         private val layoutTransitDetails: View = itemView.findViewById(R.id.layoutTransitDetails)
         private val tvLineName: TextView = itemView.findViewById(R.id.tvLineName)
         private val tvDepartureStop: TextView = itemView.findViewById(R.id.tvDepartureStop)
@@ -46,7 +46,7 @@ class RouteStepAdapter : RecyclerView.Adapter<RouteStepAdapter.StepViewHolder>()
         private val tvHeadsign: TextView = itemView.findViewById(R.id.tvHeadsign)
 
         fun bind(step: RouteStep) {
-            // 设置步骤图标
+            // Set step icon
             val iconRes = when (step.travel_mode) {
                 "WALKING" -> R.drawable.ic_walking
                 "TRANSIT" -> R.drawable.ic_transit
@@ -56,47 +56,47 @@ class RouteStepAdapter : RecyclerView.Adapter<RouteStepAdapter.StepViewHolder>()
             }
             ivStepIcon.setImageResource(iconRes)
 
-            // 设置步骤说明
+            // Set step instruction
             tvStepInstruction.text = step.instruction
 
-            // 设置距离和时长
+            // Set distance and duration
             val distanceText = if (step.distance >= 1000) {
-                String.format("%.1f 公里", step.distance / 1000.0)
+                String.format("%.1f km", step.distance / 1000.0)
             } else {
-                String.format("%.0f 米", step.distance)
+                String.format("%.0f m", step.distance)
             }
             val durationText = if (step.duration >= 60) {
-                String.format("%d 分钟", step.duration / 60)
+                String.format("%d min", step.duration / 60)
             } else {
-                String.format("%d 秒", step.duration)
+                String.format("%d sec", step.duration)
             }
             tvStepDistance.text = "$distanceText · $durationText"
 
-            // 显示公交详情（仅 TRANSIT 模式）
+            // Display transit details (TRANSIT mode only)
             if (step.travel_mode == "TRANSIT" && step.transit_details != null) {
                 layoutTransitDetails.visibility = View.VISIBLE
 
                 val transit = step.transit_details
 
-                // 线路名称
+                // Line name
                 val lineName = transit.line_short_name ?: transit.line_name
                 tvLineName.text = lineName
 
-                // 上车站
-                tvDepartureStop.text = "上车: ${transit.departure_stop}"
+                // Departure stop
+                tvDepartureStop.text = "Depart: ${transit.departure_stop}"
 
-                // 下车站和经过站数
+                // Arrival stop and number of stops
                 val arrivalText = if (transit.num_stops > 0) {
-                    "下车: ${transit.arrival_stop} (经过 ${transit.num_stops} 站)"
+                    "Arrive: ${transit.arrival_stop} (${transit.num_stops} stops)"
                 } else {
-                    "下车: ${transit.arrival_stop}"
+                    "Arrive: ${transit.arrival_stop}"
                 }
                 tvArrivalStop.text = arrivalText
 
-                // 方向标识
+                // Headsign
                 if (transit.headsign != null) {
                     tvHeadsign.visibility = View.VISIBLE
-                    tvHeadsign.text = "往${transit.headsign}方向"
+                    tvHeadsign.text = "Towards ${transit.headsign}"
                 } else {
                     tvHeadsign.visibility = View.GONE
                 }

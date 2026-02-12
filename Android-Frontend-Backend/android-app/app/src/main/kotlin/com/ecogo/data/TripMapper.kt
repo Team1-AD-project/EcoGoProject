@@ -25,7 +25,7 @@ object TripMapper {
             ?: "Unknown mode"
 
 
-        val distKm = (t.distance ?: 0.0)   // 如果后端 distance 已经是 km，就把这行改掉
+        val distKm = (t.distance ?: 0.0)   // If backend distance is already in km, modify this line
         val meta = if (t.distance == null) mode else "$mode • ${"%.2f".format(distKm)} km"
 
         val pts = t.pointsGained ?: 0

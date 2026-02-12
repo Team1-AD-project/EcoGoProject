@@ -11,7 +11,7 @@ import com.ecogo.utils.CarbonCalculator
 import com.ecogo.utils.MapUtils
 
 /**
- * 路线选项适配器
+ * Route option adapter
  */
 class RouteOptionAdapter(
     private var routes: List<NavRoute> = emptyList(),
@@ -44,7 +44,7 @@ class RouteOptionAdapter(
 
         fun bind(route: NavRoute) {
             binding.apply {
-                // 显示徽章（如果有）
+                // Show badge (if any)
                 if (route.badge.isNotEmpty()) {
                     textBadge.text = route.badge
                     textBadge.visibility = View.VISIBLE
@@ -52,25 +52,25 @@ class RouteOptionAdapter(
                     textBadge.visibility = View.GONE
                 }
                 
-                // 交通方式图标
+                // Transport mode icon
                 val modeIcon = when (route.mode) {
-                    com.ecogo.data.TransportMode.WALK -> "🚶 步行"
-                    com.ecogo.data.TransportMode.CYCLE -> "🚲 骑行"
-                    com.ecogo.data.TransportMode.BUS -> "🚌 公交"
-                    com.ecogo.data.TransportMode.MIXED -> "🚶🚌 混合"
+                    com.ecogo.data.TransportMode.WALK -> "🚶 Walking"
+                    com.ecogo.data.TransportMode.CYCLE -> "🚲 Cycling"
+                    com.ecogo.data.TransportMode.BUS -> "🚌 Bus"
+                    com.ecogo.data.TransportMode.MIXED -> "🚶🚌 Mixed"
                 }
                 textMode.text = modeIcon
                 
-                // 时间和距离
+                // Time and distance
                 textDuration.text = MapUtils.formatDuration(route.duration)
-                textDistance.text = String.format("%.1fkm", route.distance)
+                textDistance.text = String.format("%.1f km", route.distance)
                 
-                // 环保数据
+                // Eco data
                 textCarbon.text = CarbonCalculator.formatCarbon(route.carbonEmission)
-                textPoints.text = "+${route.points}积分"
-                textSavings.text = "节省$${String.format("%.1f", CarbonCalculator.calculateMoneySaved(route.distance))}"
+                textPoints.text = "+${route.points} pts"
+                textSavings.text = "Save $${String.format("%.1f", CarbonCalculator.calculateMoneySaved(route.distance))}"
                 
-                // 推荐路线高亮
+                // Highlight recommended route
                 if (route.isRecommended) {
                     root.setCardBackgroundColor(
                         root.context.getColor(R.color.background)

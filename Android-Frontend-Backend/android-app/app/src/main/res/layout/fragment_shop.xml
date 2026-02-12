@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <!-- 标题 -->
+    <!-- Title -->
     <TextView
         android:id="@+id/text_title"
         android:layout_width="wrap_content"
@@ -19,7 +19,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 余额卡片 -->
+    <!-- Balance Card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card_balance"
         android:layout_width="0dp"
@@ -87,7 +87,7 @@
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
-    <!-- 分类标签 -->
+    <!-- Category Tabs -->
     <com.google.android.material.chip.ChipGroup
         android:id="@+id/chip_group_filter"
         android:layout_width="wrap_content"
@@ -120,7 +120,7 @@
             style="@style/Widget.MaterialComponents.Chip.Choice" />
     </com.google.android.material.chip.ChipGroup>
 
-    <!-- 商品列表 -->
+    <!-- Product List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_products"
         android:layout_width="0dp"

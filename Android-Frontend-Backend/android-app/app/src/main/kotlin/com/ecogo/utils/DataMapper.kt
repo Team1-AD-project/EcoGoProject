@@ -8,12 +8,12 @@ import com.ecogo.data.dto.UserBadgeDto
 import com.ecogo.data.dto.UserOutfitDto
 
 /**
- * 数据转换工具
+ * Data mapping utility
  */
 object DataMapper {
 
     /**
-     * 将 BadgeDto (cloth) 转换为 ShopItem
+     * Convert BadgeDto (cloth) to ShopItem
      */
     fun BadgeDto.toShopItem(): ShopItem? {
         if (category != "cloth") return null
@@ -29,8 +29,8 @@ object DataMapper {
     }
 
     /**
-     * 将 BadgeDto (badge) 转换为 Achievement
-     * ✅ 根据 carbonThreshold 生成动态解锁条件
+     * Convert BadgeDto (badge) to Achievement
+     * Generates dynamic unlock conditions based on carbonThreshold
      */
     fun BadgeDto.toAchievement(): Achievement? {
         if (category != "badge") return null
@@ -60,7 +60,7 @@ object DataMapper {
     }
 
     /**
-     * 合并服饰数据
+     * Merge clothing data
      */
     fun mergeClothData(
         shopItems: List<BadgeDto>,
@@ -85,8 +85,8 @@ object DataMapper {
     }
 
     /**
-     * 合并徽章数据
-     * ✅ 支持动态解锁条件文字
+     * Merge badge data
+     * Supports dynamic unlock condition text
      */
     fun mergeBadgeData(
         shopBadges: List<BadgeDto>,
@@ -125,7 +125,7 @@ object DataMapper {
     }
 
     /**
-     * 转换为 Outfit
+     * Convert to Outfit
      */
     fun UserOutfitDto.toOutfit(): Outfit {
         return Outfit(

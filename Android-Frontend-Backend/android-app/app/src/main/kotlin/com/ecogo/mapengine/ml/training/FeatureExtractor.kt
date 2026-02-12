@@ -81,7 +81,7 @@ class FeatureExtractor {
                 transportMode = journey.transportMode
             )
         } catch (e: Exception) {
-            Log.e(TAG, "特征提取失败: ${e.message}", e)
+            Log.e(TAG, "Feature extraction failed: ${e.message}", e)
             throw e
         }
     }
@@ -116,7 +116,7 @@ class FeatureExtractor {
                 Triple(xList[i], yList[i], zList[i])
             }
         } catch (e: Exception) {
-            Log.w(TAG, "传感器数据解析失败: ${e.message}")
+            Log.w(TAG, "Sensor data parsing failed: ${e.message}")
             emptyList()
         }
     }

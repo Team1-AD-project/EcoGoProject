@@ -9,8 +9,8 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 
 /**
- * 导航历史记录实体
- * 用于存储用户完成的导航路线数据
+ * Navigation history entity
+ * Stores completed navigation route data for the user
  */
 @Entity(tableName = "navigation_history")
 @TypeConverters(NavigationHistoryConverters::class)
@@ -18,46 +18,46 @@ data class NavigationHistory(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
 
-    // 行程基本信息
-    val tripId: String? = null,                    // 行程ID（如果有后端记录）
-    val userId: String? = null,                    // 用户ID
-    val startTime: Long,                           // 开始时间（时间戳）
-    val endTime: Long,                             // 结束时间（时间戳）
-    val durationSeconds: Int,                      // 行程时长（秒）
+    // Trip basic info
+    val tripId: String? = null,                    // Trip ID (if backend record exists)
+    val userId: String? = null,                    // User ID
+    val startTime: Long,                           // Start time (timestamp)
+    val endTime: Long,                             // End time (timestamp)
+    val durationSeconds: Int,                      // Trip duration (seconds)
 
-    // 位置信息
-    val originLat: Double,                         // 起点纬度
-    val originLng: Double,                         // 起点经度
-    val originName: String,                        // 起点名称
-    val destinationLat: Double,                    // 终点纬度
-    val destinationLng: Double,                    // 终点经度
-    val destinationName: String,                   // 终点名称
+    // Location info
+    val originLat: Double,                         // Origin latitude
+    val originLng: Double,                         // Origin longitude
+    val originName: String,                        // Origin name
+    val destinationLat: Double,                    // Destination latitude
+    val destinationLng: Double,                    // Destination longitude
+    val destinationName: String,                   // Destination name
 
-    // 路线信息
-    val routePoints: String,                       // 路线点列表（JSON格式）
-    val trackPoints: String,                       // 实际轨迹点列表（JSON格式）
-    val totalDistance: Double,                     // 总距离（米）
-    val traveledDistance: Double,                  // 实际行进距离（米）
+    // Route info
+    val routePoints: String,                       // Route point list (JSON format)
+    val trackPoints: String,                       // Actual track point list (JSON format)
+    val totalDistance: Double,                     // Total distance (meters)
+    val traveledDistance: Double,                  // Actual traveled distance (meters)
 
-    // 交通方式
-    val transportMode: String,                     // 主要交通方式
-    val detectedMode: String? = null,              // AI检测的交通方式
+    // Transport mode
+    val transportMode: String,                     // Primary transport mode
+    val detectedMode: String? = null,              // AI-detected transport mode
 
-    // 环保数据
-    val totalCarbon: Double,                       // 总碳排放（kg）
-    val carbonSaved: Double,                       // 减少的碳排放（kg）
-    val isGreenTrip: Boolean,                      // 是否为绿色出行
-    val greenPoints: Int = 0,                      // 获得的绿色积分
+    // Environmental data
+    val totalCarbon: Double,                       // Total carbon emission (kg)
+    val carbonSaved: Double,                       // Carbon emission saved (kg)
+    val isGreenTrip: Boolean,                      // Whether it is a green trip
+    val greenPoints: Int = 0,                      // Green points earned
 
-    // 路线类型
-    val routeType: String? = null,                 // 路线类型（low_carbon, balanced）
+    // Route type
+    val routeType: String? = null,                 // Route type (low_carbon, balanced)
 
-    // 备注
-    val notes: String? = null                      // 用户备注
+    // Notes
+    val notes: String? = null                      // User notes
 )
 
 /**
- * 导航历史记录的简化版本（用于列表显示）
+ * Simplified version of navigation history (for list display)
  */
 data class NavigationHistorySummary(
     val id: Long,

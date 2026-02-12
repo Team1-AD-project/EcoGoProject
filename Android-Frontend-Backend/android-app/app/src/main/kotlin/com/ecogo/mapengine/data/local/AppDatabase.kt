@@ -8,8 +8,8 @@ import com.ecogo.mapengine.data.local.dao.NavigationHistoryDao
 import com.ecogo.mapengine.data.local.entity.NavigationHistory
 
 /**
- * 应用数据库
- * 单例模式，提供全局唯一的数据库实例
+ * Application database
+ * Singleton pattern, provides a globally unique database instance
  */
 @Database(
     entities = [NavigationHistory::class],
@@ -19,7 +19,7 @@ import com.ecogo.mapengine.data.local.entity.NavigationHistory
 abstract class AppDatabase : RoomDatabase() {
 
     /**
-     * 获取导航历史DAO
+     * Get navigation history DAO
      */
     abstract fun navigationHistoryDao(): NavigationHistoryDao
 
@@ -28,7 +28,7 @@ abstract class AppDatabase : RoomDatabase() {
         private var INSTANCE: AppDatabase? = null
 
         /**
-         * 获取数据库实例（单例）
+         * Get database instance (singleton)
          */
         fun getInstance(context: Context): AppDatabase {
             return INSTANCE ?: synchronized(this) {
@@ -37,7 +37,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     "ecogo_database"
                 )
-                    .fallbackToDestructiveMigration() // 开发阶段可以使用，生产环境需要提供迁移策略
+                    .fallbackToDestructiveMigration() // Acceptable for development; production requires a migration strategy
                     .build()
                 INSTANCE = instance
                 instance
@@ -45,7 +45,7 @@ abstract class AppDatabase : RoomDatabase() {
         }
 
         /**
-         * 用于测试：清除数据库实例
+         * For testing: clear database instance
          */
         fun clearInstance() {
             INSTANCE = null

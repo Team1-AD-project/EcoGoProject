@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 /**
  * Challenge Detail Page
  * Display challenge rules, progress, leaderboard, etc.
- * 从后端API获取挑战数据
+ * Fetches challenge data from backend API
  */
 class ChallengeDetailFragment : Fragment() {
 
@@ -85,18 +85,18 @@ class ChallengeDetailFragment : Fragment() {
     }
 
     /**
-     * 从后端API获取挑战详情
+     * Fetch challenge details from backend API
      */
     private fun fetchChallengeFromApi() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
-                // 获取挑战详情
+                // Get challenge details
                 val response = RetrofitClient.apiService.getChallengeById(challengeId)
                 if (response.code == 200 && response.data != null) {
                     currentChallenge = response.data
                     displayChallengeDetail(response.data)
 
-                    // 获取用户进度（如果用户已登录）
+                    // Get user progress (if user is logged in)
                     val userId = TokenManager.getUserId()
                     if (!userId.isNullOrEmpty()) {
                         fetchUserProgress(userId)
@@ -114,7 +114,7 @@ class ChallengeDetailFragment : Fragment() {
     }
 
     /**
-     * 获取用户在该挑战的进度
+     * Get user progress for this challenge
      */
     private fun fetchUserProgress(userId: String) {
         viewLifecycleOwner.lifecycleScope.launch {
@@ -126,13 +126,13 @@ class ChallengeDetailFragment : Fragment() {
                     updateProgressUI(response.data)
                     Log.d("ChallengeDetail", "User progress: ${response.data.current}/${response.data.target}")
                 } else {
-                    // 用户尚未参加此挑战
+                    // User has not joined this challenge yet
                     isAccepted = false
                     updateButtonState(currentChallenge?.status ?: "ACTIVE")
                 }
             } catch (e: Exception) {
                 Log.e("ChallengeDetail", "Error loading user progress", e)
-                // 用户可能尚未参加此挑战，不显示错误
+                // User may not have joined this challenge yet, do not show error
                 isAccepted = false
                 updateButtonState(currentChallenge?.status ?: "ACTIVE")
             }
@@ -140,7 +140,7 @@ class ChallengeDetailFragment : Fragment() {
     }
 
     /**
-     * 显示挑战详情
+     * Display challenge details
      */
     private fun displayChallengeDetail(challenge: Challenge) {
         // Display challenge information
@@ -148,7 +148,7 @@ class ChallengeDetailFragment : Fragment() {
         binding.textIcon.text = challenge.icon
         binding.textDescription.text = challenge.description
 
-        // Type - 显示挑战类型
+        // Type - display challenge type
         binding.textType.text = when (challenge.type) {
             "GREEN_TRIPS_COUNT" -> "Trip Count Challenge"
             "GREEN_TRIPS_DISTANCE" -> "Distance Challenge"
@@ -156,7 +156,7 @@ class ChallengeDetailFragment : Fragment() {
             else -> challenge.type
         }
 
-        // Progress - 默认显示目标值（用户进度需要单独获取）
+        // Progress - default to showing target value (user progress fetched separately)
         val target = challenge.target.toInt()
         binding.progressChallenge.max = if (target > 0) target else 1
         binding.progressChallenge.progress = 0
@@ -172,7 +172,7 @@ class ChallengeDetailFragment : Fragment() {
             binding.textBadgeReward.visibility = View.GONE
         }
 
-        // Time - 显示结束时间
+        // Time - display end time
         if (!challenge.endTime.isNullOrEmpty()) {
             binding.textEndTime.text = challenge.endTime.substring(0, 10).replace("-", "/")
         } else {
@@ -187,7 +187,7 @@ class ChallengeDetailFragment : Fragment() {
     }
 
     /**
-     * 更新用户进度UI
+     * Update user progress UI
      */
     private fun updateProgressUI(progress: UserChallengeProgress) {
         val current = progress.current.toInt()
@@ -247,7 +247,7 @@ class ChallengeDetailFragment : Fragment() {
     }
 
     /**
-     * 参加挑战 / 领取奖励
+     * Join challenge / Claim reward
      */
     private fun acceptChallenge() {
         val userId = TokenManager.getUserId()
@@ -290,7 +290,7 @@ class ChallengeDetailFragment : Fragment() {
     }
 
     /**
-     * 领取挑战完成奖励
+     * Claim challenge completion reward
      */
     private fun claimReward(userId: String) {
         viewLifecycleOwner.lifecycleScope.launch {

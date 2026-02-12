@@ -6,69 +6,69 @@ import com.ecogo.mapengine.data.local.entity.NavigationHistorySummary
 import kotlinx.coroutines.flow.Flow
 
 /**
- * 导航历史记录数据访问对象
- * 提供数据库CRUD操作
+ * Navigation history data access object
+ * Provides database CRUD operations
  */
 @Dao
 interface NavigationHistoryDao {
 
     /**
-     * 插入一条导航历史记录
-     * @return 插入记录的ID
+     * Insert a navigation history record
+     * @return ID of the inserted record
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(history: NavigationHistory): Long
 
     /**
-     * 插入多条导航历史记录
+     * Insert multiple navigation history records
      */
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertAll(histories: List<NavigationHistory>)
 
     /**
-     * 更新导航历史记录
+     * Update navigation history record
      */
     @Update
     suspend fun update(history: NavigationHistory)
 
     /**
-     * 删除导航历史记录
+     * Delete navigation history record
      */
     @Delete
     suspend fun delete(history: NavigationHistory)
 
     /**
-     * 根据ID删除记录
+     * Delete record by ID
      */
     @Query("DELETE FROM navigation_history WHERE id = :id")
     suspend fun deleteById(id: Long)
 
     /**
-     * 清空所有历史记录
+     * Delete all history records
      */
     @Query("DELETE FROM navigation_history")
     suspend fun deleteAll()
 
     /**
-     * 根据ID查询单条记录
+     * Get a single record by ID
      */
     @Query("SELECT * FROM navigation_history WHERE id = :id")
     suspend fun getById(id: Long): NavigationHistory?
 
     /**
-     * 获取所有导航历史记录（按时间倒序）
+     * Get all navigation history records (sorted by time descending)
      */
     @Query("SELECT * FROM navigation_history ORDER BY startTime DESC")
     suspend fun getAll(): List<NavigationHistory>
 
     /**
-     * 获取所有导航历史记录（Flow，用于实时更新）
+     * Get all navigation history records (Flow, for real-time updates)
      */
     @Query("SELECT * FROM navigation_history ORDER BY startTime DESC")
     fun getAllFlow(): Flow<List<NavigationHistory>>
 
     /**
-     * 获取简化版历史记录列表（用于列表显示）
+     * Get simplified history record list (for list display)
      */
     @Query("""
         SELECT id, startTime, originName, destinationName, totalDistance,
@@ -79,7 +79,7 @@ interface NavigationHistoryDao {
     suspend fun getAllSummaries(): List<NavigationHistorySummary>
 
     /**
-     * 根据时间范围查询
+     * Query by time range
      */
     @Query("""
         SELECT * FROM navigation_history
@@ -89,7 +89,7 @@ interface NavigationHistoryDao {
     suspend fun getByTimeRange(startTime: Long, endTime: Long): List<NavigationHistory>
 
     /**
-     * 根据交通方式查询
+     * Query by transport mode
      */
     @Query("""
         SELECT * FROM navigation_history
@@ -99,7 +99,7 @@ interface NavigationHistoryDao {
     suspend fun getByTransportMode(mode: String): List<NavigationHistory>
 
     /**
-     * 查询绿色出行记录
+     * Query green trip records
      */
     @Query("""
         SELECT * FROM navigation_history
@@ -109,7 +109,7 @@ interface NavigationHistoryDao {
     suspend fun getGreenTrips(): List<NavigationHistory>
 
     /**
-     * 获取最近N条记录
+     * Get the most recent N records
      */
     @Query("""
         SELECT * FROM navigation_history
@@ -119,31 +119,31 @@ interface NavigationHistoryDao {
     suspend fun getRecent(limit: Int): List<NavigationHistory>
 
     /**
-     * 统计总记录数
+     * Get total record count
      */
     @Query("SELECT COUNT(*) FROM navigation_history")
     suspend fun getCount(): Int
 
     /**
-     * 统计总减碳量
+     * Get total carbon saved
      */
     @Query("SELECT SUM(carbonSaved) FROM navigation_history WHERE isGreenTrip = 1")
     suspend fun getTotalCarbonSaved(): Double?
 
     /**
-     * 统计总行驶距离
+     * Get total travel distance
      */
     @Query("SELECT SUM(totalDistance) FROM navigation_history")
     suspend fun getTotalDistance(): Double?
 
     /**
-     * 统计绿色出行次数
+     * Get green trip count
      */
     @Query("SELECT COUNT(*) FROM navigation_history WHERE isGreenTrip = 1")
     suspend fun getGreenTripCount(): Int
 
     /**
-     * 根据用户ID查询
+     * Query by user ID
      */
     @Query("""
         SELECT * FROM navigation_history
@@ -153,7 +153,7 @@ interface NavigationHistoryDao {
     suspend fun getByUserId(userId: String): List<NavigationHistory>
 
     /**
-     * 搜索记录（根据起点或终点名称）
+     * Search records (by origin or destination name)
      */
     @Query("""
         SELECT * FROM navigation_history

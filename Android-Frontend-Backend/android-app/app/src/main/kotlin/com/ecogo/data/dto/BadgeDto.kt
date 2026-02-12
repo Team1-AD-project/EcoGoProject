@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName
 import java.util.Date
 
 /**
- * Badge - 统一的徽章/服饰数据模型
- * 后端使用同一个表存储 badge 和 cloth
+ * Badge - Unified badge/cloth data model
+ * Backend uses the same table to store badges and clothes
  */
 data class BadgeDto(
     @SerializedName("id")
@@ -24,7 +24,7 @@ data class BadgeDto(
     val purchaseCost: Int?,
 
     @SerializedName("category")
-    val category: String?,  // "badge" 或 "cloth"
+    val category: String?,  // "badge" or "cloth"
 
     @SerializedName("subCategory")
     val subCategory: String?,  // cloth: head/face/body, badge: rank
@@ -58,7 +58,7 @@ data class BadgeDto(
 }
 
 /**
- * UserBadge - 用户持有的徽章/服饰
+ * UserBadge - User's owned badges/clothes
  */
 data class UserBadgeDto(
     @SerializedName("id")
@@ -81,7 +81,7 @@ data class UserBadgeDto(
 )
 
 /**
- * 购买请求
+ * Purchase request
  */
 data class PurchaseRequest(
     @SerializedName("user_id")
@@ -89,7 +89,7 @@ data class PurchaseRequest(
 )
 
 /**
- * 切换佩戴请求
+ * Toggle display request
  */
 data class ToggleDisplayRequest(
     @SerializedName("user_id")
@@ -100,7 +100,7 @@ data class ToggleDisplayRequest(
 )
 
 /**
- * 用户装备信息
+ * User outfit info
  */
 data class UserOutfitDto(
     val head: String? = null,

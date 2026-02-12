@@ -14,114 +14,114 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 /**
- * 地图 ViewModel
- * 管理地图页面的 UI 状态和业务逻辑
+ * Map ViewModel
+ * Manages UI state and business logic for the map page
  *
- * @param useMockData 是否使用 Mock 数据（默认 true 用于测试）
+ * @param useMockData whether to use mock data (default true for testing)
  */
 class MapViewModel(
-    useMockData: Boolean = false,  // 开关：true = Mock数据，false = 真实API
-    repositoryOverride: IMapRepository? = null  // 用于单元测试注入
+    useMockData: Boolean = false,  // Switch: true = Mock data, false = Real API
+    repositoryOverride: IMapRepository? = null  // For unit test injection
 ) : ViewModel() {
 
-    // 根据开关选择 Repository (测试时可通过 repositoryOverride 注入)
+    // Select Repository based on switch (can be overridden via repositoryOverride for testing)
     private val repository: IMapRepository = repositoryOverride ?: if (useMockData) {
         MockMapRepository()
     } else {
         MapRepository()
     }
 
-    // 模拟用户 ID (实际应从登录状态获取)
+    // Simulated user ID (should be obtained from login state in production)
     private val userId: String = "test-user-001"
 
     companion object {
-        private const val ERR_NO_ORIGIN = "无法获取起点位置"
-        private const val ERR_NO_DESTINATION = "请先设置目的地"
+        private const val ERR_NO_ORIGIN = "Unable to get origin location"
+        private const val ERR_NO_DESTINATION = "Please set a destination first"
     }
 
     // ========================================
-    // UI 状态
+    // UI State
     // ========================================
 
-    // 当前位置
+    // Current location
     private val _currentLocation = MutableLiveData<LatLng>()
     val currentLocation: LiveData<LatLng> = _currentLocation
 
-    // 起点（用于路线规划）
+    // Origin (for route planning)
     private val _origin = MutableLiveData<LatLng?>()
     val origin: LiveData<LatLng?> = _origin
 
-    // 目的地
+    // Destination
     private val _destination = MutableLiveData<LatLng?>()
     val destination: LiveData<LatLng?> = _destination
 
-    // 行程状态
+    // Trip state
     private val _tripState = MutableLiveData<TripState>(TripState.Idle)
     val tripState: LiveData<TripState> = _tripState
 
-    // 当前行程 ID
+    // Current trip ID
     private val _currentTripId = MutableLiveData<String?>()
     val currentTripId: LiveData<String?> = _currentTripId
 
-    // 推荐路线
+    // Recommended route
     private val _recommendedRoute = MutableLiveData<RouteRecommendData?>()
     val recommendedRoute: LiveData<RouteRecommendData?> = _recommendedRoute
 
-    // 路线点 (用于绘制 Polyline)
+    // Route points (for drawing Polyline)
     private val _routePoints = MutableLiveData<List<LatLng>>()
     val routePoints: LiveData<List<LatLng>> = _routePoints
 
-    // 碳足迹计算结果
+    // Carbon footprint calculation result
     private val _carbonResult = MutableLiveData<CarbonCalculateData?>()
     val carbonResult: LiveData<CarbonCalculateData?> = _carbonResult
 
-    // 错误消息
+    // Error message
     private val _errorMessage = MutableLiveData<String?>()
     val errorMessage: LiveData<String?> = _errorMessage
 
-    // 加载状态
+    // Loading state
     private val _isLoading = MutableLiveData<Boolean>(false)
     val isLoading: LiveData<Boolean> = _isLoading
 
-    // 成功消息（用于 Toast）
+    // Success message (for Toast)
     private val _successMessage = MutableLiveData<String?>()
     val successMessage: LiveData<String?> = _successMessage
 
-    // 当前选择的交通方式
+    // Currently selected transport mode
     private val _selectedTransportMode = MutableLiveData<TransportMode?>(null)
     val selectedTransportMode: LiveData<TransportMode?> = _selectedTransportMode
 
     // ========================================
-    // 位置更新
+    // Location Updates
     // ========================================
 
     /**
-     * 更新当前位置
+     * Update current location
      */
     fun updateCurrentLocation(latLng: LatLng) {
         _currentLocation.value = latLng
-        // 如果还没有设置起点，默认使用当前位置
+        // If origin hasn't been set, use current location as default
         if (_origin.value == null) {
             _origin.value = latLng
         }
     }
 
     /**
-     * 设置起点
+     * Set origin
      */
     fun setOrigin(latLng: LatLng) {
         _origin.value = latLng
     }
 
     /**
-     * 设置目的地
+     * Set destination
      */
     fun setDestination(latLng: LatLng) {
         _destination.value = latLng
     }
 
     /**
-     * 交换起点和终点
+     * Swap origin and destination
      */
     fun swapOriginDestination() {
         val tempOrigin = _origin.value
@@ -134,7 +134,7 @@ class MapViewModel(
             _destination.value = tempOrigin
         }
 
-        // 如果有路线，需要重新获取
+        // If there's a route, need to re-fetch
         if (_recommendedRoute.value != null) {
             _recommendedRoute.value = null
             _routePoints.value = emptyList()
@@ -142,7 +142,7 @@ class MapViewModel(
     }
 
     /**
-     * 清除目的地
+     * Clear destination
      */
     fun clearDestination() {
         _destination.value = null
@@ -151,15 +151,15 @@ class MapViewModel(
     }
 
     // ========================================
-    // 行程追踪
+    // Trip Tracking
     // ========================================
 
     /**
-     * 开始行程追踪
+     * Start trip tracking
      */
     fun startTracking() {
         val location = _currentLocation.value ?: run {
-            _errorMessage.value = "无法获取当前位置"
+            _errorMessage.value = "Unable to get current location"
             return
         }
 
@@ -174,7 +174,7 @@ class MapViewModel(
                 onSuccess = { data ->
                     _currentTripId.value = data.trip_id
                     _tripState.value = TripState.Tracking(data.trip_id)
-                    _successMessage.value = data.message ?: "行程已开始"
+                    _successMessage.value = data.message ?: "Trip started"
                 },
                 onFailure = { error ->
                     _tripState.value = TripState.Idle
@@ -186,16 +186,16 @@ class MapViewModel(
     }
 
     /**
-     * 停止行程追踪并保存
+     * Stop trip tracking and save
      */
     fun stopTracking() {
-        // 只负责更新 UI 状态，实际保存由 MapActivity.completeTripOnBackend() 完成
+        // Only responsible for updating UI state; actual saving is done by MapActivity.completeTripOnBackend()
         _tripState.value = TripState.Completed
         _currentTripId.value = null
     }
 
     /**
-     * 取消行程
+     * Cancel trip
      */
     fun cancelTracking(reason: String? = null) {
         val tripId = _currentTripId.value ?: return
@@ -209,7 +209,7 @@ class MapViewModel(
                 onSuccess = { data ->
                     _tripState.value = TripState.Idle
                     _currentTripId.value = null
-                    _successMessage.value = data.message ?: "行程已取消"
+                    _successMessage.value = data.message ?: "Trip cancelled"
                 },
                 onFailure = { error ->
                     _errorMessage.value = error.message
@@ -220,11 +220,11 @@ class MapViewModel(
     }
 
     // ========================================
-    // 路线推荐
+    // Route Recommendations
     // ========================================
 
     /**
-     * 获取低碳路线
+     * Fetch low carbon route
      */
     fun fetchLowCarbonRoute() {
         val start = _origin.value ?: _currentLocation.value ?: run {
@@ -248,10 +248,10 @@ class MapViewModel(
             result.fold(
                 onSuccess = { data ->
                     _recommendedRoute.value = data
-                    // 优先使用新的 route_points，兼容旧的 green_route
+                    // Prefer new route_points, fall back to legacy green_route
                     val points = data.route_points ?: data.green_route ?: emptyList()
                     _routePoints.value = points.map { it.toLatLng() }
-                    _successMessage.value = "已找到低碳路线，预计节省 ${String.format("%.2f", data.carbon_saved)} kg 碳排放"
+                    _successMessage.value = "Low carbon route found, estimated saving ${String.format("%.2f", data.carbon_saved)} kg CO₂"
                 },
                 onFailure = { error ->
                     _errorMessage.value = error.message
@@ -262,7 +262,7 @@ class MapViewModel(
     }
 
     /**
-     * 获取平衡路线
+     * Fetch balanced route
      */
     fun fetchBalancedRoute() {
         val start = _origin.value ?: _currentLocation.value ?: run {
@@ -288,7 +288,7 @@ class MapViewModel(
                     _recommendedRoute.value = data
                     val points = data.route_points ?: data.green_route ?: emptyList()
                     _routePoints.value = points.map { it.toLatLng() }
-                    _successMessage.value = "已找到平衡路线，预计节省 ${String.format("%.2f", data.carbon_saved)} kg 碳排放"
+                    _successMessage.value = "Balanced route found, estimated saving ${String.format("%.2f", data.carbon_saved)} kg CO₂"
                 },
                 onFailure = { error ->
                     _errorMessage.value = error.message
@@ -299,10 +299,10 @@ class MapViewModel(
     }
 
     /**
-     * 根据交通方式获取路线
+     * Fetch route by transport mode
      */
     fun fetchRouteByMode(mode: TransportMode) {
-        // 记录选择的交通方式
+        // Record selected transport mode
         _selectedTransportMode.value = mode
 
         val start = _origin.value ?: _currentLocation.value ?: run {
@@ -333,10 +333,10 @@ class MapViewModel(
                     val distance = String.format("%.2f", data.total_distance)
                     val duration = data.estimated_duration
                     val carbonSaved = String.format("%.2f", data.carbon_saved)
-                    _successMessage.value = "${mode.displayName}路线: ${distance}公里, 预计${duration}分钟, 减碳${carbonSaved}kg"
+                    _successMessage.value = "${mode.displayName} route: ${distance} km, est. ${duration} min, carbon saved ${carbonSaved} kg"
                 },
                 onFailure = { error ->
-                    _errorMessage.value = error.message ?: "路线获取失败"
+                    _errorMessage.value = error.message ?: "Failed to fetch route"
                 }
             )
             _isLoading.value = false
@@ -344,11 +344,11 @@ class MapViewModel(
     }
 
     // ========================================
-    // 碳足迹计算
+    // Carbon Footprint Calculation
     // ========================================
 
     /**
-     * 计算碳足迹
+     * Calculate carbon footprint
      */
     private fun calculateCarbon(tripId: String, transportModes: List<String>) {
         viewModelScope.launch {
@@ -366,37 +366,37 @@ class MapViewModel(
     }
 
     /**
-     * 更新路线点（当用户选择了不同的路线方案时）
-     * 仅更新路线点，不触发重新绘制（绘制由 MapActivity 自行处理）
+     * Update route points (when user selects a different route alternative)
+     * Only updates route points without triggering re-draw (drawing is handled by MapActivity)
      */
     fun updateRoutePointsForSelectedAlternative(points: List<LatLng>) {
         _routePoints.value = points
     }
 
     /**
-     * 清除错误消息
+     * Clear error message
      */
     fun clearError() {
         _errorMessage.value = null
     }
 
     /**
-     * 清除成功消息
+     * Clear success message
      */
     fun clearSuccessMessage() {
         _successMessage.value = null
     }
 
     /**
-     * 恢复追踪状态
-     * 当用户返回 MapActivity 时，如果有正在进行的行程，恢复 UI 状态
+     * Restore tracking state
+     * When user returns to MapActivity, restore UI state if there's an ongoing trip
      */
     fun restoreTrackingState() {
-        // 检查 LocationManager 是否正在追踪
+        // Check if LocationManager is tracking
         if (com.ecogo.mapengine.service.LocationManager.isTracking.value == true) {
-            // 如果当前状态不是 Tracking，恢复为 Tracking 状态
+            // If current state is not Tracking, restore to Tracking state
             if (_tripState.value !is TripState.Tracking) {
-                // 使用一个恢复的 tripId（如果没有保存的 tripId，使用占位符）
+                // Use a restored tripId (if no saved tripId, use placeholder)
                 val tripId = _currentTripId.value ?: "restored-trip"
                 _tripState.value = TripState.Tracking(tripId)
             }
@@ -405,12 +405,12 @@ class MapViewModel(
 }
 
 /**
- * 行程状态
+ * Trip State
  */
 sealed class TripState {
-    object Idle : TripState()                       // 空闲
-    object Starting : TripState()                   // 正在开始
-    data class Tracking(val tripId: String) : TripState()  // 追踪中
-    object Stopping : TripState()                   // 正在停止
-    object Completed : TripState()                  // 已完成
+    object Idle : TripState()                       // Idle
+    object Starting : TripState()                   // Starting
+    data class Tracking(val tripId: String) : TripState()  // Tracking
+    object Stopping : TripState()                   // Stopping
+    object Completed : TripState()                  // Completed
 }

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <!-- 优惠券分类筛选 -->
+    <!-- Coupon Category Filter -->
     <HorizontalScrollView
         android:id="@+id/scroll_filters"
         android:layout_width="0dp"
@@ -60,7 +60,7 @@
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 
-    <!-- 优惠券列表 -->
+    <!-- Coupon List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_coupons"
         android:layout_width="0dp"
@@ -73,7 +73,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/scroll_filters" />
 
-    <!-- 加载中指示器 -->
+    <!-- Loading Indicator -->
     <ProgressBar
         android:id="@+id/progress_loading"
         android:layout_width="wrap_content"

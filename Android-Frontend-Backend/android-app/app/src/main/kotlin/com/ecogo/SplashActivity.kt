@@ -164,12 +164,12 @@ class SplashActivity : AppCompatActivity() {
         countdownTimer = object : CountDownTimer(3000, 1000) {
             override fun onTick(millisUntilFinished: Long) {
                 val secondsLeft = (millisUntilFinished / 1000) + 1
-                tvSkipText.text = "跳过 $secondsLeft"
+                tvSkipText.text = "Skip $secondsLeft"
             }
 
             override fun onFinish() {
                 Log.d(TAG, "Countdown finished")
-                tvSkipText.text = "跳过 0"
+                tvSkipText.text = "Skip 0"
                 proceedToMain(shouldGoToHome = true, notificationDest = notificationDest)
             }
         }.start()

@@ -1,8 +1,8 @@
 package com.ecogo.api
 
 /**
- * API 统一响应格式
- * 对应后端的 ResponseMessage<T>
+ * Unified API response format
+ * Corresponds to the backend's ResponseMessage<T>
  */
 data class ApiResponse<T>(
     val code: Int,
@@ -14,7 +14,7 @@ data class ApiResponse<T>(
 }
 
 /**
- * 空响应（没有数据体）
+ * Empty response (no data body)
  */
 data class EmptyResponse(
     val message: String = "Success"

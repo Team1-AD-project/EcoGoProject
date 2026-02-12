@@ -12,7 +12,7 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 顶部导航 -->
+        <!-- Top navigation -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -47,7 +47,7 @@
                 android:src="@drawable/ic_share" />
         </LinearLayout>
 
-        <!-- 基本信息卡片 -->
+        <!-- Basic info card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_info"
             android:layout_width="match_parent"
@@ -62,7 +62,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- 图标和标题 -->
+                <!-- Icon and title -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -110,7 +110,7 @@
                     </LinearLayout>
                 </LinearLayout>
 
-                <!-- 描述 -->
+                <!-- Description -->
                 <TextView
                     android:id="@+id/text_description"
                     android:layout_width="match_parent"
@@ -127,7 +127,7 @@
                     android:layout_marginVertical="16dp"
                     android:background="@color/border" />
 
-                <!-- 奖励信息 -->
+                <!-- Reward info -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -233,7 +233,7 @@
                     android:layout_marginVertical="16dp"
                     android:background="@color/border" />
 
-                <!-- 截止时间 -->
+                <!-- Deadline -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -266,7 +266,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 进度卡片 -->
+        <!-- Progress card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_progress"
             android:layout_width="match_parent"
@@ -290,7 +290,7 @@
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <!-- 小狮子鼓励 -->
+                <!-- Mascot lion encouragement -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -315,7 +315,7 @@
                         android:textSize="14sp" />
                 </LinearLayout>
 
-                <!-- 进度条 -->
+                <!-- Progress bar -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -360,7 +360,7 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!-- 底部按钮 -->
+        <!-- Bottom button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_accept"
             android:layout_width="match_parent"

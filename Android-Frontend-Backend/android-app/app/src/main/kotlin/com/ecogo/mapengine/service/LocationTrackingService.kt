@@ -17,8 +17,8 @@ import com.google.android.gms.location.*
 import com.google.android.gms.maps.model.LatLng
 
 /**
- * 前台定位服务
- * 用于在行程追踪期间持续获取用户位置
+ * Foreground location service
+ * Used to continuously obtain user location during trip tracking
  */
 class LocationTrackingService : Service() {
 
@@ -36,9 +36,9 @@ class LocationTrackingService : Service() {
         const val ACTION_START = "com.ecogo.mapengine.action.START_TRACKING"
         const val ACTION_STOP = "com.ecogo.mapengine.action.STOP_TRACKING"
 
-        // 位置更新间隔
-        private const val UPDATE_INTERVAL_MS = 3000L  // 3 秒
-        private const val FASTEST_INTERVAL_MS = 2000L // 最快 2 秒
+        // Location update interval
+        private const val UPDATE_INTERVAL_MS = 3000L  // 3 seconds
+        private const val FASTEST_INTERVAL_MS = 2000L // Fastest 2 seconds
     }
 
     override fun onCreate() {
@@ -60,16 +60,16 @@ class LocationTrackingService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     /**
-     * 创建通知渠道
+     * Create notification channel
      */
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 CHANNEL_ID,
-                "行程追踪",
+                "Trip Tracking",
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
-                description = "显示行程追踪状态"
+                description = "Shows trip tracking status"
                 setShowBadge(false)
             }
 
@@ -79,7 +79,7 @@ class LocationTrackingService : Service() {
     }
 
     /**
-     * 创建前台通知
+     * Create foreground notification
      */
     private fun createNotification(distance: Float = 0f): Notification {
         val intent = Intent(this, MapActivity::class.java).apply {
@@ -91,13 +91,13 @@ class LocationTrackingService : Service() {
         )
 
         val distanceText = if (distance > 0) {
-            String.format("已行进 %.2f 公里", distance / 1000)
+            String.format("Traveled %.2f km", distance / 1000)
         } else {
-            "正在记录您的绿色出行轨迹"
+            "Recording your green travel route"
         }
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("EcoGo 行程追踪中")
+            .setContentTitle("EcoGo Trip Tracking")
             .setContentText(distanceText)
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
             .setContentIntent(pendingIntent)
@@ -107,7 +107,7 @@ class LocationTrackingService : Service() {
     }
 
     /**
-     * 更新通知
+     * Update notification
      */
     private fun updateNotification(distance: Float) {
         val notificationManager = getSystemService(NotificationManager::class.java)
@@ -115,7 +115,7 @@ class LocationTrackingService : Service() {
     }
 
     /**
-     * 设置位置回调
+     * Set up location callback
      */
     private fun setupLocationCallback() {
         locationCallback = object : LocationCallback() {
@@ -125,15 +125,15 @@ class LocationTrackingService : Service() {
 
                     val latLng = LatLng(location.latitude, location.longitude)
 
-                    // 更新 LocationManager（轨迹记录）
+                    // Update LocationManager (route recording)
                     LocationManager.updateLocation(location.latitude, location.longitude)
 
-                    // 更新 NavigationManager（导航路线匹配）
+                    // Update NavigationManager (navigation route matching)
                     if (NavigationManager.isNavigating.value == true) {
                         NavigationManager.updateLocation(latLng)
                     }
 
-                    // 更新通知显示距离
+                    // Update notification with distance
                     val distance = if (NavigationManager.isNavigating.value == true) {
                         NavigationManager.traveledDistance.value ?: 0f
                     } else {
@@ -152,7 +152,7 @@ class LocationTrackingService : Service() {
     }
 
     /**
-     * 开始追踪
+     * Start tracking
      */
     @SuppressLint("MissingPermission")
     private fun startTracking() {
@@ -164,20 +164,20 @@ class LocationTrackingService : Service() {
         Log.d(TAG, "Starting tracking")
         isTracking = true
 
-        // 通知 LocationManager 开始追踪
+        // Notify LocationManager to start tracking
         LocationManager.startTracking()
 
-        // 启动前台服务
+        // Start foreground service
         startForeground(NOTIFICATION_ID, createNotification())
 
-        // 配置高精度位置请求
+        // Configure high-accuracy location request
         val locationRequest = LocationRequest.Builder(
             Priority.PRIORITY_HIGH_ACCURACY,
             UPDATE_INTERVAL_MS
         ).apply {
             setMinUpdateIntervalMillis(FASTEST_INTERVAL_MS)
             setWaitForAccurateLocation(true)
-            setMinUpdateDistanceMeters(5f)  // 最小移动 5 米才更新
+            setMinUpdateDistanceMeters(5f)  // Minimum 5 meters movement to trigger update
         }.build()
 
         fusedLocationClient.requestLocationUpdates(
@@ -188,7 +188,7 @@ class LocationTrackingService : Service() {
     }
 
     /**
-     * 停止追踪
+     * Stop tracking
      */
     private fun stopTracking() {
         if (!isTracking) {
@@ -199,13 +199,13 @@ class LocationTrackingService : Service() {
         Log.d(TAG, "Stopping tracking")
         isTracking = false
 
-        // 通知 LocationManager 停止追踪
+        // Notify LocationManager to stop tracking
         LocationManager.stopTracking()
 
-        // 停止位置更新
+        // Stop location updates
         fusedLocationClient.removeLocationUpdates(locationCallback)
 
-        // 停止前台服务
+        // Stop foreground service
         stopForeground(STOP_FOREGROUND_REMOVE)
         stopSelf()
     }

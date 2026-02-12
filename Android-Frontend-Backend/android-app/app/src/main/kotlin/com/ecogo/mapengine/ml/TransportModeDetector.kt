@@ -9,23 +9,23 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.LinkedList
 
 /**
- * 交通方式检测器
- * 整合传感器数据采集、特征提取和模型预测
+ * Transport Mode Detector
+ * Integrates sensor data collection, feature extraction, and model prediction
  */
 class TransportModeDetector(private val context: Context) {
 
     private val sensorCollector = SensorDataCollector(context)
     private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
-    // 预测结果流
+    // Prediction result flow
     private val _detectedMode = MutableStateFlow<TransportModePrediction?>(null)
     val detectedMode: StateFlow<TransportModePrediction?> = _detectedMode
 
-    // 预测历史（用于平滑）
+    // Prediction history (for smoothing)
     private val predictionHistory = LinkedList<TransportModeLabel>()
-    private val historySize = 3  // 保留最近 3 次预测
+    private val historySize = 3  // Keep the last 3 predictions
 
-    // 是否正在检测
+    // Whether detection is running
     private var isDetecting = false
 
     companion object {
@@ -33,7 +33,7 @@ class TransportModeDetector(private val context: Context) {
     }
 
     /**
-     * 开始检测交通方式
+     * Start transport mode detection
      */
     fun startDetection() {
         if (isDetecting) {
@@ -44,10 +44,10 @@ class TransportModeDetector(private val context: Context) {
         Log.d(TAG, "Starting transport mode detection")
         isDetecting = true
 
-        // 开始采集传感器数据
+        // Start collecting sensor data
         sensorCollector.startCollecting()
 
-        // 监听数据窗口
+        // Listen to data windows
         scope.launch {
             sensorCollector.windowFlow.collect { window ->
                 window?.let {
@@ -58,7 +58,7 @@ class TransportModeDetector(private val context: Context) {
     }
 
     /**
-     * 停止检测
+     * Stop detection
      */
     fun stopDetection() {
         if (!isDetecting) return
@@ -71,33 +71,33 @@ class TransportModeDetector(private val context: Context) {
     }
 
     /**
-     * 检查是否正在检测
+     * Check if detection is running
      */
     fun isDetecting(): Boolean = isDetecting
 
     /**
-     * 更新 GPS 位置（从外部调用）
+     * Update GPS location (called externally)
      */
     fun updateLocation(location: Location) {
         sensorCollector.updateGpsSpeed(location)
     }
 
     /**
-     * 处理数据窗口
+     * Process a data window
      */
     private suspend fun processWindow(window: SensorWindow) = withContext(Dispatchers.Default) {
         try {
-            // 1. 提取特征
+            // 1. Extract features
             val features = SensorFeatureExtractor.extractFeatures(window)
             Log.d(TAG, "Extracted features: accMean=${features.accXMean}, gpsSpeed=${features.gpsSpeedMean}")
 
-            // 2. 运行模型预测
+            // 2. Run model prediction
             val prediction = predictTransportMode(features)
 
-            // 3. 平滑预测结果
+            // 3. Smooth prediction result
             val smoothedPrediction = smoothPrediction(prediction)
 
-            // 4. 更新检测结果
+            // 4. Update detection result
             _detectedMode.value = smoothedPrediction
 
             Log.d(TAG, "Detected mode: ${smoothedPrediction.mode} (confidence: ${smoothedPrediction.confidence})")
@@ -108,19 +108,19 @@ class TransportModeDetector(private val context: Context) {
     }
 
     /**
-     * 使用模型预测交通方式
+     * Predict transport mode using model
      *
-     * 使用简化的决策树分类器
-     * TODO: 训练完 Random Forest 后，替换为真实的模型
+     * Uses simplified decision tree classifier
+     * TODO: Replace with actual model after training Random Forest
      */
     private fun predictTransportMode(features: SensorFeatures): TransportModePrediction {
-        // 转换特征为数组
+        // Convert features to array
         val featureArray = features.toFloatArray()
 
-        // 使用简化的决策树分类器
+        // Use simplified decision tree classifier
         val (predictedClass, confidence) = SimpleDecisionTreeClassifier.predict(featureArray)
 
-        // 转换类别索引为枚举
+        // Convert class index to enum
         val mode = when (predictedClass) {
             0 -> TransportModeLabel.WALKING
             1 -> TransportModeLabel.CYCLING
@@ -130,7 +130,7 @@ class TransportModeDetector(private val context: Context) {
             else -> TransportModeLabel.UNKNOWN
         }
 
-        // 获取概率分布
+        // Get probability distribution
         val probArray = SimpleDecisionTreeClassifier.predictProba(featureArray)
         val probabilities = mapOf(
             TransportModeLabel.WALKING to probArray[0],
@@ -149,21 +149,21 @@ class TransportModeDetector(private val context: Context) {
     }
 
     /**
-     * 平滑预测结果（使用多数投票）
+     * Smooth prediction results (using majority voting)
      */
     private fun smoothPrediction(prediction: TransportModePrediction): TransportModePrediction {
-        // 添加到历史
+        // Add to history
         predictionHistory.add(prediction.mode)
         if (predictionHistory.size > historySize) {
             predictionHistory.removeFirst()
         }
 
-        // 如果历史不足，直接返回当前预测
+        // If history is insufficient, return current prediction directly
         if (predictionHistory.size < historySize) {
             return prediction
         }
 
-        // 多数投票
+        // Majority voting
         val modeCount = predictionHistory.groupingBy { it }.eachCount()
         val majorityMode = modeCount.maxByOrNull { it.value }?.key ?: prediction.mode
         val majorityConfidence = modeCount[majorityMode]!!.toFloat() / historySize
@@ -176,7 +176,7 @@ class TransportModeDetector(private val context: Context) {
     }
 
     /**
-     * 清理资源
+     * Clean up resources
      */
     fun cleanup() {
         stopDetection()

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <!-- 商品分类筛选 -->
+    <!-- Product Category Filter -->
     <HorizontalScrollView
         android:id="@+id/scroll_categories"
         android:layout_width="0dp"
@@ -68,7 +68,7 @@
         </com.google.android.material.chip.ChipGroup>
     </HorizontalScrollView>
 
-    <!-- 商品列表 -->
+    <!-- Product List -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_goods"
         android:layout_width="0dp"
@@ -81,7 +81,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/scroll_categories" />
 
-    <!-- 加载中指示器 -->
+    <!-- Loading Indicator -->
     <ProgressBar
         android:id="@+id/progress_loading"
         android:layout_width="wrap_content"

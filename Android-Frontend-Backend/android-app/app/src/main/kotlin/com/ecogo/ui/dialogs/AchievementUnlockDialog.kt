@@ -15,12 +15,12 @@ import com.ecogo.data.MascotSize
 import com.ecogo.databinding.DialogAchievementUnlockBinding
 
 /**
- * AchievementUnlockDialog - 成就解锁弹窗
- * 
- * 功能:
- * - 展示小狮子庆祝动画
- * - 徽章掉落动画
- * - 积分奖励展示
+ * AchievementUnlockDialog - Achievement unlock dialog
+ *
+ * Features:
+ * - Lion mascot celebration animation
+ * - Badge drop animation
+ * - Points reward display
  */
 class AchievementUnlockDialog(
     context: Context,
@@ -38,7 +38,7 @@ class AchievementUnlockDialog(
         binding = DialogAchievementUnlockBinding.inflate(layoutInflater)
         setContentView(binding.root)
         
-        // 设置对话框背景透明
+        // Set dialog background to transparent
         window?.setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
         window?.attributes?.width = android.view.WindowManager.LayoutParams.MATCH_PARENT
         
@@ -51,39 +51,39 @@ class AchievementUnlockDialog(
     }
 
     private fun setupUI() {
-        // 设置成就信息
+        // Set achievement info
         binding.textAchievementName.text = achievement.name
         binding.textAchievementDesc.text = achievement.description
         
-        // 设置小狮子
+        // Set up lion mascot
         binding.mascotCelebrate.apply {
             mascotSize = MascotSize.XLARGE
         }
         
-        // 显示积分奖励
+        // Show points reward
         if (pointsEarned > 0) {
             binding.layoutPointsReward.visibility = View.VISIBLE
             binding.textPointsEarned.text = pointsEarned.toString()
         }
         
-        // 确认按钮
+        // Confirm button
         binding.buttonAwesome.setOnClickListener {
             dismiss()
         }
     }
 
     private fun playAnimations() {
-        // 延迟启动动画，让对话框先显示
+        // Delay animation start to let the dialog display first
         binding.root.postDelayed({
-            // 1. 小狮子庆祝动画
+            // 1. Lion mascot celebration animation
             binding.mascotCelebrate.celebrateAnimation()
             
-            // 2. 徽章掉落动画（200ms后）
+            // 2. Badge drop animation (after 200ms)
             binding.root.postDelayed({
                 playBadgeDropAnimation()
             }, 200)
             
-            // 3. 积分数字动画（600ms后）
+            // 3. Points number animation (after 600ms)
             if (pointsEarned > 0) {
                 binding.root.postDelayed({
                     playPointsAnimation()
@@ -97,9 +97,9 @@ class AchievementUnlockDialog(
             visibility = View.VISIBLE
             setImageResource(getBadgeDrawable(achievement.id))
             
-            // 从顶部掉落到小狮子胸前
+            // Drop from top to lion mascot's chest
             val startY = -100f
-            val endY = 80f  // 小狮子胸前位置
+            val endY = 80f  // Lion mascot's chest position
             
             val dropAnimator = ValueAnimator.ofFloat(startY, endY).apply {
                 duration = 600
@@ -113,7 +113,7 @@ class AchievementUnlockDialog(
     }
 
     private fun playPointsAnimation() {
-        // 积分数字从0到目标值的动画
+        // Animate points number from 0 to target value
         ValueAnimator.ofInt(0, pointsEarned).apply {
             duration = 800
             addUpdateListener { animation ->
@@ -122,7 +122,7 @@ class AchievementUnlockDialog(
             start()
         }
         
-        // 火花效果（缩放动画）
+        // Spark effect (scale animation)
         binding.layoutPointsReward.apply {
             scaleX = 0.8f
             scaleY = 0.8f

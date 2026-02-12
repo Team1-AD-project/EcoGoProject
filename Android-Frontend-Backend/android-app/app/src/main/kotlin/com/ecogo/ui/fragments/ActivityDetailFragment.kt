@@ -21,8 +21,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.launch
 
 /**
- * 活动详情页面
- * 显示活动完整信息，支持参与、签到等操作
+ * Activity Detail Page
+ * Displays full activity information, supports join, check-in, and other actions
  */
 class ActivityDetailFragment : Fragment() {
 
@@ -78,19 +78,19 @@ class ActivityDetailFragment : Fragment() {
                 val intent = Intent(requireContext(), MapActivity::class.java).apply {
                     putExtra(MapActivity.EXTRA_DEST_LAT, lat)
                     putExtra(MapActivity.EXTRA_DEST_LNG, lng)
-                    putExtra(MapActivity.EXTRA_DEST_NAME, activityLocationName ?: "活动地点")
+                    putExtra(MapActivity.EXTRA_DEST_NAME, activityLocationName ?: "Activity Location")
                 }
                 startActivity(intent)
             } else {
-                Toast.makeText(requireContext(), "该活动未设置地点坐标", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "No location coordinates set for this activity", Toast.LENGTH_SHORT).show()
             }
         }
         
         binding.btnShare.setOnClickListener {
-            // TODO: 分享功能（将在阶段三实现）
+            // TODO: Share functionality (to be implemented in phase 3)
             android.widget.Toast.makeText(
                 requireContext(),
-                "分享功能将在后续版本实现",
+                "Share functionality coming soon",
                 android.widget.Toast.LENGTH_SHORT
             ).show()
         }
@@ -100,44 +100,44 @@ class ActivityDetailFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             val result = repository.getActivityById(activityId)
             result.onSuccess { activity ->
-                // 显示活动信息
+                // Display activity information
                 binding.textTitle.text = activity.title
                 binding.textDescription.text = activity.description
                 
-                // 活动类型和状态
+                // Activity type and status
                 binding.textType.text = when (activity.type) {
-                    "ONLINE" -> "线上活动"
-                    "OFFLINE" -> "线下活动"
+                    "ONLINE" -> "Online Activity"
+                    "OFFLINE" -> "Offline Activity"
                     else -> activity.type
                 }
                 
                 activityStatus = activity.status ?: "PUBLISHED"
                 binding.textStatus.text = when (activityStatus) {
-                    "DRAFT" -> "草稿"
-                    "PUBLISHED" -> "已发布"
-                    "ONGOING" -> "进行中"
-                    "ENDED" -> "已结束"
+                    "DRAFT" -> "Draft"
+                    "PUBLISHED" -> "Published"
+                    "ONGOING" -> "Ongoing"
+                    "ENDED" -> "Ended"
                     else -> activity.status
                 }
                 
-                // 保存坐标信息
+                // Save coordinate information
                 activityLat = activity.latitude
                 activityLng = activity.longitude
                 activityLocationName = activity.locationName
 
-                // 时间
-                binding.textStartTime.text = activity.startTime ?: "待定"
-                binding.textEndTime.text = activity.endTime ?: "待定"
+                // Time
+                binding.textStartTime.text = activity.startTime ?: "TBD"
+                binding.textEndTime.text = activity.endTime ?: "TBD"
                 
-                // 奖励
-                binding.textReward.text = "+${activity.rewardCredits} 积分"
+                // Reward
+                binding.textReward.text = "+${activity.rewardCredits} pts"
                 
-                // 参与人数
+                // Participant count
                 val currentParticipants = activity.currentParticipants
                 val maxParticipants = activity.maxParticipants ?: Int.MAX_VALUE
                 binding.textParticipants.text = "$currentParticipants / ${if (maxParticipants == Int.MAX_VALUE) "∞" else maxParticipants}"
                 
-                // 进度条
+                // Progress bar
                 if (maxParticipants != Int.MAX_VALUE) {
                     val progress = (currentParticipants.toFloat() / maxParticipants * 100).toInt()
                     binding.progressParticipants.progress = progress
@@ -146,25 +146,25 @@ class ActivityDetailFragment : Fragment() {
                     binding.progressParticipants.visibility = View.GONE
                 }
                 
-                // 检查用户是否已参与
+                // Check if user has already joined
                 val currentUserId = com.ecogo.auth.TokenManager.getUserId() ?: ""
                 isJoined = activity.participantIds.contains(currentUserId)
                 updateJoinButton()
                 
-                // 参与人员列表（简化版，显示前几个）
-                // TODO: 实际应该加载参与用户的详细信息
+                // Participant list (simplified, showing first few)
+                // TODO: Should load detailed participant user info
                 // binding.recyclerParticipants.apply {
                 //     layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
                 //     adapter = FriendAdapter(participants, {}, {})
                 // }
                 
-                // 更新按钮可用性
+                // Update button availability
                 updateButtonStates()
             }.onFailure { error: Throwable ->
                 MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("加载失败")
-                    .setMessage("无法加载活动详情: ${error.message}")
-                    .setPositiveButton("确定") { _, _ ->
+                    .setTitle("Load Failed")
+                    .setMessage("Unable to load activity details: ${error.message}")
+                    .setPositiveButton("OK") { _, _ ->
                         findNavController().navigateUp()
                     }
                     .show()
@@ -174,16 +174,16 @@ class ActivityDetailFragment : Fragment() {
     
     private fun updateJoinButton() {
         if (isJoined) {
-            binding.btnJoin.text = "退出活动"
+            binding.btnJoin.text = "Leave Activity"
             binding.btnJoin.setIconResource(R.drawable.ic_check)
         } else {
-            binding.btnJoin.text = "参加活动"
+            binding.btnJoin.text = "Join Activity"
             binding.btnJoin.icon = null
         }
     }
     
     private fun updateButtonStates() {
-        // 根据活动状态更新按钮可用性
+        // Update button availability based on activity status
         when (activityStatus) {
             "ENDED" -> {
                 binding.btnJoin.isEnabled = false
@@ -209,26 +209,26 @@ class ActivityDetailFragment : Fragment() {
                 updateJoinButton()
                 updateButtonStates()
                 
-                // 显示成功消息
+                // Show success message
                 val dialog = MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("成功")
-                    .setMessage("你已成功参加活动！")
-                    .setPositiveButton("确定", null)
+                    .setTitle("Success")
+                    .setMessage("You have successfully joined the activity!")
+                    .setPositiveButton("OK", null)
                     .create()
                 dialog.show()
                 
-                // 重新加载活动详情以更新参与人数
+                // Reload activity detail to update participant count
                 loadActivityDetail()
             }.onFailure { error: Throwable ->
                 MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("参加失败")
+                    .setTitle("Join Failed")
                     .setMessage(error.message)
-                    .setPositiveButton("确定", null)
+                    .setPositiveButton("OK", null)
                     .show()
             }
         }
     }
-    
+
     private fun leaveActivity() {
         val userId = com.ecogo.auth.TokenManager.getUserId() ?: return
         viewLifecycleOwner.lifecycleScope.launch {
@@ -240,22 +240,22 @@ class ActivityDetailFragment : Fragment() {
                 
                 android.widget.Toast.makeText(
                     requireContext(),
-                    "已退出活动",
+                    "Left the activity",
                     android.widget.Toast.LENGTH_SHORT
                 ).show()
                 
-                // 重新加载活动详情以更新参与人数
+                // Reload activity detail to update participant count
                 loadActivityDetail()
             }.onFailure { error: Throwable ->
                 MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("退出失败")
+                    .setTitle("Leave Failed")
                     .setMessage(error.message)
-                    .setPositiveButton("确定", null)
+                    .setPositiveButton("OK", null)
                     .show()
             }
         }
     }
-    
+
     private fun setupAnimations() {
         val slideUp = AnimationUtils.loadAnimation(requireContext(), R.anim.slide_up)
         binding.cardInfo.startAnimation(slideUp)

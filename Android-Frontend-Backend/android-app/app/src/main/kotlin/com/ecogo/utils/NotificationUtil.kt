@@ -56,7 +56,7 @@ object NotificationUtil {
 
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.mipmap.ic_launcher) // ✅ 不用 ic_notification，避免资源不存在
+            .setSmallIcon(R.mipmap.ic_launcher) // Use ic_launcher instead of ic_notification to avoid missing resource
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)

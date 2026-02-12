@@ -9,21 +9,21 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * 行程仓库 - 整合本地存储和远程API
+ * Trip repository - integrates local storage and remote API
  *
- * 功能：
- * 1. 开始行程 -> 调用后端API + 本地记录
- * 2. 完成行程 -> 上传轨迹到后端 + 本地保存
- * 3. 获取历史记录 -> 优先本地，支持从云端同步
+ * Features:
+ * 1. Start trip -> call backend API + local recording
+ * 2. Complete trip -> upload track to backend + save locally
+ * 3. Get history -> local first, supports cloud sync
  *
- * 使用方法：
+ * Usage:
  * ```kotlin
  * val repo = TripRepository.getInstance()
  *
- * // 开始行程
+ * // Start trip
  * val result = repo.startTrip(startLat, startLng, placeName, address)
  *
- * // 完成行程
+ * // Complete trip
  * val result = repo.completeTrip(tripId, endLat, endLng, ...)
  * ```
  */
@@ -32,10 +32,10 @@ class TripRepository private constructor() {
     private val tripApiService = RetrofitClient.tripApiService
     private val historyRepo by lazy { NavigationHistoryRepository.getInstance() }
 
-    // 当前行程ID（从后端获取）
+    // Current trip ID (obtained from backend)
     private var currentTripId: String? = null
 
-    // Token管理：优先从 TokenManager 获取登录 token（不再硬编码）
+    // Token management: prefer getting login token from TokenManager (no longer hardcoded)
     private fun resolveAuthToken(): String =
         TokenManager.getAuthHeader() ?: "Bearer test_token_123"
 
@@ -53,18 +53,18 @@ class TripRepository private constructor() {
     }
 
     /**
-     * 获取当前认证Token（从 TokenManager 动态读取）
+     * Get current auth token (dynamically read from TokenManager)
      */
     fun getAuthToken(): String = resolveAuthToken()
 
     // ============================================================
-    // 1. 开始行程
+    // 1. Start trip
     // ============================================================
 
     /**
-     * 开始行程
+     * Start trip
      *
-     * @return Result<String> 成功返回tripId，失败返回错误信息
+     * @return Result<String> returns tripId on success, error message on failure
      */
     suspend fun startTrip(
         startLat: Double,
@@ -110,25 +110,25 @@ class TripRepository private constructor() {
     }
 
     // ============================================================
-    // 2. 完成行程
+    // 2. Complete trip
     // ============================================================
 
     /**
-     * 完成行程并上传数据
+     * Complete trip and upload data
      *
-     * @param tripId 行程ID（从startTrip获取）
-     * @param endLat 终点纬度
-     * @param endLng 终点经度
-     * @param endPlaceName 终点名称
-     * @param endAddress 终点地址
-     * @param distance 总距离（米）
-     * @param trackPoints 实际轨迹点
-     * @param transportMode 主要交通方式（用户选择）
-     * @param detectedMode AI检测的主要交通方式
-     * @param mlConfidence ML置信度
-     * @param carbonSaved 减碳量（克）
-     * @param isGreenTrip 是否为绿色出行
-     * @param transportModeSegments ML检测的交通方式段列表（UI显示什么就传什么）
+     * @param tripId Trip ID (obtained from startTrip)
+     * @param endLat Destination latitude
+     * @param endLng Destination longitude
+     * @param endPlaceName Destination name
+     * @param endAddress Destination address
+     * @param distance Total distance (meters)
+     * @param trackPoints Actual track points
+     * @param transportMode Primary transport mode (user-selected)
+     * @param detectedMode AI-detected primary transport mode
+     * @param mlConfidence ML confidence score
+     * @param carbonSaved Carbon saved (grams)
+     * @param isGreenTrip Whether it is a green trip
+     * @param transportModeSegments ML-detected transport mode segment list (pass what the UI displays)
      *
      * @return Result<TripCompleteResponse>
      */
@@ -215,11 +215,11 @@ class TripRepository private constructor() {
     }
 
     // ============================================================
-    // 3. 取消行程
+    // 3. Cancel trip
     // ============================================================
 
     /**
-     * 取消行程
+     * Cancel trip
      */
     suspend fun cancelTrip(tripId: String): Result<String> = withContext(Dispatchers.IO) {
         try {
@@ -232,7 +232,7 @@ class TripRepository private constructor() {
                 if (apiResponse.isSuccess && apiResponse.data != null) {
                     Log.d(TAG, "Trip canceled successfully: ${apiResponse.data}")
 
-                    // 清除当前行程ID
+                    // Clear current trip ID
                     if (currentTripId == tripId) {
                         currentTripId = null
                     }
@@ -255,11 +255,11 @@ class TripRepository private constructor() {
     }
 
     // ============================================================
-    // 4. 获取行程列表
+    // 4. Get trip list
     // ============================================================
 
     /**
-     * 从云端获取行程列表
+     * Get trip list from cloud
      */
     suspend fun getTripListFromCloud(
         page: Int? = null,
@@ -294,7 +294,7 @@ class TripRepository private constructor() {
     }
 
     /**
-     * 从本地获取行程列表（快速）
+     * Get trip list from local storage (fast)
      */
     suspend fun getTripListFromLocal(): Result<List<com.ecogo.mapengine.data.local.entity.NavigationHistory>> {
         return try {
@@ -306,11 +306,11 @@ class TripRepository private constructor() {
     }
 
     // ============================================================
-    // 5. 获取行程详情
+    // 5. Get trip details
     // ============================================================
 
     /**
-     * 获取行程详情
+     * Get trip details
      */
     suspend fun getTripDetail(tripId: String): Result<TripDetail> = withContext(Dispatchers.IO) {
         try {
@@ -341,11 +341,11 @@ class TripRepository private constructor() {
     }
 
     // ============================================================
-    // 6. 获取当前追踪行程
+    // 6. Get current tracking trip
     // ============================================================
 
     /**
-     * 获取当前正在追踪的行程
+     * Get current tracking trip
      */
     suspend fun getCurrentTrip(): Result<TripDetail?> = withContext(Dispatchers.IO) {
         try {
@@ -382,16 +382,16 @@ class TripRepository private constructor() {
     }
 
     // ============================================================
-    // 辅助方法
+    // Helper methods
     // ============================================================
 
     /**
-     * 获取当前行程ID
+     * Get current trip ID
      */
     fun getCurrentTripId(): String? = currentTripId
 
     /**
-     * 清除当前行程ID
+     * Clear current trip ID
      */
     fun clearCurrentTripId() {
         currentTripId = null

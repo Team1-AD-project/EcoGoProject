@@ -27,15 +27,15 @@ import com.ecogo.ui.adapters.FacultySwipeAdapter
 import kotlin.math.abs
 
 /**
- * SignupWizardFragment - 注册向导
+ * SignupWizardFragment - Registration Wizard
  *
- * 六步流程:
- * Step 0: 个人信息填写（用户名、邮箱、NUSNET ID）
- * Step 1: 学院选择（滑动卡片）
- * Step 2: 交通偏好（公交/步行/骑行/拼车）
- * Step 3: 常用地点（宿舍/教学楼/学习地点）
- * Step 4: 兴趣目标（兴趣、目标、通知偏好）
- * Step 5: 小狮子换装展示
+ * Six-step flow:
+ * Step 0: Personal info (username, email, NUSNET ID)
+ * Step 1: Faculty selection (swipe cards)
+ * Step 2: Transport preference (bus/walking/cycling/carpool)
+ * Step 3: Common locations (dormitory/teaching building/study spot)
+ * Step 4: Interests & goals (interests, goals, notification preferences)
+ * Step 5: Mascot outfit reveal
  */
 class SignupWizardFragment : Fragment() {
 
@@ -80,14 +80,14 @@ class SignupWizardFragment : Fragment() {
     ): View {
         return try {
             Log.d("DEBUG_SIGNUP", "SignupWizardFragment onCreateView")
-            Toast.makeText(context, "📝 SignupWizard 正在加载...", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "📝 SignupWizard loading...", Toast.LENGTH_SHORT).show()
             _binding = FragmentSignupWizardBinding.inflate(inflater, container, false)
             Log.d("DEBUG_SIGNUP", "SignupWizardFragment binding inflated")
-            Toast.makeText(context, "✅ SignupWizard 加载成功！", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "✅ SignupWizard loaded!", Toast.LENGTH_SHORT).show()
             binding.root
         } catch (e: Exception) {
             Log.e("DEBUG_SIGNUP", "SignupWizardFragment onCreateView FAILED: ${e.message}", e)
-            Toast.makeText(context, "❌ SignupWizard 创建失败: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "❌ SignupWizard creation failed: ${e.message}", Toast.LENGTH_LONG).show()
             throw e
         }
     }
@@ -100,14 +100,14 @@ class SignupWizardFragment : Fragment() {
             Log.d("DEBUG_SIGNUP", "SignupWizardFragment personal info shown")
         } catch (e: Exception) {
             Log.e("DEBUG_SIGNUP", "SignupWizardFragment onViewCreated FAILED: ${e.message}", e)
-            Toast.makeText(requireContext(), "SignupWizard 初始化失败: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(requireContext(), "SignupWizard init failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
     private fun showPersonalInfo() {
         currentStep = 0
 
-        // 显示个人信息界面
+        // Show personal info layout
         binding.layoutPersonalInfo.visibility = View.VISIBLE
         binding.layoutFacultySelection.visibility = View.GONE
         binding.layoutTransportPreference.root.visibility = View.GONE
@@ -115,7 +115,7 @@ class SignupWizardFragment : Fragment() {
         binding.layoutInterestsGoals.root.visibility = View.GONE
         binding.layoutMascotReveal.visibility = View.GONE
 
-        // 输入验证
+        // Input validation
         val textWatcher = object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
@@ -130,7 +130,7 @@ class SignupWizardFragment : Fragment() {
         binding.inputPassword.addTextChangedListener(textWatcher)
         binding.inputConfirmPassword.addTextChangedListener(textWatcher)
 
-        // Next 按钮
+        // Next button
         binding.btnNextToFaculty.isEnabled = false
         binding.btnNextToFaculty.alpha = 0.5f
         binding.btnNextToFaculty.setOnClickListener {
@@ -246,7 +246,7 @@ class SignupWizardFragment : Fragment() {
     private fun showFacultySelection() {
         currentStep = 1
 
-        // 切换界面
+        // Switch layout
         binding.layoutPersonalInfo.visibility = View.GONE
         binding.layoutFacultySelection.visibility = View.VISIBLE
         binding.layoutTransportPreference.root.visibility = View.GONE
@@ -254,9 +254,9 @@ class SignupWizardFragment : Fragment() {
         binding.layoutInterestsGoals.root.visibility = View.GONE
         binding.layoutMascotReveal.visibility = View.GONE
 
-        // 设置ViewPager2适配器
+        // Setup ViewPager2 adapter
         val adapter = FacultySwipeAdapter(MockData.FACULTY_DATA) { faculty ->
-            // 选择后跳转到交通偏好
+            // After selection, navigate to transport preference
             selectedFaculty = faculty
             android.util.Log.d("DEBUG_SIGNUP", "Faculty selected: ${faculty.name}")
 
@@ -274,38 +274,38 @@ class SignupWizardFragment : Fragment() {
 
         binding.viewpagerFaculties.adapter = adapter
 
-        // 设置ViewPager2的页面切换监听
+        // Setup ViewPager2 page change listener
         binding.viewpagerFaculties.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
-                // 更新页面指示器
+                // Update page indicator
                 binding.textPageIndicator.text = "${position + 1} / ${MockData.FACULTY_DATA.size}"
             }
         })
 
-        // 初始化页面指示器
+        // Initialize page indicator
         binding.textPageIndicator.text = "1 / ${MockData.FACULTY_DATA.size}"
 
-        // 配置ViewPager2的页面转换效果
+        // Configure ViewPager2 page transformation
         setupPageTransformer()
     }
 
     private fun setupPageTransformer() {
         binding.viewpagerFaculties.apply {
-            // 设置页面间距
+            // Set page margins
             offscreenPageLimit = 1
 
             setPageTransformer { page, position ->
                 val absPosition = abs(position)
 
-                // 缩放效果
+                // Scale effect
                 page.scaleY = 0.85f + (1 - absPosition) * 0.15f
                 page.scaleX = 0.85f + (1 - absPosition) * 0.15f
 
-                // 透明度效果
+                // Alpha effect
                 page.alpha = 0.5f + (1 - absPosition) * 0.5f
 
-                // 轻微旋转效果
+                // Slight rotation effect
                 page.rotationY = position * -15f
             }
         }
@@ -314,7 +314,7 @@ class SignupWizardFragment : Fragment() {
     private fun showTransportPreference() {
         currentStep = 2
 
-        // 切换界面
+        // Switch layout
         binding.layoutPersonalInfo.visibility = View.GONE
         binding.layoutFacultySelection.visibility = View.GONE
         binding.layoutTransportPreference.root.visibility = View.VISIBLE
@@ -324,14 +324,14 @@ class SignupWizardFragment : Fragment() {
 
         Log.d("DEBUG_SIGNUP", "Showing transport preference")
         
-        // 设置 RecyclerView 布局管理器
+        // Setup RecyclerView layout manager
         binding.layoutTransportPreference.recyclerTransportModes.layoutManager = 
             androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         
-        // 加载交通方式数据
+        // Load transport mode data
         loadTransportModes()
 
-        // Continue按钮
+        // Continue button
         binding.layoutTransportPreference.btnContinueTransport.isEnabled = false
         binding.layoutTransportPreference.btnContinueTransport.alpha = 0.5f
         binding.layoutTransportPreference.btnContinueTransport.setOnClickListener {
@@ -378,7 +378,7 @@ class SignupWizardFragment : Fragment() {
     private fun showCommonLocations() {
         currentStep = 3
 
-        // 切换界面
+        // Switch layout
         binding.layoutPersonalInfo.visibility = View.GONE
         binding.layoutFacultySelection.visibility = View.GONE
         binding.layoutTransportPreference.root.visibility = View.GONE
@@ -388,7 +388,7 @@ class SignupWizardFragment : Fragment() {
 
         Log.d("DEBUG_SIGNUP", "Showing common locations")
 
-        // Chip监听
+        // Chip listeners
         binding.layoutCommonLocations.chipGym.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) otherLocations.add("gym") else otherLocations.remove("gym")
         }
@@ -402,13 +402,13 @@ class SignupWizardFragment : Fragment() {
             if (isChecked) otherLocations.add("sports") else otherLocations.remove("sports")
         }
 
-        // Skip按钮
+        // Skip button
         binding.layoutCommonLocations.btnSkipLocations.setOnClickListener {
             Log.d("DEBUG_SIGNUP", "Locations skipped")
             showInterestsGoals()
         }
 
-        // Continue按钮
+        // Continue button
         binding.layoutCommonLocations.btnContinueLocations.setOnClickListener {
             dormitory = binding.layoutCommonLocations.inputDorm.text.toString()
             teachingBuilding = binding.layoutCommonLocations.inputBuilding.text.toString()
@@ -434,7 +434,7 @@ class SignupWizardFragment : Fragment() {
     private fun showInterestsGoals() {
         currentStep = 4
 
-        // 切换界面
+        // Switch layout
         binding.layoutPersonalInfo.visibility = View.GONE
         binding.layoutFacultySelection.visibility = View.GONE
         binding.layoutTransportPreference.root.visibility = View.GONE
@@ -444,7 +444,7 @@ class SignupWizardFragment : Fragment() {
 
         Log.d("DEBUG_SIGNUP", "Showing interests and goals")
 
-        // 兴趣Chips监听
+        // Interest chips listeners
         binding.layoutInterestsGoals.chipSustainability.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) interests.add("sustainability") else interests.remove("sustainability")
         }
@@ -461,13 +461,13 @@ class SignupWizardFragment : Fragment() {
             if (isChecked) interests.add("leaderboard") else interests.remove("leaderboard")
         }
 
-        // 每周目标Slider
+        // Weekly goal slider
         binding.layoutInterestsGoals.sliderWeeklyGoal.addOnChangeListener { _, value, _ ->
             weeklyGoal = value.toInt()
             binding.layoutInterestsGoals.textGoalValue.text = weeklyGoal.toString()
         }
 
-        // 通知开关
+        // Notification switches
         binding.layoutInterestsGoals.switchChallenges.setOnCheckedChangeListener { _, isChecked ->
             notifyChallenges = isChecked
         }
@@ -478,7 +478,7 @@ class SignupWizardFragment : Fragment() {
             notifyFriends = isChecked
         }
 
-        // Finish按钮
+        // Finish button
         binding.layoutInterestsGoals.btnFinishSignup.setOnClickListener {
             // Prepare request
             val request = com.ecogo.api.UpdateProfileRequest(
@@ -610,7 +610,7 @@ class SignupWizardFragment : Fragment() {
             putString("username", username)
             putString("email", email)
             putString("nusnet_id", nusnetId)
-            putString("password", password)  // 注意：实际应用中应该加密存储
+            putString("password", password)  // Note: should be encrypted in production
             putString("faculty", selectedFaculty?.name)
             putStringSet("transport_prefs", transportPrefs)
             putString("dormitory", dormitory)
@@ -622,7 +622,7 @@ class SignupWizardFragment : Fragment() {
             putBoolean("notify_challenges", notifyChallenges)
             putBoolean("notify_reminders", notifyReminders)
             putBoolean("notify_friends", notifyFriends)
-            putBoolean("is_registered", true)  // 标记已注册
+            putBoolean("is_registered", true)  // Mark as registered
             apply()
         }
         Log.d("DEBUG_SIGNUP", "Registration data saved to SharedPreferences")
@@ -652,7 +652,7 @@ class SignupWizardFragment : Fragment() {
     }
 
     override fun onDestroyView() {
-        // 清理动画
+        // Clean up animations
         buttonAnimator?.cancel()
         mascotScaleAnimator?.cancel()
         mascotRotateAnimator?.cancel()

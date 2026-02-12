@@ -8,7 +8,7 @@ import com.ecogo.databinding.ItemRouteStepBinding
 import com.ecogo.utils.MapUtils
 
 /**
- * 路线步骤适配器
+ * Route step adapter
  */
 class RouteStepAdapter(
     private var steps: List<RouteStep> = emptyList()
@@ -42,7 +42,7 @@ class RouteStepAdapter(
             binding.apply {
                 textStepNumber.text = stepNumber.toString()
                 
-                // 交通方式图标
+                // Transport mode icon
                 textIcon.text = when (step.mode) {
                     com.ecogo.data.TransportMode.WALK -> "🚶"
                     com.ecogo.data.TransportMode.CYCLE -> "🚲"
@@ -52,12 +52,12 @@ class RouteStepAdapter(
                 
                 textInstruction.text = step.instruction
                 
-                // 详细信息
+                // Details
                 val distanceStr = MapUtils.formatDistance(step.distance)
                 val durationStr = if (step.duration >= 60) {
-                    "${step.duration / 60}分钟"
+                    "${step.duration / 60} min"
                 } else {
-                    "${step.duration}秒"
+                    "${step.duration} sec"
                 }
                 textDetails.text = "$distanceStr • $durationStr"
             }

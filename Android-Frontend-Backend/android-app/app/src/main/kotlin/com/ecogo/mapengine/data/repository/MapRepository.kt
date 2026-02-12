@@ -10,24 +10,24 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * 地图数据仓库
- * 负责处理行程追踪和路线推荐的数据逻辑
- * 实现 IMapRepository 接口，调用真实的后端 API
+ * Map data repository
+ * Handles trip tracking and route recommendation data logic
+ * Implements IMapRepository interface, calls real backend API
  */
 class MapRepository(
     private val apiService: ApiService = RetrofitClient.apiService
 ) : IMapRepository {
 
     companion object {
-        private const val ERR_EMPTY_RESPONSE = "响应数据为空"
+        private const val ERR_EMPTY_RESPONSE = "Response data is empty"
     }
 
     // ========================================
-    // 行程追踪相关
+    // Trip tracking
     // ========================================
 
     /**
-     * 开始行程追踪
+     * Start trip tracking
      */
     override suspend fun startTripTracking(
         userId: String,
@@ -47,7 +47,7 @@ class MapRepository(
                     Result.success(it)
                 } ?: Result.failure(Exception(ERR_EMPTY_RESPONSE))
             } else {
-                Result.failure(Exception(response.body()?.msg ?: "开启行程失败"))
+                Result.failure(Exception(response.body()?.msg ?: "Failed to start trip"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -55,7 +55,7 @@ class MapRepository(
     }
 
     /**
-     * 取消行程追踪
+     * Cancel trip tracking
      */
     override suspend fun cancelTripTracking(
         tripId: String,
@@ -74,7 +74,7 @@ class MapRepository(
                     Result.success(it)
                 } ?: Result.failure(Exception(ERR_EMPTY_RESPONSE))
             } else {
-                Result.failure(Exception(response.body()?.msg ?: "取消行程失败"))
+                Result.failure(Exception(response.body()?.msg ?: "Failed to cancel trip"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -82,7 +82,7 @@ class MapRepository(
     }
 
     /**
-     * 获取实时地图数据
+     * Get real-time map data
      */
     override suspend fun getTripMap(
         tripId: String,
@@ -96,7 +96,7 @@ class MapRepository(
                     Result.success(it)
                 } ?: Result.failure(Exception(ERR_EMPTY_RESPONSE))
             } else {
-                Result.failure(Exception(response.body()?.msg ?: "获取地图数据失败"))
+                Result.failure(Exception(response.body()?.msg ?: "Failed to get map data"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -104,7 +104,7 @@ class MapRepository(
     }
 
     /**
-     * 保存行程
+     * Save trip
      */
     override suspend fun saveTrip(
         tripId: String,
@@ -130,7 +130,7 @@ class MapRepository(
                     Result.success(it)
                 } ?: Result.failure(Exception(ERR_EMPTY_RESPONSE))
             } else {
-                Result.failure(Exception(response.body()?.msg ?: "保存行程失败"))
+                Result.failure(Exception(response.body()?.msg ?: "Failed to save trip"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -138,7 +138,7 @@ class MapRepository(
     }
 
     /**
-     * 计算碳足迹
+     * Calculate carbon footprint
      */
     override suspend fun calculateCarbon(
         tripId: String,
@@ -156,7 +156,7 @@ class MapRepository(
                     Result.success(it)
                 } ?: Result.failure(Exception(ERR_EMPTY_RESPONSE))
             } else {
-                Result.failure(Exception(response.body()?.msg ?: "计算碳足迹失败"))
+                Result.failure(Exception(response.body()?.msg ?: "Failed to calculate carbon footprint"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -164,11 +164,11 @@ class MapRepository(
     }
 
     // ========================================
-    // 路线推荐相关
+    // Route recommendation
     // ========================================
 
     /**
-     * 获取最低碳排路线
+     * Get lowest carbon emission route
      */
     override suspend fun getLowestCarbonRoute(
         userId: String,
@@ -188,7 +188,7 @@ class MapRepository(
                     Result.success(it)
                 } ?: Result.failure(Exception(ERR_EMPTY_RESPONSE))
             } else {
-                Result.failure(Exception(response.body()?.msg ?: "获取路线失败"))
+                Result.failure(Exception(response.body()?.msg ?: "Failed to get route"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -196,7 +196,7 @@ class MapRepository(
     }
 
     /**
-     * 获取平衡路线 (时间-碳排平衡)
+     * Get balanced route (time-carbon balanced)
      */
     override suspend fun getBalancedRoute(
         userId: String,
@@ -216,7 +216,7 @@ class MapRepository(
                     Result.success(it)
                 } ?: Result.failure(Exception(ERR_EMPTY_RESPONSE))
             } else {
-                Result.failure(Exception(response.body()?.msg ?: "获取路线失败"))
+                Result.failure(Exception(response.body()?.msg ?: "Failed to get route"))
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -224,8 +224,8 @@ class MapRepository(
     }
 
     /**
-     * 根据交通方式获取路线
-     * 直接调用 Google Directions API，不经过后端
+     * Get route by transport mode
+     * Calls Google Directions API directly, bypassing the backend
      */
     override suspend fun getRouteByTransportMode(
         userId: String,
@@ -237,7 +237,7 @@ class MapRepository(
             val origin = LatLng(startPoint.lat, startPoint.lng)
             val destination = LatLng(endPoint.lat, endPoint.lng)
 
-            // TransportMode → Google Directions API mode 参数
+            // TransportMode -> Google Directions API mode parameter
             val googleMode = when (transportMode) {
                 TransportMode.WALKING -> "walking"
                 TransportMode.CYCLING -> "bicycling"
@@ -246,12 +246,12 @@ class MapRepository(
             }
 
             val result = DirectionsService.getRoute(origin, destination, googleMode)
-                ?: return@withContext Result.failure(Exception("无法获取路线，请检查网络连接"))
+                ?: return@withContext Result.failure(Exception("Unable to get route, please check network connection"))
 
             val distanceKm = result.distanceMeters / 1000.0
             val durationMinutes = result.durationSeconds / 60
 
-            // 碳排放计算
+            // Carbon emission calculation
             val totalCarbon = MapUtils.estimateCarbonEmission(distanceKm, transportMode.value)
             val carbonSaved = MapUtils.calculateCarbonSaved(distanceKm, transportMode.value)
 

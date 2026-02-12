@@ -31,7 +31,7 @@ class ShopFragment : Fragment() {
     private val binding get() = _binding!!
     private val repository = EcoGoRepository()
     
-    private var currentPoints = 1250  // 从用户数据获取
+    private var currentPoints = 1250  // Loaded from user data
     private var currentFilter = "all"  // "all", "voucher", "goods"
     
     private lateinit var paymentSheet: PaymentSheet
@@ -50,7 +50,7 @@ class ShopFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // 初始化Stripe PaymentSheet
+        // Initialize Stripe PaymentSheet
         paymentSheet = PaymentSheet(this, ::onPaymentSheetResult)
         
         setupUI()
@@ -61,7 +61,7 @@ class ShopFragment : Fragment() {
     
     private fun setupUI() {
         binding.textPoints.text = "$currentPoints pts"
-        binding.textCash.text = "$50.00 SGD"  // 模拟现金余额
+        binding.textCash.text = "$50.00 SGD"  // Simulated cash balance
     }
     
     private fun setupTabs() {
@@ -105,7 +105,7 @@ class ShopFragment : Fragment() {
                 }
                 (binding.recyclerProducts.adapter as ProductAdapter).updateProducts(listToShow)
             }.onFailure { error: Throwable ->
-                Toast.makeText(context, "加载失败: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Loading failed: ${error.message}", Toast.LENGTH_SHORT).show()
                 val filteredProducts = when (currentFilter) {
                     "voucher" -> MockData.PRODUCTS.filter { product -> product.type == "voucher" }
                     "goods" -> MockData.PRODUCTS.filter { product -> product.type == "goods" }
@@ -119,13 +119,13 @@ class ShopFragment : Fragment() {
     private fun handlePurchase(product: Product, paymentMethod: String) {
         when (paymentMethod) {
             "points" -> redeemWithPoints(product)
-            "cash" -> buyWithCash(product)  // Phase 2实现
+            "cash" -> buyWithCash(product)  // Phase 2 implementation
         }
     }
     
     private fun redeemWithPoints(product: Product) {
         if (product.pointsPrice == null) {
-            Toast.makeText(context, "该商品不支持积分兑换", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "This item does not support points redemption", Toast.LENGTH_SHORT).show()
             return
         }
         
@@ -134,7 +134,7 @@ class ShopFragment : Fragment() {
             return
         }
         
-        // 显示确认Dialog
+        // Show confirm dialog
         showRedeemConfirmDialog(product) {
             performRedeem(product)
         }
@@ -142,19 +142,19 @@ class ShopFragment : Fragment() {
     
     private fun showInsufficientPointsDialog(requiredPoints: Int) {
         AlertDialog.Builder(requireContext())
-            .setTitle("积分不足")
-            .setMessage("需要 $requiredPoints 积分，当前 $currentPoints 积分\n\n" +
-                    "通过绿色出行、参加活动等方式获取更多积分！")
-            .setPositiveButton("知道了", null)
+            .setTitle("Insufficient Points")
+            .setMessage("Need $requiredPoints pts, currently $currentPoints pts\n\n" +
+                    "Earn more points through green travel, joining activities, and more!")
+            .setPositiveButton("OK", null)
             .show()
     }
     
     private fun showRedeemConfirmDialog(product: Product, onConfirm: () -> Unit) {
         AlertDialog.Builder(requireContext())
-            .setTitle("确认兑换")
-            .setMessage("确定使用 ${product.pointsPrice} 积分兑换\n${product.name}?")
-            .setPositiveButton("确认") { _, _ -> onConfirm() }
-            .setNegativeButton("取消", null)
+            .setTitle("Confirm Redemption")
+            .setMessage("Use ${product.pointsPrice} pts to redeem\n${product.name}?")
+            .setPositiveButton("Confirm") { _, _ -> onConfirm() }
+            .setNegativeButton("Cancel", null)
             .show()
     }
     
@@ -169,10 +169,10 @@ class ShopFragment : Fragment() {
             result.onSuccess { response: RedeemResponse ->
                 currentPoints -= (product.pointsPrice ?: 0)
                 binding.textPoints.text = "$currentPoints pts"
-                showSuccessDialog("成功兑换 ${product.name}!", "-${product.pointsPrice} pts")
-                loadProducts()  // 刷新列表
+                showSuccessDialog("Successfully redeemed ${product.name}!", "-${product.pointsPrice} pts")
+                loadProducts()  // Refresh list
             }.onFailure { error: Throwable ->
-                Toast.makeText(context, "兑换失败: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Redemption failed: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -200,13 +200,13 @@ class ShopFragment : Fragment() {
     
     private fun buyWithCash(product: Product) {
         if (product.cashPrice == null) {
-            Toast.makeText(context, "该商品不支持现金购买", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "This item does not support cash purchase", Toast.LENGTH_SHORT).show()
             return
         }
         
         currentProduct = product
         
-        // 显示支付用途说明
+        // Show payment purpose description
         showPaymentInfoDialog(product) {
             initializePayment(product)
         }
@@ -237,19 +237,19 @@ class ShopFragment : Fragment() {
             )
             
             result.onSuccess { paymentData: com.ecogo.api.PaymentIntentResponse ->
-                // 配置Stripe
+                // Configure Stripe
                 PaymentConfiguration.init(
                     requireContext(),
                     paymentData.publishableKey
                 )
                 
-                // 保存PaymentIntent ID
+                // Save PaymentIntent ID
                 currentPaymentIntentId = extractPaymentIntentId(paymentData.clientSecret)
                 
-                // 显示支付表单
+                // Show payment form
                 presentPaymentSheet(paymentData.clientSecret)
             }.onFailure { error: Throwable ->
-                Toast.makeText(context, "初始化支付失败: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Payment initialization failed: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -272,7 +272,7 @@ class ShopFragment : Fragment() {
     private fun onPaymentSheetResult(result: PaymentSheetResult) {
         when (result) {
             is PaymentSheetResult.Completed -> {
-                // 支付成功，确认订单
+                // Payment successful, confirm order
                 confirmPaymentWithBackend()
             }
             is PaymentSheetResult.Canceled -> {
@@ -297,9 +297,9 @@ class ShopFragment : Fragment() {
             
             result.onSuccess { order: com.ecogo.api.OrderDto ->
                 showPurchaseSuccessDialog(product)
-                loadProducts()  // 刷新列表
+                loadProducts()  // Refresh list
             }.onFailure { error: Throwable ->
-                Toast.makeText(context, "确认订单失败: ${error.message}", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Order confirmation failed: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }

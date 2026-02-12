@@ -6,14 +6,14 @@
     android:layout_height="match_parent"
     tools:context=".ui.history.HistoryMapActivity">
 
-    <!-- 地图 -->
+    <!-- Map -->
     <fragment
         android:id="@+id/mapFragment"
         android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- 顶部返回按钮 -->
+    <!-- Top back button -->
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/btnBack"
         android:layout_width="wrap_content"
@@ -24,7 +24,7 @@
         app:layout_anchor="@id/mapFragment"
         app:layout_anchorGravity="top|start" />
 
-    <!-- 右侧控制按钮组 -->
+    <!-- Right control button group -->
     <LinearLayout
         android:id="@+id/controlButtons"
         android:layout_width="wrap_content"
@@ -33,7 +33,7 @@
         android:layout_margin="16dp"
         android:orientation="vertical">
 
-        <!-- 切换规划路线 -->
+        <!-- Toggle planned route -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnTogglePlannedRoute"
             android:layout_width="wrap_content"
@@ -43,7 +43,7 @@
             app:backgroundTint="@color/route_planned"
             app:fabSize="mini" />
 
-        <!-- 切换实际轨迹 -->
+        <!-- Toggle actual track -->
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/btnToggleActualTrack"
             android:layout_width="wrap_content"
@@ -53,7 +53,7 @@
             app:fabSize="mini" />
     </LinearLayout>
 
-    <!-- 底部信息卡片 -->
+    <!-- Bottom info card -->
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cardInfo"
         android:layout_width="match_parent"
@@ -69,17 +69,17 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- 路线名称 -->
+            <!-- Route name -->
             <TextView
                 android:id="@+id/tvRouteName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="起点 → 终点"
+                android:text="Origin → Destination"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
                 android:textStyle="bold" />
 
-            <!-- 日期时间 -->
+            <!-- Date and time -->
             <TextView
                 android:id="@+id/tvDate"
                 android:layout_width="match_parent"
@@ -89,7 +89,7 @@
                 android:textColor="@color/text_secondary"
                 android:textSize="14sp" />
 
-            <!-- 分隔线 -->
+            <!-- Divider -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="1dp"
@@ -97,13 +97,13 @@
                 android:layout_marginBottom="12dp"
                 android:background="#E0E0E0" />
 
-            <!-- 信息行 -->
+            <!-- Info row -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <!-- 距离 -->
+                <!-- Distance -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -114,7 +114,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="距离"
+                        android:text="Distance"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
 
@@ -129,7 +129,7 @@
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- 用时 -->
+                <!-- Duration -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -140,7 +140,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="用时"
+                        android:text="Duration"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
 
@@ -149,13 +149,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="0分钟"
+                        android:text="0 min"
                         android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- 交通方式 -->
+                <!-- Transport mode -->
                 <LinearLayout
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
@@ -166,7 +166,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="方式"
+                        android:text="Mode"
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
 
@@ -175,33 +175,33 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
-                        android:text="步行"
+                        android:text="Walking"
                         android:textColor="@color/text_primary"
                         android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- 减碳信息 -->
+            <!-- Carbon reduction info -->
             <TextView
                 android:id="@+id/tvCarbonSaved"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
                 android:gravity="center"
-                android:text="减碳 0.0 kg"
+                android:text="CO2 saved: 0.0 kg"
                 android:textColor="@color/green_primary"
                 android:textSize="14sp"
                 android:textStyle="bold" />
 
-            <!-- AI检测的交通方式 -->
+            <!-- AI-detected transport mode -->
             <TextView
                 android:id="@+id/tvDetectedMode"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:gravity="center"
-                android:text="AI检测: 步行"
+                android:text="AI detected: Walking"
                 android:textColor="@color/text_secondary"
                 android:textSize="12sp"
                 android:visibility="gone" />

@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- 顶部导航栏 -->
+        <!-- Top navigation bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -23,7 +23,7 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="返回"
+                android:contentDescription="Back"
                 android:src="@drawable/ic_arrow_left"
                 app:tint="@color/text_primary" />
 
@@ -31,7 +31,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="活动详情"
+                android:text="Activity Details"
                 android:textAlignment="center"
                 android:textColor="@color/text_primary"
                 android:textSize="18sp"
@@ -42,11 +42,11 @@
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
-                android:contentDescription="分享"
+                android:contentDescription="Share"
                 android:src="@drawable/ic_share" />
         </LinearLayout>
 
-        <!-- 活动基本信息卡片 -->
+        <!-- Activity basic info card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_info"
             android:layout_width="match_parent"
@@ -62,7 +62,7 @@
                 android:orientation="vertical"
                 android:padding="16dp">
 
-                <!-- 类型和状态标签 -->
+                <!-- Type and status labels -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -75,7 +75,7 @@
                         android:background="@drawable/bg_recommendation_tag"
                         android:paddingHorizontal="12dp"
                         android:paddingVertical="4dp"
-                        android:text="线上活动"
+                        android:text="Online Activity"
                         android:textColor="@color/primary"
                         android:textSize="12sp"
                         android:textStyle="bold" />
@@ -88,31 +88,31 @@
                         android:background="@drawable/badge_background"
                         android:paddingHorizontal="12dp"
                         android:paddingVertical="4dp"
-                        android:text="进行中"
+                        android:text="In Progress"
                         android:textColor="@color/primary"
                         android:textSize="12sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- 活动标题 -->
+                <!-- Activity title -->
                 <TextView
                     android:id="@+id/text_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="12dp"
-                    android:text="校园环保周挑战"
+                    android:text="Campus Eco Week Challenge"
                     android:textColor="@color/text_primary"
                     android:textSize="20sp"
                     android:textStyle="bold" />
 
-                <!-- 活动描述 -->
+                <!-- Activity description -->
                 <TextView
                     android:id="@+id/text_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:lineSpacingExtra="4dp"
-                    android:text="参与本周的环保挑战，完成每日绿色出行任务，赢取丰厚奖励！"
+                    android:text="Join this week\'s eco challenge, complete daily green travel tasks, and win great rewards!"
                     android:textColor="@color/text_muted"
                     android:textSize="14sp" />
 
@@ -122,7 +122,7 @@
                     android:layout_marginVertical="16dp"
                     android:background="@color/border" />
 
-                <!-- 奖励 -->
+                <!-- Reward -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -139,7 +139,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="完成奖励："
+                        android:text="Completion reward:"
                         android:textColor="@color/text_muted"
                         android:textSize="14sp" />
 
@@ -148,13 +148,13 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="4dp"
-                        android:text="+200 积分"
+                        android:text="+200 points"
                         android:textColor="@color/primary"
                         android:textSize="16sp"
                         android:textStyle="bold" />
                 </LinearLayout>
 
-                <!-- 参与人数 -->
+                <!-- Participants -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -172,7 +172,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="参与人数："
+                        android:text="Participants:"
                         android:textColor="@color/text_muted"
                         android:textSize="14sp" />
 
@@ -199,7 +199,7 @@
             </LinearLayout>
         </com.google.android.material.card.MaterialCardView>
 
-        <!-- 详细信息卡片 -->
+        <!-- Details card -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_details"
             android:layout_width="match_parent"
@@ -219,12 +219,12 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="活动时间"
+                    android:text="Event Schedule"
                     android:textColor="@color/text_primary"
                     android:textSize="16sp"
                     android:textStyle="bold" />
 
-                <!-- 开始时间 -->
+                <!-- Start time -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -242,7 +242,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="开始时间："
+                        android:text="Start time:"
                         android:textColor="@color/text_muted"
                         android:textSize="14sp" />
 
@@ -256,7 +256,7 @@
                         android:textSize="14sp" />
                 </LinearLayout>
 
-                <!-- 结束时间 -->
+                <!-- End time -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -274,7 +274,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="8dp"
-                        android:text="结束时间："
+                        android:text="End time:"
                         android:textColor="@color/text_muted"
                         android:textSize="14sp" />
 
@@ -295,7 +295,7 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!-- 底部按钮 -->
+        <!-- Bottom buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -306,7 +306,7 @@
                 android:id="@+id/btn_join"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="参加活动"
+                android:text="Join Activity"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 app:backgroundTint="@color/primary"
@@ -318,7 +318,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="12dp"
-                android:text="开始路线"
+                android:text="Start Route"
                 android:textSize="14sp"
                 app:cornerRadius="28dp"
                 app:icon="@drawable/ic_route" />

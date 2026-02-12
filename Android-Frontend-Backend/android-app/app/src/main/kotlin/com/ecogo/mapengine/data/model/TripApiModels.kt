@@ -4,17 +4,17 @@ import com.google.gson.annotations.SerializedName
 
 /**
  * ========================================
- * 行程API相关模型（对接后端API）
+ * Trip API related models (backend API integration)
  * Base URL: http://47.129.124.55:8090/api/v1
  * ========================================
  */
 
 // ============================================================
-// 1. 开始行程 POST /mobile/trips/start
+// 1. Start trip POST /mobile/trips/start
 // ============================================================
 
 /**
- * 开始行程请求
+ * Start trip request
  */
 data class TripStartRequest(
     @SerializedName("startLng")
@@ -34,16 +34,16 @@ data class TripStartRequest(
 )
 
 /**
- * 开始行程响应 - 实际返回TripResponse对象
+ * Start trip response - actually returns a TripResponse object
  */
 typealias TripStartResponse = TripDetail
 
 // ============================================================
-// 2. 完成行程 POST /mobile/trips/{tripId}/complete
+// 2. Complete trip POST /mobile/trips/{tripId}/complete
 // ============================================================
 
 /**
- * 完成行程请求
+ * Complete trip request
  */
 data class TripCompleteRequest(
     @SerializedName("endLng")
@@ -74,7 +74,7 @@ data class TripCompleteRequest(
     val isGreenTrip: Boolean,
 
     @SerializedName("carbonSaved")
-    val carbonSaved: Long,  // 单位：克(g)
+    val carbonSaved: Long,  // Unit: grams (g)
 
     @SerializedName("transportModes")
     val transportModes: List<TransportModeSegment>,
@@ -84,7 +84,7 @@ data class TripCompleteRequest(
 )
 
 /**
- * 交通方式段
+ * Transport mode segment
  */
 data class TransportModeSegment(
     @SerializedName("mode")
@@ -98,7 +98,7 @@ data class TransportModeSegment(
 )
 
 /**
- * 路线点
+ * Polyline point
  */
 data class PolylinePoint(
     @SerializedName("lng")
@@ -109,16 +109,16 @@ data class PolylinePoint(
 )
 
 /**
- * 完成行程响应 - 实际返回TripResponse对象
+ * Complete trip response - actually returns a TripResponse object
  */
 typealias TripCompleteResponse = TripDetail
 
 // ============================================================
-// 3. 取消行程 POST /mobile/trips/{tripId}/cancel
+// 3. Cancel trip POST /mobile/trips/{tripId}/cancel
 // ============================================================
 
 /**
- * 取消行程响应
+ * Cancel trip response
  */
 data class TripCancelResponse(
     @SerializedName("tripId")
@@ -135,11 +135,11 @@ data class TripCancelResponse(
 )
 
 // ============================================================
-// 4. 获取行程列表 GET /mobile/trips
+// 4. Get trip list GET /mobile/trips
 // ============================================================
 
 /**
- * 行程列表响应
+ * Trip list response
  */
 data class TripListResponse(
     @SerializedName("trips")
@@ -156,14 +156,14 @@ data class TripListResponse(
 )
 
 // ============================================================
-// 5. 获取行程详情 GET /mobile/trips/{tripId}
+// 5. Get trip details GET /mobile/trips/{tripId}
 // ============================================================
 
 /**
- * 行程详情
+ * Trip details
  */
 /**
- * 后端返回的嵌套坐标对象 {"lng": ..., "lat": ...}
+ * Nested coordinate object returned by backend {"lng": ..., "lat": ...}
  */
 data class GeoPointObj(
     @SerializedName("lng") val lng: Double = 0.0,
@@ -171,7 +171,7 @@ data class GeoPointObj(
 )
 
 /**
- * 后端返回的嵌套地点对象 {"address": ..., "placeName": ..., "campusZone": ...}
+ * Nested location object returned by backend {"address": ..., "placeName": ..., "campusZone": ...}
  */
 data class LocationObj(
     @SerializedName("address") val address: String? = null,
@@ -195,19 +195,19 @@ data class TripDetail(
     @SerializedName(value = "carbonStatus", alternate = ["status"])
     val status: String = "",
 
-    // 后端返回嵌套对象 startPoint: {lng, lat}
+    // Backend returns nested object startPoint: {lng, lat}
     @SerializedName("startPoint")
     val startPoint: GeoPointObj? = null,
 
-    // 后端返回嵌套对象 startLocation: {address, placeName, campusZone}
+    // Backend returns nested object startLocation: {address, placeName, campusZone}
     @SerializedName("startLocation")
     val startLocation: LocationObj? = null,
 
-    // 后端返回嵌套对象 endPoint: {lng, lat}
+    // Backend returns nested object endPoint: {lng, lat}
     @SerializedName("endPoint")
     val endPoint: GeoPointObj? = null,
 
-    // 后端返回嵌套对象 endLocation: {address, placeName, campusZone}
+    // Backend returns nested object endLocation: {address, placeName, campusZone}
     @SerializedName("endLocation")
     val endLocation: LocationObj? = null,
 
@@ -224,7 +224,7 @@ data class TripDetail(
     val isGreenTrip: Boolean? = null,
 
     @SerializedName("carbonSaved")
-    val carbonSaved: Long? = null,  // 单位：克(g)
+    val carbonSaved: Long? = null,  // Unit: grams (g)
 
     @SerializedName("pointsGained")
     val pointsGained: Long? = null,
@@ -235,7 +235,7 @@ data class TripDetail(
     @SerializedName("polylinePoints")
     val polylinePoints: List<PolylinePoint>? = null
 ) {
-    // 兼容旧代码的便捷属性
+    // Convenience properties for backward compatibility
     val startLng: Double get() = startPoint?.lng ?: 0.0
     val startLat: Double get() = startPoint?.lat ?: 0.0
     val startAddress: String get() = startLocation?.address ?: ""
@@ -247,11 +247,11 @@ data class TripDetail(
 }
 
 // ============================================================
-// 6. 获取当前追踪行程 GET /mobile/trips/current
+// 6. Get current tracking trip GET /mobile/trips/current
 // ============================================================
 
 /**
- * 当前行程响应
+ * Current trip response
  */
 data class CurrentTripResponse(
     @SerializedName("hasCurrentTrip")
@@ -262,11 +262,11 @@ data class CurrentTripResponse(
 )
 
 // ============================================================
-// 通用响应包装 - 使用 ApiResponse.kt 中的定义
+// Generic response wrapper - uses definition from ApiResponse.kt
 // ============================================================
 
 /**
- * API错误响应
+ * API error response
  */
 data class ApiError(
     @SerializedName("code")

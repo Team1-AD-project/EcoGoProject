@@ -37,17 +37,17 @@ import com.ecogo.data.TripDto
 
 
 /**
- * EcoGo 数据仓库
- * 统一管理所有数据访问（API 调用）
+ * EcoGo Data Repository
+ * Centralized management for all data access (API calls)
  */
 class EcoGoRepository(
     private val api: ApiService = RetrofitClient.apiService
 ) {
     
-    // ==================== 活动相关 ====================
-    
+    // ==================== Activity Related ====================
+
     /**
-     * 获取所有活动
+     * Get all activities
      */
     suspend fun getAllActivities(): Result<List<Activity>> = withContext(Dispatchers.IO) {
         try {
@@ -63,7 +63,7 @@ class EcoGoRepository(
     }
     
     /**
-     * 根据 ID 获取活动
+     * Get activity by ID
      */
     suspend fun getActivityById(id: String): Result<Activity> = withContext(Dispatchers.IO) {
         try {
@@ -79,7 +79,7 @@ class EcoGoRepository(
     }
     
     /**
-     * 参加活动
+     * Join an activity
      */
     suspend fun joinActivity(activityId: String, userId: String): Result<Activity> =
         withContext(Dispatchers.IO) {
@@ -96,7 +96,7 @@ class EcoGoRepository(
         }
     
     /**
-     * 退出活动
+     * Leave an activity
      */
     suspend fun leaveActivity(activityId: String, userId: String): Result<Activity> =
         withContext(Dispatchers.IO) {
@@ -112,10 +112,10 @@ class EcoGoRepository(
             }
         }
     
-    // ==================== 排行榜相关 ====================
+    // ==================== Leaderboard Related ====================
 
     /**
-     * 获取学院月度碳排放统计排名（从数据库实时计算）
+     * Get faculty monthly carbon emission statistics ranking (calculated in real-time from database)
      */
     suspend fun getFacultyMonthlyCarbonStats(): Result<List<com.ecogo.data.FacultyCarbonData>> =
         withContext(Dispatchers.IO) {
@@ -134,7 +134,7 @@ class EcoGoRepository(
         }
 
     /**
-     * 获取个人排行榜数据（DAILY 或 MONTHLY，移动端只能看今天/本月）
+     * Get individual leaderboard data (DAILY or MONTHLY, mobile can only view today/this month)
      */
     suspend fun getIndividualRankings(type: String): Result<com.ecogo.data.LeaderboardStatsData> =
         withContext(Dispatchers.IO) {
@@ -150,12 +150,12 @@ class EcoGoRepository(
             }
         }
     
-    // ==================== 商品相关 ====================
+    // ==================== Product Related ====================
     suspend fun getUserTripHistoryWeb(userId: String): Result<List<TripDto>> = withContext(Dispatchers.IO) {
         try {
             val response = api.getUserTripsWeb(userId)
 
-            // ✅ 按你后端 web trips 返回的 code/message/data 结构处理
+            // Handle based on backend web trips code/message/data response structure
             if (response.code == 200 && response.data != null) {
                 Result.success(response.data)
             } else {
@@ -207,7 +207,7 @@ class EcoGoRepository(
                 size = size
             )
 
-            // ✅ 统一后的 code/message/data 结构
+            // Unified code/message/data response structure
             if (response.code == 200 && response.data != null) {
                 Result.success(response.data)
             } else {
@@ -222,7 +222,7 @@ class EcoGoRepository(
 
 
     /**
-     * 获取所有商品（带分页）
+     * Get all products (with pagination)
      */
     suspend fun getAllGoods(
         page: Int = 1,
@@ -253,7 +253,7 @@ class EcoGoRepository(
 
 
     /**
-     * 获取可兑换商品
+     * Get redeemable products
      */
     suspend fun getRedemptionGoods(vipLevel: Int? = null): Result<List<GoodsDto>> =
         withContext(Dispatchers.IO) {
@@ -270,7 +270,7 @@ class EcoGoRepository(
         }
     
     /**
-     * 获取商品详情
+     * Get product details
      */
     suspend fun getGoodsById(id: String): Result<GoodsDto> = withContext(Dispatchers.IO) {
         try {
@@ -285,10 +285,10 @@ class EcoGoRepository(
         }
     }
     
-    // ==================== 订单相关 ====================
-    
+    // ==================== Order Related ====================
+
     /**
-     * 创建订单
+     * Create an order
      */
     suspend fun createOrder(order: OrderCreateRequest): Result<OrderDto> =
         withContext(Dispatchers.IO) {
@@ -305,7 +305,7 @@ class EcoGoRepository(
         }
     
     /**
-     * 创建兑换订单
+     * Create a redemption order
      */
     suspend fun createRedemptionOrder(order: OrderCreateRequest): Result<OrderDto> =
         withContext(Dispatchers.IO) {
@@ -322,7 +322,7 @@ class EcoGoRepository(
         }
     
     /**
-     * 获取用户订单历史
+     * Get user order history
      */
     suspend fun getUserOrderHistory(
         userId: String,
@@ -342,10 +342,10 @@ class EcoGoRepository(
         }
     }
     
-    // ==================== 徽章相关 ====================
-    
+    // ==================== Badge Related ====================
+
     /**
-     * 购买徽章
+     * Purchase a badge
      */
     suspend fun purchaseBadge(userId: String, badgeId: String): Result<BadgeDto> =
         withContext(Dispatchers.IO) {
@@ -363,7 +363,7 @@ class EcoGoRepository(
         }
     
     /**
-     * 切换徽章佩戴状态
+     * Toggle badge display status
      */
     suspend fun toggleBadgeDisplay(
         userId: String,
@@ -384,7 +384,7 @@ class EcoGoRepository(
     }
     
     /**
-     * 获取徽章商店列表
+     * Get badge shop list
      */
     suspend fun getBadgeShopList(): Result<List<BadgeDto>> = withContext(Dispatchers.IO) {
         try {
@@ -400,7 +400,7 @@ class EcoGoRepository(
     }
     
     /**
-     * 获取我的徽章背包
+     * Get my badge inventory
      */
     suspend fun getMyBadges(userId: String): Result<List<BadgeDto>> =
         withContext(Dispatchers.IO) {
@@ -416,10 +416,10 @@ class EcoGoRepository(
             }
         }
     
-    // ==================== 统计相关 ====================
-    
+    // ==================== Statistics Related ====================
+
     /**
-     * 获取仪表盘统计数据
+     * Get dashboard statistics
      */
     suspend fun getDashboardStats(): Result<DashboardStatsDto> =
         withContext(Dispatchers.IO) {

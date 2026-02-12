@@ -5,13 +5,13 @@ import com.ecogo.mapengine.data.repository.NavigationHistoryRepository
 import com.ecogo.repository.EcoGoRepository
 
 /**
- * EcoGo Application 类
- * 用于应用级别的初始化和单例管理
+ * EcoGo Application class
+ * Used for application-level initialization and singleton management
  */
 class EcoGoApplication : Application() {
     
     companion object {
-        // 全局单例 Repository，避免重复创建
+        // Global singleton Repository to avoid redundant creation
         lateinit var repository: EcoGoRepository
             private set
     }
@@ -19,7 +19,7 @@ class EcoGoApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         
-        // 初始化 Repository 单例
+        // Initialize Repository singleton
         repository = EcoGoRepository()
 
         // Initialize TokenManager globally
@@ -28,17 +28,17 @@ class EcoGoApplication : Application() {
         // Initialize NavigationHistoryRepository (requires Context)
         NavigationHistoryRepository.initialize(this)
         
-        // 预加载关键数据（可选，在后台线程执行）
+        // Preload critical data (optional, executed on background thread)
         // Thread {
         //     preloadCriticalData()
         // }.start()
     }
     
     /**
-     * 预加载关键数据（可选）
+     * Preload critical data (optional)
      */
     private fun preloadCriticalData() {
-        // 在这里可以预加载一些关键数据
-        // 例如：用户配置、缓存等
+        // Critical data can be preloaded here
+        // e.g., user preferences, caches, etc.
     }
 }

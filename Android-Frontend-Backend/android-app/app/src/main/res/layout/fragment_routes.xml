@@ -17,7 +17,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 站点选择 -->
+    <!-- Stop Selection -->
     <Spinner
         android:id="@+id/spinner_bus_stop"
         android:layout_width="0dp"

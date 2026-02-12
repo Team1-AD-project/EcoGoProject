@@ -20,7 +20,7 @@ data class TripDto(
     val isGreenTrip: Boolean? = null,
     val distance: Double? = null,
 
-    // 你 Apifox 里它经常为 null，真实类型不确定，先 Any? 最安全
+    // Often null in Apifox, actual type uncertain, using Any? for safety
     val polylinePoints: Any? = null,
 
     val carbonSaved: Double? = null,

@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <!-- 顶部标题栏 -->
+    <!-- Top Header -->
     <LinearLayout
         android:id="@+id/layout_header"
         android:layout_width="match_parent"
@@ -16,14 +16,14 @@
         android:paddingBottom="8dp"
         app:layout_constraintTop_toTopOf="parent">
 
-        <!-- 标题和积分 + History -->
+        <!-- Title, Points & History -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <!-- 回退键 -->
+            <!-- Back Button -->
             <ImageButton
                 android:id="@+id/btn_back"
                 android:layout_width="40dp"
@@ -34,7 +34,7 @@
                 android:src="@drawable/ic_arrow_left"
                 app:tint="@color/text_primary" />
 
-            <!-- 左侧：积分 -->
+            <!-- Left: Points -->
             <LinearLayout
                 android:id="@+id/card_points"
                 android:layout_width="wrap_content"
@@ -71,13 +71,13 @@
                     android:textSize="12sp" />
             </LinearLayout>
 
-            <!-- 中间撑开 -->
+            <!-- Spacer -->
             <View
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:layout_weight="1" />
 
-            <!-- 右侧：History -->
+            <!-- Right: History -->
             <LinearLayout
                 android:id="@+id/card_history"
                 android:layout_width="wrap_content"
@@ -107,7 +107,7 @@
         </LinearLayout>
 
 
-        <!-- Tab布局 -->
+        <!-- Tab Layout -->
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tab_layout"
             android:layout_width="match_parent"
@@ -124,7 +124,7 @@
             app:tabTextColor="@color/text_secondary" />
     </LinearLayout>
 
-    <!-- ViewPager2 用于滑动切换 -->
+    <!-- ViewPager2 for swipe navigation -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"
         android:layout_width="0dp"
@@ -135,7 +135,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/layout_header" />
 
-    <!-- 空状态提示 -->
+    <!-- Empty State -->
     <LinearLayout
         android:id="@+id/layout_empty"
         android:layout_width="wrap_content"

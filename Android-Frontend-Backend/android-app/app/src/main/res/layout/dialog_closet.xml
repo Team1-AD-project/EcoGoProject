@@ -6,7 +6,7 @@
     android:background="@color/background"
     android:orientation="vertical">
 
-    <!-- ═══════ 上方：小狮子预览区（自适应高度） ═══════ -->
+    <!-- ═══════ Top: Mascot lion preview area (adaptive height) ═══════ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -15,7 +15,7 @@
         android:paddingTop="12dp"
         android:paddingBottom="8dp">
 
-        <!-- 关闭按钮 -->
+        <!-- Close button -->
         <ImageView
             android:id="@+id/btn_close"
             android:layout_width="32dp"
@@ -27,14 +27,14 @@
             android:src="@drawable/ic_close"
             app:tint="@color/text_secondary" />
 
-        <!-- 小狮子 -->
+        <!-- Mascot lion -->
         <com.ecogo.ui.views.MascotLionView
             android:id="@+id/mascot_closet"
             android:layout_width="160dp"
             android:layout_height="160dp"
             android:layout_gravity="center_horizontal" />
 
-        <!-- 当前穿搭信息 -->
+        <!-- Current outfit info -->
         <TextView
             android:id="@+id/text_outfit_label"
             android:layout_width="wrap_content"
@@ -58,7 +58,7 @@
             android:textSize="12sp" />
     </LinearLayout>
 
-    <!-- ═══════ 下方：Tab + 物品列表（占满剩余空间） ═══════ -->
+    <!-- ═══════ Bottom: Tab + Item list (fill remaining space) ═══════ -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -69,7 +69,7 @@
         android:paddingTop="16dp"
         android:paddingEnd="16dp">
 
-        <!-- Tab 按钮行 -->
+        <!-- Tab button row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -105,7 +105,7 @@
                 app:strokeWidth="1dp" />
         </LinearLayout>
 
-        <!-- 物品网格容器（用于裁剪滑动动画） -->
+        <!-- Item grid container (for clipping slide animations) -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"

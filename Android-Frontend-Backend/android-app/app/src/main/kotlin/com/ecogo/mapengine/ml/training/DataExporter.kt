@@ -46,15 +46,15 @@ class DataExporter(
      */
     suspend fun exportVerifiedDataToCSV(outputFile: String): Int = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "开始导出验证过的数据...")
+            Log.d(TAG, "Starting export of verified data...")
             
             val journeys = labelingDao.getVerifiedJourneysForExport(limit = 10000)
             if (journeys.isEmpty()) {
-                Log.w(TAG, "没有验证过的数据可导出")
+                Log.w(TAG, "No verified data to export")
                 return@withContext 0
             }
             
-            Log.d(TAG, "找到 ${journeys.size} 条验证过的记录")
+            Log.d(TAG, "Found ${journeys.size} verified records")
             
             // 创建输出文件并写入CSV头
             val file = File(outputFile)
@@ -74,10 +74,10 @@ class DataExporter(
 
                         // 每100条记录打印一次进度
                         if (processedCount % 100 == 0) {
-                            Log.d(TAG, "已处理 $processedCount 条记录...")
+                            Log.d(TAG, "Processed $processedCount records...")
                         }
                     } catch (e: Exception) {
-                        Log.e(TAG, "处理记录 ${journey.id} 失败: ${e.message}")
+                        Log.e(TAG, "Failed to process record ${journey.id}: ${e.message}")
                     }
                 }
 
@@ -85,11 +85,11 @@ class DataExporter(
             }
 
             val fileSize = file.length() / 1024  // KB
-            Log.d(TAG, "成功导出 $journeys.size 条记录 (${fileSize}KB) -> $outputFile")
+            Log.d(TAG, "Successfully exported $journeys.size records (${fileSize}KB) -> $outputFile")
 
             journeys.size
         } catch (e: Exception) {
-            Log.e(TAG, "导出CSV失败: ${e.message}", e)
+            Log.e(TAG, "CSV export failed: ${e.message}", e)
             -1
         }
     }
@@ -99,15 +99,15 @@ class DataExporter(
      */
     suspend fun exportAllDataToCSV(outputFile: String): Int = withContext(Dispatchers.IO) {
         try {
-            Log.d(TAG, "开始导出所有数据...")
+            Log.d(TAG, "Starting export of all data...")
 
             val journeys = labelingDao.getJourneysForExport(limit = 10000)
             if (journeys.isEmpty()) {
-                Log.w(TAG, "没有数据可导出")
+                Log.w(TAG, "No data to export")
                 return@withContext 0
             }
 
-            Log.d(TAG, "找到 ${journeys.size} 条记录")
+            Log.d(TAG, "Found ${journeys.size} records")
 
             val file = File(outputFile)
             file.parentFile?.mkdirs()
@@ -124,7 +124,7 @@ class DataExporter(
                         writer.append(recordToCSVLine(record))
                         processedCount++
                     } catch (e: Exception) {
-                        Log.e(TAG, "处理记录 ${journey.id} 失败: ${e.message}")
+                        Log.e(TAG, "Failed to process record ${journey.id}: ${e.message}")
                     }
                 }
                 
@@ -132,11 +132,11 @@ class DataExporter(
             }
             
             val fileSize = file.length() / 1024
-            Log.d(TAG, "成功导出 $journeys.size 条记录 (${fileSize}KB) -> $outputFile")
+            Log.d(TAG, "Successfully exported $journeys.size records (${fileSize}KB) -> $outputFile")
             
             journeys.size
         } catch (e: Exception) {
-            Log.e(TAG, "导出CSV失败: ${e.message}", e)
+            Log.e(TAG, "CSV export failed: ${e.message}", e)
             -1
         }
     }
@@ -152,23 +152,23 @@ class DataExporter(
             val sourceDistribution = labelingDao.getLabelSourceDistribution()
 
             val report = StringBuilder()
-            report.append("=== 训练数据统计报告 ===\n")
-            report.append("生成时间: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA).format(Date())}\n\n")
+            report.append("=== Training Data Statistics Report ===\n")
+            report.append("Generated: ${SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())}\n\n")
 
-            report.append("总体统计:\n")
-            report.append("- 总记录数: $totalCount\n")
-            report.append("- 已验证: $verifiedCount (${if (totalCount > 0) verifiedCount * 100 / totalCount else 0}%)\n")
-            report.append("- 待验证: ${totalCount - verifiedCount}\n\n")
+            report.append("Overall Statistics:\n")
+            report.append("- Total records: $totalCount\n")
+            report.append("- Verified: $verifiedCount (${if (totalCount > 0) verifiedCount * 100 / totalCount else 0}%)\n")
+            report.append("- Pending verification: ${totalCount - verifiedCount}\n\n")
 
-            appendDistribution(report, "交通方式分布", modeDistribution.map { it.transportMode to it.count }, totalCount)
-            appendDistribution(report, "标签来源分布", sourceDistribution.map { it.labelSource to it.count }, totalCount)
+            appendDistribution(report, "Transport Mode Distribution", modeDistribution.map { it.transportMode to it.count }, totalCount)
+            appendDistribution(report, "Label Source Distribution", sourceDistribution.map { it.labelSource to it.count }, totalCount)
 
             appendQualityAssessment(report, totalCount, verifiedCount, modeDistribution)
 
             report.toString()
         } catch (e: Exception) {
-            Log.e(TAG, "生成报告失败: ${e.message}", e)
-            "报告生成失败: ${e.message}"
+            Log.e(TAG, "Report generation failed: ${e.message}", e)
+            "Report generation failed: ${e.message}"
         }
     }
 
@@ -181,7 +181,7 @@ class DataExporter(
         report.append("$title:\n")
         distribution.forEach { (label, count) ->
             val percentage = if (totalCount > 0) count * 100 / totalCount else 0
-            report.append("- $label: $count 个 ($percentage%)\n")
+            report.append("- $label: $count ($percentage%)\n")
         }
         report.append("\n")
     }
@@ -192,21 +192,21 @@ class DataExporter(
         verifiedCount: Int,
         modeDistribution: List<com.ecogo.mapengine.ml.database.TransportModeCount>
     ) {
-        report.append("数据质量评估:\n")
+        report.append("Data Quality Assessment:\n")
         report.append(assessDataVolume(totalCount))
         report.append(assessVerificationRate(totalCount, verifiedCount))
         report.append(assessModeBalance(modeDistribution))
     }
 
     private fun assessDataVolume(totalCount: Int): String = when {
-        totalCount < 100 -> "⚠️  数据量较小 (< 100条)，建议继续收集\n"
-        totalCount < 500 -> "⚠️  数据量适中 (< 500条)，可以开始训练初版模型\n"
-        else -> "✓ 数据量充足 (≥ 500条)，适合训练生产级模型\n"
+        totalCount < 100 -> "⚠️  Small data volume (< 100 records), recommend collecting more\n"
+        totalCount < 500 -> "⚠️  Moderate data volume (< 500 records), can start training initial model\n"
+        else -> "✓ Sufficient data volume (≥ 500 records), suitable for production model training\n"
     }
 
     private fun assessVerificationRate(totalCount: Int, verifiedCount: Int): String =
-        if (verifiedCount < totalCount * 0.8) "⚠️  验证率较低 (< 80%)，建议增加人工验证\n"
-        else "✓ 验证率高 (≥ 80%)，数据质量良好\n"
+        if (verifiedCount < totalCount * 0.8) "⚠️  Low verification rate (< 80%), recommend more manual verification\n"
+        else "✓ High verification rate (≥ 80%), good data quality\n"
 
     private fun assessModeBalance(modeDistribution: List<com.ecogo.mapengine.ml.database.TransportModeCount>): String {
         val counts = modeDistribution.map { it.count }
@@ -214,8 +214,8 @@ class DataExporter(
         val minCount = counts.minOrNull() ?: 0
         val maxCount = counts.maxOrNull() ?: 0
         val ratio = if (minCount > 0) maxCount / minCount else 0
-        return if (ratio > 5) "⚠️  交通方式分布不均衡 (最大/最小比: $ratio)，可能影响模型性能\n"
-        else "✓ 交通方式分布相对均衡\n"
+        return if (ratio > 5) "⚠️  Unbalanced transport mode distribution (max/min ratio: $ratio), may affect model performance\n"
+        else "✓ Relatively balanced transport mode distribution\n"
     }
     
     /**

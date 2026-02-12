@@ -15,7 +15,7 @@
         android:padding="24dp"
         android:gravity="center">
 
-        <!-- 成功图标 -->
+        <!-- Success icon -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -43,7 +43,7 @@
             android:textStyle="bold"
             android:textColor="@color/primary" />
 
-        <!-- 环保影响说明 -->
+        <!-- Eco impact description -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

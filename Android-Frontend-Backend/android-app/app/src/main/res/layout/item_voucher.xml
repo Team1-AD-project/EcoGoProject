@@ -16,7 +16,7 @@
         android:layout_height="wrap_content"
         android:padding="16dp">
 
-        <!-- 左侧品牌图标区域 -->
+        <!-- Left Brand Icon Area -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_icon"
             android:layout_width="72dp"
@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <!-- ✅ 真实图片 -->
+                <!-- ✅ Real Image -->
                 <ImageView
                     android:id="@+id/img_icon"
                     android:layout_width="match_parent"
@@ -38,7 +38,7 @@
                     android:scaleType="centerCrop"
                     android:visibility="gone" />
 
-                <!-- ✅ 兜底 emoji（图片失败/没 url 才显示） -->
+                <!-- ✅ Fallback emoji (shown when image fails or no url) -->
                 <TextView
                     android:id="@+id/text_icon"
                     android:layout_width="match_parent"
@@ -51,7 +51,7 @@
         </com.google.android.material.card.MaterialCardView>
 
 
-        <!-- 优惠券状态标签（可选） -->
+        <!-- Coupon Status Label (optional) -->
         <com.google.android.material.chip.Chip
             android:id="@+id/chip_status"
             android:layout_width="wrap_content"
@@ -78,7 +78,7 @@
 
 
 
-        <!-- 优惠券信息区域 -->
+        <!-- Coupon Info Area -->
         <LinearLayout
             android:id="@+id/layout_info"
             android:layout_width="0dp"
@@ -116,7 +116,7 @@
                 android:textSize="13sp" />
         </LinearLayout>
 
-        <!-- 价格和按钮区域 -->
+        <!-- Price and Button Area -->
         <LinearLayout
             android:id="@+id/layout_price"
             android:layout_width="wrap_content"

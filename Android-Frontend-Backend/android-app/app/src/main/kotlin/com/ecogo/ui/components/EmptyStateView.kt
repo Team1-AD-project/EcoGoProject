@@ -10,12 +10,12 @@ import com.ecogo.data.MascotSize
 import com.ecogo.databinding.ViewEmptyStateBinding
 
 /**
- * EmptyStateView - 空状态组件
- * 
- * 支持的状态:
- * - NETWORK_ERROR: 小狮子困惑表情 + "连接不上了"
- * - NO_DATA: 小狮子睡觉 + "这里还没有内容"
- * - LOADING: 小狮子奔跑动画 + "加载中..."
+ * EmptyStateView - Empty state component
+ *
+ * Supported states:
+ * - NETWORK_ERROR: Lion mascot confused expression + "Connection lost"
+ * - NO_DATA: Lion mascot sleeping + "No content here yet"
+ * - LOADING: Lion mascot running animation + "Loading..."
  */
 class EmptyStateView @JvmOverloads constructor(
     context: Context,
@@ -63,7 +63,7 @@ class EmptyStateView @JvmOverloads constructor(
                 binding.textEmptyDesc.text = context.getString(R.string.empty_loading_desc)
                 binding.buttonAction.visibility = GONE
                 
-                // 启动呼吸动画表示加载中
+                // Start breathing animation to indicate loading
                 binding.mascotEmpty.invalidate()
             }
         }

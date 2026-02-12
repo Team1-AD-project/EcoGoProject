@@ -8,19 +8,19 @@ import retrofit2.http.*
 
 /**
  * Badge & Cloth API Service
- * 统一处理 badge 和 cloth 的 API 调用
+ * Unified API calls for badges and clothes
  */
 interface BadgeApiService {
 
     /**
-     * 获取商店列表
+     * Get shop list
      * GET /api/v1/mobile/badges/shop
      */
     @GET("api/v1/mobile/badges/shop")
     suspend fun getShopList(): ApiResponse<List<BadgeDto>>
 
     /**
-     * 获取用户的背包
+     * Get user's inventory
      * GET /api/v1/mobile/badges/user/{user_id}
      */
     @GET("api/v1/mobile/badges/user/{user_id}")
@@ -29,7 +29,7 @@ interface BadgeApiService {
     ): ApiResponse<List<UserBadgeDto>>
 
     /**
-     * 购买物品
+     * Purchase an item
      * POST /api/v1/mobile/badges/{badge_id}/purchase
      */
     @POST("api/v1/mobile/badges/{badge_id}/purchase")
@@ -39,7 +39,7 @@ interface BadgeApiService {
     ): ApiResponse<UserBadgeDto>
 
     /**
-     * 切换佩戴状态
+     * Toggle display status
      * PUT /api/v1/mobile/badges/{badge_id}/display
      */
     @PUT("api/v1/mobile/badges/{badge_id}/display")
@@ -49,7 +49,7 @@ interface BadgeApiService {
     ): ApiResponse<UserBadgeDto>
 
     /**
-     * 按子分类查询
+     * Query by sub-category
      * GET /api/v1/mobile/badges/sub-category/{sub_category}
      */
     @GET("api/v1/mobile/badges/sub-category/{sub_category}")

@@ -21,15 +21,15 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
-        // 设置全局异常处理器
+        // Set up global exception handler
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             Log.e("CRASH_HANDLER", "Uncaught exception in thread ${thread.name}: ${throwable.message}", throwable)
             android.os.Handler(mainLooper).post {
-                Toast.makeText(this, "应用崩溃: ${throwable.message}", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, "Application crashed: ${throwable.message}", Toast.LENGTH_LONG).show()
             }
-            // 给Toast一些时间显示
+            // Give Toast some time to display
             Thread.sleep(2000)
-            // 让默认处理器处理（这会关闭应用）
+            // Let the default handler process (this will close the app)
             android.os.Process.killProcess(android.os.Process.myPid())
             System.exit(1)
         }
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
             Log.d("DEBUG_MAIN", "MainActivity onCreate completed")
         } catch (e: Exception) {
             Log.e("DEBUG_MAIN", "MainActivity onCreate FAILED: ${e.message}", e)
-            Toast.makeText(this, "MainActivity 初始化失败: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "MainActivity initialization failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
 
         handleNotificationIntent(intent)
@@ -105,7 +105,7 @@ class MainActivity : AppCompatActivity() {
             }
         } catch (e: Exception) {
             Log.e("DEBUG_MAIN", "setupNavigation FAILED: ${e.message}", e)
-            Toast.makeText(this, "导航设置失败: ${e.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(this, "Navigation setup failed: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
     
@@ -130,7 +130,7 @@ class MainActivity : AppCompatActivity() {
                 var hasNavigatedToOnboarding = false
                 navController.addOnDestinationChangedListener { _, destination, _ ->
                     if (destination.id == R.id.homeFragment && isFirstLogin && !hasNavigatedToOnboarding) {
-                        // 到达首页后显示引导（仅一次）
+                        // Show onboarding after reaching home (once only)
                         hasNavigatedToOnboarding = true
                         prefs.edit().putBoolean("is_first_login", false).apply()
                         Log.d("DEBUG_MAIN", "Navigating to onboarding from home (once only)")
@@ -183,15 +183,15 @@ class MainActivity : AppCompatActivity() {
 
         when (destination) {
             "voucher" -> {
-                // 这里换成你们项目的 voucher destination id
+                // Replace with your project's voucher destination id
                 navController.navigate(com.ecogo.R.id.voucherFragment)
             }
             "challenges" -> {
-                // 这里换成你们项目的 challenges destination id
+                // Replace with your project's challenges destination id
                 navController.navigate(com.ecogo.R.id.challengesFragment)
             }
             else -> {
-                // home 可以不处理，因为默认就在 home
+                // No action needed for home since it's the default destination
             }
         }
     }

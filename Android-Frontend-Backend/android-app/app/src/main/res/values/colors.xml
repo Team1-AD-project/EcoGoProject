@@ -55,7 +55,7 @@
     <color name="gray_600">#757575</color>
     <color name="blue_500">#2196F3</color>
 
-    <!-- Transit Mode Route Colors (分段交通方式颜色) -->
+    <!-- Transit Mode Route Colors -->
     <color name="route_walking">#888888</color>
     <color name="route_bus">#4CAF50</color>
     <color name="route_subway">#F44336</color>

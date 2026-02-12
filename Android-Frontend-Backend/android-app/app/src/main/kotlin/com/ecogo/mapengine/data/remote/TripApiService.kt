@@ -5,15 +5,15 @@ import retrofit2.Response
 import retrofit2.http.*
 
 /**
- * 行程API服务接口
+ * Trip API service interface
  * Base URL: http://47.129.124.55:8090/api/v1
  */
 interface TripApiService {
 
     /**
-     * 1. 开始行程
+     * 1. Start trip
      * POST /mobile/trips/start
-     * 返回: ResponseMessage<TripResponse>
+     * Returns: ResponseMessage<TripResponse>
      */
     @POST("mobile/trips/start")
     suspend fun startTrip(
@@ -22,9 +22,9 @@ interface TripApiService {
     ): Response<ApiResponse<TripStartResponse>>
 
     /**
-     * 2. 完成行程
+     * 2. Complete trip
      * POST /mobile/trips/{tripId}/complete
-     * 返回: ResponseMessage<TripResponse>
+     * Returns: ResponseMessage<TripResponse>
      */
     @POST("mobile/trips/{tripId}/complete")
     suspend fun completeTrip(
@@ -34,9 +34,9 @@ interface TripApiService {
     ): Response<ApiResponse<TripCompleteResponse>>
 
     /**
-     * 3. 取消行程
+     * 3. Cancel trip
      * POST /mobile/trips/{tripId}/cancel
-     * 返回: ResponseMessage<String>
+     * Returns: ResponseMessage<String>
      */
     @POST("mobile/trips/{tripId}/cancel")
     suspend fun cancelTrip(
@@ -45,9 +45,9 @@ interface TripApiService {
     ): Response<ApiResponse<String>>
 
     /**
-     * 4. 获取行程列表
+     * 4. Get trip list
      * GET /mobile/trips
-     * 返回: ResponseMessage<List<TripSummaryResponse>>
+     * Returns: ResponseMessage<List<TripSummaryResponse>>
      */
     @GET("mobile/trips")
     suspend fun getTripList(
@@ -58,9 +58,9 @@ interface TripApiService {
     ): Response<ApiResponse<List<TripDetail>>>
 
     /**
-     * 5. 获取行程详情
+     * 5. Get trip details
      * GET /mobile/trips/{tripId}
-     * 返回: ResponseMessage<TripResponse>
+     * Returns: ResponseMessage<TripResponse>
      */
     @GET("mobile/trips/{tripId}")
     suspend fun getTripDetail(
@@ -69,9 +69,9 @@ interface TripApiService {
     ): Response<ApiResponse<TripDetail>>
 
     /**
-     * 6. 获取当前追踪行程
+     * 6. Get current tracking trip
      * GET /mobile/trips/current
-     * 返回: ResponseMessage<TripResponse>
+     * Returns: ResponseMessage<TripResponse>
      */
     @GET("mobile/trips/current")
     suspend fun getCurrentTrip(
@@ -79,9 +79,9 @@ interface TripApiService {
     ): Response<ApiResponse<TripDetail>>
 
     /**
-     * 7. [Admin] 获取所有行程
+     * 7. [Admin] Get all trips
      * GET /web/trips/all
-     * 返回: ResponseMessage<List<TripSummaryResponse>>
+     * Returns: ResponseMessage<List<TripSummaryResponse>>
      */
     @GET("web/trips/all")
     suspend fun getAllTrips(
@@ -89,9 +89,9 @@ interface TripApiService {
     ): Response<ApiResponse<List<TripDetail>>>
 
     /**
-     * 8. [Admin] 获取指定用户的行程
+     * 8. [Admin] Get trips for a specific user
      * GET /web/trips/user/{userid}
-     * 返回: ResponseMessage<List<TripSummaryResponse>>
+     * Returns: ResponseMessage<List<TripSummaryResponse>>
      */
     @GET("web/trips/user/{userid}")
     suspend fun getUserTrips(

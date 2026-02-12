@@ -9,7 +9,7 @@ import com.ecogo.mapengine.data.model.RouteAlternative
 import com.ecogo.databinding.ItemMapengineRouteOptionBinding
 
 /**
- * 路线选择适配器
+ * Route selection adapter
  */
 class RouteOptionAdapter(
     private val onRouteSelected: (RouteAlternative) -> Unit
@@ -44,24 +44,24 @@ class RouteOptionAdapter(
     ) : RecyclerView.ViewHolder(binding.root) {
 
         fun bind(route: RouteAlternative, isSelected: Boolean) {
-            // 路线摘要
+            // Route summary
             binding.tvRouteSummary.text = route.summary
 
-            // 时长
-            binding.tvRouteTime.text = "${route.estimated_duration} 分钟"
+            // Duration
+            binding.tvRouteTime.text = "${route.estimated_duration} min"
 
-            // 距离
+            // Distance
             val distanceText = if (route.total_distance >= 1.0) {
-                String.format("%.1f 公里", route.total_distance)
+                String.format("%.1f km", route.total_distance)
             } else {
-                String.format("%.0f 米", route.total_distance * 1000)
+                String.format("%.0f m", route.total_distance * 1000)
             }
             binding.tvRouteDistance.text = distanceText
 
-            // 碳排放
+            // Carbon emissions
             binding.tvRouteCarbon.text = String.format("%.2f kg", route.total_carbon)
 
-            // 选中状态
+            // Selected state
             if (isSelected) {
                 binding.cardRouteOption.strokeWidth = 6
                 binding.cardRouteOption.strokeColor = ContextCompat.getColor(
@@ -72,7 +72,7 @@ class RouteOptionAdapter(
                 binding.cardRouteOption.strokeWidth = 0
             }
 
-            // 点击事件
+            // Click event
             binding.root.setOnClickListener {
                 val oldSelectedIndex = selectedIndex
                 selectedIndex = adapterPosition

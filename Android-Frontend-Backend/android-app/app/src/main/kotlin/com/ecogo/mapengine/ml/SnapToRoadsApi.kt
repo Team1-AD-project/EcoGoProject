@@ -16,11 +16,11 @@ import retrofit2.http.Query
 interface SnapToRoadsApi {
     
     /**
-     * 调用 Google Snap to Roads API
-     * @param path 经纬度序列，格式: "lat1,lng1|lat2,lng2|..."
-     * @param key 对应 API Key
-     * @param interpolate 是否插值（可选）
-     * @return SnapToRoadsResponse 包含对齐后的点和道路信息
+     * Call Google Snap to Roads API
+     * @param path Coordinate sequence, format: "lat1,lng1|lat2,lng2|..."
+     * @param key Corresponding API Key
+     * @param interpolate Whether to interpolate (optional)
+     * @return SnapToRoadsResponse containing snapped points and road information
      */
     @GET("v1/snapToRoads")
     suspend fun snapToRoads(
@@ -45,7 +45,7 @@ data class SnapToRoadsResponse(
 )
 
 /**
- * 对齐后的单个点
+ * Single snapped point
  */
 data class SnappedPoint(
     @SerializedName("location")
@@ -59,7 +59,7 @@ data class SnappedPoint(
 )
 
 /**
- * 位置信息
+ * Location information
  */
 data class LocationPoint(
     @SerializedName("latitude")
@@ -85,10 +85,10 @@ object SnapToRoadsHttpClient {
     private val api = retrofit.create(SnapToRoadsApi::class.java)
     
     /**
-     * 调用 Snap to Roads API
-     * @param gpsPoints GPS 坐标点列表
+     * Call Snap to Roads API
+     * @param gpsPoints GPS coordinate point list
      * @param apiKey Google Maps API Key
-     * @return 对齐后的点及其道路信息
+     * @return Snapped points with road information
      */
     suspend fun snapToRoads(
         gpsPoints: List<com.google.android.gms.maps.model.LatLng>,
@@ -105,22 +105,22 @@ object SnapToRoadsHttpClient {
                 return@withContext null
             }
             
-            // 构建路径字符串：lat1,lng1|lat2,lng2|...
+            // Build path string: lat1,lng1|lat2,lng2|...
             val pathString = gpsPoints.joinToString("|") { point ->
                 "${point.latitude},${point.longitude}"
             }
             
             Log.d(TAG, "Calling Snap to Roads API with ${gpsPoints.size} points")
-            Log.d(TAG, "Path: ${pathString.take(100)}...")  // 仅记录前100个字符
+            Log.d(TAG, "Path: ${pathString.take(100)}...")  // Log only first 100 characters
             
-            // 调用 API
+            // Call API
             val response = api.snapToRoads(
                 path = pathString,
                 key = apiKey,
                 interpolate = true
             )
             
-            // 检查错误
+            // Check for errors
             if (!response.error.isNullOrEmpty()) {
                 Log.e(TAG, "API Error: ${response.error}")
                 return@withContext null
@@ -130,7 +130,7 @@ object SnapToRoadsHttpClient {
                 Log.w(TAG, "API Warning: ${response.warningMessage}")
             }
             
-            // 返回对齐后的点
+            // Return snapped points
             val snappedCount = response.snappedPoints?.size ?: 0
             Log.d(TAG, "Snap to Roads API returned $snappedCount snapped points")
             

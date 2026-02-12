@@ -12,22 +12,22 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <!-- 顶部关闭按钮 -->
+        <!-- Close Button -->
         <ImageButton
             android:id="@+id/btn_close"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:layout_gravity="end"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="关闭"
+            android:contentDescription="Close"
             android:src="@drawable/ic_close" />
 
-        <!-- 标题 -->
+        <!-- Title -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
-            android:text="行程完成！"
+            android:text="Trip Complete!"
             android:textColor="@color/text_primary"
             android:textSize="24sp"
             android:textStyle="bold" />
@@ -37,11 +37,11 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:layout_marginTop="4dp"
-            android:text="干得漂亮！"
+            android:text="Well Done!"
             android:textColor="@color/text_muted"
             android:textSize="14sp" />
 
-        <!-- 小狮子庆祝 -->
+        <!-- Mascot Celebration -->
         <com.ecogo.ui.views.MascotLionView
             android:id="@+id/mascot_celebrate"
             android:layout_width="120dp"
@@ -49,7 +49,7 @@
             android:layout_gravity="center_horizontal"
             android:layout_marginVertical="16dp" />
 
-        <!-- 环保等级 -->
+        <!-- Eco Rating -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -64,7 +64,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="环保等级"
+                android:text="Eco Rating"
                 android:textColor="@color/text_muted"
                 android:textSize="12sp" />
 
@@ -78,7 +78,7 @@
                 android:textStyle="bold" />
         </LinearLayout>
 
-        <!-- 统计卡片网格 -->
+        <!-- Stats Card Grid -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -89,7 +89,7 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <!-- 距离 -->
+                <!-- Distance -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_distance"
                     android:layout_width="0dp"
@@ -127,13 +127,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="公里"
+                            android:text="km"
                             android:textColor="@color/text_muted"
                             android:textSize="12sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- 时长 -->
+                <!-- Duration -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_duration"
                     android:layout_width="0dp"
@@ -171,7 +171,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="分钟"
+                            android:text="min"
                             android:textColor="@color/text_muted"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -184,7 +184,7 @@
                 android:layout_marginTop="16dp"
                 android:orientation="horizontal">
 
-                <!-- 碳减排 -->
+                <!-- Carbon Saved -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_carbon"
                     android:layout_width="0dp"
@@ -222,13 +222,13 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="g CO₂ 减排"
+                            android:text="g CO₂ Saved"
                             android:textColor="@color/text_muted"
                             android:textSize="12sp" />
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 
-                <!-- 积分 -->
+                <!-- Points -->
                 <com.google.android.material.card.MaterialCardView
                     android:id="@+id/card_points"
                     android:layout_width="0dp"
@@ -266,7 +266,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="积分"
+                            android:text="Points"
                             android:textColor="@color/text_muted"
                             android:textSize="12sp" />
                     </LinearLayout>
@@ -279,7 +279,7 @@
             android:layout_height="0dp"
             android:layout_weight="1" />
 
-        <!-- 下一步操作按钮 -->
+        <!-- Action Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -291,7 +291,7 @@
                 style="@style/Widget.Material3.Button.OutlinedButton"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="分享成就"
+                android:text="Share Achievement"
                 android:textSize="16sp"
                 app:cornerRadius="28dp"
                 app:icon="@drawable/ic_share"
@@ -310,7 +310,7 @@
                     android:layout_height="56dp"
                     android:layout_marginEnd="6dp"
                     android:layout_weight="1"
-                    android:text="查看排行"
+                    android:text="Leaderboard"
                     android:textSize="14sp"
                     app:cornerRadius="28dp" />
 
@@ -321,7 +321,7 @@
                     android:layout_height="56dp"
                     android:layout_marginHorizontal="6dp"
                     android:layout_weight="1"
-                    android:text="兑换奖励"
+                    android:text="Redeem"
                     android:textSize="14sp"
                     app:cornerRadius="28dp" />
 
@@ -332,7 +332,7 @@
                     android:layout_height="56dp"
                     android:layout_marginStart="6dp"
                     android:layout_weight="1"
-                    android:text="再来一次"
+                    android:text="Go Again"
                     android:textSize="14sp"
                     app:cornerRadius="28dp" />
             </LinearLayout>
