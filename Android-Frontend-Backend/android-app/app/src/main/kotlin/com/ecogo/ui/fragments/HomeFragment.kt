@@ -114,6 +114,12 @@ class HomeFragment : Fragment() {
 
     private fun setupUI() {
         try {
+            // Immediately set greeting from cached username to avoid flicker
+            val cachedUsername = com.ecogo.auth.TokenManager.getUsername()
+            if (!cachedUsername.isNullOrBlank()) {
+                binding.textWelcome.text = "Hello, $cachedUsername"
+            }
+
             binding.textBusNumber.text = "D1"
             binding.textBusTime.text = "2 min"
             binding.textBusRoute.text = "to UTown"
