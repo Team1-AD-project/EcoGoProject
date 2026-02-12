@@ -20,6 +20,8 @@ import org.robolectric.shadows.ShadowToast
 @Config(sdk = [33])
 class LoginFragmentTest {
 
+    private val TOAST_PLEASE_ENTER = "Please enter"
+
     private fun launchWithNav(): Pair<androidx.fragment.app.testing.FragmentScenario<LoginFragment>, TestNavHostController> {
         val navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         navController.setGraph(R.navigation.nav_graph)
@@ -90,7 +92,7 @@ class LoginFragmentTest {
 
             val latestToast = ShadowToast.getTextOfLatestToast()
             assertNotNull(latestToast)
-            assertTrue(latestToast.contains("Please enter"))
+            assertTrue(latestToast.contains(TOAST_PLEASE_ENTER))
         }
     }
 
@@ -105,7 +107,7 @@ class LoginFragmentTest {
 
             val latestToast = ShadowToast.getTextOfLatestToast()
             assertNotNull(latestToast)
-            assertTrue(latestToast.contains("Please enter"))
+            assertTrue(latestToast.contains(TOAST_PLEASE_ENTER))
         }
     }
 
@@ -120,7 +122,7 @@ class LoginFragmentTest {
 
             val latestToast = ShadowToast.getTextOfLatestToast()
             assertNotNull(latestToast)
-            assertTrue(latestToast.contains("Please enter"))
+            assertTrue(latestToast.contains(TOAST_PLEASE_ENTER))
         }
     }
 

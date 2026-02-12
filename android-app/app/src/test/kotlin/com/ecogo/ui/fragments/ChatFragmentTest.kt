@@ -24,6 +24,13 @@ import java.lang.reflect.Method
 @Config(sdk = [33])
 class ChatFragmentTest {
 
+    companion object {
+        private const val NO_SOURCES = "No sources"
+        private const val GREEN_TRAVEL_ADVICE = "绿色出行建议"
+        private const val ROUTE_NUS_TO_CLEMENTI = "从NUS到Clementi"
+        private const val TEST_DATE_TIME = "2025-01-15T10:30:00"
+    }
+
     // ==================== Reflection helpers ====================
 
     private fun getPrivateMethod(name: String, vararg paramTypes: Class<*>): Method {
@@ -280,10 +287,10 @@ class ChatFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("buildDisplayText", ChatResponse::class.java)
             val response = ChatResponse(
-                assistant = AssistantMessage(text = "No sources", citations = emptyList())
+                assistant = AssistantMessage(text = NO_SOURCES, citations = emptyList())
             )
             val result = method.invoke(fragment, response) as String
-            assertEquals("No sources", result)
+            assertEquals(NO_SOURCES, result)
             assertFalse(result.contains("📚"))
         }
     }
@@ -294,10 +301,10 @@ class ChatFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("buildDisplayText", ChatResponse::class.java)
             val response = ChatResponse(
-                assistant = AssistantMessage(text = "No sources", citations = null)
+                assistant = AssistantMessage(text = NO_SOURCES, citations = null)
             )
             val result = method.invoke(fragment, response) as String
-            assertEquals("No sources", result)
+            assertEquals(NO_SOURCES, result)
         }
     }
 
@@ -419,7 +426,7 @@ class ChatFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("generateSmartReply", String::class.java)
             val result = method.invoke(fragment, "推荐出行方式") as String
-            assertTrue(result.contains("绿色出行建议"))
+            assertTrue(result.contains(GREEN_TRAVEL_ADVICE))
         }
     }
 
@@ -429,7 +436,7 @@ class ChatFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("generateSmartReply", String::class.java)
             val result = method.invoke(fragment, "给我一些建议") as String
-            assertTrue(result.contains("绿色出行建议"))
+            assertTrue(result.contains(GREEN_TRAVEL_ADVICE))
         }
     }
 
@@ -439,7 +446,7 @@ class ChatFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("generateSmartReply", String::class.java)
             val result = method.invoke(fragment, "怎么去学校") as String
-            assertTrue(result.contains("绿色出行建议"))
+            assertTrue(result.contains(GREEN_TRAVEL_ADVICE))
         }
     }
 
@@ -490,8 +497,8 @@ class ChatFragmentTest {
         val scenario = launchFragmentInContainer<ChatFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("formatRouteForBackend", String::class.java)
-            val result = method.invoke(fragment, "从NUS到Clementi") as String
-            assertEquals("从NUS到Clementi", result)
+            val result = method.invoke(fragment, ROUTE_NUS_TO_CLEMENTI) as String
+            assertEquals(ROUTE_NUS_TO_CLEMENTI, result)
         }
     }
 
@@ -501,7 +508,7 @@ class ChatFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("formatRouteForBackend", String::class.java)
             val result = method.invoke(fragment, "NUS->Clementi") as String
-            assertEquals("从NUS到Clementi", result)
+            assertEquals(ROUTE_NUS_TO_CLEMENTI, result)
         }
     }
 
@@ -511,7 +518,7 @@ class ChatFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("formatRouteForBackend", String::class.java)
             val result = method.invoke(fragment, "NUS→Clementi") as String
-            assertEquals("从NUS到Clementi", result)
+            assertEquals(ROUTE_NUS_TO_CLEMENTI, result)
         }
     }
 
@@ -521,7 +528,7 @@ class ChatFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("formatRouteForBackend", String::class.java)
             val result = method.invoke(fragment, "NUS-Clementi") as String
-            assertEquals("从NUS到Clementi", result)
+            assertEquals(ROUTE_NUS_TO_CLEMENTI, result)
         }
     }
 
@@ -531,7 +538,7 @@ class ChatFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("formatRouteForBackend", String::class.java)
             val result = method.invoke(fragment, "NUS—Clementi") as String
-            assertEquals("从NUS到Clementi", result)
+            assertEquals(ROUTE_NUS_TO_CLEMENTI, result)
         }
     }
 
@@ -541,7 +548,7 @@ class ChatFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("formatRouteForBackend", String::class.java)
             val result = method.invoke(fragment, "NUS to Clementi") as String
-            assertEquals("从NUS到Clementi", result)
+            assertEquals(ROUTE_NUS_TO_CLEMENTI, result)
         }
     }
 
@@ -658,7 +665,7 @@ class ChatFragmentTest {
             val method = getPrivateMethod("normalizeDepartAtForBackend", String::class.java)
             val result = method.invoke(fragment, "2025-01-15 10:30") as String
             assertTrue(result.contains("T"))
-            assertEquals("2025-01-15T10:30:00", result)
+            assertEquals(TEST_DATE_TIME, result)
         }
     }
 
@@ -668,7 +675,7 @@ class ChatFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("normalizeDepartAtForBackend", String::class.java)
             val result = method.invoke(fragment, "2025-01-15T10:30") as String
-            assertEquals("2025-01-15T10:30:00", result)
+            assertEquals(TEST_DATE_TIME, result)
         }
     }
 
@@ -687,8 +694,8 @@ class ChatFragmentTest {
         val scenario = launchFragmentInContainer<ChatFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("normalizeDepartAtForBackend", String::class.java)
-            val result = method.invoke(fragment, "2025-01-15T10:30:00") as String
-            assertEquals("2025-01-15T10:30:00", result)
+            val result = method.invoke(fragment, TEST_DATE_TIME) as String
+            assertEquals(TEST_DATE_TIME, result)
         }
     }
 

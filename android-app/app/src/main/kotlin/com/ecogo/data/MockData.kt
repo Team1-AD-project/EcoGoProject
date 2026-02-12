@@ -11,6 +11,12 @@ object MockData {
     private const val TYPE_GOODS = "goods"
     private const val MOCK_USER_ID = "user123"
     private const val OUTFIT_NONE = "none"
+    private const val FACULTY_SOC = "School of Computing"
+    private const val FACULTY_ENG = "Faculty of Engineering"
+    private const val LOCATION_MRT = "Kent Ridge MRT"
+    private const val FACULTY_BIZ = "Business School"
+    private const val COLOR_PINK = "#DB2777"
+    private const val FACULTY_SCI = "Faculty of Science"
 
     // === Navigation Related Mock Data ===
     
@@ -22,7 +28,7 @@ object MockData {
         NavLocation(
             id = "1",
             name = "COM1",
-            address = "School of Computing",
+            address = FACULTY_SOC,
             latitude = 1.2948,
             longitude = 103.7743,
             type = LocationType.FACULTY,
@@ -66,7 +72,7 @@ object MockData {
         NavLocation(
             id = "5",
             name = "The Deck",
-            address = "Faculty of Engineering",
+            address = FACULTY_ENG,
             latitude = 1.2993,
             longitude = 103.7710,
             type = LocationType.CANTEEN,
@@ -76,7 +82,7 @@ object MockData {
         ),
         NavLocation(
             id = "6",
-            name = "Kent Ridge MRT",
+            name = LOCATION_MRT,
             address = "MRT Station",
             latitude = 1.2931,
             longitude = 103.7843,
@@ -87,7 +93,7 @@ object MockData {
         ),
         NavLocation(
             id = "7",
-            name = "Business School",
+            name = FACULTY_BIZ,
             address = "NUS Business School",
             latitude = 1.2935,
             longitude = 103.7751,
@@ -147,7 +153,7 @@ object MockData {
             crowdLevel = "Low",
             plateNumber = "SBS3421A",
             status = "arriving",
-            color = "#DB2777"
+            color = COLOR_PINK
         ),
         BusInfo(
             busId = "D1",
@@ -160,12 +166,12 @@ object MockData {
             crowdLevel = "Medium",
             plateNumber = "SBS3422B",
             status = "coming",
-            color = "#DB2777"
+            color = COLOR_PINK
         ),
         BusInfo(
             busId = "A1",
             routeName = "A1",
-            destination = "Kent Ridge MRT",
+            destination = LOCATION_MRT,
             currentLat = 1.2990,
             currentLng = 103.7720,
             etaMinutes = 15,
@@ -185,7 +191,7 @@ object MockData {
             name = "D1",
             from = "Opp Hon Sui Sen",
             to = "UTown",
-            color = "#DB2777",
+            color = COLOR_PINK,
             status = "Arriving",
             time = "2 min",
             crowd = "Low",
@@ -212,7 +218,7 @@ object MockData {
             id = "A1",
             name = "A1",
             from = "PGP Terminal",
-            to = "Kent Ridge MRT",
+            to = LOCATION_MRT,
             color = "#DC2626",
             status = "Delayed",
             time = "12 min",
@@ -225,7 +231,7 @@ object MockData {
         BusRoute(
             id = "A2",
             name = "A2",
-            from = "Kent Ridge MRT",
+            from = LOCATION_MRT,
             to = "PGP Terminal",
             color = "#F59E0B",
             status = "Arriving",
@@ -254,17 +260,17 @@ object MockData {
     
     val COMMUNITIES by lazy { listOf(
         Community(
-            name = "School of Computing",
+            name = FACULTY_SOC,
             points = 15420,
             change = 245
         ),
         Community(
-            name = "Faculty of Engineering",
+            name = FACULTY_ENG,
             points = 14890,
             change = 180
         ),
         Community(
-            name = "Faculty of Science",
+            name = FACULTY_SCI,
             points = 14320,
             change = -45
         ),
@@ -1124,7 +1130,7 @@ object MockData {
     val FACULTIES by lazy { listOf(
         Faculty(
             id = "soc",
-            name = "School of Computing",
+            name = FACULTY_SOC,
             x = 0.3f,
             y = 0.4f,
             score = 15420,
@@ -1132,7 +1138,7 @@ object MockData {
         ),
         Faculty(
             id = "eng",
-            name = "Faculty of Engineering",
+            name = FACULTY_ENG,
             x = 0.5f,
             y = 0.3f,
             score = 14890,
@@ -1140,7 +1146,7 @@ object MockData {
         ),
         Faculty(
             id = "sci",
-            name = "Faculty of Science",
+            name = FACULTY_SCI,
             x = 0.7f,
             y = 0.5f,
             score = 14320,
@@ -1156,7 +1162,7 @@ object MockData {
         ),
         Faculty(
             id = "biz",
-            name = "Business School",
+            name = FACULTY_BIZ,
             x = 0.6f,
             y = 0.6f,
             score = 13450,
@@ -1247,21 +1253,21 @@ object MockData {
         ),
         FacultyData(
             id = "soc",
-            name = "School of Computing",
+            name = FACULTY_SOC,
             color = "#3B82F6",
             slogan = "Code the Future 💻",
             outfit = Outfit(head = "hat_cap", face = OUTFIT_NONE, body = "shirt_hoodie")
         ),
         FacultyData(
             id = "eng",
-            name = "Faculty of Engineering",
+            name = FACULTY_ENG,
             color = "#EF4444",
             slogan = "Building the Future 🛠️",
             outfit = Outfit(head = "hat_helmet", face = OUTFIT_NONE, body = "body_plaid")
         ),
         FacultyData(
             id = "sci",
-            name = "Faculty of Science",
+            name = FACULTY_SCI,
             color = "#6366F1",
             slogan = "Discovering Truth 🧪",
             outfit = Outfit(head = OUTFIT_NONE, face = "face_goggles", body = "body_coat")
@@ -1275,7 +1281,7 @@ object MockData {
         ),
         FacultyData(
             id = "biz",
-            name = "Business School",
+            name = FACULTY_BIZ,
             color = "#EAB308",
             slogan = "Leading the Way 💼",
             outfit = Outfit(head = OUTFIT_NONE, face = "face_monocle", body = "body_suit")
@@ -1553,7 +1559,7 @@ object MockData {
             avatarUrl = null,
             points = 920,
             rank = 1,
-            faculty = "School of Computing"
+            faculty = FACULTY_SOC
         ),
         Friend(
             userId = "friend2",
@@ -1561,7 +1567,7 @@ object MockData {
             avatarUrl = null,
             points = 875,
             rank = 2,
-            faculty = "Faculty of Engineering"
+            faculty = FACULTY_ENG
         ),
         Friend(
             userId = "friend3",
@@ -1569,7 +1575,7 @@ object MockData {
             avatarUrl = null,
             points = 850,
             rank = 3,
-            faculty = "School of Computing"
+            faculty = FACULTY_SOC
         )
     )
     

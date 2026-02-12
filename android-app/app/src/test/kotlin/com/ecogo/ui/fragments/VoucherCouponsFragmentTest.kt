@@ -26,10 +26,14 @@ import org.robolectric.annotation.Config
 @Config(sdk = [33])
 class VoucherCouponsFragmentTest {
 
+    companion object {
+        private const val TEST_USER = "test-user"
+    }
+
     @Before
     fun setup() {
         TokenManager.init(ApplicationProvider.getApplicationContext())
-        TokenManager.saveToken("test-token", "test-user", "TestUser")
+        TokenManager.saveToken("test-token", TEST_USER, "TestUser")
     }
 
     private fun launchFragment(): androidx.fragment.app.testing.FragmentScenario<VoucherCouponsFragment> {
@@ -227,7 +231,7 @@ class VoucherCouponsFragmentTest {
         scenario.onFragment { fragment ->
             val userVoucher = UserVoucher(
                 id = "uv-1",
-                userId = "test-user",
+                userId = TEST_USER,
                 goodsId = "g-1",
                 voucherName = "Test Voucher",
                 status = "ACTIVE",
@@ -255,7 +259,7 @@ class VoucherCouponsFragmentTest {
         scenario.onFragment { fragment ->
             val userVoucher = UserVoucher(
                 id = "uv-2",
-                userId = "test-user",
+                userId = TEST_USER,
                 goodsId = "g-2",
                 voucherName = "Used Voucher",
                 status = "USED",
@@ -278,7 +282,7 @@ class VoucherCouponsFragmentTest {
             scenario.onFragment { fragment ->
                 val userVoucher = UserVoucher(
                     id = "uv-3",
-                    userId = "test-user",
+                    userId = TEST_USER,
                     goodsId = "g-3",
                     voucherName = "Expired Voucher",
                     status = "EXPIRED",

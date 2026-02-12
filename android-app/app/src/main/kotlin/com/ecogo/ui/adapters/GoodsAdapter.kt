@@ -14,6 +14,7 @@ private const val TYPE_HEAD = "head"
 private const val TYPE_FACE = "face"
 private const val TYPE_BODY = "body"
 private const val TYPE_BADGE = "badge"
+private const val DEFAULT_STROKE_COLOR = "#BBF7D0"
 
 class GoodsAdapter(
     private val onGoodsClick: (ShopItem) -> Unit = {}
@@ -177,11 +178,11 @@ class GoodsAdapter(
                     TYPE_HEAD -> android.graphics.Color.parseColor("#FDE68A")
                     TYPE_FACE -> android.graphics.Color.parseColor("#BFDBFE")
                     TYPE_BODY -> android.graphics.Color.parseColor("#FBCFE8")
-                    TYPE_BADGE -> android.graphics.Color.parseColor("#BBF7D0")
-                    else -> android.graphics.Color.parseColor("#BBF7D0")
+                    TYPE_BADGE -> android.graphics.Color.parseColor(DEFAULT_STROKE_COLOR)
+                    else -> android.graphics.Color.parseColor(DEFAULT_STROKE_COLOR)
                 }
             } catch (e: Exception) {
-                android.graphics.Color.parseColor("#BBF7D0")
+                android.graphics.Color.parseColor(DEFAULT_STROKE_COLOR)
             }
             iconCard?.strokeColor = strokeColor
         }

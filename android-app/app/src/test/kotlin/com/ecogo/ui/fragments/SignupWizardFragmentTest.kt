@@ -26,6 +26,12 @@ import java.lang.reflect.Method
 @Config(sdk = [33])
 class SignupWizardFragmentTest {
 
+    companion object {
+        private const val TEST_EMAIL = "test@nus.edu"
+        private const val COLOR_BLUE = "#003D7C"
+        private const val COLOR_BLACK = "#000000"
+    }
+
     // ==================== Reflection helpers ====================
 
     private fun getPrivateMethod(name: String, vararg paramTypes: Class<*>): Method {
@@ -152,7 +158,7 @@ class SignupWizardFragmentTest {
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
             view.findViewById<EditText>(R.id.input_username).setText("ab")
-            view.findViewById<EditText>(R.id.input_email).setText("test@nus.edu")
+            view.findViewById<EditText>(R.id.input_email).setText(TEST_EMAIL)
             view.findViewById<EditText>(R.id.input_nusnet).setText("e0123456")
             view.findViewById<EditText>(R.id.input_password).setText("password123")
             view.findViewById<EditText>(R.id.input_confirm_password).setText("password123")
@@ -188,7 +194,7 @@ class SignupWizardFragmentTest {
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
             view.findViewById<EditText>(R.id.input_username).setText("testuser")
-            view.findViewById<EditText>(R.id.input_email).setText("test@nus.edu")
+            view.findViewById<EditText>(R.id.input_email).setText(TEST_EMAIL)
             view.findViewById<EditText>(R.id.input_nusnet).setText("x012")
             view.findViewById<EditText>(R.id.input_password).setText("password123")
             view.findViewById<EditText>(R.id.input_confirm_password).setText("password123")
@@ -206,7 +212,7 @@ class SignupWizardFragmentTest {
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
             view.findViewById<EditText>(R.id.input_username).setText("testuser")
-            view.findViewById<EditText>(R.id.input_email).setText("test@nus.edu")
+            view.findViewById<EditText>(R.id.input_email).setText(TEST_EMAIL)
             view.findViewById<EditText>(R.id.input_nusnet).setText("e0123456")
             view.findViewById<EditText>(R.id.input_password).setText("abc")
             view.findViewById<EditText>(R.id.input_confirm_password).setText("abc")
@@ -224,7 +230,7 @@ class SignupWizardFragmentTest {
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
             view.findViewById<EditText>(R.id.input_username).setText("testuser")
-            view.findViewById<EditText>(R.id.input_email).setText("test@nus.edu")
+            view.findViewById<EditText>(R.id.input_email).setText(TEST_EMAIL)
             view.findViewById<EditText>(R.id.input_nusnet).setText("e0123456")
             view.findViewById<EditText>(R.id.input_password).setText("password123")
             view.findViewById<EditText>(R.id.input_confirm_password).setText("differentpw")
@@ -242,7 +248,7 @@ class SignupWizardFragmentTest {
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
             view.findViewById<EditText>(R.id.input_username).setText("testuser")
-            view.findViewById<EditText>(R.id.input_email).setText("test@nus.edu")
+            view.findViewById<EditText>(R.id.input_email).setText(TEST_EMAIL)
             view.findViewById<EditText>(R.id.input_nusnet).setText("e0123456")
             view.findViewById<EditText>(R.id.input_password).setText("password123")
             view.findViewById<EditText>(R.id.input_confirm_password).setText("password123")
@@ -261,7 +267,7 @@ class SignupWizardFragmentTest {
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
             view.findViewById<EditText>(R.id.input_username).setText("testuser")
-            view.findViewById<EditText>(R.id.input_email).setText("test@nus.edu")
+            view.findViewById<EditText>(R.id.input_email).setText(TEST_EMAIL)
             view.findViewById<EditText>(R.id.input_nusnet).setText("e0123456")
             view.findViewById<EditText>(R.id.input_password).setText("password123")
             view.findViewById<EditText>(R.id.input_confirm_password).setText("password123")
@@ -752,7 +758,7 @@ class SignupWizardFragmentTest {
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
             view.findViewById<EditText>(R.id.input_username).setText("testuser")
-            view.findViewById<EditText>(R.id.input_email).setText("test@nus.edu")
+            view.findViewById<EditText>(R.id.input_email).setText(TEST_EMAIL)
             view.findViewById<EditText>(R.id.input_nusnet).setText("E0123456")
             view.findViewById<EditText>(R.id.input_password).setText("password123")
             view.findViewById<EditText>(R.id.input_confirm_password).setText("password123")
@@ -799,7 +805,7 @@ class SignupWizardFragmentTest {
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
             view.findViewById<EditText>(R.id.input_username).setText("testuser")
-            view.findViewById<EditText>(R.id.input_email).setText("test@nus.edu")
+            view.findViewById<EditText>(R.id.input_email).setText(TEST_EMAIL)
             view.findViewById<EditText>(R.id.input_nusnet).setText("e01234")
             view.findViewById<EditText>(R.id.input_password).setText("password123")
             view.findViewById<EditText>(R.id.input_confirm_password).setText("password123")
@@ -814,7 +820,7 @@ class SignupWizardFragmentTest {
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
             view.findViewById<EditText>(R.id.input_username).setText("testuser")
-            view.findViewById<EditText>(R.id.input_email).setText("test@nus.edu")
+            view.findViewById<EditText>(R.id.input_email).setText(TEST_EMAIL)
             view.findViewById<EditText>(R.id.input_nusnet).setText("e0123456")
             view.findViewById<EditText>(R.id.input_password).setText("abcdef")
             view.findViewById<EditText>(R.id.input_confirm_password).setText("abcdef")
@@ -830,7 +836,7 @@ class SignupWizardFragmentTest {
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
             view.findViewById<EditText>(R.id.input_username).setText("testuser")
-            view.findViewById<EditText>(R.id.input_email).setText("test@nus.edu")
+            view.findViewById<EditText>(R.id.input_email).setText(TEST_EMAIL)
             view.findViewById<EditText>(R.id.input_nusnet).setText("e0123456")
             view.findViewById<EditText>(R.id.input_password).setText("abcde")
             view.findViewById<EditText>(R.id.input_confirm_password).setText("abcde")
@@ -845,7 +851,7 @@ class SignupWizardFragmentTest {
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
             view.findViewById<EditText>(R.id.input_username).setText("testuser")
-            view.findViewById<EditText>(R.id.input_email).setText("test@nus.edu")
+            view.findViewById<EditText>(R.id.input_email).setText(TEST_EMAIL)
             view.findViewById<EditText>(R.id.input_nusnet).setText("e0123456")
             view.findViewById<EditText>(R.id.input_password).setText("password123")
             view.findViewById<EditText>(R.id.input_confirm_password).setText("")
@@ -974,7 +980,7 @@ class SignupWizardFragmentTest {
             val faculty = FacultyData(
                 id = "soc",
                 name = "School of Computing",
-                color = "#003D7C",
+                color = COLOR_BLUE,
                 slogan = "Computing the Future",
                 outfit = Outfit(head = "hat_cap", face = "none", body = "shirt_nus")
             )
@@ -1001,7 +1007,7 @@ class SignupWizardFragmentTest {
             val faculty = FacultyData(
                 id = "soc",
                 name = "School of Computing",
-                color = "#003D7C",
+                color = COLOR_BLUE,
                 slogan = "Computing the Future",
                 outfit = Outfit(head = "none", face = "none", body = "none")
             )
@@ -1068,7 +1074,7 @@ class SignupWizardFragmentTest {
             val faculty = FacultyData(
                 id = "test",
                 name = "Test",
-                color = "#000000",
+                color = COLOR_BLACK,
                 slogan = "Test",
                 outfit = Outfit(head = "none", face = "none", body = "none")
             )
@@ -1089,7 +1095,7 @@ class SignupWizardFragmentTest {
             val faculty = FacultyData(
                 id = "test",
                 name = "Test",
-                color = "#000000",
+                color = COLOR_BLACK,
                 slogan = "Test",
                 outfit = Outfit()
             )
@@ -1111,7 +1117,7 @@ class SignupWizardFragmentTest {
             val faculty = FacultyData(
                 id = "test",
                 name = "Test",
-                color = "#000000",
+                color = COLOR_BLACK,
                 slogan = "Test",
                 outfit = Outfit()
             )
@@ -1131,11 +1137,11 @@ class SignupWizardFragmentTest {
         val scenario = launchFragmentInContainer<SignupWizardFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             setFieldValue(fragment, "username", "testuser")
-            setFieldValue(fragment, "email", "test@nus.edu")
+            setFieldValue(fragment, "email", TEST_EMAIL)
             setFieldValue(fragment, "nusnetId", "e0123456")
             setFieldValue(fragment, "password", "secret123")
             setFieldValue(fragment, "selectedFaculty", FacultyData(
-                id = "soc", name = "Computing", color = "#003D7C",
+                id = "soc", name = "Computing", color = COLOR_BLUE,
                 slogan = "Compute", outfit = Outfit()
             ))
 
@@ -1145,7 +1151,7 @@ class SignupWizardFragmentTest {
             val prefs = fragment.requireContext()
                 .getSharedPreferences("EcoGoPrefs", Context.MODE_PRIVATE)
             assertEquals("testuser", prefs.getString("username", ""))
-            assertEquals("test@nus.edu", prefs.getString("email", ""))
+            assertEquals(TEST_EMAIL, prefs.getString("email", ""))
             assertEquals("e0123456", prefs.getString("nusnet_id", ""))
             assertEquals("secret123", prefs.getString("password", ""))
             assertEquals("Computing", prefs.getString("faculty", ""))

@@ -43,6 +43,11 @@ class MapViewModelTest {
         route_points = listOf(GeoPoint(103.7764, 1.2966), GeoPoint(103.8, 1.3))
     )
 
+    private val TEST_START_TIME = "2026-02-11T10:00:00"
+    private val TRIP_ID_123 = "trip-123"
+    private val TRIP_ID_CALC = "trip-calc"
+    private val TRIP_ID_456 = "trip-456"
+
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
@@ -147,7 +152,7 @@ class MapViewModelTest {
         viewModel.updateCurrentLocation(testOrigin)
 
         whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = "trip-123", start_time = "2026-02-11T10:00:00"))
+            Result.success(TripTrackData(trip_id = TRIP_ID_123, start_time = TEST_START_TIME))
         )
 
         viewModel.startTracking()
@@ -155,8 +160,8 @@ class MapViewModelTest {
 
         val state = viewModel.tripState.value
         assertTrue(state is TripState.Tracking)
-        assertEquals("trip-123", (state as TripState.Tracking).tripId)
-        assertEquals("trip-123", viewModel.currentTripId.value)
+        assertEquals(TRIP_ID_123, (state as TripState.Tracking).tripId)
+        assertEquals(TRIP_ID_123, viewModel.currentTripId.value)
         assertNotNull(viewModel.successMessage.value)
     }
 
@@ -180,7 +185,7 @@ class MapViewModelTest {
         viewModel.updateCurrentLocation(testOrigin)
 
         whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = "trip-123", start_time = "2026-02-11T10:00:00"))
+            Result.success(TripTrackData(trip_id = TRIP_ID_123, start_time = TEST_START_TIME))
         )
 
         viewModel.startTracking()
@@ -201,20 +206,20 @@ class MapViewModelTest {
     fun `stopTracking success completes trip and calculates carbon`() = runTest {
         viewModel.updateCurrentLocation(testOrigin)
         whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = "trip-123", start_time = "2026-02-11T10:00:00"))
+            Result.success(TripTrackData(trip_id = TRIP_ID_123, start_time = TEST_START_TIME))
         )
         viewModel.startTracking()
         advanceUntilIdle()
 
         whenever(mockRepository.saveTrip(
-            eq("trip-123"), any(), any(), anyOrNull(), any(), any()
+            eq(TRIP_ID_123), any(), any(), anyOrNull(), any(), any()
         )).thenReturn(
-            Result.success(TripSaveData(trip_id = "trip-123", status = "saved"))
+            Result.success(TripSaveData(trip_id = TRIP_ID_123, status = "saved"))
         )
 
-        whenever(mockRepository.calculateCarbon(eq("trip-123"), any())).thenReturn(
+        whenever(mockRepository.calculateCarbon(eq(TRIP_ID_123), any())).thenReturn(
             Result.success(CarbonCalculateData(
-                trip_id = "trip-123",
+                trip_id = TRIP_ID_123,
                 total_carbon_emission = 0.5,
                 carbon_saved = 0.3,
                 green_points = 10
@@ -233,7 +238,7 @@ class MapViewModelTest {
     fun `stopTracking after startTracking sets Completed state`() = runTest {
         viewModel.updateCurrentLocation(testOrigin)
         whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = "trip-789", start_time = "2026-02-11T10:00:00"))
+            Result.success(TripTrackData(trip_id = "trip-789", start_time = TEST_START_TIME))
         )
         viewModel.startTracking()
         advanceUntilIdle()
@@ -249,18 +254,18 @@ class MapViewModelTest {
     fun `stopTracking with carbon calculation failure still completes trip`() = runTest {
         viewModel.updateCurrentLocation(testOrigin)
         whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = "trip-calc", start_time = "2026-02-11T10:00:00"))
+            Result.success(TripTrackData(trip_id = TRIP_ID_CALC, start_time = TEST_START_TIME))
         )
         viewModel.startTracking()
         advanceUntilIdle()
 
         whenever(mockRepository.saveTrip(
-            eq("trip-calc"), any(), any(), anyOrNull(), any(), any()
+            eq(TRIP_ID_CALC), any(), any(), anyOrNull(), any(), any()
         )).thenReturn(
-            Result.success(TripSaveData(trip_id = "trip-calc", status = "saved"))
+            Result.success(TripSaveData(trip_id = TRIP_ID_CALC, status = "saved"))
         )
 
-        whenever(mockRepository.calculateCarbon(eq("trip-calc"), any())).thenReturn(
+        whenever(mockRepository.calculateCarbon(eq(TRIP_ID_CALC), any())).thenReturn(
             Result.failure(RuntimeException("Carbon calc failed"))
         )
 
@@ -280,13 +285,13 @@ class MapViewModelTest {
     fun `cancelTracking success transitions to Idle`() = runTest {
         viewModel.updateCurrentLocation(testOrigin)
         whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = "trip-456", start_time = "2026-02-11T10:00:00"))
+            Result.success(TripTrackData(trip_id = TRIP_ID_456, start_time = TEST_START_TIME))
         )
         viewModel.startTracking()
         advanceUntilIdle()
 
-        whenever(mockRepository.cancelTripTracking(eq("trip-456"), any(), anyOrNull())).thenReturn(
-            Result.success(TripCancelData(trip_id = "trip-456", status = "canceled"))
+        whenever(mockRepository.cancelTripTracking(eq(TRIP_ID_456), any(), anyOrNull())).thenReturn(
+            Result.success(TripCancelData(trip_id = TRIP_ID_456, status = "canceled"))
         )
         viewModel.cancelTracking("test")
         advanceUntilIdle()
@@ -300,7 +305,7 @@ class MapViewModelTest {
     fun `cancelTracking failure sets error`() = runTest {
         viewModel.updateCurrentLocation(testOrigin)
         whenever(mockRepository.startTripTracking(any(), any(), anyOrNull())).thenReturn(
-            Result.success(TripTrackData(trip_id = "trip-err", start_time = "2026-02-11T10:00:00"))
+            Result.success(TripTrackData(trip_id = "trip-err", start_time = TEST_START_TIME))
         )
         viewModel.startTracking()
         advanceUntilIdle()

@@ -22,6 +22,11 @@ import androidx.test.core.app.ApplicationProvider
 @Config(sdk = [33])
 class EditProfileFragmentTest {
 
+    companion object {
+        private const val TEST_TOKEN = "test-token"
+        private const val TEST_USER_ID = "test-user-id"
+    }
+
     @Before
     fun setup() {
         TokenManager.init(ApplicationProvider.getApplicationContext())
@@ -375,7 +380,7 @@ class EditProfileFragmentTest {
 
     @Test
     fun `saveProfile with valid nickname and userId builds request`() {
-        TokenManager.saveToken("test-token", "test-user-id", "TestUser")
+        TokenManager.saveToken(TEST_TOKEN, TEST_USER_ID, "TestUser")
         val scenario = launchFragmentInContainer<EditProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
@@ -394,7 +399,7 @@ class EditProfileFragmentTest {
 
     @Test
     fun `saveProfile with valid nickname after empty does not crash`() {
-        TokenManager.saveToken("test-token", "test-user-id", "TestUser")
+        TokenManager.saveToken(TEST_TOKEN, TEST_USER_ID, "TestUser")
         val scenario = launchFragmentInContainer<EditProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
@@ -407,7 +412,7 @@ class EditProfileFragmentTest {
 
     @Test
     fun `saveProfile with empty weeklyGoals defaults to 20`() {
-        TokenManager.saveToken("test-token", "test-user-id", "TestUser")
+        TokenManager.saveToken(TEST_TOKEN, TEST_USER_ID, "TestUser")
         val scenario = launchFragmentInContainer<EditProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
@@ -419,7 +424,7 @@ class EditProfileFragmentTest {
 
     @Test
     fun `saveProfile with non-numeric weeklyGoals defaults to 20`() {
-        TokenManager.saveToken("test-token", "test-user-id", "TestUser")
+        TokenManager.saveToken(TEST_TOKEN, TEST_USER_ID, "TestUser")
         val scenario = launchFragmentInContainer<EditProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
@@ -431,7 +436,7 @@ class EditProfileFragmentTest {
 
     @Test
     fun `saveProfile reads switch states correctly`() {
-        TokenManager.saveToken("test-token", "test-user-id", "TestUser")
+        TokenManager.saveToken(TEST_TOKEN, TEST_USER_ID, "TestUser")
         val scenario = launchFragmentInContainer<EditProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             val view = fragment.requireView()
@@ -446,7 +451,7 @@ class EditProfileFragmentTest {
 
     @Test
     fun `saveProfile with empty faculty does not crash`() {
-        TokenManager.saveToken("test-token", "test-user-id", "TestUser")
+        TokenManager.saveToken(TEST_TOKEN, TEST_USER_ID, "TestUser")
         val scenario = launchFragmentInContainer<EditProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             val view = fragment.requireView()

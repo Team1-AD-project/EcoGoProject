@@ -35,6 +35,7 @@ class HomeFragment : Fragment() {
     companion object {
         private const val TAG = "HomeFragment"
         private const val DEFAULT_USER_ID = "user123"
+        private const val STATUS_ON_TIME = "On Time"
     }
 
     private var _binding: FragmentHomeBinding? = null
@@ -337,7 +338,7 @@ class HomeFragment : Fragment() {
             Triple(name, eta, statusText)
         }.getOrElse { e ->
             android.util.Log.e("NEXTBUS", "Home loadBusInfo failed", e)
-            Triple("-", -1, "On Time")
+            Triple("-", -1, STATUS_ON_TIME)
         }
 
         // 2) 更新 Home 卡片 UI（你现在 Home 只显示这三个字段）
@@ -357,10 +358,10 @@ class HomeFragment : Fragment() {
     }
 
     private fun statusFromEta(eta: Int): String {
-        if (eta < 0) return "On Time"
+        if (eta < 0) return STATUS_ON_TIME
         return when {
             eta <= 2 -> "Arriving"
-            eta <= 8 -> "On Time"
+            eta <= 8 -> STATUS_ON_TIME
             eta <= 30 -> "Delayed"
             else -> "Scheduled"
         }

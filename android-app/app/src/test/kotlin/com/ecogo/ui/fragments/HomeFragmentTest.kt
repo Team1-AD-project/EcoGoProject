@@ -20,6 +20,8 @@ import org.robolectric.annotation.Config
 @Config(sdk = [33])
 class HomeFragmentTest {
 
+    private val STATUS_ON_TIME = "On Time"
+
     /**
      * Helper: launch HomeFragment and attach a TestNavHostController (no Mockito needed)
      */
@@ -381,7 +383,7 @@ class HomeFragmentTest {
     fun `statusFromEta - negative eta returns On Time`() {
         val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
-            assertEquals("On Time", invokePrivate(fragment, "statusFromEta", -1))
+            assertEquals(STATUS_ON_TIME, invokePrivate(fragment, "statusFromEta", -1))
         }
     }
 
@@ -405,7 +407,7 @@ class HomeFragmentTest {
     fun `statusFromEta - eta 5 returns On Time`() {
         val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
-            assertEquals("On Time", invokePrivate(fragment, "statusFromEta", 5))
+            assertEquals(STATUS_ON_TIME, invokePrivate(fragment, "statusFromEta", 5))
         }
     }
 
@@ -413,7 +415,7 @@ class HomeFragmentTest {
     fun `statusFromEta - eta 8 returns On Time`() {
         val scenario = launchFragmentInContainer<HomeFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
-            assertEquals("On Time", invokePrivate(fragment, "statusFromEta", 8))
+            assertEquals(STATUS_ON_TIME, invokePrivate(fragment, "statusFromEta", 8))
         }
     }
 

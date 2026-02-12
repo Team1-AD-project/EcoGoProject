@@ -25,6 +25,8 @@ import java.time.format.DateTimeFormatter
 @Config(sdk = [33])
 class MonthlyHighlightsFragmentTest {
 
+    private val ORANGE_COLOR = "#F97316"
+
     @Before
     fun setup() {
         TokenManager.init(ApplicationProvider.getApplicationContext())
@@ -313,15 +315,15 @@ class MonthlyHighlightsFragmentTest {
 
     @Test
     fun `MonthStat data class equals works`() {
-        val stat1 = MonthStat(icon = "trophy", title = "Challenges", value = "3", subtitle = "joined", color = "#F97316")
-        val stat2 = MonthStat(icon = "trophy", title = "Challenges", value = "3", subtitle = "joined", color = "#F97316")
+        val stat1 = MonthStat(icon = "trophy", title = "Challenges", value = "3", subtitle = "joined", color = ORANGE_COLOR)
+        val stat2 = MonthStat(icon = "trophy", title = "Challenges", value = "3", subtitle = "joined", color = ORANGE_COLOR)
         assertEquals(stat1, stat2)
     }
 
     @Test
     fun `MonthStat data class not equals works`() {
-        val stat1 = MonthStat(icon = "trophy", title = "Challenges", value = "3", subtitle = "joined", color = "#F97316")
-        val stat2 = MonthStat(icon = "trophy", title = "Challenges", value = "5", subtitle = "joined", color = "#F97316")
+        val stat1 = MonthStat(icon = "trophy", title = "Challenges", value = "3", subtitle = "joined", color = ORANGE_COLOR)
+        val stat2 = MonthStat(icon = "trophy", title = "Challenges", value = "5", subtitle = "joined", color = ORANGE_COLOR)
         assertNotEquals(stat1, stat2)
     }
 
@@ -497,7 +499,7 @@ class MonthlyHighlightsFragmentTest {
             try {
                 method.invoke(fragment, object : kotlin.coroutines.Continuation<Unit> {
                     override val context = kotlin.coroutines.EmptyCoroutineContext
-                    override fun resumeWith(result: Result<Unit>) {}
+                    override fun resumeWith(result: Result<Unit>) {} // No-op for test continuation
                 })
             } catch (_: Exception) { /* expected - suspend function */ }
         }
@@ -512,7 +514,7 @@ class MonthlyHighlightsFragmentTest {
             try {
                 method.invoke(fragment, object : kotlin.coroutines.Continuation<Unit> {
                     override val context = kotlin.coroutines.EmptyCoroutineContext
-                    override fun resumeWith(result: Result<Unit>) {}
+                    override fun resumeWith(result: Result<Unit>) {} // No-op for test continuation
                 })
             } catch (_: Exception) { /* expected - suspend function */ }
         }
@@ -527,7 +529,7 @@ class MonthlyHighlightsFragmentTest {
             try {
                 method.invoke(fragment, object : kotlin.coroutines.Continuation<Unit> {
                     override val context = kotlin.coroutines.EmptyCoroutineContext
-                    override fun resumeWith(result: Result<Unit>) {}
+                    override fun resumeWith(result: Result<Unit>) {} // No-op for test continuation
                 })
             } catch (_: Exception) { /* expected - suspend function */ }
         }
@@ -542,7 +544,7 @@ class MonthlyHighlightsFragmentTest {
             try {
                 method.invoke(fragment, object : kotlin.coroutines.Continuation<Unit> {
                     override val context = kotlin.coroutines.EmptyCoroutineContext
-                    override fun resumeWith(result: Result<Unit>) {}
+                    override fun resumeWith(result: Result<Unit>) {} // No-op for test continuation
                 })
             } catch (_: Exception) { /* expected - suspend function */ }
         }
@@ -557,7 +559,7 @@ class MonthlyHighlightsFragmentTest {
             try {
                 method.invoke(fragment, object : kotlin.coroutines.Continuation<Unit> {
                     override val context = kotlin.coroutines.EmptyCoroutineContext
-                    override fun resumeWith(result: Result<Unit>) {}
+                    override fun resumeWith(result: Result<Unit>) {} // No-op for test continuation
                 })
             } catch (_: Exception) { /* expected - suspend function */ }
         }

@@ -26,6 +26,7 @@ class EcoGoRepositoryTest {
     companion object {
         private const val MSG_OK = "OK"
         private const val CODE_SUCCESS = 200
+        private const val TEST_USER_ID = "user-1"
     }
 
     private val testDispatcher = StandardTestDispatcher()
@@ -130,15 +131,15 @@ class EcoGoRepositoryTest {
 
     @Test
     fun `joinActivity success returns updated activity`() = runTest {
-        val activity = Activity(id = "a1", title = "Cycling Event", participantIds = listOf("user-1"))
-        whenever(mockApi.joinActivity("a1", "user-1")).thenReturn(
+        val activity = Activity(id = "a1", title = "Cycling Event", participantIds = listOf(TEST_USER_ID))
+        whenever(mockApi.joinActivity("a1", TEST_USER_ID)).thenReturn(
             ApiResponse(code = CODE_SUCCESS, message = "Joined", data = activity)
         )
 
-        val result = repository.joinActivity("a1", "user-1")
+        val result = repository.joinActivity("a1", TEST_USER_ID)
 
         assertTrue(result.isSuccess)
-        assertTrue(result.getOrNull()?.participantIds?.contains("user-1") == true)
+        assertTrue(result.getOrNull()?.participantIds?.contains(TEST_USER_ID) == true)
     }
 
     // ==================== acceptChallenge ====================
@@ -165,15 +166,15 @@ class EcoGoRepositoryTest {
     @Test
     fun `getJoinedActivitiesCount filters by userId`() = runTest {
         val activities = listOf(
-            Activity(id = "1", title = "A", participantIds = listOf("user-1", "user-2")),
+            Activity(id = "1", title = "A", participantIds = listOf(TEST_USER_ID, "user-2")),
             Activity(id = "2", title = "B", participantIds = listOf("user-2")),
-            Activity(id = "3", title = "C", participantIds = listOf("user-1"))
+            Activity(id = "3", title = "C", participantIds = listOf(TEST_USER_ID))
         )
         whenever(mockApi.getAllActivities()).thenReturn(
             ApiResponse(code = CODE_SUCCESS, message = MSG_OK, data = activities)
         )
 
-        val result = repository.getJoinedActivitiesCount("user-1")
+        val result = repository.getJoinedActivitiesCount(TEST_USER_ID)
 
         assertTrue(result.isSuccess)
         assertEquals(2, result.getOrNull())

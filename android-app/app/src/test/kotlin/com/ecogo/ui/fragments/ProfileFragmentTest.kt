@@ -26,6 +26,19 @@ import java.lang.reflect.Method
 @Config(sdk = [33])
 class ProfileFragmentTest {
 
+    companion object {
+        private const val TEST_USER = "test-user"
+        private const val SEEDLING_EMOJI = "\uD83C\uDF31"
+        private const val WALKING_EMOJI = "\uD83D\uDEB6"
+        private const val CROWN_EMOJI = "\uD83D\uDC51"
+        private const val TROPHY_EMOJI = "\uD83C\uDFC6"
+        private const val SHIRT_EMOJI = "\uD83D\uDC55"
+        private const val ECO_STARTER = "Eco Starter"
+        private const val SOC_NAME = "School of Computing"
+        private const val SOC_COLOR = "#3B82F6"
+        private const val SOC_SLOGAN = "Code the Future"
+    }
+
     /**
      * Helper: launch ProfileFragment with TestNavHostController
      */
@@ -106,7 +119,7 @@ class ProfileFragmentTest {
     private fun makeUserBadge(
         badgeId: String,
         isDisplay: Boolean = false,
-        userId: String = "test-user"
+        userId: String = TEST_USER
     ) = UserBadgeDto(
         userId = userId,
         badgeId = badgeId,
@@ -398,16 +411,16 @@ class ProfileFragmentTest {
         val scenario = launchFragmentInContainer<ProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("getBadgeEmoji", String::class.java)
-            assertEquals("\uD83C\uDF31", method.invoke(fragment, "badge_c1"))
-            assertEquals("\uD83D\uDEB6", method.invoke(fragment, "badge_c2"))
+            assertEquals(SEEDLING_EMOJI, method.invoke(fragment, "badge_c1"))
+            assertEquals(WALKING_EMOJI, method.invoke(fragment, "badge_c2"))
             assertEquals("♻️", method.invoke(fragment, "badge_c3"))
             assertEquals("\uD83C\uDF33", method.invoke(fragment, "badge_c4"))
             assertEquals("\uD83D\uDE8C", method.invoke(fragment, "badge_c5"))
             assertEquals("\uD83C\uDF0D", method.invoke(fragment, "badge_c6"))
             assertEquals("⚡", method.invoke(fragment, "badge_c7"))
             assertEquals("\uD83E\uDDB8", method.invoke(fragment, "badge_c8"))
-            assertEquals("\uD83D\uDC51", method.invoke(fragment, "badge_c9"))
-            assertEquals("\uD83C\uDFC6", method.invoke(fragment, "badge_c10"))
+            assertEquals(CROWN_EMOJI, method.invoke(fragment, "badge_c9"))
+            assertEquals(TROPHY_EMOJI, method.invoke(fragment, "badge_c10"))
         }
     }
 
@@ -416,26 +429,26 @@ class ProfileFragmentTest {
         val scenario = launchFragmentInContainer<ProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("getBadgeEmoji", String::class.java)
-            assertEquals("\uD83C\uDF31", method.invoke(fragment, "a1"))
-            assertEquals("\uD83D\uDEB6", method.invoke(fragment, "a2"))
+            assertEquals(SEEDLING_EMOJI, method.invoke(fragment, "a1"))
+            assertEquals(WALKING_EMOJI, method.invoke(fragment, "a2"))
             assertEquals("♻️", method.invoke(fragment, "a3"))
             assertEquals("\uD83C\uDF33", method.invoke(fragment, "a4"))
             assertEquals("\uD83D\uDE8C", method.invoke(fragment, "a5"))
             assertEquals("\uD83C\uDF0D", method.invoke(fragment, "a6"))
             assertEquals("⚡", method.invoke(fragment, "a7"))
             assertEquals("\uD83E\uDDB8", method.invoke(fragment, "a8"))
-            assertEquals("\uD83D\uDC51", method.invoke(fragment, "a9"))
-            assertEquals("\uD83C\uDFC6", method.invoke(fragment, "a10"))
+            assertEquals(CROWN_EMOJI, method.invoke(fragment, "a9"))
+            assertEquals(TROPHY_EMOJI, method.invoke(fragment, "a10"))
             assertEquals("\uD83D\uDC8E", method.invoke(fragment, "a11"))
             assertEquals("\uD83D\uDEB4", method.invoke(fragment, "a12"))
-            assertEquals("\uD83D\uDEB6", method.invoke(fragment, "a13"))
+            assertEquals(WALKING_EMOJI, method.invoke(fragment, "a13"))
             assertEquals("\uD83D\uDE8D", method.invoke(fragment, "a14"))
             assertEquals("♻️", method.invoke(fragment, "a15"))
             assertEquals("\uD83E\uDD8B", method.invoke(fragment, "a16"))
             assertEquals("\uD83E\uDD1D", method.invoke(fragment, "a17"))
             assertEquals("\uD83D\uDC65", method.invoke(fragment, "a18"))
             assertEquals("\uD83C\uDFAB", method.invoke(fragment, "a19"))
-            assertEquals("\uD83C\uDFC6", method.invoke(fragment, "a20"))
+            assertEquals(TROPHY_EMOJI, method.invoke(fragment, "a20"))
         }
     }
 
@@ -459,7 +472,7 @@ class ProfileFragmentTest {
             assertEquals("\uD83C\uDF93", method.invoke(fragment, "hat_grad"))
             assertEquals("\uD83E\uDDF6", method.invoke(fragment, "hat_beanie"))
             assertEquals("\uD83D\uDCAA", method.invoke(fragment, "hat_headband"))
-            assertEquals("\uD83D\uDC51", method.invoke(fragment, "hat_crown"))
+            assertEquals(CROWN_EMOJI, method.invoke(fragment, "hat_crown"))
             assertEquals("\uD83E\uDD20", method.invoke(fragment, "hat_cowboy"))
             assertEquals("\uD83C\uDFA7", method.invoke(fragment, "hat_headphones"))
             assertEquals("⛑️", method.invoke(fragment, "hat_hardhat"))
@@ -491,7 +504,7 @@ class ProfileFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("getItemEmoji", String::class.java)
             assertEquals("\uD83D\uDC54", method.invoke(fragment, "body_white_shirt"))
-            assertEquals("\uD83D\uDC55", method.invoke(fragment, "shirt_nus"))
+            assertEquals(SHIRT_EMOJI, method.invoke(fragment, "shirt_nus"))
             assertEquals("\uD83D\uDCDA", method.invoke(fragment, "shirt_fass"))
             assertEquals("\uD83D\uDCBC", method.invoke(fragment, "shirt_business"))
             assertEquals("⚖️", method.invoke(fragment, "shirt_law"))
@@ -504,7 +517,7 @@ class ProfileFragmentTest {
             assertEquals("\uD83E\uDDE5", method.invoke(fragment, "body_hoodie"))
             assertEquals("\uD83E\uDD35", method.invoke(fragment, "body_suit"))
             assertEquals("\uD83D\uDC54", method.invoke(fragment, "body_scrubs"))
-            assertEquals("\uD83D\uDC55", method.invoke(fragment, "body_polo"))
+            assertEquals(SHIRT_EMOJI, method.invoke(fragment, "body_polo"))
         }
     }
 
@@ -513,7 +526,7 @@ class ProfileFragmentTest {
         val scenario = launchFragmentInContainer<ProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("getItemEmoji", String::class.java)
-            assertEquals("\uD83D\uDC55", method.invoke(fragment, "some_unknown_item"))
+            assertEquals(SHIRT_EMOJI, method.invoke(fragment, "some_unknown_item"))
         }
     }
 
@@ -724,7 +737,7 @@ class ProfileFragmentTest {
             @Suppress("UNCHECKED_CAST")
             val shopItems = getFieldValue(fragment, "shopItems") as MutableList<BadgeDto>
             // Only add badge items, no cloth items
-            shopItems.add(makeBadgeDto("badge_c1", "Eco Starter"))
+            shopItems.add(makeBadgeDto("badge_c1", ECO_STARTER))
             shopItems.add(makeBadgeDto("badge_c2", "Walker"))
 
             val method = getPrivateMethod("getShopItemsGrouped")
@@ -780,7 +793,7 @@ class ProfileFragmentTest {
             shopItems.add(makeClothDto("face_mask", "face", "Mask"))
             shopItems.add(makeClothDto("body_suit", "body", "Suit"))
             // Add a badge item - should NOT be counted
-            shopItems.add(makeBadgeDto("badge_c1", "Eco Starter"))
+            shopItems.add(makeBadgeDto("badge_c1", ECO_STARTER))
 
             val method = getPrivateMethod("updateClosetPreview")
             method.invoke(fragment)
@@ -797,7 +810,7 @@ class ProfileFragmentTest {
         scenario.onFragment { fragment ->
             @Suppress("UNCHECKED_CAST")
             val shopItems = getFieldValue(fragment, "shopItems") as MutableList<BadgeDto>
-            shopItems.add(makeBadgeDto("badge_c1", "Eco Starter"))
+            shopItems.add(makeBadgeDto("badge_c1", ECO_STARTER))
 
             val method = getPrivateMethod("updateClosetPreview")
             method.invoke(fragment)
@@ -847,7 +860,7 @@ class ProfileFragmentTest {
         val scenario = launchFragmentInContainer<ProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             val preview = fragment.requireView().findViewById<TextView>(R.id.text_badge_preview)
-            assertEquals("\uD83C\uDFC6", preview.text.toString())
+            assertEquals(TROPHY_EMOJI, preview.text.toString())
         }
     }
 
@@ -899,7 +912,7 @@ class ProfileFragmentTest {
             method.invoke(fragment)
 
             val preview = fragment.requireView().findViewById<TextView>(R.id.text_badge_preview)
-            assertEquals("\uD83C\uDF31", preview.text.toString()) // badge_c1 -> 🌱
+            assertEquals(SEEDLING_EMOJI, preview.text.toString()) // badge_c1 -> 🌱
         }
     }
 
@@ -915,7 +928,7 @@ class ProfileFragmentTest {
             method.invoke(fragment)
 
             val preview = fragment.requireView().findViewById<TextView>(R.id.text_badge_preview)
-            assertEquals("\uD83C\uDFC6", preview.text.toString()) // 🏆
+            assertEquals(TROPHY_EMOJI, preview.text.toString()) // 🏆
         }
     }
 
@@ -1084,7 +1097,7 @@ class ProfileFragmentTest {
         scenario.onFragment { fragment ->
             @Suppress("UNCHECKED_CAST")
             val shopItems = getFieldValue(fragment, "shopItems") as MutableList<BadgeDto>
-            shopItems.add(makeBadgeDto("badge_c1", "Eco Starter"))
+            shopItems.add(makeBadgeDto("badge_c1", ECO_STARTER))
 
             @Suppress("UNCHECKED_CAST")
             val userItems = getFieldValue(fragment, "userItems") as MutableList<UserBadgeDto>
@@ -1322,8 +1335,8 @@ class ProfileFragmentTest {
         scenario.onFragment { fragment ->
             val method = getPrivateMethod("equipFacultyOutfit", FacultyData::class.java)
             val faculty = FacultyData(
-                id = "soc", name = "School of Computing", color = "#3B82F6",
-                slogan = "Code the Future",
+                id = "soc", name = SOC_NAME, color = SOC_COLOR,
+                slogan = SOC_SLOGAN,
                 outfit = Outfit(head = "hat_cap", face = "none", body = "shirt_hoodie")
             )
             method.invoke(fragment, faculty)
@@ -1369,8 +1382,8 @@ class ProfileFragmentTest {
             ownedFaculties.add("soc")
 
             val faculty = FacultyData(
-                id = "soc", name = "School of Computing", color = "#3B82F6",
-                slogan = "Code the Future",
+                id = "soc", name = SOC_NAME, color = SOC_COLOR,
+                slogan = SOC_SLOGAN,
                 outfit = Outfit(head = "hat_cap", face = "none", body = "shirt_hoodie")
             )
 
@@ -1398,8 +1411,8 @@ class ProfileFragmentTest {
             inventory.add("shirt_hoodie")
 
             val faculty = FacultyData(
-                id = "soc", name = "School of Computing", color = "#3B82F6",
-                slogan = "Code the Future",
+                id = "soc", name = SOC_NAME, color = SOC_COLOR,
+                slogan = SOC_SLOGAN,
                 outfit = Outfit(head = "hat_cap", face = "none", body = "shirt_hoodie")
             )
 
@@ -1429,8 +1442,8 @@ class ProfileFragmentTest {
             // shirt_hoodie is missing
 
             val faculty = FacultyData(
-                id = "soc", name = "School of Computing", color = "#3B82F6",
-                slogan = "Code the Future",
+                id = "soc", name = SOC_NAME, color = SOC_COLOR,
+                slogan = SOC_SLOGAN,
                 outfit = Outfit(head = "hat_cap", face = "none", body = "shirt_hoodie")
             )
 
@@ -1495,7 +1508,7 @@ class ProfileFragmentTest {
         scenario.onFragment { fragment ->
             @Suppress("UNCHECKED_CAST")
             val shopItems = getFieldValue(fragment, "shopItems") as MutableList<BadgeDto>
-            shopItems.add(makeBadgeDto("badge_c1", "Eco Starter"))
+            shopItems.add(makeBadgeDto("badge_c1", ECO_STARTER))
 
             val method = getPrivateMethod(
                 "handleBadgeClick",
@@ -1521,7 +1534,7 @@ class ProfileFragmentTest {
             outfitMap["badge"] = "badge_c1"
 
             val achievement = Achievement(
-                id = "badge_c1", name = "Eco Starter",
+                id = "badge_c1", name = ECO_STARTER,
                 description = "Begin your eco journey",
                 unlocked = true, howToUnlock = "Start using eco transport"
             )
@@ -1679,7 +1692,7 @@ class ProfileFragmentTest {
                 Function0::class.java
             )
             val onConfirm: () -> Unit = { /* no-op */ }
-            method.invoke(fragment, "\uD83D\uDC55", "Purchase Item", "Buy this item?", onConfirm)
+            method.invoke(fragment, SHIRT_EMOJI, "Purchase Item", "Buy this item?", onConfirm)
         }
     }
 
@@ -1741,7 +1754,7 @@ class ProfileFragmentTest {
 
             @Suppress("UNCHECKED_CAST")
             val shopItems = getFieldValue(fragment, "shopItems") as MutableList<BadgeDto>
-            shopItems.add(makeBadgeDto("badge_c1", "Eco Starter"))
+            shopItems.add(makeBadgeDto("badge_c1", ECO_STARTER))
 
             val method = getPrivateMethod("showBadgesDialog")
             method.invoke(fragment)
@@ -1758,7 +1771,7 @@ class ProfileFragmentTest {
 
             @Suppress("UNCHECKED_CAST")
             val shopItems = getFieldValue(fragment, "shopItems") as MutableList<BadgeDto>
-            shopItems.add(makeBadgeDto("badge_c1", "Eco Starter"))
+            shopItems.add(makeBadgeDto("badge_c1", ECO_STARTER))
             shopItems.add(makeBadgeDto("badge_c2", "Walker"))
 
             @Suppress("UNCHECKED_CAST")
@@ -1778,7 +1791,7 @@ class ProfileFragmentTest {
         scenario.onFragment { fragment ->
             setFieldValue(fragment, "currentPoints", 10)
 
-            val badgeDto = makeBadgeDto("badge_c1", "Eco Starter", cost = 200)
+            val badgeDto = makeBadgeDto("badge_c1", ECO_STARTER, cost = 200)
             val detailDialog = android.app.Dialog(fragment.requireContext())
 
             val method = getPrivateMethod(
@@ -1833,7 +1846,7 @@ class ProfileFragmentTest {
             val outfit = getFieldValue(fragment, "currentOutfit") as MutableMap<String, String>
             outfit["head"] = "hat_cap"
 
-            setFieldValue(fragment, "currentUserId", "test-user")
+            setFieldValue(fragment, "currentUserId", TEST_USER)
 
             val item = ShopItem(
                 id = "hat_cap", name = "Cap", type = "head",
@@ -1857,7 +1870,7 @@ class ProfileFragmentTest {
             val outfit = getFieldValue(fragment, "currentOutfit") as MutableMap<String, String>
             outfit["head"] = "none"
 
-            setFieldValue(fragment, "currentUserId", "test-user")
+            setFieldValue(fragment, "currentUserId", TEST_USER)
 
             val item = ShopItem(
                 id = "hat_cap", name = "Cap", type = "head",
@@ -1894,7 +1907,7 @@ class ProfileFragmentTest {
         val scenario = launchFragmentInContainer<ProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             setFieldValue(fragment, "currentPoints", 10)
-            setFieldValue(fragment, "currentUserId", "test-user")
+            setFieldValue(fragment, "currentUserId", TEST_USER)
 
             val item = ShopItem(
                 id = "hat_crown", name = "Crown", type = "head",
@@ -1914,7 +1927,7 @@ class ProfileFragmentTest {
         val scenario = launchFragmentInContainer<ProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
             setFieldValue(fragment, "currentPoints", 1000)
-            setFieldValue(fragment, "currentUserId", "test-user")
+            setFieldValue(fragment, "currentUserId", TEST_USER)
 
             val item = ShopItem(
                 id = "hat_cap", name = "Cap", type = "head",
@@ -1943,7 +1956,7 @@ class ProfileFragmentTest {
     fun `loadBadgesAndCloths proceeds when userId is set`() {
         val scenario = launchFragmentInContainer<ProfileFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
-            setFieldValue(fragment, "currentUserId", "test-user")
+            setFieldValue(fragment, "currentUserId", TEST_USER)
             val method = getPrivateMethod("loadBadgesAndCloths")
             // Will proceed to async calls which may fail, but won't crash
             method.invoke(fragment)

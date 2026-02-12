@@ -19,6 +19,11 @@ import androidx.test.core.app.ApplicationProvider
 @Config(sdk = [33])
 class ShopGoodsDetailFragmentTest {
 
+    companion object {
+        private const val TEST_ITEM = "Test Item"
+        private const val TEST_GOODS_ID = "test-goods-id"
+    }
+
     @Before
     fun setup() {
         TokenManager.init(ApplicationProvider.getApplicationContext())
@@ -143,8 +148,8 @@ class ShopGoodsDetailFragmentTest {
     fun `goodsName can be set`() {
         val scenario = launchFragmentInContainer<ShopGoodsDetailFragment>(themeResId = R.style.Theme_EcoGo)
         scenario.onFragment { fragment ->
-            setField(fragment, "goodsName", "Test Item")
-            assertEquals("Test Item", getField(fragment, "goodsName"))
+            setField(fragment, "goodsName", TEST_ITEM)
+            assertEquals(TEST_ITEM, getField(fragment, "goodsName"))
         }
     }
 
@@ -202,7 +207,7 @@ class ShopGoodsDetailFragmentTest {
         scenario.onFragment { fragment ->
             setField(fragment, "goodsActive", true)
             setField(fragment, "goodsStock", 5)
-            setField(fragment, "goodsName", "Test Item")
+            setField(fragment, "goodsName", TEST_ITEM)
             setField(fragment, "goodsPoints", 100)
             invokePrivate(fragment, "confirmRedeem")
         }
@@ -260,7 +265,7 @@ class ShopGoodsDetailFragmentTest {
 
     @Test
     fun `fragment launched with goodsId arg inflates successfully`() {
-        val args = bundleOf("goodsId" to "test-goods-id")
+        val args = bundleOf("goodsId" to TEST_GOODS_ID)
         val scenario = launchFragmentInContainer<ShopGoodsDetailFragment>(
             fragmentArgs = args,
             themeResId = R.style.Theme_EcoGo
@@ -270,7 +275,7 @@ class ShopGoodsDetailFragmentTest {
 
     @Test
     fun `fragment launched with args has correct view visibility`() {
-        val args = bundleOf("goodsId" to "test-goods-id")
+        val args = bundleOf("goodsId" to TEST_GOODS_ID)
         val scenario = launchFragmentInContainer<ShopGoodsDetailFragment>(
             fragmentArgs = args,
             themeResId = R.style.Theme_EcoGo
@@ -286,7 +291,7 @@ class ShopGoodsDetailFragmentTest {
 
     @Test
     fun `performRedeem with valid setup does not crash`() {
-        val args = bundleOf("goodsId" to "test-goods-id")
+        val args = bundleOf("goodsId" to TEST_GOODS_ID)
         val scenario = launchFragmentInContainer<ShopGoodsDetailFragment>(
             fragmentArgs = args,
             themeResId = R.style.Theme_EcoGo
@@ -302,7 +307,7 @@ class ShopGoodsDetailFragmentTest {
 
     @Test
     fun `performRedeem disables redeem button`() {
-        val args = bundleOf("goodsId" to "test-goods-id")
+        val args = bundleOf("goodsId" to TEST_GOODS_ID)
         val scenario = launchFragmentInContainer<ShopGoodsDetailFragment>(
             fragmentArgs = args,
             themeResId = R.style.Theme_EcoGo
