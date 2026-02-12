@@ -3,7 +3,7 @@ package com.example.EcoGo.utils;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +17,10 @@ public class JwtUtils {
 
     // 在生产环境中，这个密钥应该存储在环境变量或配置文件中
     // 必须足够长以满足 HS256 算法要求
-    private static final Key SECRET_KEY = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    // FIX: Use a static key to ensure tokens persist across restarts/instances
+    private static final String SECRET_STRING = "EcoGoProjectSecretKeyForJwtTokenGeneration2026";
+    private static final Key SECRET_KEY = Keys
+            .hmacShaKeyFor(SECRET_STRING.getBytes(java.nio.charset.StandardCharsets.UTF_8));
 
     // Token 有效期：7天
     private static final long EXPIRATION_TIME = 7 * 24 * 60 * 60 * 1000L;
