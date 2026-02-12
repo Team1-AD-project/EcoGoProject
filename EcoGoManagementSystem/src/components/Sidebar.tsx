@@ -8,7 +8,6 @@ import {
   BarChart3,
   Megaphone,
   Trophy,
-  MessageSquare,
   LogOut,
   Activity,
   Target
@@ -73,11 +72,6 @@ export function Sidebar({ selectedModule, onModuleSelect, onLogout }: SidebarPro
       id: 'leaderboard-management',
       label: 'Leaderboard',
       icon: <Trophy className="size-5" />
-    },
-    {
-      id: 'chat-management',
-      label: 'Chat Management',
-      icon: <MessageSquare className="size-5" />
     },
     {
       id: 'activity-management',

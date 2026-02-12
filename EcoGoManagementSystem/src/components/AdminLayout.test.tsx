@@ -64,9 +64,6 @@ vi.mock('@/components/modules/LeaderboardManagement', () => ({
   LeaderboardManagement: () => <div>Leaderboard Management Module</div>,
 }));
 
-vi.mock('@/components/modules/ChatManagement', () => ({
-  ChatManagement: () => <div>Chat Management Module</div>,
-}));
 
 vi.mock('@/components/modules/ActivityManagement', () => ({
   ActivityManagement: () => <div>Activity Management Module</div>,

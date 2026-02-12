@@ -10,7 +10,7 @@ import { CollectiblesManagement } from '@/components/modules/CollectiblesManagem
 import { AnalyticsManagement } from '@/components/modules/AnalyticsManagement';
 import { AdManagement } from '@/components/modules/AdManagement';
 import { LeaderboardManagement } from '@/components/modules/LeaderboardManagement';
-import { ChatManagement } from '@/components/modules/ChatManagement';
+
 import { ActivityManagement } from '@/components/modules/ActivityManagement';
 import { ChallengeManagement } from '@/components/modules/ChallengeManagement';
 
@@ -48,8 +48,7 @@ export function AdminLayout() {
         return <AdManagement />;
       case 'leaderboard-management':
         return <LeaderboardManagement />;
-      case 'chat-management':
-        return <ChatManagement />;
+
       case 'activity-management':
         return <ActivityManagement />;
       case 'challenge-management':
