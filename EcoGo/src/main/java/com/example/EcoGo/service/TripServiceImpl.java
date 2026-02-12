@@ -133,7 +133,8 @@ public class TripServiceImpl implements TripService {
     }
 
     /**
-     * Convert segments, set them into trip, and compute carbonSaved (kg, 2 decimals).
+     * Convert segments, set them into trip, and compute carbonSaved (kg, 2
+     * decimals).
      */
     private double calculateAndSetSegmentsAndCarbon(Trip trip, TripDto.CompleteTripRequest request) {
         double carbonSaved = calculateCarbonSavedFromSegments(request);
@@ -150,8 +151,10 @@ public class TripServiceImpl implements TripService {
     }
 
     /**
-     * carbonSaved = Σ((carCarbon - modeCarbonFactor) × subDistance) for each segment
-     * Convert g -> kg-like display unit (/100 in your original code) and round to 2 decimals.
+     * carbonSaved = Σ((carCarbon - modeCarbonFactor) × subDistance) for each
+     * segment
+     * Convert g -> kg-like display unit (/100 in your original code) and round to 2
+     * decimals.
      */
     private double calculateCarbonSavedFromSegments(TripDto.CompleteTripRequest request) {
         double carCarbon = 100.0; // g/km benchmark
@@ -174,7 +177,8 @@ public class TripServiceImpl implements TripService {
 
     private double calculateSavingPerKm(TripDto.TransportSegmentDto seg, double carCarbon) {
         TransportMode mode = transportModeRepository.findByMode(seg.mode).orElse(null);
-        if (mode == null) return 0.0;
+        if (mode == null)
+            return 0.0;
         return carCarbon - mode.getCarbonFactor();
     }
 
@@ -183,7 +187,8 @@ public class TripServiceImpl implements TripService {
     }
 
     private void setPolylinePointsIfPresent(Trip trip, TripDto.CompleteTripRequest request) {
-        if (request.polylinePoints == null) return;
+        if (request.polylinePoints == null)
+            return;
 
         List<Trip.GeoPoint> points = request.polylinePoints.stream()
                 .map(p -> new Trip.GeoPoint(p.lng, p.lat))
@@ -192,7 +197,8 @@ public class TripServiceImpl implements TripService {
     }
 
     /**
-     * Points = round(carbonSaved * 100), VIP double if switch enabled, and then settle().
+     * Points = round(carbonSaved * 100), VIP double if switch enabled, and then
+     * settle().
      * Returns pointsGained.
      */
     private long settleTripPoints(String userId, Trip trip, TripDto.CompleteTripRequest request, double carbonSaved) {
@@ -209,8 +215,7 @@ public class TripServiceImpl implements TripService {
         String description = pointsService.formatTripDescription(
                 trip.getStartLocation() != null ? trip.getStartLocation().getPlaceName() : null,
                 request.endPlaceName,
-                request.distance
-        );
+                request.distance);
 
         PointsDto.SettleResult settleResult = new PointsDto.SettleResult();
         settleResult.points = pointsGained;
@@ -223,12 +228,13 @@ public class TripServiceImpl implements TripService {
     }
 
     private void updateUserTotalCarbonIfNeeded(String userId, double carbonSaved) {
-        if (carbonSaved <= 0) return;
+        if (carbonSaved <= 0)
+            return;
 
         User user = userRepository.findByUserid(userId)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        double newTotal = user.getTotalCarbon() + carbonSaved;
+        double newTotal = user.getTotalCarbon() + carbonSaved / 10.0;
         user.setTotalCarbon(round2(newTotal));
         userRepository.save(user);
     }
