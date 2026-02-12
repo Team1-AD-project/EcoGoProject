@@ -10,7 +10,7 @@ import {
     deleteVoucher,
     fetchOrders,
     fetchCategories,
-    CreateRewardRequest
+    type CreateRewardRequest
 } from './rewardService';
 import { api } from './auth';
 
