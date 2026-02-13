@@ -73,7 +73,7 @@ data class UserBadgeDto(
     @SerializedName("unlockedAt")
     val unlockedAt: Date?,
 
-    @SerializedName("isDisplay")
+    @SerializedName(value = "isDisplay", alternate = ["display"])
     val isDisplay: Boolean,
 
     @SerializedName("createdAt")

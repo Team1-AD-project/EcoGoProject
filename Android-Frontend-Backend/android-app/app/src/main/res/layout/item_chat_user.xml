@@ -1,20 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="8dp">
+    android:paddingStart="48dp"
+    android:paddingTop="4dp"
+    android:paddingEnd="10dp"
+    android:paddingBottom="4dp">
 
-    <TextView
-        android:id="@+id/text_message"
+    <com.google.android.material.card.MaterialCardView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="end"
-        android:background="@drawable/chat_bubble_user"
-        android:elevation="1dp"
-        android:lineSpacingMultiplier="1.5"
-        android:maxWidth="280dp"
-        android:padding="12dp"
-        android:textColor="@color/text_white"
-        android:textSize="14sp" />
+        app:cardBackgroundColor="@color/primary"
+        app:cardCornerRadius="18dp"
+        app:cardElevation="2dp"
+        app:strokeWidth="0dp">
 
+        <TextView
+            android:id="@+id/text_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:lineSpacingMultiplier="1.4"
+            android:maxWidth="260dp"
+            android:paddingStart="14dp"
+            android:paddingTop="10dp"
+            android:paddingEnd="14dp"
+            android:paddingBottom="10dp"
+            android:textColor="@color/text_white"
+            android:textSize="14sp" />
+    </com.google.android.material.card.MaterialCardView>
 </FrameLayout>

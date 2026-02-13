@@ -5,74 +5,158 @@
     android:layout_height="match_parent"
     android:background="@color/background">
 
-    <TextView
-        android:id="@+id/text_title"
-        android:layout_width="wrap_content"
+    <!-- ==================== HEADER ==================== -->
+    <LinearLayout
+        android:id="@+id/header"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/chat_title"
-        android:textColor="@color/text_primary"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:background="@drawable/bg_monthly_header"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="20dp"
+        android:paddingTop="16dp"
+        android:paddingEnd="20dp"
+        android:paddingBottom="18dp"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
 
+        <!-- AI Avatar -->
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="42dp"
+            android:layout_height="42dp"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardCornerRadius="21dp"
+            app:cardElevation="2dp"
+            app:strokeWidth="0dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:text="🦁"
+                android:textSize="22sp" />
+        </com.google.android.material.card.MaterialCardView>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/text_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/chat_title"
+                android:textColor="@color/text_white"
+                android:textSize="18sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:alpha="0.8"
+                android:text="Your EcoGo campus assistant"
+                android:textColor="@color/text_white"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <!-- Online indicator -->
+        <View
+            android:layout_width="8dp"
+            android:layout_height="8dp"
+            android:layout_marginEnd="6dp"
+            android:background="@drawable/circle_shape"
+            android:backgroundTint="#6EE7B7" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:alpha="0.85"
+            android:text="Online"
+            android:textColor="@color/text_white"
+            android:textSize="12sp" />
+    </LinearLayout>
+
+    <!-- ==================== CHAT MESSAGES ==================== -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycler_chat"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_margin="8dp"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:paddingStart="4dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="4dp"
+        android:paddingBottom="4dp"
         app:layout_constraintBottom_toTopOf="@id/input_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_title" />
+        app:layout_constraintTop_toBottomOf="@id/header" />
 
+    <!-- ==================== INPUT BAR ==================== -->
     <LinearLayout
         android:id="@+id/input_container"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:background="@color/surface"
-        android:elevation="4dp"
+        android:elevation="8dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="8dp"
+        android:paddingStart="12dp"
+        android:paddingTop="10dp"
+        android:paddingEnd="12dp"
+        android:paddingBottom="10dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
 
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/edit_message"
+        <com.google.android.material.card.MaterialCardView
             android:layout_width="0dp"
-            android:layout_height="44dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:background="@drawable/card_background"
-            android:hint="@string/chat_hint"
-            android:inputType="text"
-            android:imeOptions="actionSend"
-            android:maxLines="1"
-            android:paddingStart="12dp"
-            android:paddingEnd="12dp"
-            android:textColor="@color/text_primary"
-            android:textSize="14sp" />
+            app:cardBackgroundColor="#F1F5F9"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="0dp"
+            app:strokeWidth="0dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_message"
+                android:layout_width="match_parent"
+                android:layout_height="46dp"
+                android:background="@android:color/transparent"
+                android:hint="@string/chat_hint"
+                android:imeOptions="actionSend"
+                android:inputType="text"
+                android:maxLines="1"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary"
+                android:textSize="14sp" />
+        </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/button_send"
             style="@style/Widget.MaterialComponents.Button.Icon"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:layout_marginStart="8dp"
+            android:layout_width="46dp"
+            android:layout_height="46dp"
+            android:layout_marginStart="10dp"
             android:insetLeft="0dp"
             android:insetTop="0dp"
             android:insetRight="0dp"
             android:insetBottom="0dp"
             android:text=""
             app:backgroundTint="@color/primary"
-            app:cornerRadius="22dp"
+            app:cornerRadius="23dp"
             app:icon="@drawable/ic_send"
             app:iconGravity="textStart"
             app:iconPadding="0dp"
             app:iconSize="20dp"
             app:iconTint="@color/text_white" />
-
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

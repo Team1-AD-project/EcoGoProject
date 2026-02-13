@@ -1,5 +1,6 @@
 package com.example.EcoGo.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -33,6 +34,7 @@ public class UserBadge {
     private Date unlockedAt; // 购买时间
 
     @Field("is_display")
+    @JsonProperty("isDisplay")
     private boolean isDisplay; // ✅ 是否佩戴 (点击显示)
 
     @Field("created_at")

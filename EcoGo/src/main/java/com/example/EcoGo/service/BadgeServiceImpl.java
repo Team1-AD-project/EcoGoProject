@@ -99,25 +99,25 @@ public class BadgeServiceImpl implements BadgeService {
         }
 
         // ================= 同类互斥核心逻辑 =================
+        // 按 subCategory 做互斥：head/face/body/rank 各只能装备一件
 
-        // A. 查当前徽章的分类
         Badge targetBadgeDef = badgeRepository.findByBadgeId(badgeId)
                 .orElseThrow(() -> new RuntimeException("徽章定义不存在"));
 
-        String category = targetBadgeDef.getCategory(); // ✅ 现在这里不会报错了
+        String subCategory = targetBadgeDef.getSubCategory();
 
-        if (category != null && !category.isEmpty()) {
-            // B. 找出该分类下所有的徽章ID (比如所有 RANK 类的)
-            List<Badge> sameCategoryBadges = badgeRepository.findByCategory(category);
-            List<String> sameCategoryBadgeIds = sameCategoryBadges.stream()
+        if (subCategory != null && !subCategory.isEmpty()) {
+            // A. 找出同 subCategory 下所有的徽章ID (比如所有 head 类的)
+            List<Badge> sameSubCategoryBadges = badgeRepository.findBySubCategory(subCategory);
+            List<String> sameSubCategoryBadgeIds = sameSubCategoryBadges.stream()
                     .map(Badge::getBadgeId)
                     .toList();
 
-            // C. 找出用户身上正在戴着的、且属于该分类的旧徽章
+            // B. 找出用户身上正在戴着的、且属于同 subCategory 的旧徽章
             List<UserBadge> conflictingBadges = userBadgeRepository
-                    .findByUserIdAndIsDisplayTrueAndBadgeIdIn(userId, sameCategoryBadgeIds);
+                    .findByUserIdAndIsDisplayTrueAndBadgeIdIn(userId, sameSubCategoryBadgeIds);
 
-            // D. 统统卸下
+            // C. 统统卸下
             for (UserBadge conflict : conflictingBadges) {
                 if (!conflict.getBadgeId().equals(badgeId)) {
                     conflict.setDisplay(false);

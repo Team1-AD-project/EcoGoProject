@@ -1,5 +1,6 @@
 package com.example.EcoGo.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -41,6 +42,7 @@ public class Badge {
     private BadgeIcon icon;
 
     
+    @JsonProperty("isActive")
     private Boolean isActive;
 
    
