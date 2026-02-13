@@ -70,6 +70,9 @@ class EditProfileFragment : Fragment() {
         setupFacultyDropdown()
         setupTransportList()
         setupActions()
+
+        // First load local cache as fallback, then overlay with API data
+        loadLocalFallback()
         loadProfile()
     }
 
@@ -97,8 +100,77 @@ class EditProfileFragment : Fragment() {
         }
     }
 
+    /**
+     * Load local fallback data from SharedPreferences.
+     * Tries both "ecogo_profile" and "EcoGoPrefs" (registration wizard) as sources.
+     */
+    private fun loadLocalFallback() {
+        // Try ecogo_profile first (saved from previous edits)
+        val editPrefs = requireContext().getSharedPreferences("ecogo_profile", android.content.Context.MODE_PRIVATE)
+        // Then try EcoGoPrefs (saved during registration wizard)
+        val regPrefs = requireContext().getSharedPreferences("EcoGoPrefs", android.content.Context.MODE_PRIVATE)
+
+        // Nickname: from registration prefs
+        val nickname = regPrefs.getString("username", null)
+        if (!nickname.isNullOrEmpty()) {
+            binding.editNickname.setText(nickname)
+        }
+
+        // Faculty: from registration prefs
+        val faculty = regPrefs.getString("faculty", null)
+        if (!faculty.isNullOrEmpty()) {
+            binding.editFaculty.setText(faculty, false)
+        }
+
+        // Campus info: try edit prefs first, then registration prefs
+        val dormitory = editPrefs.getString("dormitoryOrResidence", null)
+            ?: regPrefs.getString("dormitory", null)
+        val building = editPrefs.getString("mainTeachingBuilding", null)
+            ?: regPrefs.getString("teaching_building", null)
+        val studySpot = editPrefs.getString("favoriteStudySpot", null)
+            ?: regPrefs.getString("study_spot", null)
+
+        if (!dormitory.isNullOrEmpty()) binding.editDormitory.setText(dormitory)
+        if (!building.isNullOrEmpty()) binding.editTeachingBuilding.setText(building)
+        if (!studySpot.isNullOrEmpty()) binding.editStudySpot.setText(studySpot)
+
+        // Weekly goals
+        val weeklyGoals = editPrefs.getInt("weeklyGoals", -1).let {
+            if (it > 0) it else regPrefs.getInt("weekly_goal", 20)
+        }
+        binding.editWeeklyGoals.setText(weeklyGoals.toString())
+
+        // Transport prefs from registration
+        val transportSet = regPrefs.getStringSet("transport_prefs", null)
+        if (!transportSet.isNullOrEmpty()) {
+            selectedTransportModes.addAll(transportSet)
+        }
+
+        // Notification preferences
+        binding.switchNewChallenges.isChecked = editPrefs.getBoolean("newChallenges",
+            regPrefs.getBoolean("notify_challenges", true))
+        binding.switchActivityReminders.isChecked = editPrefs.getBoolean("activityReminders",
+            regPrefs.getBoolean("notify_reminders", true))
+        binding.switchFriendActivity.isChecked = editPrefs.getBoolean("friendActivity",
+            regPrefs.getBoolean("notify_friends", false))
+
+        Log.d(TAG, "Local fallback loaded: nickname=$nickname, faculty=$faculty")
+    }
+
     private fun loadProfile() {
-        val userId = com.ecogo.auth.TokenManager.getUserId() ?: return
+        val userId = TokenManager.getUserId()
+        if (userId == null) {
+            Log.w(TAG, "UserId is null, cannot load profile from API")
+            Toast.makeText(context, "Please log in to load profile data", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        Log.d(TAG, "Loading profile from API for userId: $userId")
+
+        // Show loading state
+        binding.btnSaveBottom.isEnabled = false
+        binding.btnSaveBottom.text = "Loading..."
+
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 // Load Transport Modes first
@@ -111,14 +183,28 @@ class EditProfileFragment : Fragment() {
                 if (profile != null) {
                     cachedProfile = profile
                     populateFields(profile, availableModes)
-                    Log.d(TAG, "Profile loaded: ${profile.userInfo.nickname}")
+                    Log.d(TAG, "Profile loaded from API: ${profile.userInfo.nickname}")
                 } else {
-                    Log.w(TAG, "Failed to load profile, using defaults")
-                    Toast.makeText(context, "Could not load profile data", Toast.LENGTH_SHORT).show()
+                    val error = result.exceptionOrNull()
+                    Log.w(TAG, "Failed to load profile from API: ${error?.message}")
+                    Log.w(TAG, "Using local fallback data. Fields may be incomplete.")
+                    Toast.makeText(context, "Could not load profile from server, showing local data", Toast.LENGTH_LONG).show()
+
+                    // Still setup transport modes adapter with local data
+                    setupTransportAdapter(availableModes)
                 }
             } catch (e: Exception) {
                 Log.e(TAG, "Error loading profile: ${e.message}", e)
-                Toast.makeText(context, "Error loading profile", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Network error: ${e.message}", Toast.LENGTH_LONG).show()
+
+                // Setup transport adapter with fallback
+                val fallbackModes = listOf("walk", "bike", "bus", "subway", "car", "electric_bike")
+                setupTransportAdapter(fallbackModes)
+            } finally {
+                if (_binding != null) {
+                    binding.btnSaveBottom.isEnabled = true
+                    binding.btnSaveBottom.text = getString(R.string.edit_profile_save_changes)
+                }
             }
         }
     }
@@ -127,31 +213,35 @@ class EditProfileFragment : Fragment() {
         val userInfo = profile.userInfo
         val prefs = userInfo.preferences
 
-        // Basic info
+        // Basic info — overwrite local fallback with API data
         binding.editNickname.setText(userInfo.nickname)
         binding.editFaculty.setText(userInfo.faculty ?: "", false)
 
-        // Campus info
-        loadLocalPreferences()
-        binding.editDormitory.setText(prefs?.dormitoryOrResidence ?: "")
-        binding.editTeachingBuilding.setText(prefs?.mainTeachingBuilding ?: "")
-        binding.editStudySpot.setText(prefs?.favoriteStudySpot ?: "")
+        // Campus info — only overwrite if API has non-null values
+        if (!prefs?.dormitoryOrResidence.isNullOrEmpty()) {
+            binding.editDormitory.setText(prefs?.dormitoryOrResidence ?: "")
+        }
+        if (!prefs?.mainTeachingBuilding.isNullOrEmpty()) {
+            binding.editTeachingBuilding.setText(prefs?.mainTeachingBuilding ?: "")
+        }
+        if (!prefs?.favoriteStudySpot.isNullOrEmpty()) {
+            binding.editStudySpot.setText(prefs?.favoriteStudySpot ?: "")
+        }
         
-        // Weekly goal (default to 20 trips if not set)
+        // Weekly goal
         val goal = prefs?.weeklyGoals ?: 20
-        binding.editWeeklyGoals.setText(goal.toString())
+        if (goal > 0) {
+            binding.editWeeklyGoals.setText(goal.toString())
+        }
 
-        // Transport preferences
-        selectedTransportModes.clear()
+        // Transport preferences — merge API data with local
         prefs?.preferredTransport?.let { transports ->
+            selectedTransportModes.clear()
             selectedTransportModes.addAll(transports)
         }
         
         // Setup RecyclerView Adapter
-        val adapter = com.ecogo.ui.adapters.TransportModeAdapter(availableModes, selectedTransportModes) { selected ->
-            // Update local set just in case, though adapter modifies it directly
-        }
-        binding.recyclerTransportModes.adapter = adapter
+        setupTransportAdapter(availableModes)
 
         // Notification preferences
         binding.switchNewChallenges.isChecked = prefs?.newChallenges ?: true
@@ -159,24 +249,14 @@ class EditProfileFragment : Fragment() {
         binding.switchFriendActivity.isChecked = prefs?.friendActivity ?: false
     }
 
-    // Keep local preferences loading method (fallback when API has no data)
-    private fun loadLocalPreferences() {
-        val prefs = requireContext().getSharedPreferences("ecogo_profile", android.content.Context.MODE_PRIVATE)
-        binding.editDormitory.setText(prefs.getString("dormitoryOrResidence", "") ?: "")
-        binding.editTeachingBuilding.setText(prefs.getString("mainTeachingBuilding", "") ?: "")
-        binding.editStudySpot.setText(prefs.getString("favoriteStudySpot", "") ?: "")
-    }
-
-    // Keep local preference getter method (for fallback)
-    private fun getLocalPref(key: String, default: Boolean): Boolean {
-        val prefs = requireContext().getSharedPreferences("ecogo_profile", android.content.Context.MODE_PRIVATE)
-        return prefs.getBoolean(key, default)
-    }
-
-    // Keep local int preference getter method (fallback for weeklyGoals)
-    private fun getLocalPrefInt(key: String, default: Int): Int {
-        val prefs = requireContext().getSharedPreferences("ecogo_profile", android.content.Context.MODE_PRIVATE)
-        return prefs.getInt(key, default)
+    /**
+     * Setup transport mode RecyclerView adapter
+     */
+    private fun setupTransportAdapter(availableModes: List<String>) {
+        val adapter = com.ecogo.ui.adapters.TransportModeAdapter(availableModes, selectedTransportModes) { _ ->
+            // Transport selection updated via the shared set
+        }
+        binding.recyclerTransportModes.adapter = adapter
     }
 
     private fun saveProfile() {
@@ -237,6 +317,8 @@ class EditProfileFragment : Fragment() {
                 if (result.isSuccess) {
                     // Save to local SharedPreferences for immediate access
                     saveLocalPreferences(
+                        nickname = nickname,
+                        faculty = faculty ?: "",
                         dormitory = dormitory ?: "",
                         teachingBuilding = teachingBuilding ?: "",
                         studySpot = studySpot ?: "",
@@ -258,13 +340,20 @@ class EditProfileFragment : Fragment() {
                 Log.e(TAG, "Error saving profile: ${e.message}", e)
                 Toast.makeText(context, getString(R.string.edit_profile_save_error), Toast.LENGTH_SHORT).show()
             } finally {
-                binding.btnSaveBottom.isEnabled = true
-                binding.btnSaveBottom.text = getString(R.string.edit_profile_save_changes)
+                if (_binding != null) {
+                    binding.btnSaveBottom.isEnabled = true
+                    binding.btnSaveBottom.text = getString(R.string.edit_profile_save_changes)
+                }
             }
         }
     }
 
+    /**
+     * Save to BOTH SharedPreferences stores for consistency
+     */
     private fun saveLocalPreferences(
+        nickname: String,
+        faculty: String,
         dormitory: String,
         teachingBuilding: String,
         studySpot: String,
@@ -273,6 +362,7 @@ class EditProfileFragment : Fragment() {
         activityReminders: Boolean,
         friendActivity: Boolean
     ) {
+        // Save to ecogo_profile (for Edit Profile fallback)
         requireContext().getSharedPreferences("ecogo_profile", android.content.Context.MODE_PRIVATE)
             .edit()
             .putString("dormitoryOrResidence", dormitory)
@@ -283,6 +373,22 @@ class EditProfileFragment : Fragment() {
             .putBoolean("activityReminders", activityReminders)
             .putBoolean("friendActivity", friendActivity)
             .apply()
+
+        // Also update EcoGoPrefs (used by registration wizard and other fragments)
+        requireContext().getSharedPreferences("EcoGoPrefs", android.content.Context.MODE_PRIVATE)
+            .edit()
+            .putString("username", nickname)
+            .putString("faculty", faculty)
+            .putString("dormitory", dormitory)
+            .putString("teaching_building", teachingBuilding)
+            .putString("study_spot", studySpot)
+            .putInt("weekly_goal", weeklyGoals)
+            .putBoolean("notify_challenges", newChallenges)
+            .putBoolean("notify_reminders", activityReminders)
+            .putBoolean("notify_friends", friendActivity)
+            .apply()
+
+        Log.d(TAG, "Local preferences saved to both stores")
     }
 
     override fun onDestroyView() {
