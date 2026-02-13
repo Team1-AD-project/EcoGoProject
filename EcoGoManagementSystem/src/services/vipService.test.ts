@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { fetchVipSwitches, updateVipSwitch, UpdateVipSwitchRequest } from './vipService';
+import { fetchVipSwitches, updateVipSwitch, type UpdateVipSwitchRequest } from './vipService';
 import { api } from './auth';
 
 vi.mock('./auth', () => ({
@@ -10,6 +10,8 @@ vi.mock('./auth', () => ({
 }));
 
 describe('vipService', () => {
+    const BASE_URL = 'http://47.129.124.55:8090/api/v1';
+
     beforeEach(() => {
         vi.clearAllMocks();
     });
@@ -21,7 +23,7 @@ describe('vipService', () => {
 
             const result = await fetchVipSwitches();
 
-            expect(api.get).toHaveBeenCalledWith('/admin/vip-switches', { baseURL: '/api/v1' });
+            expect(api.get).toHaveBeenCalledWith('/admin/vip-switches', { baseURL: BASE_URL });
             expect(result).toEqual(mockData);
         });
     });
@@ -38,7 +40,7 @@ describe('vipService', () => {
 
             const result = await updateVipSwitch(payload);
 
-            expect(api.post).toHaveBeenCalledWith('/admin/vip-switches', payload, { baseURL: '/api/v1' });
+            expect(api.post).toHaveBeenCalledWith('/admin/vip-switches', payload, { baseURL: BASE_URL });
             expect(result).toEqual(mockResponse);
         });
     });

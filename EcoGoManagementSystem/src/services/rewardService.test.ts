@@ -24,6 +24,8 @@ vi.mock('./auth', () => ({
 }));
 
 describe('rewardService', () => {
+    const BASE_URL = 'http://47.129.124.55:8090/api/v1';
+
     beforeEach(() => {
         vi.clearAllMocks();
     });
@@ -38,7 +40,7 @@ describe('rewardService', () => {
 
             expect(api.get).toHaveBeenCalledWith(
                 expect.stringContaining('/goods?page=2&size=5'),
-                { baseURL: '/api/v1' }
+                { baseURL: BASE_URL }
             );
             expect(result).toEqual(mockData);
         });
@@ -65,7 +67,7 @@ describe('rewardService', () => {
 
             const result = await createReward(payload);
 
-            expect(api.post).toHaveBeenCalledWith('/goods', payload, { baseURL: '/api/v1' });
+            expect(api.post).toHaveBeenCalledWith('/goods', payload, { baseURL: BASE_URL });
             expect(result).toEqual(mockResponse);
         });
     });
@@ -78,7 +80,7 @@ describe('rewardService', () => {
 
             const result = await updateReward('r1', payload);
 
-            expect(api.put).toHaveBeenCalledWith('/goods/r1', payload, { baseURL: '/api/v1' });
+            expect(api.put).toHaveBeenCalledWith('/goods/r1', payload, { baseURL: BASE_URL });
             expect(result).toEqual(mockResponse);
         });
     });
@@ -90,7 +92,7 @@ describe('rewardService', () => {
 
             const result = await deleteReward('r1');
 
-            expect(api.delete).toHaveBeenCalledWith('/goods/r1', { baseURL: '/api/v1' });
+            expect(api.delete).toHaveBeenCalledWith('/goods/r1', { baseURL: BASE_URL });
             expect(result).toEqual(mockResponse);
         });
     });
@@ -105,7 +107,7 @@ describe('rewardService', () => {
 
             expect(api.get).toHaveBeenCalledWith(
                 expect.stringContaining('/goods/admin/vouchers'),
-                { baseURL: '/api/v1' }
+                { baseURL: BASE_URL }
             );
             expect(result).toEqual(mockData);
         });
@@ -119,7 +121,7 @@ describe('rewardService', () => {
 
             await createVoucher(payload);
 
-            expect(api.post).toHaveBeenCalledWith('/goods/admin/vouchers', payload, { baseURL: '/api/v1' });
+            expect(api.post).toHaveBeenCalledWith('/goods/admin/vouchers', payload, { baseURL: BASE_URL });
         });
     });
 
@@ -131,7 +133,7 @@ describe('rewardService', () => {
 
             await updateVoucher('v1', payload);
 
-            expect(api.put).toHaveBeenCalledWith('/goods/admin/vouchers/v1', payload, { baseURL: '/api/v1' });
+            expect(api.put).toHaveBeenCalledWith('/goods/admin/vouchers/v1', payload, { baseURL: BASE_URL });
         });
     });
 
@@ -142,7 +144,7 @@ describe('rewardService', () => {
 
             await deleteVoucher('v1');
 
-            expect(api.delete).toHaveBeenCalledWith('/goods/admin/vouchers/v1', { baseURL: '/api/v1' });
+            expect(api.delete).toHaveBeenCalledWith('/goods/admin/vouchers/v1', { baseURL: BASE_URL });
         });
     });
 
@@ -154,7 +156,7 @@ describe('rewardService', () => {
 
             const result = await fetchOrders(1, 10);
 
-            expect(api.get).toHaveBeenCalledWith('/orders?page=1&size=10', { baseURL: '/api/v1' });
+            expect(api.get).toHaveBeenCalledWith('/orders?page=1&size=10', { baseURL: BASE_URL });
             expect(result).toEqual(mockData);
         });
     });
@@ -168,7 +170,7 @@ describe('rewardService', () => {
 
             expect(api.get).toHaveBeenCalledWith(
                 expect.stringContaining('/goods/categories'),
-                { baseURL: '/api/v1' }
+                { baseURL: BASE_URL }
             );
             expect(result).toEqual(mockData);
         });
