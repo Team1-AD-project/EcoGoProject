@@ -82,7 +82,9 @@ class MonthlyHighlightsFragment : Fragment() {
 
         // View all challenges
         binding.btnViewAllChallenges.setOnClickListener {
-            safeNavigate { findNavController().navigate(R.id.action_monthlyHighlights_to_challenges) }
+            safeNavigate {
+                findNavController().navigate(R.id.action_monthlyHighlights_to_challenges)
+            }
         }
     }
     
@@ -247,11 +249,6 @@ class MonthlyHighlightsFragment : Fragment() {
     
     private suspend fun loadMonthlyAchievements() {
         // TODO: Load this month's unlocked achievements from backend
-        // Using mock data here
-//        binding.textAchievementsUnlocked.text = "3 Achievements Unlocked This Month"
-        
-        // Display achievement badges (if any)
-//        binding.layoutAchievements.visibility = View.VISIBLE
     }
     
     private suspend fun loadChallenges() {

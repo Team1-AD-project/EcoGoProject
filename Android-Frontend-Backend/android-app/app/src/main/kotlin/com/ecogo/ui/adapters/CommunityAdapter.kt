@@ -1,5 +1,6 @@
 package com.ecogo.ui.adapters
 
+import android.graphics.drawable.GradientDrawable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,12 +38,19 @@ class CommunityAdapter(private val faculties: List<FacultyCarbonData>) :
             name.text = faculty.faculty
             points.text = "%.2f".format(faculty.totalCarbon)
 
-            val rankColor = if (position <= 3) {
-                ContextCompat.getColor(itemView.context, R.color.primary)
-            } else {
-                ContextCompat.getColor(itemView.context, R.color.text_secondary)
+            // Style rank badge based on position
+            val (rankBgColor, rankTextColor) = when (position) {
+                1 -> Pair(0x20FFD700.toInt(), 0xFFB8860B.toInt()) // Gold
+                2 -> Pair(0x20C0C0C0.toInt(), 0xFF808080.toInt()) // Silver
+                3 -> Pair(0x20CD7F32.toInt(), 0xFFCD7F32.toInt()) // Bronze
+                else -> Pair(0x10000000, ContextCompat.getColor(itemView.context, R.color.text_secondary))
             }
-            rank.setTextColor(rankColor)
+            rank.setTextColor(rankTextColor)
+            val rankBg = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(rankBgColor)
+            }
+            rank.background = rankBg
 
             // Progress bar proportional to max carbon
             val progressPercentage = if (maxCarbon > 0) {
@@ -52,7 +60,7 @@ class CommunityAdapter(private val faculties: List<FacultyCarbonData>) :
             progress.post {
                 val parentWidth = (progress.parent as? View)?.width ?: itemView.width
                 val params = progress.layoutParams
-                params.width = (parentWidth * progressPercentage * 0.5).toInt()
+                params.width = (parentWidth * progressPercentage).toInt().coerceAtLeast(8)
                 progress.layoutParams = params
             }
         }

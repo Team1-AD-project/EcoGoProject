@@ -35,6 +35,7 @@ class TripHistoryFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        binding.btnBack.setOnClickListener { findNavController().navigateUp() }
         binding.toolbar.setNavigationOnClickListener { findNavController().navigateUp() }
         setupRecycler()
         loadTripsFromApi()
@@ -49,7 +50,6 @@ class TripHistoryFragment : Fragment() {
     }
 
     private fun loadTripsFromApi() {
-        // ✅ mobile 接口是 authenticated：只要 token 就行，不需要 userId path
         if (TokenManager.getToken().isNullOrBlank()) {
             showEmpty()
             return
@@ -61,7 +61,6 @@ class TripHistoryFragment : Fragment() {
             try {
                 Log.d("TRIP_HISTORY", "auth=${TokenManager.getAuthHeader()}")
 
-                // ✅ 关键：改成你新加的 mobile 接口
                 val trips = repo.getMyTripHistory().getOrThrow()
 
                 val uiList = trips

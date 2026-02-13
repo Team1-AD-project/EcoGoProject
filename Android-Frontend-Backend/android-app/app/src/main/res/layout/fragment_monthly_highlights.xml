@@ -114,7 +114,6 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- Section title -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -168,7 +167,6 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- Section header -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -215,7 +213,6 @@
                         android:textColor="@color/text_secondary"
                         android:textSize="12sp" />
 
-                    <!-- Activities grid -->
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/recycler_featured_activities"
                         android:layout_width="match_parent"
@@ -226,7 +223,6 @@
                         tools:itemCount="2"
                         tools:listitem="@layout/item_monthly_activity" />
 
-                    <!-- Empty state -->
                     <LinearLayout
                         android:id="@+id/text_no_joined_activities"
                         android:layout_width="match_parent"
@@ -278,7 +274,6 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- Section header -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -333,7 +328,6 @@
                         android:nestedScrollingEnabled="false"
                         android:overScrollMode="never" />
 
-                    <!-- Empty state -->
                     <LinearLayout
                         android:id="@+id/text_no_joined_challenges"
                         android:layout_width="match_parent"
@@ -385,7 +379,6 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
-                    <!-- Section header -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -630,7 +623,6 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <!-- Title row -->
                     <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
@@ -655,7 +647,6 @@
                             android:textStyle="bold" />
                     </LinearLayout>
 
-                    <!-- Divider -->
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
@@ -692,7 +683,6 @@
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Footer spacing -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="32dp" />

@@ -4,60 +4,67 @@
     android:layout_width="140dp"
     android:layout_height="wrap_content"
     android:layout_marginEnd="12dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="1dp"
+    app:cardBackgroundColor="@color/surface"
+    app:cardCornerRadius="18dp"
+    app:cardElevation="2dp"
     app:strokeColor="@color/border"
-    app:strokeWidth="1dp">
+    app:strokeWidth="0.5dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp">
+        android:paddingStart="14dp"
+        android:paddingTop="14dp"
+        android:paddingEnd="14dp"
+        android:paddingBottom="14dp">
 
-        <!-- Icon with colored background -->
-        <TextView
-            android:id="@+id/text_stat_icon"
+        <FrameLayout
             android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_gravity="center_horizontal"
-            android:background="@drawable/bg_stat_icon"
-            android:gravity="center"
-            android:text="⭐"
-            android:textSize="20sp" />
+            android:layout_height="40dp">
 
-        <!-- Stat value -->
+            <TextView
+                android:id="@+id/text_stat_icon"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_stat_icon_rounded"
+                android:gravity="center"
+                android:text="⭐"
+                android:textSize="20sp" />
+        </FrameLayout>
+
         <TextView
             android:id="@+id/text_stat_value"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:text="500"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="22sp"
             android:textStyle="bold" />
 
-        <!-- Stat title -->
         <TextView
             android:id="@+id/text_stat_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
             android:layout_marginTop="2dp"
             android:text="Total Points"
             android:textColor="@color/text_secondary"
             android:textSize="11sp" />
 
-        <!-- Stat subtitle -->
         <TextView
             android:id="@+id/text_stat_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="6dp"
+            android:background="@drawable/bg_section_title_icon"
+            android:paddingStart="8dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="8dp"
+            android:paddingBottom="2dp"
             android:text="current balance"
             android:textColor="@color/primary"
-            android:textSize="9sp" />
+            android:textSize="9sp"
+            android:textStyle="bold" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

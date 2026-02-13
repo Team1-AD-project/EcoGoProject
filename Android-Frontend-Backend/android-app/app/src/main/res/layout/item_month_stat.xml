@@ -19,7 +19,6 @@
         android:paddingEnd="14dp"
         android:paddingBottom="16dp">
 
-        <!-- Icon with rounded square background -->
         <FrameLayout
             android:layout_width="44dp"
             android:layout_height="44dp">
@@ -34,7 +33,6 @@
                 android:textSize="22sp" />
         </FrameLayout>
 
-        <!-- Stat value -->
         <TextView
             android:id="@+id/text_stat_value"
             android:layout_width="wrap_content"
@@ -45,7 +43,6 @@
             android:textSize="24sp"
             android:textStyle="bold" />
 
-        <!-- Stat title -->
         <TextView
             android:id="@+id/text_stat_title"
             android:layout_width="wrap_content"
@@ -55,7 +52,6 @@
             android:textColor="@color/text_secondary"
             android:textSize="12sp" />
 
-        <!-- Stat subtitle / trend -->
         <TextView
             android:id="@+id/text_stat_subtitle"
             android:layout_width="wrap_content"

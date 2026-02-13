@@ -3,31 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginBottom="16dp"
+    android:layout_marginBottom="10dp"
+    app:cardBackgroundColor="@color/surface"
     app:cardCornerRadius="16dp"
-    app:cardElevation="1dp">
+    app:cardElevation="2dp"
+    app:strokeColor="#0A000000"
+    app:strokeWidth="0.5dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:padding="16dp">
+        android:padding="14dp">
 
         <TextView
             android:id="@+id/text_rank"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:background="@drawable/bg_rank_number"
             android:fontFamily="sans-serif-black"
             android:gravity="center"
             android:text="#1"
             android:textColor="@color/primary"
-            android:textSize="16sp" />
+            android:textSize="14sp" />
 
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="14dp"
             android:layout_weight="1"
             android:orientation="vertical">
 
@@ -42,38 +46,39 @@
 
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="6dp"
-                android:layout_marginTop="6dp"
-                android:background="@drawable/badge_background">
+                android:layout_height="8dp"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_stat_icon_rounded">
 
                 <View
                     android:id="@+id/view_progress"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
-                    android:background="@color/primary" />
+                    android:background="@drawable/bg_progress_bar_fill" />
             </FrameLayout>
         </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginStart="14dp"
             android:gravity="end|center_vertical"
-            android:orientation="horizontal">
+            android:orientation="vertical">
 
             <TextView
                 android:id="@+id/text_points"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:fontFamily="sans-serif-black"
+                android:gravity="end"
                 android:text="0.00"
-                android:textColor="@color/text_primary"
-                android:textSize="14sp" />
+                android:textColor="@color/primary"
+                android:textSize="15sp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginStart="4dp"
+                android:gravity="end"
                 android:text="@string/community_carbon_unit"
                 android:textColor="@color/text_secondary"
                 android:textSize="10sp" />

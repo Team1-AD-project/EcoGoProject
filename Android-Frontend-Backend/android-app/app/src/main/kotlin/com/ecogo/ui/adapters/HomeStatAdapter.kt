@@ -51,11 +51,16 @@ class HomeStatAdapter(
             title.text = stat.title
             subtitle.text = stat.subtitle
 
-            // Set icon background color
+            // Apply color to icon background with rounded rectangle
             try {
                 val color = Color.parseColor(stat.color)
-                val background = icon.background as? GradientDrawable
-                background?.setColor(color)
+                val bgDrawable = GradientDrawable().apply {
+                    shape = GradientDrawable.RECTANGLE
+                    cornerRadius = 14f * itemView.resources.displayMetrics.density
+                    setColor(Color.argb(30, Color.red(color), Color.green(color), Color.blue(color)))
+                }
+                icon.background = bgDrawable
+                subtitle.setTextColor(color)
             } catch (e: Exception) {
                 // Use default color if parsing fails
             }
