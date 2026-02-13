@@ -21,25 +21,25 @@ export function Header() {
           <Maximize className="size-5" />
         </Button>
       </div>
-      
+
       <div className="flex items-center gap-2">
         <Button variant="ghost" size="icon" className="text-gray-600">
           <Search className="size-5" />
         </Button>
-        
+
         <Button variant="ghost" size="icon" className="text-gray-600">
           <Maximize className="size-5" />
         </Button>
-        
+
         <Button variant="ghost" size="icon" className="text-gray-600">
           <Settings className="size-5" />
         </Button>
-        
+
         <Button variant="ghost" size="icon" className="relative text-gray-600">
           <Bell className="size-5" />
           <span className="absolute top-1 right-1 size-2 bg-red-500 rounded-full" />
         </Button>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="gap-2 h-9">
@@ -48,7 +48,7 @@ export function Header() {
                   管
                 </AvatarFallback>
               </Avatar>
-              <span className="text-sm">管理员</span>
+              <span className="text-sm">Admin</span>
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-48">
