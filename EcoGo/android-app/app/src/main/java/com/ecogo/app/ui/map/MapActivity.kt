@@ -956,52 +956,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     private fun handleAutocompleteResult(result: ActivityResult) {
         when (result.resultCode) {
-            Activity.RESULT_OK -> {
-                result.data?.let { data ->
-                    val place = Autocomplete.getPlaceFromIntent(data)
-                    val latLng = place.latLng
-
-                    if (latLng != null) {
-                        if (isSearchingOrigin) {
-                            // 设置起点
-                            originLatLng = latLng
-                            originName = place.name ?: place.address ?: "起点"
-                            binding.etOrigin.setText(originName)
-                            updateOriginMarker(latLng, originName)
-                            viewModel.setOrigin(latLng)  // 使用 setOrigin 而不是 updateCurrentLocation
-
-                            // 如果终点已设置，自动获取默认路线（驾车）
-                            if (destinationLatLng != null) {
-                                binding.cardTransportModes.visibility = View.VISIBLE
-                                binding.chipDriving.isChecked = true
-                                viewModel.fetchRouteByMode(TransportMode.DRIVING)
-                            }
-                        } else {
-                            // 设置终点
-                            destinationLatLng = latLng
-                            destinationName = place.name ?: place.address ?: "目的地"
-                            binding.etDestination.setText(destinationName)
-                            updateDestinationMarker(latLng, destinationName)
-                            viewModel.setDestination(latLng)
-
-                            // 显示交通方式选择卡片
-                            binding.cardTransportModes.visibility = View.VISIBLE
-
-                            // 自动获取默认路线（驾车）
-                            if (originLatLng != null || viewModel.currentLocation.value != null) {
-                                binding.chipDriving.isChecked = true
-                                viewModel.fetchRouteByMode(TransportMode.DRIVING)
-                            }
-                        }
-
-                        // 移动相机到选择的位置
-                        googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
-
-                        // 如果起点和终点都已设置，调整相机显示两点
-                        fitBoundsIfReady()
-                    }
-                }
-            }
+            Activity.RESULT_OK -> handleAutocompleteSuccess(result)
             AutocompleteActivity.RESULT_ERROR -> {
                 result.data?.let { data ->
                     val status = Autocomplete.getStatusFromIntent(data)
@@ -1013,6 +968,59 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
                 Log.d(TAG, "Autocomplete canceled")
             }
         }
+    }
+
+    private fun handleAutocompleteSuccess(result: ActivityResult) {
+        val data = result.data ?: return
+        val place = Autocomplete.getPlaceFromIntent(data)
+        val latLng = place.latLng ?: return
+
+        if (isSearchingOrigin) {
+            applyOriginPlace(latLng, place)
+        } else {
+            applyDestinationPlace(latLng, place)
+        }
+
+        // 移动相机到选择的位置
+        googleMap?.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 15f))
+
+        // 如果起点和终点都已设置，调整相机显示两点
+        fitBoundsIfReady()
+    }
+
+    private fun applyOriginPlace(latLng: LatLng, place: Place) {
+        originLatLng = latLng
+        originName = place.name ?: place.address ?: "起点"
+        binding.etOrigin.setText(originName)
+        updateOriginMarker(latLng, originName)
+        viewModel.setOrigin(latLng)
+
+        // 如果终点已设置，自动获取默认路线（驾车）
+        if (destinationLatLng != null) {
+            fetchDefaultDrivingRoute()
+        }
+    }
+
+    private fun applyDestinationPlace(latLng: LatLng, place: Place) {
+        destinationLatLng = latLng
+        destinationName = place.name ?: place.address ?: "目的地"
+        binding.etDestination.setText(destinationName)
+        updateDestinationMarker(latLng, destinationName)
+        viewModel.setDestination(latLng)
+
+        // 显示交通方式选择卡片
+        binding.cardTransportModes.visibility = View.VISIBLE
+
+        // 自动获取默认路线（驾车）
+        if (originLatLng != null || viewModel.currentLocation.value != null) {
+            fetchDefaultDrivingRoute()
+        }
+    }
+
+    private fun fetchDefaultDrivingRoute() {
+        binding.cardTransportModes.visibility = View.VISIBLE
+        binding.chipDriving.isChecked = true
+        viewModel.fetchRouteByMode(TransportMode.DRIVING)
     }
 
     /**
