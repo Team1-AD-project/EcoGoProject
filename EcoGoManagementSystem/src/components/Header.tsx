@@ -45,7 +45,7 @@ export function Header() {
             <Button variant="ghost" className="gap-2 h-9">
               <Avatar className="size-7">
                 <AvatarFallback className="bg-blue-600 text-white text-xs">
-                  管
+                  Ad
                 </AvatarFallback>
               </Avatar>
               <span className="text-sm">Admin</span>
