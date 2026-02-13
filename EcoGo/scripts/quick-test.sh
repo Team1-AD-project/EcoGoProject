@@ -10,7 +10,7 @@ echo ""
 # 1. 构建应用
 echo "[1/5] 构建应用..."
 ./mvnw clean package -DskipTests
-if [ $? -eq 0 ]; then
+if [[ $? -eq 0 ]]; then
     echo "✓ 应用构建成功"
 else
     echo "✗ 应用构建失败"
@@ -21,7 +21,7 @@ echo ""
 # 2. 构建Docker镜像
 echo "[2/5] 构建Docker镜像..."
 docker build -t ecogo:test . -q
-if [ $? -eq 0 ]; then
+if [[ $? -eq 0 ]]; then
     echo "✓ Docker镜像构建成功"
 else
     echo "✗ Docker镜像构建失败"
@@ -67,7 +67,7 @@ else
 fi
 
 METRICS=$(curl -s http://localhost:8091/actuator/prometheus | wc -l)
-if [ $METRICS -gt 10 ]; then
+if [[ $METRICS -gt 10 ]]; then
     echo "✓ Prometheus指标: $METRICS 行"
 else
     echo "⚠ Prometheus指标异常"

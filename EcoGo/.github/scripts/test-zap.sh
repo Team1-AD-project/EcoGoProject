@@ -43,7 +43,7 @@ docker run --rm --network="host" -v "$(pwd):/zap/wrk/:rw" \
 # 步骤 3: 运行 ZAP 完整扫描（使用配置文件）
 echo ""
 echo "步骤 3/4: 运行 ZAP 完整扫描..."
-if [ -f ".zap/zap-config.yaml" ]; then
+if  [[ -f ".zap/zap-config.yaml" ]]; then
     docker run --rm --network="host" -v "$(pwd):/zap/wrk/:rw" \
         -t zaproxy/zap-stable zap-full-scan.py \
         -t "$TARGET_URL" \

@@ -15,7 +15,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Check if SONAR_TOKEN is set
-if [ -z "$SONAR_TOKEN" ]; then
+if [[ -z "$SONAR_TOKEN" ]]; then
     echo -e "${RED}❌ SONAR_TOKEN is NOT configured${NC}"
     echo "   Please add SONAR_TOKEN to GitHub Secrets"
     echo "   See docs/SONARQUBE-SETUP.md for instructions"
@@ -28,7 +28,7 @@ fi
 echo ""
 
 # Check if SONAR_HOST_URL is set
-if [ -z "$SONAR_HOST_URL" ]; then
+if [[ -z "$SONAR_HOST_URL" ]]; then
     echo -e "${RED}❌ SONAR_HOST_URL is NOT configured${NC}"
     echo "   Please add SONAR_HOST_URL to GitHub Secrets"
     echo "   Example: https://sonarcloud.io"
@@ -50,7 +50,7 @@ echo "========================================="
 echo "Configuration Summary"
 echo "========================================="
 
-if [ "$TOKEN_OK" = true ] && [ "$HOST_OK" = true ]; then
+if [[ "$TOKEN_OK" = true ]] && [[ "$HOST_OK" = true ]]; then
     echo -e "${GREEN}✅ SonarQube is properly configured!${NC}"
     echo ""
     echo "SonarQube analysis will run on:"

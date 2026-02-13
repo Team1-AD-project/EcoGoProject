@@ -96,7 +96,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     // Origin and destination locations
     private var originLatLng: LatLng? = null
     private var destinationLatLng: LatLng? = null
-    private var originName: String = "My Location"
+    private var originName: String = MY_LOCATION_LABEL
     private var destinationName: String = ""
 
     // Flag indicating whether searching for origin or destination
@@ -129,6 +129,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
     companion object {
         private const val TAG = "MapActivity"
+        private const val MY_LOCATION_LABEL = "My Location"
         const val EXTRA_DEST_LAT = "extra_dest_lat"
         const val EXTRA_DEST_LNG = "extra_dest_lng"
         const val EXTRA_DEST_NAME = "extra_dest_name"
@@ -1355,7 +1356,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
         destinationName = tempName
 
         // Update UI
-        binding.etOrigin.setText(if (originLatLng != null) originName else "My Location")
+        binding.etOrigin.setText(if (originLatLng != null) originName else MY_LOCATION_LABEL)
         binding.etDestination.setText(destinationName)
 
         // Update markers
@@ -1391,7 +1392,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
             location?.let {
                 val latLng = LatLng(it.latitude, it.longitude)
                 originLatLng = latLng
-                originName = "My Location"
+                originName = MY_LOCATION_LABEL
                 binding.etOrigin.setText(originName)
                 originMarker?.remove()
                 originMarker = null
@@ -1444,7 +1445,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
     private fun observeViewModel() {
         // Observe current location
         viewModel.currentLocation.observe(this) { location ->
-            if (originName == "My Location" && originLatLng == null) {
+            if (originName == MY_LOCATION_LABEL && originLatLng == null) {
                 originLatLng = location
             }
         }
@@ -2199,7 +2200,7 @@ class MapActivity : AppCompatActivity(), OnMapReadyCallback {
 
         // If there's an origin marker and it's not "My Location", re-draw it
         originLatLng?.let { latLng ->
-            if (originName != "My Location") {
+            if (originName != MY_LOCATION_LABEL) {
                 updateOriginMarker(latLng, originName)
             }
         }

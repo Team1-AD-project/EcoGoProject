@@ -15,6 +15,10 @@ class MapRepository(
     private val apiService: ApiService = RetrofitClient.apiService
 ) : IMapRepository {
 
+    companion object {
+        private const val ERROR_EMPTY_RESPONSE = "响应数据为空"
+    }
+
     // ========================================
     // 行程追踪相关
     // ========================================
@@ -38,7 +42,7 @@ class MapRepository(
             if (response.isSuccessful && response.body()?.isSuccess == true) {
                 response.body()?.data?.let {
                     Result.success(it)
-                } ?: Result.failure(Exception("响应数据为空"))
+                } ?: Result.failure(Exception(ERROR_EMPTY_RESPONSE))
             } else {
                 Result.failure(Exception(response.body()?.msg ?: "开启行程失败"))
             }
@@ -65,7 +69,7 @@ class MapRepository(
             if (response.isSuccessful && response.body()?.isSuccess == true) {
                 response.body()?.data?.let {
                     Result.success(it)
-                } ?: Result.failure(Exception("响应数据为空"))
+                } ?: Result.failure(Exception(ERROR_EMPTY_RESPONSE))
             } else {
                 Result.failure(Exception(response.body()?.msg ?: "取消行程失败"))
             }
@@ -87,7 +91,7 @@ class MapRepository(
             if (response.isSuccessful && response.body()?.isSuccess == true) {
                 response.body()?.data?.let {
                     Result.success(it)
-                } ?: Result.failure(Exception("响应数据为空"))
+                } ?: Result.failure(Exception(ERROR_EMPTY_RESPONSE))
             } else {
                 Result.failure(Exception(response.body()?.msg ?: "获取地图数据失败"))
             }
@@ -121,7 +125,7 @@ class MapRepository(
             if (response.isSuccessful && response.body()?.isSuccess == true) {
                 response.body()?.data?.let {
                     Result.success(it)
-                } ?: Result.failure(Exception("响应数据为空"))
+                } ?: Result.failure(Exception(ERROR_EMPTY_RESPONSE))
             } else {
                 Result.failure(Exception(response.body()?.msg ?: "保存行程失败"))
             }
@@ -147,7 +151,7 @@ class MapRepository(
             if (response.isSuccessful && response.body()?.isSuccess == true) {
                 response.body()?.data?.let {
                     Result.success(it)
-                } ?: Result.failure(Exception("响应数据为空"))
+                } ?: Result.failure(Exception(ERROR_EMPTY_RESPONSE))
             } else {
                 Result.failure(Exception(response.body()?.msg ?: "计算碳足迹失败"))
             }
@@ -179,7 +183,7 @@ class MapRepository(
             if (response.isSuccessful && response.body()?.isSuccess == true) {
                 response.body()?.data?.let {
                     Result.success(it)
-                } ?: Result.failure(Exception("响应数据为空"))
+                } ?: Result.failure(Exception(ERROR_EMPTY_RESPONSE))
             } else {
                 Result.failure(Exception(response.body()?.msg ?: "获取路线失败"))
             }
@@ -207,7 +211,7 @@ class MapRepository(
             if (response.isSuccessful && response.body()?.isSuccess == true) {
                 response.body()?.data?.let {
                     Result.success(it)
-                } ?: Result.failure(Exception("响应数据为空"))
+                } ?: Result.failure(Exception(ERROR_EMPTY_RESPONSE))
             } else {
                 Result.failure(Exception(response.body()?.msg ?: "获取路线失败"))
             }

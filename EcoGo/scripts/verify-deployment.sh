@@ -144,7 +144,7 @@ test_endpoints() {
     print_test "Testing health endpoint..."
     if curl -s http://localhost:8090/actuator/health >/dev/null 2>&1; then
         HEALTH=$(curl -s http://localhost:8090/actuator/health | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
-        if [ "$HEALTH" = "UP" ]; then
+        if [[ "$HEALTH" = "UP" ]]; then
             print_pass "Application health endpoint: $HEALTH"
         else
             print_warning "Application health endpoint: $HEALTH (not UP)"
@@ -223,7 +223,7 @@ test_terraform() {
         print_warning "Terraform not found (required for deployment)"
     fi
 
-    if [ -d "terraform" ]; then
+    if [[ -d "terraform" ]]; then
         print_test "Checking Terraform configuration..."
         if terraform validate -json 2>/dev/null | grep -q "valid"; then
             print_pass "Terraform configuration valid"
@@ -244,12 +244,12 @@ test_ansible() {
         print_warning "Ansible not found (required for deployment)"
     fi
 
-    if [ -f "ansible/inventory.ini" ]; then
+    if [[ -f "ansible/inventory.ini" ]]; then
         print_test "Checking Ansible inventory..."
         print_pass "Ansible inventory file exists"
     fi
 
-    if [ -f "ansible/deploy.yml" ]; then
+    if [[ -f "ansible/deploy.yml" ]]; then
         print_test "Checking Ansible playbook..."
         print_pass "Ansible playbook file exists"
     fi
@@ -259,21 +259,21 @@ test_github() {
     print_header "Testing GitHub Configuration"
 
     print_test "Checking GitHub Actions workflow..."
-    if [ -f ".github/workflows/cicd-pipeline.yml" ]; then
+    if [[ -f ".github/workflows/cicd-pipeline.yml" ]]; then
         print_pass "GitHub Actions workflow configured"
     else
         print_fail "GitHub Actions workflow not found"
     fi
 
     print_test "Checking pull request template..."
-    if [ -f ".github/pull_request_template.md" ]; then
+    if [[ -f ".github/pull_request_template.md" ]]; then
         print_pass "Pull request template configured"
     else
         print_warning "Pull request template not found"
     fi
 
     print_test "Checking secrets template..."
-    if [ -f ".github/SECRETS-TEMPLATE.md" ]; then
+    if [[ -f ".github/SECRETS-TEMPLATE.md" ]]; then
         print_pass "Secrets template available"
     else
         print_warning "Secrets template not found"
@@ -293,7 +293,7 @@ print_summary() {
     echo -e "${YELLOW}Warnings:${NC} $WARNINGS"
     echo -e "${RED}Failed:${NC} $FAILED"
 
-    if [ $FAILED -eq 0 ]; then
+    if [[ $FAILED -eq 0 ]]; then
         echo -e "\n${GREEN}✓ All critical checks passed!${NC}"
         return 0
     else

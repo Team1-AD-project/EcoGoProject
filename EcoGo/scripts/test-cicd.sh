@@ -100,7 +100,7 @@ test_configuration_files() {
 
     for file in "${REQUIRED_FILES[@]}"; do
         print_test "检查 $file..."
-        if [ -f "$file" ]; then
+        if [[ -f "$file" ]]; then
             print_pass "$file 存在"
         else
             print_fail "$file 不存在"
@@ -128,7 +128,7 @@ test_build() {
     if mvn clean package -DskipTests -q 2>/dev/null; then
         print_pass "应用构建成功"
 
-        if [ -f "target/EcoGo-0.0.1-SNAPSHOT.jar" ]; then
+        if [[ -f "target/EcoGo-0.0.1-SNAPSHOT.jar" ]]; then
             print_pass "JAR文件生成成功"
         fi
     else
@@ -222,7 +222,7 @@ test_app_startup() {
         for i in {1..10}; do
             if curl -s http://localhost:8091/actuator/health >/dev/null 2>&1; then
                 HEALTH=$(curl -s http://localhost:8091/actuator/health | grep -o '"status":"[^"]*"' | cut -d'"' -f4)
-                if [ "$HEALTH" = "UP" ]; then
+                if [[ "$HEALTH" = "UP" ]]; then
                     print_pass "应用健康状态: $HEALTH"
                     return 0
                 fi
@@ -303,7 +303,7 @@ main() {
     echo -e "${GREEN}通过: $TESTS_PASSED${NC}"
     echo -e "${RED}失败: $TESTS_FAILED${NC}"
 
-    if [ $TESTS_FAILED -eq 0 ]; then
+    if [[ $TESTS_FAILED -eq 0 ]]; then
         echo -e "\n${GREEN}✓ 所有关键测试通过！${NC}"
         echo -e "${GREEN}✓ 可以安全地推送到GitHub${NC}"
         return 0

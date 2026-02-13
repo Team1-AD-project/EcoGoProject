@@ -23,6 +23,11 @@ class MapViewModel(
     useMockData: Boolean = true  // 开关：true = Mock数据，false = 真实API
 ) : ViewModel() {
 
+    companion object {
+        private const val ERROR_MSG_START_POINT_NOT_FOUND = "无法获取起点位置"
+        private const val ERROR_MSG_DESTINATION_NOT_SET = "请先设置目的地"
+    }
+
     // 根据开关选择 Repository
     private val repository: IMapRepository = if (useMockData) {
         MockMapRepository()
@@ -262,11 +267,11 @@ class MapViewModel(
      */
     fun fetchLowCarbonRoute() {
         val start = _origin.value ?: _currentLocation.value ?: run {
-            _errorMessage.value = "无法获取起点位置"
+            _errorMessage.value = ERROR_MSG_START_POINT_NOT_FOUND
             return
         }
         val end = _destination.value ?: run {
-            _errorMessage.value = "请先设置目的地"
+            _errorMessage.value = ERROR_MSG_DESTINATION_NOT_SET
             return
         }
 
@@ -300,11 +305,11 @@ class MapViewModel(
      */
     fun fetchBalancedRoute() {
         val start = _origin.value ?: _currentLocation.value ?: run {
-            _errorMessage.value = "无法获取起点位置"
+            _errorMessage.value = ERROR_MSG_START_POINT_NOT_FOUND
             return
         }
         val end = _destination.value ?: run {
-            _errorMessage.value = "请先设置目的地"
+            _errorMessage.value = ERROR_MSG_DESTINATION_NOT_SET
             return
         }
 
@@ -340,11 +345,11 @@ class MapViewModel(
         _selectedTransportMode.value = mode
 
         val start = _origin.value ?: _currentLocation.value ?: run {
-            _errorMessage.value = "无法获取起点位置"
+            _errorMessage.value = ERROR_MSG_START_POINT_NOT_FOUND
             return
         }
         val end = _destination.value ?: run {
-            _errorMessage.value = "请先设置目的地"
+            _errorMessage.value = ERROR_MSG_DESTINATION_NOT_SET
             return
         }
 
